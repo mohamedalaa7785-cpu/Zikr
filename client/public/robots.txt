@@ -1,0 +1,41 @@
+# ZIKR | ذِكرٌ - Robots.txt
+# Allow search engines to crawl all pages
+
+User-agent: *
+Allow: /
+Allow: /quran
+Allow: /hadith
+Allow: /stories
+Allow: /ai-assistant
+Allow: /radio
+Allow: /scholars
+Allow: /ar
+Allow: /en
+
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api
+Disallow: /internal
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /search?
+Disallow: /login
+Disallow: /register
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Crawl delay
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://zikr.vercel.app/sitemap.xml
+Sitemap: https://zikr.vercel.app/sitemap-ar.xml
+Sitemap: https://zikr.vercel.app/sitemap-en.xml
