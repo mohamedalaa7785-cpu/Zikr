@@ -4,7 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import ZikrHome from "./pages/ZikrHome";
 import Episodes from "./pages/Episodes";
 import EpisodeDetail from "./pages/EpisodeDetail";
 import About from "./pages/About";
@@ -30,7 +30,7 @@ import LocalizedHome from "./pages/LocalizedHome";
 function Router() {
   return (
     <Switch>
-      <Route path="" component={Home} />
+      <Route path="" component={ZikrHome} />
       <Route path="/en" component={() => <LocalizedHome lang="en" />} />
       <Route path="/ar" component={() => <LocalizedHome lang="ar" />} />
       <Route path="/episodes" component={Episodes} />

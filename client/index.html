@@ -1,44 +1,75 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Hidden Narratives is an editorial history platform publishing episodes, video essays, and long-form analysis." />
-    <meta name="author" content="Hidden Narratives" />
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="ZIKR | ذِكرٌ - منصة إسلامية روحية" />
+    <meta name="description" content="ZIKR | ذِكرٌ - منصة إسلامية فاخرة تجمع بين القرآن الكريم والأحاديث الشريفة والقصص الإسلامية والمساعد الذكي والإذاعة الإسلامية في تجربة روحية سينمائية." />
+    <meta name="author" content="ZIKR | ذِكرٌ" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="keywords" content="قرآن, أحاديث, قصص إسلامية, ذكر, دعاء, تطبيق إسلامي, منصة إسلامية" />
 
+    <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Hidden Narratives | Editorial History Platform" />
-    <meta property="og:description" content="Original historical analysis and documentary storytelling from Hidden Narratives." />
-    <meta property="og:url" content="https://hiddennarratives.vercel.app" />
-    <meta property="og:image" content="https://hiddennarratives.vercel.app/og-image.jpg" />
-    <meta property="og:site_name" content="Hidden Narratives" />
+    <meta property="og:title" content="ZIKR | ذِكرٌ - منصة إسلامية روحية" />
+    <meta property="og:description" content="تجربة روحية سينمائية فاخرة تجمع القرآن والأحاديث والقصص الإسلامية والمساعد الذكي." />
+    <meta property="og:url" content="https://zikr.vercel.app" />
+    <meta property="og:image" content="https://zikr.vercel.app/og-image.jpg" />
+    <meta property="og:site_name" content="ZIKR | ذِكرٌ" />
+    <meta property="og:locale" content="ar_SA" />
+    <meta property="og:locale:alternate" content="en_US" />
 
+    <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Hidden Narratives | Editorial History Platform" />
-    <meta name="twitter:description" content="Original historical analysis and documentary storytelling from Hidden Narratives." />
-    <meta name="twitter:image" content="https://hiddennarratives.vercel.app/og-image.jpg" />
+    <meta name="twitter:title" content="ZIKR | ذِكرٌ - منصة إسلامية روحية" />
+    <meta name="twitter:description" content="تجربة روحية سينمائية فاخرة تجمع القرآن والأحاديث والقصص الإسلامية." />
+    <meta name="twitter:image" content="https://zikr.vercel.app/og-image.jpg" />
 
-    <link rel="canonical" href="https://hiddennarratives.vercel.app" />
-    <link rel="alternate" hreflang="en" href="https://hiddennarratives.vercel.app?lang=en" />
-    <link rel="alternate" hreflang="ar" href="https://hiddennarratives.vercel.app?lang=ar" />
-    <link rel="alternate" hreflang="x-default" href="https://hiddennarratives.vercel.app" />
-    <link rel="alternate" type="application/rss+xml" title="Hidden Narratives RSS" href="https://hiddennarratives.vercel.app/rss.xml" />
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://zikr.vercel.app" />
+    
+    <!-- Alternate Language Links -->
+    <link rel="alternate" hreflang="ar" href="https://zikr.vercel.app" />
+    <link rel="alternate" hreflang="en" href="https://zikr.vercel.app/en" />
+    <link rel="alternate" hreflang="x-default" href="https://zikr.vercel.app" />
 
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="ZIKR RSS Feed" href="https://zikr.vercel.app/rss.xml" />
+
+    <!-- Structured Data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "Hidden Narratives",
-        "url": "https://hiddennarratives.vercel.app",
-        "description": "Editorial historical analysis, long-form episodes, and documentary-style videos.",
-        "inLanguage": ["en", "ar"]
+        "name": "ZIKR | ذِكرٌ",
+        "url": "https://zikr.vercel.app",
+        "description": "منصة إسلامية روحية فاخرة تجمع بين القرآن الكريم والأحاديث الشريفة والقصص الإسلامية والمساعد الذكي والإذاعة الإسلامية",
+        "inLanguage": ["ar", "en"],
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://zikr.vercel.app/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
       }
     </script>
 
-    <title>Hidden Narratives | Editorial History Platform</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0a0a0a" />
+
+    <!-- Title -->
+    <title>ZIKR | ذِكرٌ - منصة إسلامية روحية</title>
   </head>
-  <body>
+  <body class="bg-zikr-black text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
