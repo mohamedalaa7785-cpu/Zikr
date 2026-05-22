@@ -6,7 +6,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 export default function AdminPage() {
   useAuth({ redirectOnUnauthenticated: true });
   usePageSEO({
-    title: "Admin | Hidden Narratives",
+    title: "Admin | ZIKR | ذِكرٌ",
     description: "Restricted admin area.",
     path: "/admin",
     robots: "noindex,nofollow",

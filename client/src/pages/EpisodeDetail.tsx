@@ -48,8 +48,8 @@ export default function EpisodeDetail() {
   const description = language === "en" ? episode?.descriptionEn : episode?.descriptionAr;
 
   usePageSEO({
-    title: title ? `${title} | Hidden Narratives` : "Episode | Hidden Narratives",
-    description: description || "Long-form historical analysis from Hidden Narratives.",
+    title: title ? `${title} | ZIKR | ذِكرٌ` : "Episode | ZIKR | ذِكرٌ",
+    description: description || "Long-form historical analysis from ZIKR | ذِكرٌ.",
     path: `/episodes/${params?.slug ?? ""}`,
     language,
     image: `${seoBaseUrl}/api/og/episode/${params?.slug ?? ""}`,
@@ -60,8 +60,8 @@ export default function EpisodeDetail() {
       description,
       mainEntityOfPage: `${seoBaseUrl}/episodes/${params?.slug}`,
       inLanguage: language === "en" ? "en-US" : "ar-EG",
-      author: { "@type": "Organization", name: "Hidden Narratives" },
-      publisher: { "@type": "Organization", name: "Hidden Narratives" },
+      author: { "@type": "Organization", name: "ZIKR | ذِكرٌ" },
+      publisher: { "@type": "Organization", name: "ZIKR | ذِكرٌ" },
       breadcrumb: {
         "@type": "BreadcrumbList",
         itemListElement: [
@@ -90,7 +90,7 @@ export default function EpisodeDetail() {
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <nav className="fixed top-0 z-50 w-full border-b border-amber-900/30 bg-black/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <button onClick={() => navigate("/")} className="text-2xl font-bold text-amber-600">Hidden Narratives</button>
+          <button onClick={() => navigate("/")} className="text-2xl font-bold text-amber-600">ZIKR | ذِكرٌ</button>
           <button onClick={() => setLanguage(language === "en" ? "ar" : "en")} className="rounded-full bg-amber-600 px-3 py-1 font-semibold text-black">{language === "en" ? "العربية" : "English"}</button>
         </div>
       </nav>

@@ -3,7 +3,7 @@ import { getDb } from "../db";
 import { episodes } from "../../drizzle/schema";
 
 const router = Router();
-const baseUrl = "https://hiddennarratives.vercel.app";
+const baseUrl = "https://zikr-platform.vercel.app";
 
 router.get("/sitemap.xml", async (_req, res) => {
   try {

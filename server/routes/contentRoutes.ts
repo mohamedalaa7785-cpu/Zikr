@@ -5,7 +5,7 @@ import { getEpisodeBySlug, subscribeEmail } from "../db";
 import { serverLogger } from "../_core/logger";
 
 const router = Router();
-const baseUrl = "https://hiddennarratives.vercel.app";
+const baseUrl = "https://zikr-platform.vercel.app";
 
 const subscribeLimiter = new Map<string, number[]>();
 const pendingSubscriptions = new Map<string, { email: string; language: "en" | "ar"; expiresAt: number }>();
@@ -47,7 +47,7 @@ async function sendConfirmationEmail(email: string, token: string, language: "en
   }
 
   const confirmUrl = `${baseUrl}/api/confirm?token=${token}`;
-  const subject = language === "ar" ? "تأكيد الاشتراك في Hidden Narratives" : "Confirm your Hidden Narratives subscription";
+  const subject = language === "ar" ? "تأكيد الاشتراك في ZIKR | ذِكرٌ" : "Confirm your ZIKR | ذِكرٌ subscription";
   const html =
     language === "ar"
       ? `<p>اضغط لتأكيد الاشتراك:</p><p><a href="${confirmUrl}">${confirmUrl}</a></p>`
@@ -60,7 +60,7 @@ async function sendConfirmationEmail(email: string, token: string, language: "en
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: process.env.RESEND_FROM_EMAIL || "Hidden Narratives <noreply@hiddennarratives.vercel.app>",
+      from: process.env.RESEND_FROM_EMAIL || "ZIKR | ذِكرٌ <noreply@zikr-platform.vercel.app>",
       to: [email],
       subject,
       html,
@@ -72,7 +72,7 @@ router.get("/api/og/episode/:slug", async (req, res) => {
   const episode = await getEpisodeBySlug(req.params.slug);
   if (!episode) return res.status(404).send("Episode not found");
 
-  const title = (episode.titleEn || "Hidden Narratives Episode").slice(0, 90);
+  const title = (episode.titleEn || "ZIKR | ذِكرٌ Episode").slice(0, 90);
   const excerpt = (episode.descriptionEn || "Long-form editorial history analysis.").slice(0, 150);
 
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'>
@@ -83,10 +83,10 @@ router.get("/api/og/episode/:slug", async (req, res) => {
     </linearGradient>
   </defs>
   <rect width='1200' height='630' fill='url(#g)'/>
-  <text x='72' y='120' fill='#f59e0b' font-size='30' font-family='Inter, Arial'>Hidden Narratives</text>
+  <text x='72' y='120' fill='#f59e0b' font-size='30' font-family='Inter, Arial'>ZIKR | ذِكرٌ</text>
   <text x='72' y='220' fill='#f8fafc' font-size='56' font-weight='700' font-family='Inter, Arial'>${title.replace(/&/g, "&amp;")}</text>
   <text x='72' y='300' fill='#cbd5e1' font-size='30' font-family='Inter, Arial'>${excerpt.replace(/&/g, "&amp;")}</text>
-  <text x='72' y='560' fill='#94a3b8' font-size='24' font-family='Inter, Arial'>hiddennarratives.vercel.app</text>
+  <text x='72' y='560' fill='#94a3b8' font-size='24' font-family='Inter, Arial'>zikr-platform.vercel.app</text>
 </svg>`;
 
   res.setHeader("Content-Type", "image/svg+xml");
@@ -112,7 +112,7 @@ router.get("/rss.xml", async (_req, res) => {
   const xml = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 <channel>
-<title>Hidden Narratives</title>
+<title>ZIKR | ذِكرٌ</title>
 <description>Editorial history episodes and analysis.</description>
 <link>${baseUrl}</link>
 ${items}

@@ -7,7 +7,7 @@ import { usePageSEO } from "@/lib/seoHead";
 export default function DashboardPage() {
   useAuth({ redirectOnUnauthenticated: true });
   useBehaviorTracker("/dashboard");
-  usePageSEO({ title: "Dashboard | Hidden Narratives", description: "Private dashboard", path: "/dashboard", robots: "noindex,nofollow" });
+  usePageSEO({ title: "Dashboard | ZIKR | ذِكرٌ", description: "Private dashboard", path: "/dashboard", robots: "noindex,nofollow" });
 
   const { data, isLoading } = trpc.dashboard.mine.useQuery();
   if (isLoading) return <div className="p-6 text-white">Loading dashboard...</div>;

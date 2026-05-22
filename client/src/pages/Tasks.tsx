@@ -10,7 +10,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 export default function TasksPage() {
   useAuth({ redirectOnUnauthenticated: true });
   useBehaviorTracker("/tasks");
-  usePageSEO({ title: "Tasks | Hidden Narratives", description: "Private tasks", path: "/tasks", robots: "noindex,nofollow" });
+  usePageSEO({ title: "Tasks | ZIKR | ذِكرٌ", description: "Private tasks", path: "/tasks", robots: "noindex,nofollow" });
 
   const [goal, setGoal] = useState("");
   const generate = trpc.tasks.generate.useMutation();

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const BASE_URL = "https://hiddennarratives.vercel.app";
+const BASE_URL = "https://zikr-platform.vercel.app";
 
 type Language = "en" | "ar";
 
@@ -19,9 +19,7 @@ function upsertMeta(selector: string, attrs: Record<string, string>) {
   let el = document.head.querySelector(selector) as HTMLMetaElement | null;
   if (!el) {
     el = document.createElement("meta");
-    Object.entries(attrs).forEach(([key, val]) => {
-      if (key !== "content") el?.setAttribute(key, val);
-    });
+    Object.entries(attrs).forEach(([key, val]) => key !== "content" && el?.setAttribute(key, val));
     document.head.appendChild(el);
   }
   el.setAttribute("content", attrs.content);
@@ -39,16 +37,7 @@ function upsertLink(rel: string, href: string, hreflang?: string) {
   el.href = href;
 }
 
-export function usePageSEO({
-  title,
-  description,
-  path,
-  image = `${BASE_URL}/og-image.jpg`,
-  keywords,
-  robots = "index,follow",
-  language = "en",
-  schema,
-}: PageSEO) {
+export function usePageSEO({ title, description, path, image = `${BASE_URL}/og-zikr.jpg`, keywords, robots = "index,follow", language = "en", schema }: PageSEO) {
   useEffect(() => {
     const canonical = `${BASE_URL}${path}`;
     document.title = title;
@@ -67,9 +56,7 @@ export function usePageSEO({
     upsertMeta("meta[name='twitter:description']", { name: "twitter:description", content: description });
     upsertMeta("meta[name='twitter:image']", { name: "twitter:image", content: image });
 
-    if (keywords?.length) {
-      upsertMeta("meta[name='keywords']", { name: "keywords", content: keywords.join(", ") });
-    }
+    if (keywords?.length) upsertMeta("meta[name='keywords']", { name: "keywords", content: keywords.join(", ") });
 
     upsertLink("canonical", canonical);
     upsertLink("alternate", `${canonical}${canonical.includes("?") ? "&" : "?"}lang=en`, "en");
@@ -77,8 +64,7 @@ export function usePageSEO({
     upsertLink("alternate", canonical, "x-default");
 
     const schemaId = "dynamic-schema";
-    const oldSchema = document.getElementById(schemaId);
-    if (oldSchema) oldSchema.remove();
+    document.getElementById(schemaId)?.remove();
     if (schema) {
       const script = document.createElement("script");
       script.id = schemaId;

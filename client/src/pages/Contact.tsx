@@ -18,7 +18,7 @@ const navLinks = [
 export default function ContactPage() {
   const [, navigate] = useLocation();
 
-  usePageSEO({ title: "Contact Hidden Narratives", description: "Hidden Narratives contact page.", path: "/contact" });
+  usePageSEO({ title: "Contact ZIKR | ذِكرٌ", description: "ZIKR | ذِكرٌ contact page.", path: "/contact" });
 
 
   return (
@@ -26,7 +26,7 @@ export default function ContactPage() {
       <nav className="sticky top-0 z-50 border-b border-amber-900/30 bg-black/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
           <button onClick={() => navigate("/")} className="text-2xl font-bold text-amber-500">
-            Hidden Narratives
+            ZIKR | ذِكرٌ
           </button>
           <div className="flex flex-wrap gap-2 text-sm">
             {navLinks.map((link) => (
@@ -60,8 +60,8 @@ export default function ContactPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <a href="mailto:hiddennarratives.contact@gmail.com" className="text-slate-200 underline-offset-4 hover:text-amber-300 hover:underline">
-                hiddennarratives.contact@gmail.com
+              <a href="mailto:contact@zikr-platform.com" className="text-slate-200 underline-offset-4 hover:text-amber-300 hover:underline">
+                contact@zikr-platform.com
               </a>
               <p className="mt-3 text-sm leading-relaxed text-slate-400">
                 Best for editorial notes, source discussions, publishing inquiries, and long-form messages.

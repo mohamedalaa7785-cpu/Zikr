@@ -2,13 +2,13 @@ import { usePageSEO, seoBaseUrl } from "@/lib/seoHead";
 
 export default function SupportPage() {
   usePageSEO({
-    title: "Support Hidden Narratives",
-    description: "Support Hidden Narratives through donations and sponsorship to fund independent historical research.",
+    title: "Support ZIKR | ذِكرٌ",
+    description: "Support ZIKR | ذِكرٌ through donations and sponsorship to fund independent historical research.",
     path: "/support",
     schema: {
       "@context": "https://schema.org",
       "@type": "DonateAction",
-      recipient: { "@type": "Organization", name: "Hidden Narratives" },
+      recipient: { "@type": "Organization", name: "ZIKR | ذِكرٌ" },
       url: `${seoBaseUrl}/support`,
     },
   });
@@ -16,7 +16,7 @@ export default function SupportPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
       <div className="mx-auto max-w-4xl space-y-4">
-        <h1 className="text-4xl font-bold text-amber-300">Support Hidden Narratives</h1>
+        <h1 className="text-4xl font-bold text-amber-300">Support ZIKR | ذِكرٌ</h1>
         <p className="text-slate-300">
           Help us fund independent editorial research, archival access, and documentary production.
         </p>
@@ -27,7 +27,7 @@ export default function SupportPage() {
             <li>Sponsorship inquiries for thematic series.</li>
             <li>Institutional collaboration for premium research commissions.</li>
           </ul>
-          <p className="mt-3 text-sm text-slate-400">Contact: hiddennarratives.contact@gmail.com</p>
+          <p className="mt-3 text-sm text-slate-400">Contact: contact@zikr-platform.com</p>
         </div>
       </div>
     </main>

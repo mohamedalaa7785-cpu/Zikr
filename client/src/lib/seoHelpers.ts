@@ -1,5 +1,5 @@
 /**
- * SEO Helper Functions for Hidden Narratives
+ * SEO Helper Functions for ZIKR | ذِكرٌ
  * Handles canonical URLs, schema.org markup, and meta tags
  */
 
@@ -19,7 +19,7 @@ export interface EpisodeSchemaData {
  * Generate canonical URL for a page
  */
 export function getCanonicalUrl(path: string): string {
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://hiddennarratives.vercel.app";
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://zikr-platform.vercel.app";
   return `${baseUrl}${path}`;
 }
 
@@ -57,12 +57,12 @@ export function generateEpisodeSchema(episode: EpisodeSchemaData, language: "en"
     keywords: language === "en" ? episode.keywordsEn : episode.keywordsAr,
     partOfSeries: {
       "@type": "PodcastSeries",
-      name: "Hidden Narratives",
+      name: "ZIKR | ذِكرٌ",
       url: getCanonicalUrl("/"),
     },
     author: {
       "@type": "Organization",
-      name: "Hidden Narratives",
+      name: "ZIKR | ذِكرٌ",
       url: getCanonicalUrl("/"),
     },
   };
@@ -75,7 +75,7 @@ export function generateOrganizationSchema(): object {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Hidden Narratives",
+    name: "ZIKR | ذِكرٌ",
     url: getCanonicalUrl("/"),
     logo: getCanonicalUrl("/logo.png"),
     description: "Deep historical analysis. Power structures. Lost civilizations.",

@@ -16,9 +16,9 @@ export interface SEOMetadata {
 }
 
 export const siteConfig = {
-  name: "Hidden Narratives",
+  name: "ZIKR | ذِكرٌ",
   description: "Deep historical analysis. Power structures. Lost civilizations.",
-  url: "https://hiddennarratives.vercel.app",
+  url: "https://zikr-platform.vercel.app",
   author: "Mohamed Alaa",
   email: "contact@hiddennarratives.com",
   social: {
@@ -165,7 +165,7 @@ Disallow: /tasks
 Disallow: /payment
 Disallow: /research-request
 
-Sitemap: https://hiddennarratives.vercel.app/sitemap.xml
+Sitemap: https://zikr-platform.vercel.app/sitemap.xml
 
 User-agent: Googlebot
 Allow: /

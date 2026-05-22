@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 export default function PremiumPage() {
   const [, navigate] = useLocation();
   usePageSEO({
-    title: "Premium Reports | Hidden Narratives",
-    description: "Purchase premium PDF reports, strategic historical briefs, and deep-dive dossiers from Hidden Narratives.",
+    title: "Premium Reports | ZIKR | ذِكرٌ",
+    description: "Purchase premium PDF reports, strategic historical briefs, and deep-dive dossiers from ZIKR | ذِكرٌ.",
     path: "/premium",
     schema: {
       "@context": "https://schema.org",
       "@type": "Service",
-      name: "Hidden Narratives Premium Reports",
-      provider: { "@type": "Organization", name: "Hidden Narratives" },
+      name: "ZIKR | ذِكرٌ Premium Reports",
+      provider: { "@type": "Organization", name: "ZIKR | ذِكرٌ" },
       areaServed: "Global",
       url: `${seoBaseUrl}/premium`,
     },

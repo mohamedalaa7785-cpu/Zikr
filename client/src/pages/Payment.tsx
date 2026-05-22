@@ -9,7 +9,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function PaymentPage() {
   useAuth({ redirectOnUnauthenticated: true });
-  usePageSEO({ title: "Payment | Hidden Narratives", description: "Private payment area", path: "/payment", robots: "noindex,nofollow" });
+  usePageSEO({ title: "Payment | ZIKR | ذِكرٌ", description: "Private payment area", path: "/payment", robots: "noindex,nofollow" });
 
   const [amount, setAmount] = useState(15);
   const [method, setMethod] = useState<"Instapay" | "Mobile Wallet">("Instapay");
@@ -32,7 +32,7 @@ export default function PaymentPage() {
           <p>Send payment via Instapay or Mobile Wallet.</p>
           <p><strong>Phone:</strong> 01210708572</p>
           <p><strong>WhatsApp:</strong> 01210708572</p>
-          <p><strong>Email:</strong> hiddennarratives.contact@gmail.com</p>
+          <p><strong>Email:</strong> contact@zikr-platform.com</p>
         </CardContent>
       </Card>
 
