@@ -204,3 +204,45 @@ export async function createContact(data: any) {
   if (!db) throw new Error("Database not available");
   await db.insert(contacts).values(data);
 }
+
+export async function listPayments() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(payments).orderBy(desc(payments.createdAt));
+}
+
+export async function setPaymentStatus(paymentId: string, status: "approved" | "rejected") {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(payments).set({ status: status as any }).where(eq(payments.id, paymentId as any));
+}
+
+export async function getDashboardData(userId: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const subscription = await getOrCreateUserSubscription(userId);
+  const tasks = await listTasksByUser(userId);
+  const research = await listResearchByUser(userId);
+  const stories = await db.select().from(savedStories).where(eq(savedStories.userId, userId as any));
+  return {
+    subscription,
+    tasksCount: tasks.length,
+    researchCount: research.length,
+    savedStoriesCount: stories.length,
+  };
+}
+
+export async function getAnalyticsOverview() {
+  const db = await getDb();
+  if (!db) return null;
+  const usersCount = await db.select({ count: sql`count(*)` }).from(users);
+  const storiesCount = await db.select({ count: sql`count(*)` }).from(stories);
+  const tasksCount = await db.select({ count: sql`count(*)` }).from(tasks);
+  const paymentsCount = await db.select({ count: sql`count(*)` }).from(payments);
+  return {
+    users: usersCount[0]?.count || 0,
+    stories: storiesCount[0]?.count || 0,
+    tasks: tasksCount[0]?.count || 0,
+    payments: paymentsCount[0]?.count || 0,
+  };
+}
