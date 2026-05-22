@@ -18,7 +18,7 @@ export default function Episodes() {
   const [, navigate] = useLocation();
 
   usePageSEO({
-    title: "Episodes | Hidden Narratives",
+    title: "Episodes | ZIKR | ذِكرٌ",
     description: "Explore long-form historical episodes with source-aware analysis, categorized for deep reading.",
     path: "/episodes",
     language,
@@ -26,7 +26,7 @@ export default function Episodes() {
     schema: {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      name: "Hidden Narratives Episodes",
+      name: "ZIKR | ذِكرٌ Episodes",
       url: `${seoBaseUrl}/episodes`,
       inLanguage: language === "en" ? "en-US" : "ar-EG",
       breadcrumb: {
@@ -62,7 +62,7 @@ export default function Episodes() {
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <nav className="sticky top-0 z-50 border-b border-amber-900/30 bg-black/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <button onClick={() => navigate("/")} className="text-2xl font-bold text-amber-600">Hidden Narratives</button>
+          <button onClick={() => navigate("/")} className="text-2xl font-bold text-amber-600">ZIKR | ذِكرٌ</button>
           <button onClick={() => setLanguage(language === "en" ? "ar" : "en")} className="rounded-full bg-amber-600 px-3 py-1 font-semibold text-black">{language === "en" ? "العربية" : "English"}</button>
         </div>
       </nav>

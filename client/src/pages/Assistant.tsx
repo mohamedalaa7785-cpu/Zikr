@@ -12,7 +12,7 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 export default function AssistantPage() {
   useAuth({ redirectOnUnauthenticated: true });
   useBehaviorTracker("/assistant");
-  usePageSEO({ title: "Assistant | Hidden Narratives", description: "Private assistant", path: "/assistant", robots: "noindex,nofollow" });
+  usePageSEO({ title: "Assistant | ZIKR | ذِكرٌ", description: "Private assistant", path: "/assistant", robots: "noindex,nofollow" });
 
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState<ChatMessage[]>([]);

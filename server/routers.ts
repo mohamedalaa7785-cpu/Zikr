@@ -145,7 +145,7 @@ export const appRouter = router({
           messages: [
             {
               role: "system",
-              content: "You are Hidden Narratives assistant. Explain lessons, answer questions, and help write content concisely.",
+              content: "You are ZIKR | ذِكرٌ assistant. Explain lessons, answer questions, and help write content concisely.",
             },
             ...(input.history ?? []).map(item => ({ role: item.role, content: item.content })),
             { role: "user", content: input.message },

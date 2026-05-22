@@ -19,7 +19,7 @@ const navLinks = [
 export default function About() {
   const [, navigate] = useLocation();
 
-  usePageSEO({ title: "About Hidden Narratives | Mission and Method", description: "Hidden Narratives about page.", path: "/about" });
+  usePageSEO({ title: "About ZIKR | ذِكرٌ | Mission and Method", description: "ZIKR | ذِكرٌ about page.", path: "/about" });
 
 
   return (
@@ -27,7 +27,7 @@ export default function About() {
       <nav className="sticky top-0 z-50 border-b border-amber-900/30 bg-black/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
           <button onClick={() => navigate("/")} className="text-2xl font-bold text-amber-500">
-            Hidden Narratives
+            ZIKR | ذِكرٌ
           </button>
           <div className="flex flex-wrap gap-2 text-sm">
             {navLinks.map((link) => (
@@ -45,9 +45,9 @@ export default function About() {
 
       <main className="mx-auto max-w-5xl space-y-10 px-4 py-12 md:py-16">
         <header className="space-y-5">
-          <h1 className="text-4xl font-bold text-amber-300 md:text-5xl">About Hidden Narratives</h1>
+          <h1 className="text-4xl font-bold text-amber-300 md:text-5xl">About ZIKR | ذِكرٌ</h1>
           <p className="text-lg leading-relaxed text-slate-300">
-            Hidden Narratives is an independent editorial history project. We investigate the less visible systems
+            ZIKR | ذِكرٌ is an independent editorial history project. We investigate the less visible systems
             behind major events—bureaucracies, religious institutions, military logistics, trade law, and media
             narratives—so readers can understand how power actually moved through time.
           </p>
@@ -88,7 +88,7 @@ export default function About() {
               <CardTitle className="text-amber-300">What makes us different</CardTitle>
             </CardHeader>
             <CardContent className="leading-relaxed text-slate-300">
-              We do not publish high-volume generic summaries. Hidden Narratives is built as a curated archive with
+              We do not publish high-volume generic summaries. ZIKR | ذِكرٌ is built as a curated archive with
               themed series, long-form context, and strong internal linking so each piece helps readers understand
               the next one in greater depth.
             </CardContent>

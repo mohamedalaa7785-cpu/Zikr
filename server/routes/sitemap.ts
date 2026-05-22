@@ -2,7 +2,10 @@ import { Router } from "express";
 import { getAllEpisodes } from "../db";
 
 const router = Router();
+codex/refactor-codebase-for-zikr-rebranding
+const baseUrl = "https://zikr-platform.vercel.app";
 const baseUrl = process.env.VITE_APP_URL || "https://zikr.vercel.app";
+ main
 
 /**
  * Main XML sitemap with language alternates

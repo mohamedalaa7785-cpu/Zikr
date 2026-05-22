@@ -5,7 +5,7 @@ import { usePageSEO } from "@/lib/seoHead";
 
 export default function AdminAnalyticsPage() {
   useAuth({ redirectOnUnauthenticated: true });
-  usePageSEO({ title: "Admin Analytics | Hidden Narratives", description: "Internal analytics dashboard", path: "/admin/analytics", robots: "noindex,nofollow" });
+  usePageSEO({ title: "Admin Analytics | ZIKR | ذِكرٌ", description: "Internal analytics dashboard", path: "/admin/analytics", robots: "noindex,nofollow" });
 
   const { data, isLoading } = trpc.analytics.admin.useQuery();
 

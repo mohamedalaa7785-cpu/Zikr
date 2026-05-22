@@ -11,7 +11,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 export default function ResearchRequest() {
   useAuth({ redirectOnUnauthenticated: true });
   useBehaviorTracker("/research-request");
-  usePageSEO({ title: "Research Request | Hidden Narratives", description: "Private research request", path: "/research-request", robots: "noindex,nofollow" });
+  usePageSEO({ title: "Research Request | ZIKR | ذِكرٌ", description: "Private research request", path: "/research-request", robots: "noindex,nofollow" });
 
   const [form, setForm] = useState({ title: "", field: "", pages: 3, type: "academic", language: "English" });
   const [result, setResult] = useState("");

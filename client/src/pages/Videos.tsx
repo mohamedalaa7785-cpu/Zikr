@@ -34,15 +34,15 @@ export default function Videos() {
   const t = translations[language];
 
   usePageSEO({
-    title: "Videos | Hidden Narratives",
-    description: "Documentary-style historical video essays from Hidden Narratives.",
+    title: "Videos | ZIKR | ذِكرٌ",
+    description: "Documentary-style historical video essays from ZIKR | ذِكرٌ.",
     path: "/videos",
     keywords: ["history videos", "documentary essays", "historical analysis"],
     language,
     schema: {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      name: "Hidden Narratives Video Essays",
+      name: "ZIKR | ذِكرٌ Video Essays",
       url: `${seoBaseUrl}/videos`,
       inLanguage: language === "en" ? "en-US" : "ar-EG",
     },

@@ -7,7 +7,7 @@ export default function LocalizedHome({ lang }: { lang: "en" | "ar" }) {
   const isAr = lang === "ar";
 
   usePageSEO({
-    title: isAr ? "Hidden Narratives العربية | تحليل تاريخي" : "Hidden Narratives EN | Editorial History",
+    title: isAr ? "ZIKR | ذِكرٌ العربية | تحليل تاريخي" : "ZIKR | ذِكرٌ EN | Editorial History",
     description: isAr
       ? "نسخة عربية تحريرية مستقلة تركز على تحليل التاريخ العميق وبنية القوة."
       : "English editorial edition focused on long-form historical power analysis.",
@@ -16,7 +16,7 @@ export default function LocalizedHome({ lang }: { lang: "en" | "ar" }) {
     schema: {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      name: isAr ? "Hidden Narratives Arabic" : "Hidden Narratives English",
+      name: isAr ? "ZIKR | ذِكرٌ Arabic" : "ZIKR | ذِكرٌ English",
       url: `${seoBaseUrl}/${lang}`,
       inLanguage: isAr ? "ar-EG" : "en-US",
     },
@@ -25,7 +25,7 @@ export default function LocalizedHome({ lang }: { lang: "en" | "ar" }) {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white" dir={isAr ? "rtl" : "ltr"}>
       <div className="mx-auto max-w-5xl space-y-5">
-        <h1 className="text-4xl font-bold text-amber-300">{isAr ? "الروايات الخفية — النسخة العربية" : "Hidden Narratives — English Edition"}</h1>
+        <h1 className="text-4xl font-bold text-amber-300">{isAr ? "الروايات الخفية — النسخة العربية" : "ZIKR | ذِكرٌ — English Edition"}</h1>
         <p className="text-lg text-slate-300">
           {isAr
             ? "هذه النسخة العربية تقدم قراءة سياقية للتاريخ السياسي والاجتماعي، مع تركيز على المؤسسات والسرديات المؤثرة في الوعي العام."

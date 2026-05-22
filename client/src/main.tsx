@@ -7,6 +7,7 @@ import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
+import "./styles/theme.css";
 import { trackCoreWebVitals } from "./lib/coreWebVitals";
 import { clientLogger } from "./lib/logger";
 
