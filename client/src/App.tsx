@@ -24,6 +24,13 @@ import AdminAnalyticsPage from "./pages/AdminAnalytics";
 import ContactPage from "./pages/Contact";
 import PremiumPage from "./pages/Premium";
 import SupportPage from "./pages/Support";
+import QuranPage from "./pages/Quran";
+import QuranDetailPage from "./pages/QuranDetail";
+import HadithPage from "./pages/Hadith";
+import HadithDetailPage from "./pages/HadithDetail";
+import PrayerPage from "./pages/Prayer";
+import ScholarsPage from "./pages/Scholars";
+import SearchPage from "./pages/Search";
 import { ConsentBanner, ConsentAwareAnalytics } from "./components/ConsentBanner";
 import LocalizedHome from "./pages/LocalizedHome";
 
@@ -53,6 +60,13 @@ function Router() {
       <Route path="/disclaimer" component={Disclaimer} />
       <Route path="/premium" component={PremiumPage} />
       <Route path="/support" component={SupportPage} />
+      <Route path="/quran" component={QuranPage} />
+      <Route path="/quran/:id" component={QuranDetailPage} />
+      <Route path="/hadith" component={HadithPage} />
+      <Route path="/hadith/:slug" component={HadithDetailPage} />
+      <Route path="/prayer" component={PrayerPage} />
+      <Route path="/scholars" component={ScholarsPage} />
+      <Route path="/search" component={SearchPage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

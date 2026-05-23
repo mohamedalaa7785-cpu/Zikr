@@ -39,6 +39,100 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /**
+ * Quran System
+ */
+export const quranSurahs = pgTable("quran_surahs", {
+  id: integer("id").primaryKey(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  nameTranslation: text("name_translation"),
+  revelationPlace: text("revelation_place"),
+  ayahsCount: integer("ayahs_count").notNull(),
+});
+
+export const quranAyahs = pgTable("quran_ayahs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  surahId: integer("surah_id").notNull().references(() => quranSurahs.id),
+  ayahNumber: integer("ayah_number").notNull(),
+  textAr: text("text_ar").notNull(),
+  textEn: text("text_en"),
+  audioUrl: text("audio_url"),
+});
+
+export const quranReciters = pgTable("quran_reciters", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  style: text("style"), // e.g., Murattal, Mujawwad
+  thumbnailUrl: text("thumbnail_url"),
+});
+
+export const quranAudio = pgTable("quran_audio", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  surahId: integer("surah_id").notNull().references(() => quranSurahs.id),
+  reciterId: uuid("reciter_id").notNull().references(() => quranReciters.id),
+  audioUrl: text("audio_url").notNull(),
+  duration: integer("duration"),
+});
+
+export const quranTafsir = pgTable("quran_tafsir", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  surahId: integer("surah_id").notNull().references(() => quranSurahs.id),
+  ayahNumber: integer("ayah_number").notNull(),
+  tafsirAr: text("tafsir_ar").notNull(),
+  tafsirEn: text("tafsir_en"),
+  author: text("author"), // e.g., Ibn Kathir, Al-Jalalayn
+});
+
+/**
+ * Hadith System
+ */
+export const hadithBooks = pgTable("hadith_books", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  authorAr: text("author_ar"),
+  authorEn: text("author_en"),
+  hadithCount: integer("hadith_count"),
+});
+
+export const hadiths = pgTable("hadiths", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  bookId: uuid("book_id").notNull().references(() => hadithBooks.id),
+  hadithNumber: text("hadith_number").notNull(),
+  textAr: text("text_ar").notNull(),
+  textEn: text("text_en"),
+  narratorAr: text("narrator_ar"),
+  narratorEn: text("narrator_en"),
+  gradeAr: text("grade_ar"),
+  gradeEn: text("grade_en"),
+});
+
+export const hadithExplanations = pgTable("hadith_explanations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  hadithId: uuid("hadith_id").notNull().references(() => hadiths.id),
+  explanationAr: text("explanation_ar").notNull(),
+  explanationEn: text("explanation_en"),
+  author: text("author"),
+});
+
+/**
+ * Scholars System
+ */
+export const scholars = pgTable("scholars", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  bioAr: text("bio_ar"),
+  bioEn: text("bio_en"),
+  thumbnailUrl: text("thumbnail_url"),
+  websiteUrl: text("website_url"),
+  youtubeUrl: text("youtube_url"),
+});
+
+/**
  * Stories / narrative engine
  */
 export const stories = pgTable("stories", {

@@ -1,4 +1,4 @@
-# Hidden Narratives - Bilingual Podcast Platform
+# ZIKR | ذِكرٌ - Islamic Spiritual Platform
 
 A modern, SEO-optimized bilingual podcast platform with Arabic/English support, built with React, Express, tRPC, and Tailwind CSS.
 
@@ -345,11 +345,11 @@ pnpm build
 For issues or questions:
 1. Check GitHub Issues
 2. Review deployment logs
-3. Contact: contact@hiddennarratives.com
+3. Contact: contact@zikr.app
 
 ## 📄 License
 
-© 2026 Hidden Narratives. All rights reserved.
+© 2026 ZIKR | ذِكرٌ. All rights reserved.
 
 ## 🙏 Acknowledgments
 

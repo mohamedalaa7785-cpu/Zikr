@@ -1,8 +1,8 @@
-# Hidden Narratives - Deployment Guide
+# ZIKR | ذِكرٌ - Deployment Guide
 
 ## Project Overview
 
-Hidden Narratives is a bilingual (Arabic/English) podcast and historical analysis platform with:
+ZIKR | ذِكرٌ is a premium Islamic spiritual platform with:
 
 - **10 migrated episodes** with full bilingual content (English & Arabic)
 - **RTL support** for Arabic language
@@ -263,8 +263,8 @@ CREATE TABLE contacts (
 For issues or questions:
 1. Check GitHub Issues
 2. Review deployment logs
-3. Contact: contact@hiddennarratives.com
+3. Contact: contact@zikr.app
 
 ## License
 
-© 2026 Hidden Narratives. All rights reserved.
+© 2026 ZIKR | ذِكرٌ. All rights reserved.

@@ -6,7 +6,7 @@ This project is ready to be pushed to GitHub. Follow these steps to complete the
 
 ## Prerequisites
 
-- GitHub account with write access to `mohamedalaa7785-cpu/hidden-narratives`
+- GitHub account with write access to `mohamedalaa7785-cpu/zikr`
 - Git installed locally
 - Personal Access Token (PAT) with `repo` scope
 
@@ -15,18 +15,18 @@ This project is ready to be pushed to GitHub. Follow these steps to complete the
 ### 1. Clone the Repository Locally
 
 ```bash
-git clone https://github.com/mohamedalaa7785-cpu/hidden-narratives.git
-cd hidden-narratives
+git clone https://github.com/mohamedalaa7785-cpu/zikr.git
+cd zikr
 ```
 
 ### 2. Copy Project Files
 
-Copy all files from `/home/ubuntu/hidden-narratives-new/` to your local clone:
+Copy all files from `/home/ubuntu/zikr/` to your local clone:
 
 ```bash
 # From your local clone directory
-cp -r /home/ubuntu/hidden-narratives-new/* .
-cp -r /home/ubuntu/hidden-narratives-new/.* .
+cp -r /home/ubuntu/zikr/* .
+cp -r /home/ubuntu/zikr/.* .
 ```
 
 ### 3. Configure Git
@@ -40,18 +40,17 @@ git config user.email "your.email@example.com"
 
 ```bash
 git add .
-git commit -m "feat: Hidden Narratives platform v1
+git commit -m "feat: ZIKR | ذِكرٌ Islamic Platform Phase 2
 
-- Bilingual support (EN/AR) with RTL layout
-- 10 migrated episodes with full content
-- Episode system with markdown rendering
-- SEO optimization (sitemap, robots.txt, JSON-LD)
-- AdSense-ready layout with 4 ad zones
-- Newsletter subscription system
-- Contact form with validation
-- YouTube video integration
-- Legal pages (Privacy, Terms, Disclaimer)
-- Responsive design with dark theme
+- Quran system foundation
+- Hadith system foundation
+- Prayer times and Qibla direction
+- Scholars foundation
+- Search system foundation
+- Spiritual experience enhancement
+- Full Supabase schema synchronization
+- SEO optimization
+- RTL perfection
 - Production-ready for Vercel deployment"
 ```
 
@@ -64,7 +63,7 @@ git push -u origin main --force
 
 ## Verifying the Push
 
-1. Go to https://github.com/mohamedalaa7785-cpu/hidden-narratives
+1. Go to https://github.com/mohamedalaa7785-cpu/zikr
 2. Verify all files are present
 3. Check commit history
 
@@ -90,7 +89,7 @@ git push -u origin main --force
 ## Project Structure
 
 ```
-hidden-narratives/
+zikr/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── pages/         # Page components
