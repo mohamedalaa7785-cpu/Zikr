@@ -1,23 +1,6 @@
 import Link from 'next/link';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { surahs } from '@/lib/data/content';
 
-const surahs = [
-  { id: 1, name: 'الفاتحة' },
-  { id: 2, name: 'البقرة' },
-  { id: 3, name: 'آل عمران' },
-];
-
-export default function QuranPage() {
-  return (
-    <main className="mx-auto max-w-6xl px-4 py-16 text-zikr-text">
-      <h1 className="text-4xl font-bold text-zikr-gold">القرآن الكريم</h1>
-      <p className="mt-4 text-zikr-muted">Foundation for search, audio, tafsir, and bookmarks.</p>
-      <ul className="mt-4 grid gap-4 md:grid-cols-2">
-        {surahs.map((surah) => (
-          <li key={surah.id} className="rounded-2xl border border-zikr-gold/15 bg-zikr-glass p-4">
-            <Link href={`/quran/${surah.id}`}>{surah.id}. {surah.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </main>
-  );
-}
+export default function QuranPage(){return <Container className='py-12 space-y-4'><h1 className='text-3xl text-brand-gold'>القرآن الكريم</h1><input className='w-full rounded-lg bg-black/20 p-3' placeholder='ابحث عن سورة...' /><div className='grid gap-3'>{surahs.map(s=><Card key={s.id}><Link href={`/quran/${s.id}`} className='flex justify-between'><span>{s.nameAr}</span><span className='arabic-muted'>{s.ayahCount} آيات</span></Link></Card>)}</div></Container>}

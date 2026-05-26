@@ -1,23 +1,11 @@
-:root {
-  --zikr-black: #020203;
-  --zikr-navy: #0d1b2a;
-  --zikr-gold: #e9d7a0;
-  --zikr-beige: #f4ead2;
-  --zikr-green: #6da67a;
+@import '../styles/tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: radial-gradient(circle at top, #0e4b45 0%, #072e2a 60%);
+  color: var(--text);
 }
 
-* { box-sizing: border-box; }
-body { margin: 0; font-family: Inter, system-ui, sans-serif; }
-
-.bg-zikr-bg { background: radial-gradient(circle at top, #1b2f52 0%, #071018 35%, #020203 100%); }
-.text-zikr-text { color: #f8f8f8; }
-.text-zikr-gold { color: var(--zikr-gold); }
-.text-zikr-green { color: var(--zikr-green); }
-.text-zikr-muted { color: #c5ced8; }
-.border-zikr-gold\/20 { border-color: rgb(233 215 160 / 0.2); }
-.border-zikr-gold\/15 { border-color: rgb(233 215 160 / 0.15); }
-.bg-zikr-glass { background: rgb(2 2 3 / 0.35); backdrop-filter: blur(10px); }
-
-.mx-auto{margin-left:auto;margin-right:auto}.max-w-6xl{max-width:72rem}.px-4{padding-left:1rem;padding-right:1rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-16{padding-top:4rem;padding-bottom:4rem}.pb-16{padding-bottom:4rem}.p-8{padding:2rem}.p-4{padding:1rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-2xl{border-radius:1rem}.border{border-width:1px}.min-h-screen{min-height:100vh}.sticky{position:sticky}.top-0{top:0}.gap-4{gap:1rem}.grid{display:grid}.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.hidden{display:none}.text-xl{font-size:1.25rem}.text-sm{font-size:.875rem}.text-4xl{font-size:2.25rem;line-height:1.2}.font-semibold{font-weight:600}.font-bold{font-weight:700}.max-w-3xl{max-width:48rem}.border-b{border-bottom-width:1px}.bg-black\/40{background:rgb(0 0 0 / .4)}.backdrop-blur{backdrop-filter:blur(8px)}
-@media (min-width: 768px){.md\:flex{display:flex}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}}
-@media (min-width: 1024px){.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr));}}
+.arabic-muted { color: var(--muted); }

@@ -219,3 +219,49 @@ ZIKR is built with respect for Islamic knowledge and values. We acknowledge:
 **ZIKR | ذِكرٌ** - Bringing Islamic knowledge to the digital age with elegance and authenticity.
 
 *Last Updated: May 2026*
+
+## Phase 2 setup (Supabase + Auth + Drizzle)
+
+### Required environment variables
+
+Create `.env.local` with:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+### Apply migrations
+
+1. Ensure your Drizzle database URL points to Supabase Postgres.
+2. Run:
+
+```bash
+pnpm db:push
+```
+
+Or execute SQL manually:
+
+```bash
+psql "$DATABASE_URL" -f drizzle/migrations/0002_phase2_auth_foundation.sql
+```
+
+### Supabase dashboard steps
+
+- Enable Email provider in Auth.
+- Configure Redirect URLs to include `/auth/callback`.
+- Verify `public-assets` bucket exists.
+- Verify RLS and policies on `profiles`, `favorites`, `reading_progress`, and `reminders`.
+
+
+## Phase 3 content import scripts
+
+```bash
+pnpm tsx scripts/import-quran.ts
+pnpm tsx scripts/import-tafsir.ts
+pnpm tsx scripts/import-reciters.ts
+pnpm tsx scripts/import-hadith.ts
+```
+
+All scripts are idempotent (upsert-based) and require `DATABASE_URL` plus Supabase-side RLS/admin setup.
