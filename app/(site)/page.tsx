@@ -1,10 +1,8 @@
 import Link from 'next/link';
-import { SiteShell } from './components/site-shell';
-import { homepageSections } from './lib/content';
+import { homepageSections } from '../lib/content';
 
 export default function Page() {
   return (
-    <SiteShell>
       <main className="mx-auto max-w-6xl px-4 py-16">
         <section className="rounded-3xl border border-zikr-gold/20 bg-zikr-glass p-8">
           <p className="text-zikr-green">Spiritual Experience Platform</p>
@@ -26,6 +24,5 @@ export default function Page() {
           ))}
         </section>
       </main>
-    </SiteShell>
   );
 }
