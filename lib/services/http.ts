@@ -1,53 +1,62 @@
-import { ApiFetchConfig, ServiceError } from '@/lib/types/common';
+import { ServiceError } from '@/lib/types/common';
 
-const DEFAULT_TIMEOUT_MS = 12000;
+const REQUEST_TIMEOUT = 10000; // 10 seconds
+const MAX_RETRIES = 2;
 
-function withTimeoutSignal(timeoutMs: number, signal?: AbortSignal | null): AbortSignal {
-  if (signal) return signal;
-  return AbortSignal.timeout(timeoutMs);
+interface FetchOptions extends RequestInit {
+  timeout?: number;
+  retries?: number;
 }
 
-export async function safeApiFetch<T>(
+export async function safeApiFetch<T = unknown>(
   url: string,
-  init: RequestInit = {},
-  config: ApiFetchConfig = {},
-): Promise<T> {
-  const timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  options: FetchOptions = {},
+): Promise<{ data?: T; error?: Error }> {
+  const { timeout = REQUEST_TIMEOUT, retries = MAX_RETRIES, ...fetchOptions } = options;
 
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      ...init,
-      signal: withTimeoutSignal(timeoutMs, init.signal),
-      next: config.nextRevalidate ? { revalidate: config.nextRevalidate, tags: config.tags } : undefined,
-    });
-  } catch (error) {
-    throw new ServiceError({
-      message: `Network request failed for ${url}`,
-      code: 'NETWORK_ERROR',
-      cause: error,
-    });
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        const response = await fetch(url, {
+          ...fetchOptions,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorBody = await response.text().catch(() => '');
+          throw new ServiceError(
+            `HTTP ${response.status}: ${errorBody || response.statusText}`,
+            `HTTP_${response.status}`,
+            response.status,
+          );
+        }
+
+        const data = await response.json();
+        return { data };
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      if (error instanceof ServiceError && error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+        // Don't retry 4xx errors
+        break;
+      }
+
+      if (attempt < retries) {
+        // Exponential backoff
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
   }
 
-  if (!response.ok) {
-    throw new ServiceError({
-      message: `API error ${response.status} for ${url}`,
-      status: response.status,
-      code: 'API_ERROR',
-    });
-  }
-
-  try {
-    return (await response.json()) as T;
-  } catch (error) {
-    throw new ServiceError({
-      message: `Invalid JSON response from ${url}`,
-      code: 'INVALID_RESPONSE',
-      cause: error,
-    });
-  }
-}
-
-export function fallbackOnError<T>(promise: Promise<T>, fallback: T): Promise<T> {
-  return promise.catch(() => fallback);
+  return { error: lastError || new Error('Unknown error') };
 }

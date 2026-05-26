@@ -1,41 +1,32 @@
-export interface ServiceErrorShape {
-  message: string;
-  status?: number;
-  code?: string;
-  cause?: unknown;
-}
+export type SearchResult<T extends string = string, D = unknown> = {
+  type: T;
+  id: string;
+  title: string;
+  description: string;
+  data: D;
+};
+
+export type PaginationMeta = {
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
 
 export class ServiceError extends Error {
-  readonly status?: number;
-  readonly code?: string;
-  readonly cause?: unknown;
-
-  constructor({ message, status, code, cause }: ServiceErrorShape) {
+  constructor(
+    message: string,
+    public code?: string,
+    public statusCode?: number,
+  ) {
     super(message);
     this.name = 'ServiceError';
-    this.status = status;
-    this.code = code;
-    this.cause = cause;
   }
 }
 
-export interface ApiFetchConfig {
-  timeoutMs?: number;
-  nextRevalidate?: number;
-  tags?: string[];
-}
-
-export interface PaginationMeta {
-  currentPage: number;
-  totalPages: number;
-  pageSize: number;
-  totalItems: number;
-}
-
-export interface SearchResult<TType extends string, TData> {
-  type: TType;
-  id: string;
-  title: string;
-  description?: string;
-  data: TData;
-}
+export type ApiResponse<T = unknown> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  timestamp: string;
+};
