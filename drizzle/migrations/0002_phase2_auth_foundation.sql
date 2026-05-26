@@ -57,10 +57,16 @@ alter table favorites enable row level security;
 alter table reading_progress enable row level security;
 alter table reminders enable row level security;
 
+drop policy if exists "profiles_select_own" on profiles;
+drop policy if exists "profiles_insert_own" on profiles;
+drop policy if exists "profiles_update_own" on profiles;
 create policy "profiles_select_own" on profiles for select using (auth.uid() = id);
 create policy "profiles_insert_own" on profiles for insert with check (auth.uid() = id);
 create policy "profiles_update_own" on profiles for update using (auth.uid() = id);
 
+drop policy if exists "favorites_owner_all" on favorites;
+drop policy if exists "reading_progress_owner_all" on reading_progress;
+drop policy if exists "reminders_owner_all" on reminders;
 create policy "favorites_owner_all" on favorites for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "reading_progress_owner_all" on reading_progress for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "reminders_owner_all" on reminders for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
@@ -87,6 +93,8 @@ insert into storage.buckets (id, name, public)
 values ('public-assets', 'public-assets', true)
 on conflict (id) do nothing;
 
+drop policy if exists "public_assets_read" on storage.objects;
+drop policy if exists "public_assets_admin_write" on storage.objects;
 create policy "public_assets_read" on storage.objects for select using (bucket_id = 'public-assets');
 create policy "public_assets_admin_write" on storage.objects for all
 using (bucket_id = 'public-assets' and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'))
