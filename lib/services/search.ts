@@ -26,13 +26,33 @@ export async function globalSearch(query: string): Promise<GlobalSearchResult[]>
   );
 
   return [
-    ...quran.map((a) => ({ type: 'quran' as const, id: String(a.number), title: `آية ${a.numberInSurah}`, description: a.text, data: { text: a.text, number: a.number } })),
-    ...hadith.map((h) => ({ type: 'hadith' as const, id: String(h.number), title: `Hadith ${h.number}`, description: h.arab ?? h.id, data: { number: h.number, arab: h.arab, id: h.id } })),
-    ...scholars.map((s) => ({ type: 'scholar' as const, id: s.id, title: s.nameEn, description: s.nameAr, data: { slug: s.slug, nameAr: s.nameAr, nameEn: s.nameEn } })),
-    ...storyMatches.map((s) => ({ type: 'story' as const, id: s.id, title: s.title, description: s.summary, data: { slug: s.slug, category: s.category } })),
+    ...quran.map((a) => ({
+      type: 'quran' as const,
+      id: String(a.number),
+      title: `آية ${a.numberInSurah}`,
+      description: a.text,
+      data: { text: a.text, number: a.number },
+    })),
+    ...hadith.map((h) => ({
+      type: 'hadith' as const,
+      id: String(h.number),
+      title: `Hadith ${h.number}`,
+      description: h.arab || h.id || String(h.number),
+      data: { number: h.number, arab: h.arab, id: h.id },
+    })),
+    ...scholars.map((s) => ({
+      type: 'scholar' as const,
+      id: s.id,
+      title: s.nameEn,
+      description: s.nameAr,
+      data: { slug: s.slug, nameAr: s.nameAr, nameEn: s.nameEn },
+    })),
+    ...storyMatches.map((s) => ({
+      type: 'story' as const,
+      id: s.id,
+      title: s.title,
+      description: s.summary,
+      data: { slug: s.slug, category: s.category },
+    })),
   ];
 }
-
-// Future ranking support:
-// - Add weighted scoring (exact phrase > title > metadata matches).
-// - Add query analytics and per-locale ranking profiles.

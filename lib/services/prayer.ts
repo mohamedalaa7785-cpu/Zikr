@@ -15,15 +15,15 @@ export async function getPrayerTimes(city: string, country: string): Promise<Pra
   if (!cleanCity || !cleanCountry) return null;
 
   const url = `${ALADHAN_BASE}/timingsByCity?city=${encodeURIComponent(cleanCity)}&country=${encodeURIComponent(cleanCountry)}`;
-  const response = await safeApiFetch<AladhanResponse<PrayerResponse>>(url);
-  return response.data ?? null;
+  const { data: response } = await safeApiFetch<AladhanResponse<PrayerResponse>>(url);
+  return response?.data ?? null;
 }
 
 export async function getPrayerTimesByCoordinates(lat: number, lng: number): Promise<PrayerResponse | null> {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   const url = `${ALADHAN_BASE}/timings?latitude=${lat}&longitude=${lng}`;
-  const response = await safeApiFetch<AladhanResponse<PrayerResponse>>(url);
-  return response.data ?? null;
+  const { data: response } = await safeApiFetch<AladhanResponse<PrayerResponse>>(url);
+  return response?.data ?? null;
 }
 
 export async function getNextPrayer(prayer: PrayerResponse | null = null): Promise<{ name: string; time: string } | null> {
@@ -49,17 +49,13 @@ export async function getNextPrayer(prayer: PrayerResponse | null = null): Promi
 
 export async function getQiblaDirection(lat: number, lng: number): Promise<QiblaResponse | null> {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  const response = await safeApiFetch<AladhanResponse<{ direction: number }>>(
+  const { data: response } = await safeApiFetch<AladhanResponse<{ direction: number }>>(
     `${ALADHAN_BASE}/qibla/${lat}/${lng}`,
   );
 
   return {
     latitude: lat,
     longitude: lng,
-    direction: response.data?.direction ?? 0,
+    direction: response?.data?.direction ?? 0,
   };
 }
-
-// Future notification integration:
-// - Use timezone from response.meta.timezone for reminder scheduling.
-// - Store preferred calc method and location per user profile in Supabase.

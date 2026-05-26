@@ -28,7 +28,7 @@ ZIKR embodies a **spiritual, cinematic, luxurious, calm, and immersive** aesthet
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS 4, Framer Motion
 - **Backend**: Express.js, tRPC
-- **Database**: Supabase (MySQL)
+- **Database**: Supabase (PostgreSQL)
 - **Storage**: AWS S3
 - **Deployment**: Vercel
 - **Build Tools**: Vite, esbuild
@@ -48,7 +48,7 @@ ZIKR is built with full internationalization (i18n) support:
 
 - Node.js 18+
 - pnpm 10+
-- MySQL database (via Supabase)
+- PostgreSQL database (via Supabase)
 
 #### Installation
 
@@ -78,7 +78,7 @@ pnpm start
 
 See `.env.example` for all required environment variables. Key variables:
 
-- `DATABASE_URL`: MySQL connection string
+- `DATABASE_URL`: PostgreSQL connection string
 - `SUPABASE_URL` & `SUPABASE_ANON_KEY`: Supabase configuration
 - `AWS_*`: S3 storage configuration
 - `OPENAI_API_KEY`: For AI assistant features
@@ -141,7 +141,7 @@ pnpm db:push
 
 ### 🗄️ Database Schema
 
-ZIKR uses Drizzle ORM with MySQL. Key tables:
+ZIKR uses Drizzle ORM with PostgreSQL. Key tables:
 
 - **users**: User accounts and authentication
 - **episodes**: Content episodes (legacy compatibility)
