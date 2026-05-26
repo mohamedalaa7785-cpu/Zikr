@@ -5,18 +5,55 @@ import { BookmarkButton } from '@/components/quran/bookmark-button';
 import { QuranAudioPlayer } from '@/components/quran/audio-player';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
-import { ayahs, surahs, tafsir } from '@/lib/data/content';
+import { getSurahById } from '@/lib/services/quran';
+
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ surah: string }> }): Promise<Metadata> {
   const p = await params;
-  const s = surahs.find((x) => String(x.id) === p.surah);
-  return { title: s ? `سورة ${s.nameAr}` : 'سورة', description: 'قراءة وتفسير واستماع' };
+  const id = Number.parseInt(p.surah, 10);
+  if (Number.isNaN(id)) return { title: 'سورة', description: 'قراءة واستماع' };
+
+  const result = await getSurahById(id, 'ar');
+  return {
+    title: result ? `سورة ${result.surah.name}` : 'سورة',
+    description: 'قراءة وتفسير واستماع',
+  };
 }
 
 export default async function SurahPage({ params }: { params: Promise<{ surah: string }> }) {
   const p = await params;
-  const s = surahs.find((x) => String(x.id) === p.surah);
-  if (!s) return notFound();
-  const items = ayahs.filter((a) => a.surahId === s.id);
-  return <Container className='py-12 space-y-6'><nav className='text-sm arabic-muted'><Link href='/'>الرئيسية</Link> / <Link href='/quran'>القرآن</Link> / {s.nameAr}</nav><h1 className='text-3xl text-brand-gold'>سورة {s.nameAr}</h1><QuranAudioPlayer surahId={s.id}/><div className='space-y-3'>{items.map((a)=>{const t=tafsir.find((x)=>x.surahId===a.surahId&&x.ayahNumber===a.ayahNumber);return <Card key={a.ayahNumber}><div className='flex justify-between gap-3'><p className='text-xl leading-loose'>{a.textUthmani}</p><BookmarkButton keyRef={`quran:${a.surahId}:${a.ayahNumber}`}/></div><p className='arabic-muted'>{a.textSimple}</p>{t&&<details className='mt-2'><summary>التفسير</summary><p className='mt-2 arabic-muted'>{t.text}</p></details>}<Link className='text-sm text-brand-gold' href={`/quran/${a.surahId}/${a.ayahNumber}`}>رابط الآية</Link></Card>;})}</div></Container>;
+  const id = Number.parseInt(p.surah, 10);
+  if (Number.isNaN(id)) return notFound();
+
+  const result = await getSurahById(id, 'ar');
+  if (!result) return notFound();
+
+  return (
+    <Container className='space-y-6 py-12'>
+      <nav className='arabic-muted text-sm'>
+        <Link href='/'>الرئيسية</Link> / <Link href='/quran'>القرآن</Link> / {result.surah.name}
+      </nav>
+      <h1 className='text-3xl text-brand-gold'>سورة {result.surah.name}</h1>
+      <QuranAudioPlayer surahId={result.surah.number} />
+
+      {result.ayahs.length === 0 ? (
+        <Card className='p-4 arabic-muted'>لا توجد آيات متاحة لهذه السورة حاليًا.</Card>
+      ) : (
+        <div className='space-y-3'>
+          {result.ayahs.map((ayah) => (
+            <Card key={ayah.numberInSurah}>
+              <div className='flex justify-between gap-3'>
+                <p className='text-xl leading-loose'>{ayah.text}</p>
+                <BookmarkButton keyRef={`quran:${result.surah.number}:${ayah.numberInSurah}`} />
+              </div>
+              <Link className='text-sm text-brand-gold' href={`/quran/${result.surah.number}/${ayah.numberInSurah}`}>
+                رابط الآية
+              </Link>
+            </Card>
+          ))}
+        </div>
+      )}
+    </Container>
+  );
 }

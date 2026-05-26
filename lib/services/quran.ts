@@ -3,6 +3,16 @@ import { ServiceError } from '@/lib/types/common';
 import type { Ayah, Juz, QuranApiResponse, Surah } from '@/lib/types/quran';
 
 const QURAN_API_BASE = 'https://api.alquran.cloud/v1';
+const DEBUG_QURAN = process.env.NODE_ENV !== 'production';
+
+function debugLog(message: string, payload?: unknown) {
+  if (!DEBUG_QURAN) return;
+  if (payload === undefined) {
+    console.debug(`[quran-service] ${message}`);
+    return;
+  }
+  console.debug(`[quran-service] ${message}`, payload);
+}
 
 const EDITIONS = {
   ar: 'quran-uthmani',
@@ -12,8 +22,10 @@ const EDITIONS = {
 type Locale = keyof typeof EDITIONS;
 
 export async function getAllSurahs(locale: Locale = 'ar'): Promise<Surah[]> {
+  debugLog('getAllSurahs request', { locale });
   const response = await safeApiFetch<QuranApiResponse<Surah[]>>(`${QURAN_API_BASE}/surah`);
   if (!Array.isArray(response.data)) return [];
+  debugLog('getAllSurahs success', { count: response.data.length });
   return locale === 'en'
     ? response.data.map((surah) => ({ ...surah, name: surah.englishName }))
     : response.data;
@@ -22,21 +34,25 @@ export async function getAllSurahs(locale: Locale = 'ar'): Promise<Surah[]> {
 export async function getSurahById(id: number, locale: Locale = 'ar'): Promise<{ surah: Surah; ayahs: Ayah[] } | null> {
   if (!id || id < 1 || id > 114) return null;
 
+  debugLog('getSurahById request', { id, locale });
   const response = await safeApiFetch<QuranApiResponse<{ ayahs: Ayah[] } & Surah>>(
     `${QURAN_API_BASE}/surah/${id}/${EDITIONS[locale]}`,
   );
 
   if (!response?.data) return null;
   const { ayahs = [], ...surah } = response.data;
+  debugLog('getSurahById success', { surah: surah.number, ayahCount: ayahs.length });
   return { surah, ayahs };
 }
 
 export async function getAyah(surahId: number, ayahId: number, locale: Locale = 'ar'): Promise<Ayah | null> {
   if (surahId < 1 || surahId > 114 || ayahId < 1) return null;
 
+  debugLog('getAyah request', { surahId, ayahId, locale });
   const response = await safeApiFetch<QuranApiResponse<Ayah>>(
     `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS[locale]}`,
   );
+  debugLog('getAyah success', { number: response.data?.numberInSurah ?? null });
   return response.data ?? null;
 }
 
