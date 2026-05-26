@@ -4,50 +4,52 @@ import { notFound } from 'next/navigation';
 import { BookmarkButton } from '@/components/quran/bookmark-button';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
-import { ayahs, surahs, tafsir } from '@/lib/data/content';
+import { getAyah, getSurahById } from '@/lib/services/quran';
+
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ surah: string; ayah: string }> }): Promise<Metadata> {
   const p = await params;
-  const surah = surahs.find((s) => String(s.id) === p.surah);
+  const surahId = Number.parseInt(p.surah, 10);
+  const ayahId = Number.parseInt(p.ayah, 10);
+
+  const surahData = Number.isNaN(surahId) ? null : await getSurahById(surahId, 'ar');
+
   return {
-    title: surah ? `سورة ${surah.nameAr} - الآية ${p.ayah}` : `الآية ${p.ayah}`,
-    description: 'قراءة الآية مع التفسير والمشاركة',
-    alternates: { canonical: `/quran/${p.surah}/${p.ayah}` }
+    title: surahData ? `سورة ${surahData.surah.name} - الآية ${ayahId}` : `الآية ${p.ayah}`,
+    description: 'قراءة الآية والمشاركة',
+    alternates: { canonical: `/quran/${p.surah}/${p.ayah}` },
   };
 }
 
 export default async function AyahPage({ params }: { params: Promise<{ surah: string; ayah: string }> }) {
   const p = await params;
-  const surah = surahs.find((s) => String(s.id) === p.surah);
-  if (!surah) return notFound();
+  const surahId = Number.parseInt(p.surah, 10);
+  const ayahId = Number.parseInt(p.ayah, 10);
 
-  const ayahNumber = Number.parseInt(p.ayah, 10);
-  const ayah = ayahs.find((a) => a.surahId === surah.id && a.ayahNumber === ayahNumber);
-  if (!ayah) return notFound();
+  if (Number.isNaN(surahId) || Number.isNaN(ayahId)) return notFound();
 
-  const tafsirRow = tafsir.find((t) => t.surahId === surah.id && t.ayahNumber === ayahNumber);
-  const shareHref = `/quran/${surah.id}/${ayah.ayahNumber}`;
+  const [surahData, ayah] = await Promise.all([getSurahById(surahId, 'ar'), getAyah(surahId, ayahId, 'ar')]);
+
+  if (!surahData || !ayah) return notFound();
 
   return (
-    <Container className='py-12 space-y-6'>
-      <nav className='text-sm arabic-muted'>
+    <Container className='space-y-6 py-12'>
+      <nav className='arabic-muted text-sm'>
         <Link href='/'>الرئيسية</Link> / <Link href='/quran'>القرآن</Link> /{' '}
-        <Link href={`/quran/${surah.id}`}>سورة {surah.nameAr}</Link> / الآية {ayah.ayahNumber}
+        <Link href={`/quran/${surahData.surah.number}`}>سورة {surahData.surah.name}</Link> / الآية {ayah.numberInSurah}
       </nav>
       <Card>
-        <h1 className='text-2xl text-brand-gold'>سورة {surah.nameAr} — الآية {ayah.ayahNumber}</h1>
-        <p className='mt-4 text-2xl leading-loose'>{ayah.textUthmani}</p>
-        <p className='mt-3 arabic-muted'>{ayah.textSimple}</p>
+        <h1 className='text-2xl text-brand-gold'>
+          سورة {surahData.surah.name} — الآية {ayah.numberInSurah}
+        </h1>
+        <p className='mt-4 text-2xl leading-loose'>{ayah.text}</p>
         <div className='mt-4 flex items-center gap-4'>
-          <BookmarkButton keyRef={`quran:${surah.id}:${ayah.ayahNumber}`} />
-          <Link href={shareHref} className='text-sm text-brand-gold'>نسخ رابط الآية</Link>
+          <BookmarkButton keyRef={`quran:${surahId}:${ayah.numberInSurah}`} />
+          <Link href={`/quran/${surahId}/${ayah.numberInSurah}`} className='text-sm text-brand-gold'>
+            نسخ رابط الآية
+          </Link>
         </div>
-        {tafsirRow ? (
-          <div className='mt-6 rounded-xl border border-brand-gold/20 bg-black/10 p-4'>
-            <h2 className='font-semibold text-brand-gold'>{tafsirRow.source}</h2>
-            <p className='mt-2 arabic-muted'>{tafsirRow.text}</p>
-          </div>
-        ) : null}
       </Card>
     </Container>
   );

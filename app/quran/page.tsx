@@ -1,6 +1,32 @@
 import Link from 'next/link';
-import { Container } from '@/components/ui/container';
+import { getAllSurahs } from '@/lib/services/quran';
 import { Card } from '@/components/ui/card';
-import { surahs } from '@/lib/data/content';
+import { Container } from '@/components/ui/container';
 
-export default function QuranPage(){return <Container className='py-12 space-y-4'><h1 className='text-3xl text-brand-gold'>القرآن الكريم</h1><input className='w-full rounded-lg bg-black/20 p-3' placeholder='ابحث عن سورة...' /><div className='grid gap-3'>{surahs.map(s=><Card key={s.id}><Link href={`/quran/${s.id}`} className='flex justify-between'><span>{s.nameAr}</span><span className='arabic-muted'>{s.ayahCount} آيات</span></Link></Card>)}</div></Container>}
+export const revalidate = 3600;
+
+export default async function QuranPage() {
+  const surahs = await getAllSurahs('ar');
+
+  return (
+    <Container className='space-y-4 py-12'>
+      <h1 className='text-3xl text-brand-gold'>القرآن الكريم</h1>
+      <input className='w-full rounded-lg bg-black/20 p-3' placeholder='ابحث عن سورة...' readOnly />
+
+      {surahs.length === 0 ? (
+        <Card className='p-4 arabic-muted'>لا توجد سور متاحة الآن. حاول مرة أخرى لاحقًا.</Card>
+      ) : (
+        <div className='grid gap-3'>
+          {surahs.map((surah) => (
+            <Card key={surah.number}>
+              <Link href={`/quran/${surah.number}`} className='flex justify-between'>
+                <span>{surah.name}</span>
+                <span className='arabic-muted'>{surah.numberOfAyahs} آيات</span>
+              </Link>
+            </Card>
+          ))}
+        </div>
+      )}
+    </Container>
+  );
+}
