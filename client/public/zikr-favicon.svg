@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#f6d58a"/><stop offset="1" stop-color="#6da67a"/></linearGradient></defs>
-  <rect width="128" height="128" rx="26" fill="#050608"/>
-  <text x="64" y="58" text-anchor="middle" fill="url(#g)" font-size="28" font-family="serif">ZIKR</text>
-  <text x="64" y="88" text-anchor="middle" fill="#e9d7a0" font-size="20" font-family="serif">ذِكرٌ</text>
-</svg>
