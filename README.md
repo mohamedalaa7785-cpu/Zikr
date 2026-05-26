@@ -54,8 +54,8 @@ ZIKR is built with full internationalization (i18n) support:
 
 ```bash
 # Clone the repository
-git clone https://github.com/mohamedalaa7785-cpu/hidden-narratives.git
-cd hidden-narratives
+git clone https://github.com/mohamedalaa7785-cpu/zikr.git
+cd zikr
 
 # Install dependencies
 pnpm install
@@ -86,7 +86,7 @@ See `.env.example` for all required environment variables. Key variables:
 ### 📁 Project Structure
 
 ```
-hidden-narratives/
+zikr/
 ├── client/                 # Frontend React application
 │   ├── src/
 │   │   ├── _core/         # Core utilities and types

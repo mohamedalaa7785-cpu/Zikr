@@ -153,7 +153,7 @@ CREATE TABLE contacts (
 
 ```bash
 # Push to GitHub
-git remote add origin https://github.com/YOUR_USERNAME/hidden-narratives.git
+git remote add origin https://github.com/YOUR_USERNAME/zikr.git
 git push -u origin main
 ```
 

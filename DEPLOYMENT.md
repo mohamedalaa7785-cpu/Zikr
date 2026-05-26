@@ -26,7 +26,7 @@ ZIKR | ذِكرٌ is a premium Islamic spiritual platform with:
 ### 1. Install Dependencies
 
 ```bash
-cd /home/ubuntu/hidden-narratives-new
+cd /home/ubuntu/zikr-new
 pnpm install
 ```
 
@@ -75,12 +75,12 @@ pnpm start
 ### 1. Push to GitHub
 
 ```bash
-cd /home/ubuntu/hidden-narratives-new
+cd /home/ubuntu/zikr-new
 git init
 git add .
-git commit -m "Initial commit: Hidden Narratives platform"
+git commit -m "Initial commit: ZIKR | ذِكرٌ platform"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/hidden-narratives.git
+git remote add origin https://github.com/YOUR_USERNAME/zikr.git
 git push -u origin main
 ```
 

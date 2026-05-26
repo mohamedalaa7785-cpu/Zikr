@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Read all episode files from old repo
-const episodesDir = '/home/ubuntu/hidden-narratives/content/episodes';
+const episodesDir = '/home/ubuntu/zikr/content/episodes';
 const files = fs.readdirSync(episodesDir).filter(f => f.endsWith('.md') && f !== 'test.md');
 
 console.log(`Found ${files.length} episode files to migrate\n`);

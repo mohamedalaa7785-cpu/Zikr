@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 
-const episodesDir = '/home/ubuntu/hidden-narratives/content/episodes';
+const episodesDir = '/home/ubuntu/zikr/content/episodes';
 const files = fs.readdirSync(episodesDir).filter(f => f.endsWith('.md') && f !== 'test.md');
 
 const episodes = {};

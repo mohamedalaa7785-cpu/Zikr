@@ -1,7 +1,7 @@
 import fs from 'fs';
 import matter from 'gray-matter';
 
-const file = '/home/ubuntu/hidden-narratives/content/episodes/deep-power-ancient-egypt-en.md';
+const file = '/home/ubuntu/zikr/content/episodes/deep-power-ancient-egypt-en.md';
 const content = fs.readFileSync(file, 'utf8');
 const { data, content: markdown } = matter(content);
 

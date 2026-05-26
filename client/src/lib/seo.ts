@@ -184,7 +184,7 @@ export const keywords = {
       "documentary",
       "deep history",
       "lost civilizations",
-      "hidden narratives",
+      "ZIKR | ذِكرٌ",
     ],
     egypt: [
       "ancient egypt",
