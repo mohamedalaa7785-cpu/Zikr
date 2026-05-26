@@ -31,3 +31,24 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
 
 export const supabaseServerAnonRequest = <T>(path: string, init?: RequestInit) => serverRequest<T>(path, init, false);
 export const supabaseServerAdminRequest = <T>(path: string, init?: RequestInit) => serverRequest<T>(path, init, true);
+
+export async function getSupabaseUser() {
+  const token = await getServerSessionToken();
+  if (!token) return null;
+
+  type AuthUserResponse = { id: string; email?: string };
+  return serverRequest<AuthUserResponse>(
+    '/auth/v1/user',
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+    false,
+  );
+}
+
+export async function assertSupabaseConnection() {
+  const status = await supabaseServerAnonRequest<{ version: string }>('/rest/v1/');
+  return Boolean(status);
+}

@@ -16,5 +16,15 @@ export function createBrowserSupabaseClient() {
     return res.json() as Promise<T>;
   };
 
-  return { request };
+  const healthcheck = () => request<Record<string, unknown>>('/rest/v1/');
+
+  const signInWithOAuth = async ({ provider, options }: { provider: 'google'; options?: { redirectTo?: string } }) => {
+    const redirectTo = options?.redirectTo;
+    const params = new URLSearchParams({ provider });
+    if (redirectTo) params.set('redirect_to', redirectTo);
+    window.location.href = `${NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize?${params.toString()}`;
+    return { data: null, error: null };
+  };
+
+  return { request, healthcheck, auth: { signInWithOAuth } };
 }
