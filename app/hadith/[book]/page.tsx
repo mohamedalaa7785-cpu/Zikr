@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
-export default async function HadithBookPage({ params }: { params: Promise<{ book: string }> }) {
-  const { book } = await params;
+export default async function HadithBookPage({ params }: { params: { book: string } }) {
+  const { book } = params;
   return (
     <main className="mx-auto max-w-6xl px-4 py-16 text-zikr-text">
       <h1 className="text-4xl font-bold text-zikr-gold">كتاب {book}</h1>

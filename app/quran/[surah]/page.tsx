@@ -1,5 +1,5 @@
-export default async function SurahPage({ params }: { params: Promise<{ surah: string }> }) {
-  const { surah } = await params;
+export default async function SurahPage({ params }: { params: { surah: string } }) {
+  const { surah } = params;
   return (
     <main className="mx-auto max-w-6xl px-4 py-16 text-zikr-text">
       <h1 className="text-4xl font-bold text-zikr-gold">سورة رقم {surah}</h1>
