@@ -1,12 +1,26 @@
 import type { MetadataRoute } from 'next';
 import { hadithBooks, hadiths, surahs } from '@/lib/data/content';
+import { siteConfig, staticRoutes } from '@/lib/site';
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base='https://zikr.app';
-  const routes=['','/quran','/hadith','/stories','/scholars','/prayer','/adhkar','/search'];
+  const now = new Date();
+
   return [
-    ...routes.map((r)=>({url:`${base}${r}`,lastModified:new Date()})),
-    ...surahs.map((s)=>({url:`${base}/quran/${s.id}`,lastModified:new Date()})),
-    ...hadithBooks.map((b)=>({url:`${base}/hadith/${b.slug}`,lastModified:new Date()})),
-    ...hadiths.map((h)=>({url:`${base}/hadith/${hadithBooks[0].slug}/${h.hadithNumber}`,lastModified:new Date()})),
+    ...staticRoutes.map((route) => ({
+      url: `${siteConfig.url}${route}`,
+      lastModified: now,
+    })),
+    ...surahs.map((surah) => ({
+      url: `${siteConfig.url}/quran/${surah.id}`,
+      lastModified: now,
+    })),
+    ...hadithBooks.map((book) => ({
+      url: `${siteConfig.url}/hadith/${book.slug}`,
+      lastModified: now,
+    })),
+    ...hadiths.map((hadith) => ({
+      url: `${siteConfig.url}/hadith/${hadithBooks[0].slug}/${hadith.hadithNumber}`,
+      lastModified: now,
+    })),
   ];
 }
