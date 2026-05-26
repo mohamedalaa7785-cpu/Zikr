@@ -1,16 +1,41 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SiteShell } from '@/components/layout/site-shell';
+import { defaultOgImage, siteConfig } from '@/lib/site';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://zikr.app'),
-  title: { default: 'ZIKR | ذِكرٌ', template: '%s | ZIKR' },
-  description: 'منصة روحانية تجمع القرآن والحديث والقصص والعلم في تجربة حديثة.',
-  alternates: { canonical: '/' },
-  openGraph: { title: 'ZIKR | ذِكرٌ', description: 'منصة روحانية حديثة.', type: 'website', locale: 'ar_SA' },
-  twitter: { card: 'summary_large_image', title: 'ZIKR | ذِكرٌ', description: 'منصة روحانية حديثة.' }
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.shortName}`,
+  },
+  description: siteConfig.description,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: siteConfig.name,
+    description: siteConfig.description,
+    type: 'website',
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: siteConfig.shortName,
+    images: [{ url: defaultOgImage }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: [defaultOgImage],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang='ar' dir='rtl'><body className='font-arabic antialiased'><SiteShell>{children}</SiteShell></body></html>;
+  return (
+    <html lang='ar' dir={siteConfig.dir}>
+      <body className='font-arabic antialiased'>
+        <SiteShell>{children}</SiteShell>
+      </body>
+    </html>
+  );
 }
