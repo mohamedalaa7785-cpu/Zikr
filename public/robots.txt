@@ -1,0 +1,13 @@
+# ZIKR | ذِكرٌ - Islamic Platform
+
+User-agent: *
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
+Allow: /
+
+Sitemap: https://zikr.app/sitemap.xml
+
+# Delay for bots
+Crawl-delay: 1
+Request-rate: 1/1s

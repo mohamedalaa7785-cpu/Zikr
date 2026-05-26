@@ -1,3 +1,4 @@
+ codex/perform-complete-schema-synchronization-audit
 import {
   boolean,
   integer,
@@ -10,6 +11,8 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { boolean, integer, jsonb, pgEnum, pgTable, text, timestamp, unique, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+ main
 
 export const roleEnum = pgEnum('role', ['user', 'admin']);
 export const favoriteItemTypeEnum = pgEnum('favorite_item_type', ['quran', 'hadith', 'story', 'scholar', 'dua']);
@@ -61,6 +64,10 @@ export const quranSurahs = pgTable('quran_surahs', {
   revelationPlace: text('revelation_place').notNull(),
   order: integer('order').notNull(),
   slug: text('slug').notNull().unique(),
+ codex/perform-complete-schema-synchronization-audit
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+ main
 });
 
 export const quranAyahs = pgTable('quran_ayahs', {
@@ -74,8 +81,15 @@ export const quranAyahs = pgTable('quran_ayahs', {
   hizb: integer('hizb'),
   rub: integer('rub'),
   sajda: boolean('sajda').default(false),
+ codex/perform-complete-schema-synchronization-audit
 }, (t) => ({
   surahAyahUnique: unique().on(t.surahId, t.ayahNumber),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  surahAyahUnique: unique().on(t.surahId, t.ayahNumber),
+  surahIdIdx: unique().on(t.surahId),
+ main
 }));
 
 export const quranTafsir = pgTable('quran_tafsir', {
@@ -84,8 +98,15 @@ export const quranTafsir = pgTable('quran_tafsir', {
   ayahNumber: integer('ayah_number').notNull(),
   source: text('source').notNull(),
   text: text('text').notNull(),
+ codex/perform-complete-schema-synchronization-audit
 }, (t) => ({
   uniquePerSource: unique().on(t.surahId, t.ayahNumber, t.source),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  uniquePerSource: unique().on(t.surahId, t.ayahNumber, t.source),
+  surahIdIdx: unique().on(t.surahId),
+ main
 }));
 
 export const quranReciters = pgTable('quran_reciters', {
@@ -95,6 +116,10 @@ export const quranReciters = pgTable('quran_reciters', {
   code: text('code').notNull().unique(),
   style: text('style'),
   baseUrlTemplate: text('base_url_template').notNull(),
+ codex/perform-complete-schema-synchronization-audit
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+ main
 });
 
 export const hadithBooks = pgTable('hadith_books', {
@@ -103,6 +128,10 @@ export const hadithBooks = pgTable('hadith_books', {
   nameAr: text('name_ar').notNull(),
   nameEn: text('name_en'),
   source: text('source').notNull(),
+ codex/perform-complete-schema-synchronization-audit
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+ main
 });
 
 export const hadiths = pgTable('hadiths', {
@@ -114,8 +143,15 @@ export const hadiths = pgTable('hadiths', {
   grade: text('grade'),
   chapter: text('chapter'),
   ref: text('ref'),
+ codex/perform-complete-schema-synchronization-audit
 }, (t) => ({
   uniqueByBookAndNumber: unique().on(t.bookId, t.hadithNumber),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  uniqueByBookAndNumber: unique().on(t.bookId, t.hadithNumber),
+  bookIdIdx: unique().on(t.bookId),
+ main
 }));
 
 export const hadithExplanations = pgTable('hadith_explanations', {
@@ -123,6 +159,10 @@ export const hadithExplanations = pgTable('hadith_explanations', {
   hadithId: uuid('hadith_id').notNull().references(() => hadiths.id, { onDelete: 'cascade' }),
   source: text('source').notNull(),
   text: text('text').notNull(),
+ codex/perform-complete-schema-synchronization-audit
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+ main
 });
 
 export const scholars = pgTable('scholars', {
@@ -135,9 +175,15 @@ export const scholars = pgTable('scholars', {
   thumbnailUrl: text('thumbnail_url'),
   websiteUrl: text('website_url'),
   youtubeUrl: text('youtube_url'),
+ codex/perform-complete-schema-synchronization-audit
+});
+  published: boolean('published').notNull().default(true),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-
+ main
 export const stories = pgTable('stories', {
   id: uuid('id').defaultRandom().primaryKey(),
   slug: text('slug').notNull().unique(),
@@ -145,7 +191,15 @@ export const stories = pgTable('stories', {
   summary: text('summary').notNull(),
   category: text('category').notNull(),
   published: boolean('published').notNull().default(true),
+ codex/perform-complete-schema-synchronization-audit
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+  thumbnailUrl: text('thumbnail_url'),
+  videoUrl: text('video_url'),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+ main
