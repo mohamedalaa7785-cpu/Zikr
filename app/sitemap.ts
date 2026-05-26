@@ -1,13 +1,12 @@
 import type { MetadataRoute } from 'next';
-
+import { hadithBooks, hadiths, surahs } from '@/lib/data/content';
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://zikr-platform.vercel.app';
-  const now = new Date();
-
+  const base='https://zikr.app';
+  const routes=['','/quran','/hadith','/stories','/scholars','/prayer','/adhkar','/search'];
   return [
-    { url: `${base}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: `${base}/episodes`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${base}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${base}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    ...routes.map((r)=>({url:`${base}${r}`,lastModified:new Date()})),
+    ...surahs.map((s)=>({url:`${base}/quran/${s.id}`,lastModified:new Date()})),
+    ...hadithBooks.map((b)=>({url:`${base}/hadith/${b.slug}`,lastModified:new Date()})),
+    ...hadiths.map((h)=>({url:`${base}/hadith/${hadithBooks[0].slug}/${h.hadithNumber}`,lastModified:new Date()})),
   ];
 }

@@ -1,14 +1,2 @@
 import type { MetadataRoute } from 'next';
-
-export default function manifest(): MetadataRoute.Manifest {
-  return {
-    name: 'ZIKR | ذِكرٌ',
-    short_name: 'ZIKR',
-    description: 'Cinematic Islamic platform foundation.',
-    start_url: '/',
-    display: 'standalone',
-    background_color: '#020203',
-    theme_color: '#0d1b2a',
-    icons: [{ src: '/zikr-favicon.svg', sizes: 'any', type: 'image/svg+xml' }],
-  };
-}
+export default function manifest(): MetadataRoute.Manifest {return {name:'ZIKR | ذِكرٌ',short_name:'ZIKR',description:'منصة روحانية حديثة',start_url:'/',display:'standalone',background_color:'#072E2A',theme_color:'#0E4B45',lang:'ar',dir:'rtl',icons:[{src:'/icons/icon-192.svg',sizes:'192x192',type:'image/svg+xml'},{src:'/icons/icon-512.svg',sizes:'512x512',type:'image/svg+xml'}]};}
