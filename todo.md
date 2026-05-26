@@ -1,4 +1,4 @@
-# Hidden Narratives - Project TODO
+# ZIKR | ذِكرٌ - Project TODO
 
 ## Phase 1: Audit & Planning
 - [x] Audit existing repository structure

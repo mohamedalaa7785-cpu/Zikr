@@ -2,9 +2,9 @@ import Link from 'next/link';
 
 const nav = [
   { href: '/', label: 'Home' },
-  { href: '/episodes', label: 'Quran Preview' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/quran', label: 'القرآن' },
+  { href: '/hadith', label: 'الحديث' },
+  { href: '/scholars', label: 'العلماء' },
 ];
 
 export function SiteShell({ children }: { children: React.ReactNode }) {

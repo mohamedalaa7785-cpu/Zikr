@@ -35,7 +35,7 @@ function rateLimited(ip: string) {
 }
 
 function signToken(email: string, language: string) {
-  const secret = process.env.SUBSCRIBE_TOKEN_SECRET || process.env.SESSION_SECRET || "hidden-narratives-secret";
+  const secret = process.env.SUBSCRIBE_TOKEN_SECRET || process.env.SESSION_SECRET || "zikr-secret";
   return createHmac("sha256", secret).update(`${email}:${language}:${Date.now()}`).digest("hex");
 }
 

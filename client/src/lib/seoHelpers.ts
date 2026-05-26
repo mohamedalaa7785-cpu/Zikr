@@ -82,7 +82,7 @@ export function generateOrganizationSchema(): object {
     sameAs: [
       "https://www.youtube.com/channel/YOUR_CHANNEL_ID",
       "https://www.facebook.com/hiddennarratives",
-      "https://www.linkedin.com/company/hidden-narratives",
+      "https://www.linkedin.com/company/zikr",
     ],
     contactPoint: {
       "@type": "ContactPoint",

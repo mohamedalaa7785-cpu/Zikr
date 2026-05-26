@@ -1,48 +1,7 @@
 {
-  "version": 2,
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
   "buildCommand": "pnpm build",
   "devCommand": "pnpm dev",
-  "installCommand": "pnpm install",
-  "framework": null,
-  "functions": {
-    "server/_core/index.ts": {
-      "runtime": "nodejs18.x",
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/trpc/(.*)",
-      "dest": "/server/_core/index.ts",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
-    },
-    {
-      "src": "/sitemap.xml",
-      "dest": "/server/_core/index.ts"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/server/_core/index.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/index.html",
-      "status": 200
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "DATABASE_URL": "@DATABASE_URL",
-    "JWT_SECRET": "@JWT_SECRET",
-    "VITE_APP_ID": "@VITE_APP_ID",
-    "OAUTH_SERVER_URL": "@OAUTH_SERVER_URL",
-    "VITE_OAUTH_PORTAL_URL": "@VITE_OAUTH_PORTAL_URL",
-    "OWNER_OPEN_ID": "@OWNER_OPEN_ID",
-    "OWNER_NAME": "@OWNER_NAME",
-    "BUILT_IN_FORGE_API_URL": "@BUILT_IN_FORGE_API_URL",
-    "BUILT_IN_FORGE_API_KEY": "@BUILT_IN_FORGE_API_KEY",
-    "VITE_FRONTEND_FORGE_API_URL": "@VITE_FRONTEND_FORGE_API_URL",
-    "VITE_FRONTEND_FORGE_API_KEY": "@VITE_FRONTEND_FORGE_API_KEY"
-  }
+  "installCommand": "pnpm install"
 }
