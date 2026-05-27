@@ -81,7 +81,8 @@ See `.env.example` for all required environment variables. Key variables:
 - `DATABASE_URL`: PostgreSQL connection string
 - `SUPABASE_URL` & `SUPABASE_ANON_KEY`: Supabase configuration
 - `AWS_*`: S3 storage configuration
-- `OPENAI_API_KEY`: For AI assistant features
+- `GEMINI_API_KEY`: For AI assistant features via Google Gemini
+- `GEMINI_MODEL`: Optional model override (default `gemini-1.5-flash`)
 
 ### 📁 Project Structure
 
