@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getPublicEnv } from '@/lib/env';
 import { supabaseServerAnonRequest } from '@/lib/supabase/server';
+import { siteConfig } from '@/lib/site';
 
 async function supabaseAuth(path: string, body: Record<string, unknown>) {
   const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = getPublicEnv();
@@ -22,7 +23,7 @@ export async function loginAction(formData: FormData) {
   const password = String(formData.get('password') || '');
   const data = await supabaseAuth('token?grant_type=password', { email, password });
   const store = await cookies();
-  if (data.access_token) store.set('sb_access_token', data.access_token, { httpOnly: true, secure: true, path: '/' });
+  if (data.access_token) store.set('sb_access_token', data.access_token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
   redirect('/profile');
 }
 
@@ -35,8 +36,7 @@ export async function registerAction(formData: FormData) {
 
 export async function forgotAction(formData: FormData) {
   const email = String(formData.get('email') || '');
-  const { NEXT_PUBLIC_SUPABASE_URL } = getPublicEnv();
-  await supabaseAuth('recover', { email, redirect_to: `${NEXT_PUBLIC_SUPABASE_URL}/auth/callback` });
+  await supabaseAuth('recover', { email, redirect_to: `${siteConfig.url}/auth/callback` });
   redirect('/auth/login');
 }
 
@@ -49,7 +49,7 @@ export async function logoutAction() {
 export async function setSessionAction(accessToken: string) {
   if (!accessToken) throw new Error('رمز الجلسة مفقود.');
   const store = await cookies();
-  store.set('sb_access_token', accessToken, { httpOnly: true, secure: true, path: '/' });
+  store.set('sb_access_token', accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
 }
 
 export async function updateProfileAction(formData: FormData) {

@@ -32,6 +32,7 @@ export async function getStories(): Promise<Story[]> {
 
     const response = await supabaseServerAnonRequest<Story[]>(
       '/rest/v1/stories?select=id,slug,title,summary,category,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc',
+      { cache: 'force-cache', next: { revalidate: 1800 } },
     );
 
     // Type validation

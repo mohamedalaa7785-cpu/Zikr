@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils';
 type BackgroundTheme = 'islamic' | 'dark' | 'serenity' | 'night';
 
 const BACKGROUNDS: Record<BackgroundTheme, string> = {
-  islamic: '/backgrounds/islamic/islamic-pattern.png',
-  dark: '/backgrounds/dark/dark-bg.png',
-  serenity: '/backgrounds/serenity/serenity-bg.png',
-  night: '/backgrounds/night/night-sky.png',
+  islamic: '/backgrounds/islamic/islamic-pattern.svg',
+  dark: '/backgrounds/dark/dark-bg.svg',
+  serenity: '/backgrounds/serenity/serenity-bg.svg',
+  night: '/backgrounds/night/night-sky.svg',
 };
 
 interface BackgroundImageProps {
