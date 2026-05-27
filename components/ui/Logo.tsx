@@ -8,8 +8,8 @@ type LogoVariant = 'default' | 'gold';
 type LogoTheme = 'light' | 'dark' | 'auto';
 
 const DEFAULT_LOGOS: Record<LogoVariant, string> = {
-  default: '/branding/logos/zikr-logo.png',
-  gold: '/branding/logos/zikr-gold.png',
+  default: '/branding/logo-gold.png',
+  gold: '/branding/logo-gold.png',
 };
 
 const FALLBACK_LOGO = '/placeholders/videos/video-placeholder.png';

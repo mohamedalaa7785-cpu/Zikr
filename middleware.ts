@@ -15,10 +15,18 @@ export function middleware(request: NextRequest) {
 
   // Validate token existence and validity
   if (!token || !isTokenValid(token)) {
+    // Check if we are already on the login page to avoid loops
+    if (pathname === '/auth/login') return NextResponse.next();
+
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('next', pathname);
     const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete('sb_access_token'); // Clear invalid token
+    
+    // Only delete cookie if it actually exists but is invalid
+    if (token) {
+      response.cookies.delete('sb_access_token');
+    }
+    
     return response;
   }
 

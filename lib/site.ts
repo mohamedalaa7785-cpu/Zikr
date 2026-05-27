@@ -2,7 +2,7 @@ export const siteConfig = {
   name: 'ZIKR | ذِكرٌ',
   shortName: 'ZIKR',
   description: 'منصة روحانية تجمع القرآن والحديث والقصص والعلم في تجربة حديثة.',
-  url: 'https://zikr.app',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://zikr.app',
   locale: 'ar_SA',
   dir: 'rtl' as const,
 };

@@ -15,6 +15,10 @@ export const roleEnum = pgEnum('role', ['user', 'admin']);
 export const favoriteItemTypeEnum = pgEnum('favorite_item_type', ['quran', 'hadith', 'story', 'scholar', 'dua']);
 export const progressScopeEnum = pgEnum('progress_scope', ['quran', 'hadith', 'stories']);
 export const reminderTypeEnum = pgEnum('reminder_type', ['prayer', 'quran', 'adhkar', 'fasting', 'zakat']);
+export const categoryEnum = pgEnum('category', ['dark', 'romantic', 'psychological']);
+export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'approved', 'rejected']);
+export const planEnum = pgEnum('plan', ['free', 'pro', 'premium']);
+export const statusEnum = pgEnum('status', ['pending', 'completed', 'failed']);
 
 export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey(),
@@ -57,8 +61,9 @@ export const quranSurahs = pgTable('quran_surahs', {
   id: integer('id').primaryKey(),
   nameAr: text('name_ar').notNull(),
   nameEn: text('name_en').notNull(),
-  ayahCount: integer('ayah_count').notNull(),
-  revelationPlace: text('revelation_place').notNull(),
+  nameTranslation: text('name_translation'),
+  revelationPlace: text('revelation_place'),
+  ayahsCount: integer('ayahs_count').notNull(),
   order: integer('order').notNull(),
   slug: text('slug').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -69,8 +74,11 @@ export const quranAyahs = pgTable('quran_ayahs', {
   id: uuid('id').defaultRandom().primaryKey(),
   surahId: integer('surah_id').notNull().references(() => quranSurahs.id, { onDelete: 'cascade' }),
   ayahNumber: integer('ayah_number').notNull(),
-  textUthmani: text('text_uthmani').notNull(),
-  textSimple: text('text_simple').notNull(),
+  textAr: text('text_ar').notNull(),
+  textEn: text('text_en'),
+  audioUrl: text('audio_url'),
+  textUthmani: text('text_uthmani'),
+  textSimple: text('text_simple'),
   page: integer('page'),
   juz: integer('juz'),
   hizb: integer('hizb'),
@@ -86,21 +94,22 @@ export const quranTafsir = pgTable('quran_tafsir', {
   id: uuid('id').defaultRandom().primaryKey(),
   surahId: integer('surah_id').notNull().references(() => quranSurahs.id, { onDelete: 'cascade' }),
   ayahNumber: integer('ayah_number').notNull(),
-  source: text('source').notNull(),
-  text: text('text').notNull(),
+  tafsirAr: text('tafsir_ar').notNull(),
+  tafsirEn: text('tafsir_en'),
+  author: text('author'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({
-  uniquePerSource: unique().on(t.surahId, t.ayahNumber, t.source),
+  uniquePerSurahAyahAuthor: unique().on(t.surahId, t.ayahNumber, t.author),
 }));
 
 export const quranReciters = pgTable('quran_reciters', {
   id: uuid('id').defaultRandom().primaryKey(),
   nameAr: text('name_ar').notNull(),
-  nameEn: text('name_en'),
-  code: text('code').notNull().unique(),
+  nameEn: text('name_en').notNull(),
   style: text('style'),
-  baseUrlTemplate: text('base_url_template').notNull(),
+  thumbnailUrl: text('thumbnail_url'),
+  metadata: jsonb('metadata').default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -109,8 +118,10 @@ export const hadithBooks = pgTable('hadith_books', {
   id: uuid('id').defaultRandom().primaryKey(),
   slug: text('slug').notNull().unique(),
   nameAr: text('name_ar').notNull(),
-  nameEn: text('name_en'),
-  source: text('source').notNull(),
+  nameEn: text('name_en').notNull(),
+  authorAr: text('author_ar'),
+  authorEn: text('author_en'),
+  hadithCount: integer('hadith_count'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -120,10 +131,12 @@ export const hadiths = pgTable('hadiths', {
   bookId: uuid('book_id').notNull().references(() => hadithBooks.id, { onDelete: 'cascade' }),
   hadithNumber: text('hadith_number').notNull(),
   textAr: text('text_ar').notNull(),
-  narrator: text('narrator'),
-  grade: text('grade'),
-  chapter: text('chapter'),
-  ref: text('ref'),
+  textEn: text('text_en'),
+  narratorAr: text('narrator_ar'),
+  narratorEn: text('narrator_en'),
+  gradeAr: text('grade_ar'),
+  gradeEn: text('grade_en'),
+  published: boolean('published').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({
@@ -133,8 +146,9 @@ export const hadiths = pgTable('hadiths', {
 export const hadithExplanations = pgTable('hadith_explanations', {
   id: uuid('id').defaultRandom().primaryKey(),
   hadithId: uuid('hadith_id').notNull().references(() => hadiths.id, { onDelete: 'cascade' }),
-  source: text('source').notNull(),
-  text: text('text').notNull(),
+  explanationAr: text('explanation_ar').notNull(),
+  explanationEn: text('explanation_en'),
+  author: text('author'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -158,13 +172,53 @@ export const scholars = pgTable('scholars', {
 export const stories = pgTable('stories', {
   id: uuid('id').defaultRandom().primaryKey(),
   slug: text('slug').notNull().unique(),
+  userId: uuid('user_id'),
   title: text('title').notNull(),
-  summary: text('summary').notNull(),
+  content: text('content').notNull(),
+  mood: text('mood'),
   category: text('category').notNull(),
-  published: boolean('published').notNull().default(true),
-  thumbnailUrl: text('thumbnail_url'),
-  videoUrl: text('video_url'),
+  published: boolean('published').default(true),
   metadata: jsonb('metadata').default({}),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const userSubscriptions = pgTable('user_subscriptions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => profiles.id),
+  plan: planEnum('plan').notNull().default('free'),
+  credits: integer('credits').notNull().default(20),
+  expiresAt: timestamp('expires_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const payments = pgTable('payments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id'),
+  amount: integer('amount').notNull(),
+  method: text('method').notNull(),
+  referenceNote: text('reference_note').notNull(),
+  screenshotUrl: text('screenshot_url'),
+  status: paymentStatusEnum('status').notNull().default('pending'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const researchRequests = pgTable('research_requests', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id'),
+  title: text('title').notNull(),
+  field: text('field').notNull(),
+  pages: integer('pages').notNull().default(3),
+  type: text('type').notNull(),
+  language: text('language').notNull().default('en'),
+  status: statusEnum('status').notNull().default('pending'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const generatedResearch = pgTable('generated_research', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  requestId: uuid('request_id').references(() => researchRequests.id),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });

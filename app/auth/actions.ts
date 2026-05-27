@@ -36,7 +36,8 @@ export async function registerAction(formData: FormData) {
 
 export async function forgotAction(formData: FormData) {
   const email = String(formData.get('email') || '');
-  await supabaseAuth('recover', { email, redirect_to: `${siteConfig.url}/auth/callback` });
+  const { NEXT_PUBLIC_SITE_URL } = getPublicEnv();
+  await supabaseAuth('recover', { email, redirect_to: `${NEXT_PUBLIC_SITE_URL}/auth/callback` });
   redirect('/auth/login');
 }
 
@@ -49,7 +50,15 @@ export async function logoutAction() {
 export async function setSessionAction(accessToken: string) {
   if (!accessToken) throw new Error('رمز الجلسة مفقود.');
   const store = await cookies();
-  store.set('sb_access_token', accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+  // Set expiration to 7 days for better persistence
+  const sevenDays = 60 * 60 * 24 * 7;
+  store.set('sb_access_token', accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: sevenDays,
+  });
 }
 
 export async function updateProfileAction(formData: FormData) {
