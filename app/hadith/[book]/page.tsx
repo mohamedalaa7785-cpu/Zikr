@@ -9,5 +9,5 @@ export default async function BookPage({ params }: { params: Promise<{ book: str
   const book = hadithBooks.find((b) => b.slug === p.book);
   if (!book) return notFound();
   const rows = hadiths.filter((h) => h.bookId === book.id);
-  return <Container className='py-12 space-y-4'><h1 className='text-3xl text-brand-gold'>{book.nameAr}</h1>{rows.map((h)=><Card key={h.id}><Link href={`/hadith/${book.slug}/${h.hadithNumber}`}>حديث رقم {h.hadithNumber}</Link><p className='arabic-muted mt-2 line-clamp-2'>{h.textAr}</p></Card>)}</Container>;
+  return <Container className='py-12 space-y-4'><h1 className='text-3xl text-brand-gold'>{book.nameAr}</h1>{rows.length===0?<Card className='arabic-muted'>لا توجد أحاديث متاحة لهذا الكتاب الآن.</Card>:rows.map((h)=><Card key={h.id}><Link href={`/hadith/${book.slug}/${h.hadithNumber}`}>حديث رقم {h.hadithNumber}</Link><p className='arabic-muted mt-2 line-clamp-2'>{h.textAr}</p></Card>)}</Container>;
 }

@@ -19,7 +19,7 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
       Authorization: `Bearer ${key}`,
       ...(init?.headers || {}),
     },
-    cache: 'no-store',
+    cache: init?.cache ?? 'no-store',
   });
 
   if (!res.ok) {

@@ -41,6 +41,7 @@ export async function getAllScholars(): Promise<Scholar[]> {
 
     const response = await supabaseServerAnonRequest<Scholar[]>(
       '/rest/v1/scholars?select=*&published=eq.true&limit=100&order=created_at.desc',
+      { cache: 'force-cache', next: { revalidate: 3600 } },
     );
 
     // Type validation
@@ -85,6 +86,7 @@ export async function getScholarBySlug(slug: string): Promise<Scholar | null> {
   try {
     const response = await supabaseServerAnonRequest<Scholar[]>(
       `/rest/v1/scholars?slug=eq.${encodeURIComponent(slug)}&published=eq.true&limit=1`,
+      { cache: 'force-cache', next: { revalidate: 3600 } },
     );
 
     if (!Array.isArray(response) || response.length === 0) {

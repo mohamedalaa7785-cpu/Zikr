@@ -4,6 +4,8 @@ import { getAllScholars } from '@/lib/services/scholars';
 import { getHadithBooks } from '@/lib/services/hadith';
 import { getStories } from '@/lib/services/stories';
 
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://zikr.app';
   const staticRoutes = [
@@ -40,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       })),
       ...hadithBooks.map((book: any) => ({
-        url: `${baseUrl}/hadith/${book.id}`,
+        url: `${baseUrl}/hadith/${book.slug ?? book.id}`,
         lastModified: new Date(),
         changeFrequency: 'monthly' as const,
         priority: 0.7,
