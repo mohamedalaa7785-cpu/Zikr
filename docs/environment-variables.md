@@ -21,7 +21,8 @@ The following environment variables are optional and are used for integrating wi
 
 | Variable Name             | Description                                                                 | Type     |
 | :------------------------ | :-------------------------------------------------------------------------- | :------- |
-| `OPENAI_API_KEY`                | API key for OpenAI services.                                                | Server   |
+| `GEMINI_API_KEY`                | API key for Google Gemini services.                                         | Server   |
+| `GEMINI_MODEL`                  | Optional Gemini model override (default: `gemini-1.5-flash`).               | Server   |
 | `AWS_S3_ACCESS_KEY_ID`          | AWS S3 access key ID for storage.                                           | Server   |
 | `AWS_S3_SECRET_ACCESS_KEY`      | AWS S3 secret access key for storage.                                       | Server   |
 | `AWS_S3_BUCKET_NAME`            | AWS S3 bucket name for storage.                                             | Server   |
