@@ -1,20 +1,67 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { BookmarkButton } from '@/components/quran/bookmark-button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
-import { hadithBooks, hadiths } from '@/lib/data/content';
+import { getHadithByNumber } from '@/lib/services/hadith';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, Share2 } from 'lucide-react';
+import Link from 'next/link';
 
-export async function generateMetadata({ params }: { params: Promise<{ book: string; id: string }> }): Promise<Metadata> {
-  const p = await params;
-  return { title: `حديث ${p.id}`, description: 'شرح الحديث' };
+interface HadithDetailPageProps {
+  params: Promise<{ book: string; id: string }>;
 }
 
-export default async function HadithDetail({ params }: { params: Promise<{ book: string; id: string }> }) {
-  const p = await params;
-  const book = hadithBooks.find((b) => b.slug === p.book);
-  if (!book) return notFound();
-  const h = hadiths.find((x) => x.bookId === book.id && x.hadithNumber === p.id);
+export async function generateMetadata({ params }: HadithDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  return { title: `حديث رقم ${id}`, description: 'قراءة الحديث النبوي الشريف' };
+}
+
+export default async function HadithDetail({ params }: HadithDetailPageProps) {
+  const { book: bookSlug, id: hadithNumber } = await params;
+  const num = parseInt(hadithNumber, 10);
+  
+  if (isNaN(num)) return notFound();
+  
+  const h = await getHadithByNumber(bookSlug, num);
+  
   if (!h) return notFound();
-  return <Container className='py-12'><Card><h1 className='text-2xl text-brand-gold'>{book.nameAr} - {h.hadithNumber}</h1><p className='mt-4 text-xl leading-loose'>{h.textAr}</p><div className='mt-4 grid gap-2 arabic-muted'><p>الراوي: {h.narrator}</p><p>الدرجة: {h.grade}</p><p>الباب: {h.chapter}</p></div><div className='mt-4 flex gap-4'><BookmarkButton keyRef={`hadith:${h.ref}`}/><a className='text-sm text-brand-gold' href={`https://example.com/hadith/${h.ref}`}>مشاركة</a></div></Card></Container>;
+
+  return (
+    <Container className='py-12 max-w-4xl'>
+      <Link href={`/hadith/${bookSlug}`}>
+        <Button variant="ghost" className="mb-6">
+          <ChevronLeft className="ml-2 h-4 w-4" />
+          العودة للكتاب
+        </Button>
+      </Link>
+
+      <Card className="shadow-lg">
+        <CardHeader className="border-b bg-muted/30">
+          <CardTitle className='text-2xl text-brand-gold text-center'>حديث رقم {h.number}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <div className="space-y-8">
+            <p className='text-3xl leading-relaxed text-right font-arabic' dir="rtl">
+              {h.arab}
+            </p>
+            
+            <div className='flex items-center justify-between pt-6 border-t'>
+              <div className="flex gap-4">
+                <BookmarkButton keyRef={`hadith:${bookSlug}:${h.number}`} />
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Share2 className="h-4 w-4" />
+                  مشاركة
+                </Button>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                المصدر: {bookSlug}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Container>
+  );
 }

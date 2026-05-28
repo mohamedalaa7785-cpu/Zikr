@@ -2,13 +2,19 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BookmarkButton } from '@/components/quran/bookmark-button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
-import { getAyah, getSurahById } from '@/lib/services/quran';
+import { getAyah, getSurahById, getTafsir } from '@/lib/services/quran';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, Share2 } from 'lucide-react';
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: Promise<{ surah: string; ayah: string }> }): Promise<Metadata> {
+interface AyahPageProps {
+  params: Promise<{ surah: string; ayah: string }>;
+}
+
+export async function generateMetadata({ params }: AyahPageProps): Promise<Metadata> {
   const p = await params;
   const surahId = Number.parseInt(p.surah, 10);
   const ayahId = Number.parseInt(p.ayah, 10);
@@ -17,40 +23,81 @@ export async function generateMetadata({ params }: { params: Promise<{ surah: st
 
   return {
     title: surahData ? `سورة ${surahData.surah.name} - الآية ${ayahId}` : `الآية ${p.ayah}`,
-    description: 'قراءة الآية والمشاركة',
+    description: 'قراءة الآية والتفسير والمشاركة',
     alternates: { canonical: `/quran/${p.surah}/${p.ayah}` },
   };
 }
 
-export default async function AyahPage({ params }: { params: Promise<{ surah: string; ayah: string }> }) {
+export default async function AyahPage({ params }: AyahPageProps) {
   const p = await params;
   const surahId = Number.parseInt(p.surah, 10);
   const ayahId = Number.parseInt(p.ayah, 10);
 
   if (Number.isNaN(surahId) || Number.isNaN(ayahId)) return notFound();
 
-  const [surahData, ayah] = await Promise.all([getSurahById(surahId, 'ar'), getAyah(surahId, ayahId, 'ar')]);
+  const [surahData, ayah, tafsir] = await Promise.all([
+    getSurahById(surahId, 'ar'), 
+    getAyah(surahId, ayahId, 'ar'),
+    getTafsir(surahId, ayahId)
+  ]);
 
   if (!surahData || !ayah) return notFound();
 
   return (
-    <Container className='space-y-6 py-12'>
-      <nav className='arabic-muted text-sm'>
-        <Link href='/'>الرئيسية</Link> / <Link href='/quran'>القرآن</Link> /{' '}
-        <Link href={`/quran/${surahData.surah.number}`}>سورة {surahData.surah.name}</Link> / الآية {ayah.numberInSurah}
-      </nav>
-      <Card>
-        <h1 className='text-2xl text-brand-gold'>
-          سورة {surahData.surah.name} — الآية {ayah.numberInSurah}
-        </h1>
-        <p className='mt-4 text-2xl leading-loose'>{ayah.text}</p>
-        <div className='mt-4 flex items-center gap-4'>
-          <BookmarkButton keyRef={`quran:${surahId}:${ayah.numberInSurah}`} />
-          <Link href={`/quran/${surahId}/${ayah.numberInSurah}`} className='text-sm text-brand-gold'>
-            نسخ رابط الآية
-          </Link>
-        </div>
+    <Container className='space-y-8 py-12 max-w-4xl'>
+      <div className="flex justify-between items-center">
+        <nav className='arabic-muted text-sm'>
+          <Link href='/'>الرئيسية</Link> / <Link href='/quran'>القرآن</Link> /{' '}
+          <Link href={`/quran/${surahData.surah.number}`}>سورة {surahData.surah.name}</Link> / الآية {ayah.numberInSurah}
+        </nav>
+        <Link href={`/quran/${surahData.surah.number}`}>
+          <Button variant="ghost" size="sm">
+            <ChevronLeft className="ml-2 h-4 w-4" />
+            العودة للسورة
+          </Button>
+        </Link>
+      </div>
+
+      <Card className="shadow-lg border-brand-gold/20">
+        <CardHeader className="text-center bg-muted/30 border-b">
+          <CardTitle className="text-2xl text-brand-gold">
+            سورة {surahData.surah.name} — الآية {ayah.numberInSurah}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-10">
+          <p className='text-4xl leading-loose text-right font-arabic' dir="rtl">
+            {ayah.text}
+          </p>
+          
+          <div className='mt-8 flex items-center justify-between pt-6 border-t'>
+            <div className="flex gap-4">
+              <BookmarkButton keyRef={`quran:${surahId}:${ayah.numberInSurah}`} />
+              <Button variant="outline" size="sm" className="gap-2">
+                <Share2 className="h-4 w-4" />
+                مشاركة
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              الجزء {ayah.juz} | الصفحة {ayah.page}
+            </div>
+          </div>
+        </CardContent>
       </Card>
+
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-brand-gold border-r-4 border-brand-gold pr-4">التفسير الميسر</h2>
+        <Card>
+          <CardContent className="p-8">
+            {tafsir ? (
+              <p className="text-xl leading-relaxed text-right arabic-muted" dir="rtl">
+                {tafsir}
+              </p>
+            ) : (
+              <p className="text-center text-muted-foreground italic">جاري تحميل التفسير...</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </Container>
   );
 }

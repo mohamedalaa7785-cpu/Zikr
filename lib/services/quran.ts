@@ -17,6 +17,7 @@ function debugLog(message: string, payload?: unknown) {
 const EDITIONS = {
   ar: 'quran-uthmani',
   en: 'en.asad',
+  tafsir: 'ar.jalalayn',
 } as const;
 
 type Locale = keyof typeof EDITIONS;
@@ -54,6 +55,16 @@ export async function getAyah(surahId: number, ayahId: number, locale: Locale = 
   );
   debugLog('getAyah success', { number: response?.data?.numberInSurah ?? null });
   return response?.data ?? null;
+}
+
+export async function getTafsir(surahId: number, ayahId: number): Promise<string | null> {
+  if (surahId < 1 || surahId > 114 || ayahId < 1) return null;
+
+  debugLog('getTafsir request', { surahId, ayahId });
+  const { data: response } = await safeApiFetch<QuranApiResponse<Ayah>>(
+    `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS.tafsir}`,
+  );
+  return response?.data?.text ?? null;
 }
 
 export async function getJuz(juzId: number, locale: Locale = 'ar'): Promise<Juz | null> {
