@@ -33,7 +33,12 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
     const body = await res.text();
     throw new Error(`Supabase server request failed: ${res.status} ${body}`);
   }
-  return res.json() as Promise<T>;
+  if (res.status === 204) return undefined as T;
+
+  const text = await res.text();
+  if (!text) return undefined as T;
+
+  return JSON.parse(text) as T;
 }
 
 export const supabaseServerAnonRequest = <T>(path: string, init?: RequestInit) => serverRequest<T>(path, init, false);
