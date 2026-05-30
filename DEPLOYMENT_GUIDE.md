@@ -13,7 +13,15 @@ To ensure the project works correctly on production (Vercel) and with Supabase, 
    - `https://your-project-name.vercel.app/auth/callback` (replace with your Vercel URL)
 
 ### Database
-Run the migrations or the SQL scripts in `drizzle/migrations` to ensure all tables (Quran, Hadith, Tafsir, Stories) are created with correct RLS policies.
+Supabase SQL migrations are the single official database migration path for this project. All deployable SQL lives in `supabase/migrations`; the Drizzle schema is kept for application-side schema definitions and optional migration generation only.
+
+Run exactly one database command before deploying:
+
+```bash
+pnpm db:migrate:supabase
+```
+
+Do not use Drizzle `db:push` for deployment; it is intentionally not defined because it would not apply the full Supabase migration history, including RLS policies.
 
 ## 2. Vercel Environment Variables
 

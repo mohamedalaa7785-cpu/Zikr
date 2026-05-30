@@ -108,7 +108,8 @@ zikr/
 │   ├── _core/            # Core server utilities
 │   └── routes/           # API routes
 ├── shared/               # Shared types and utilities
-├── drizzle/              # Database schema and migrations
+├── drizzle/              # Drizzle schema definitions
+├── supabase/migrations/  # Official Supabase SQL migrations
 └── package.json          # Project dependencies
 ```
 
@@ -136,13 +137,15 @@ pnpm build
 
 #### Database Migrations
 
+Supabase SQL migrations are the official migration path:
+
 ```bash
-pnpm db:push
+pnpm db:migrate:supabase
 ```
 
 ### 🗄️ Database Schema
 
-ZIKR uses Drizzle ORM with PostgreSQL. Key tables:
+ZIKR uses Drizzle ORM schema definitions with PostgreSQL, while deployable SQL migrations live in `supabase/migrations`. Key tables:
 
 - **users**: User accounts and authentication
 - **episodes**: Content episodes (legacy compatibility)
@@ -235,17 +238,10 @@ SUPABASE_SERVICE_ROLE_KEY=...
 
 ### Apply migrations
 
-1. Ensure your Drizzle database URL points to Supabase Postgres.
-2. Run:
+Supabase SQL migrations in `supabase/migrations` are the single official database migration path. Ensure your Supabase project is linked, then run exactly one command before deploy:
 
 ```bash
-pnpm db:push
-```
-
-Or execute SQL manually:
-
-```bash
-psql "$DATABASE_URL" -f drizzle/migrations/0002_phase2_auth_foundation.sql
+pnpm db:migrate:supabase
 ```
 
 ### Supabase dashboard steps

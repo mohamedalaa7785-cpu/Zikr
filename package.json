@@ -9,7 +9,7 @@
     "start": "next start",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "db:migrate:supabase": "pnpm dlx supabase db push",
     "lint": "pnpm check"
   },
   "dependencies": {
