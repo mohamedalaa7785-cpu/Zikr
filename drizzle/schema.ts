@@ -20,7 +20,17 @@ export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'approved'
 export const planEnum = pgEnum('plan', ['free', 'pro', 'premium']);
 export const statusEnum = pgEnum('status', ['pending', 'completed', 'failed']);
 
-export const profiles = pgTable('profiles', {
+export const profiles = pgTable("profiles", {
+  // RLS: Users can view and update their own profile
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for all users
+  // Policy: Enable insert for authenticated users
+  // Policy: Enable update for authenticated users on their own profile
+  // Policy: Enable delete for authenticated users on their own profile
+
+  // RLS: Users can view and update their own profile
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').primaryKey(),
   displayName: text('display_name'),
   avatarUrl: text('avatar_url'),
@@ -30,7 +40,17 @@ export const profiles = pgTable('profiles', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const favorites = pgTable('favorites', {
+export const favorites = pgTable("favorites", {
+  // RLS: Users can only manage their own favorites
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for authenticated users on their own favorites
+  // Policy: Enable insert for authenticated users on their own favorites
+  // Policy: Enable update for authenticated users on their own favorites
+  // Policy: Enable delete for authenticated users on their own favorites
+
+  // RLS: Users can only manage their own favorites
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   itemType: favoriteItemTypeEnum('item_type').notNull(),
@@ -38,7 +58,17 @@ export const favorites = pgTable('favorites', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({ uniq: uniqueIndex('favorites_user_item_unique').on(t.userId, t.itemType, t.itemRef) }));
 
-export const readingProgress = pgTable('reading_progress', {
+export const readingProgress = pgTable("reading_progress", {
+  // RLS: Users can only manage their own reading progress
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for authenticated users on their own reading progress
+  // Policy: Enable insert for authenticated users on their own reading progress
+  // Policy: Enable update for authenticated users on their own reading progress
+  // Policy: Enable delete for authenticated users on their own reading progress
+
+  // RLS: Users can only manage their own reading progress
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   scope: progressScopeEnum('scope').notNull(),
@@ -47,7 +77,17 @@ export const readingProgress = pgTable('reading_progress', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({ uniq: uniqueIndex('reading_progress_user_scope_ref_unique').on(t.userId, t.scope, t.ref) }));
 
-export const reminders = pgTable('reminders', {
+export const reminders = pgTable("reminders", {
+  // RLS: Users can only manage their own reminders
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for authenticated users on their own reminders
+  // Policy: Enable insert for authenticated users on their own reminders
+  // Policy: Enable update for authenticated users on their own reminders
+  // Policy: Enable delete for authenticated users on their own reminders
+
+  // RLS: Users can only manage their own reminders
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   type: reminderTypeEnum('type').notNull(),
@@ -174,6 +214,7 @@ export const stories = pgTable('stories', {
   slug: text('slug').notNull().unique(),
   userId: uuid('user_id'),
   title: text('title').notNull(),
+  summary: text('summary'),
   content: text('content').notNull(),
   mood: text('mood'),
   category: text('category').notNull(),
@@ -183,7 +224,17 @@ export const stories = pgTable('stories', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const userSubscriptions = pgTable('user_subscriptions', {
+export const userSubscriptions = pgTable("user_subscriptions", {
+  // RLS: Users can only view and manage their own subscriptions
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for authenticated users on their own subscriptions
+  // Policy: Enable insert for authenticated users on their own subscriptions
+  // Policy: Enable update for authenticated users on their own subscriptions
+  // Policy: Enable delete for authenticated users on their own subscriptions
+
+  // RLS: Users can only view and manage their own subscriptions
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => profiles.id),
   plan: planEnum('plan').notNull().default('free'),
@@ -193,7 +244,17 @@ export const userSubscriptions = pgTable('user_subscriptions', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const payments = pgTable('payments', {
+export const payments = pgTable("payments", {
+  // RLS: Users can only view their own payments
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for authenticated users on their own payments
+  // Policy: Enable insert for authenticated users on their own payments
+  // Policy: Enable update for authenticated users on their own payments
+  // Policy: Enable delete for authenticated users on their own payments
+
+  // RLS: Users can only view their own payments
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id'),
   amount: integer('amount').notNull(),
@@ -204,7 +265,17 @@ export const payments = pgTable('payments', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-export const researchRequests = pgTable('research_requests', {
+export const researchRequests = pgTable("research_requests", {
+  // RLS: Users can only view and manage their own research requests
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for authenticated users on their own research requests
+  // Policy: Enable insert for authenticated users on their own research requests
+  // Policy: Enable update for authenticated users on their own research requests
+  // Policy: Enable delete for authenticated users on their own research requests
+
+  // RLS: Users can only view and manage their own research requests
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id'),
   title: text('title').notNull(),
@@ -216,14 +287,34 @@ export const researchRequests = pgTable('research_requests', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-export const generatedResearch = pgTable('generated_research', {
+export const generatedResearch = pgTable("generated_research", {
+  // RLS: Users can only view their own generated research
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for authenticated users on their own generated research
+  // Policy: Enable insert for authenticated users on their own generated research
+  // Policy: Enable update for authenticated users on their own generated research
+  // Policy: Enable delete for authenticated users on their own generated research
+
+  // RLS: Users can only view their own generated research
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   requestId: uuid('request_id').references(() => researchRequests.id),
   content: text('content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-export const siteSettings = pgTable('site_settings', {
+export const siteSettings = pgTable("site_settings", {
+  // RLS: Only admins can manage site settings
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for all users
+  // Policy: Enable insert for admin users
+  // Policy: Enable update for admin users
+  // Policy: Enable delete for admin users
+
+  // RLS: Only admins can manage site settings
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   key: text('key').notNull().unique(),
   value: jsonb('value').notNull().default({}),
@@ -231,7 +322,17 @@ export const siteSettings = pgTable('site_settings', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const competitions = pgTable('competitions', {
+export const competitions = pgTable("competitions", {
+  // RLS: Public read, admin write
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for all users
+  // Policy: Enable insert for admin users
+  // Policy: Enable update for admin users
+  // Policy: Enable delete for admin users
+
+  // RLS: Public read, admin write
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   title: text('title').notNull(),
   description: text('description'),
@@ -244,7 +345,17 @@ export const competitions = pgTable('competitions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const pinnedMessages = pgTable('pinned_messages', {
+export const pinnedMessages = pgTable("pinned_messages", {
+  // RLS: Public read, admin write
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for all users
+  // Policy: Enable insert for admin users
+  // Policy: Enable update for admin users
+  // Policy: Enable delete for admin users
+
+  // RLS: Public read, admin write
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   title: text('title').notNull(),
   body: text('body').notNull(),
@@ -255,7 +366,17 @@ export const pinnedMessages = pgTable('pinned_messages', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const memorizationPlans = pgTable('memorization_plans', {
+export const memorizationPlans = pgTable("memorization_plans", {
+  // RLS: Public read, admin write
+  // Policies will be defined in Supabase directly or via SQL migrations
+  // Policy: Enable read access for all users
+  // Policy: Enable insert for admin users
+  // Policy: Enable update for admin users
+  // Policy: Enable delete for admin users
+
+  // RLS: Public read, admin write
+  // Policies will be defined in Supabase directly or via SQL migrations
+
   id: uuid('id').defaultRandom().primaryKey(),
   title: text('title').notNull(),
   cadence: text('cadence').notNull().default('daily'),

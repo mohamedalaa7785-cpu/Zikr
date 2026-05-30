@@ -15,6 +15,20 @@
       "when": 1779486670855,
       "tag": "0001_wakeful_stepford_cuckoos",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780115529957,
+      "tag": "0002_noisy_nocturne",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780115664129,
+      "tag": "0003_glorious_vanisher",
+      "breakpoints": true
     }
   ]
 }
