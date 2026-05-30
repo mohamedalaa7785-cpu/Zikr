@@ -1,6 +1,7 @@
 import { safeApiFetch } from '@/lib/services/http';
 import { ServiceError } from '@/lib/types/common';
 import type { Ayah, Juz, QuranApiResponse, Surah } from '@/lib/types/quran';
+import { surahs as fallbackSurahs } from '@/lib/data/content';
 
 const QURAN_API_BASE = 'https://api.alquran.cloud/v1';
 const DEBUG_QURAN = process.env.NODE_ENV !== 'production';
@@ -24,12 +25,26 @@ type Locale = keyof typeof EDITIONS;
 
 export async function getAllSurahs(locale: Locale = 'ar'): Promise<Surah[]> {
   debugLog('getAllSurahs request', { locale });
-  const { data: response } = await safeApiFetch<QuranApiResponse<Surah[]>>(`${QURAN_API_BASE}/surah`);
-  if (!response || !Array.isArray(response.data)) return [];
-  debugLog('getAllSurahs success', { count: response.data.length });
-  return locale === 'en'
-    ? response.data.map((surah) => ({ ...surah, name: surah.englishName }))
-    : response.data;
+  try {
+    const { data: response } = await safeApiFetch<QuranApiResponse<Surah[]>>(`${QURAN_API_BASE}/surah`);
+    if (!response || !Array.isArray(response.data)) {
+      throw new Error('Invalid response from Quran API');
+    }
+    debugLog('getAllSurahs success', { count: response.data.length });
+    return locale === 'en'
+      ? response.data.map((surah) => ({ ...surah, name: surah.englishName }))
+      : response.data;
+  } catch (error) {
+    console.error('[quran-service] Failed to fetch surahs, using fallback:', error);
+    return fallbackSurahs.map((s) => ({
+      number: s.id,
+      name: locale === 'en' ? s.nameEn : s.nameAr,
+      englishName: s.nameEn,
+      englishNameTranslation: '',
+      numberOfAyahs: s.ayahCount,
+      revelationType: s.revelationPlace === 'meccan' ? 'Meccan' : 'Medinan',
+    })) as Surah[];
+  }
 }
 
 export async function getSurahById(id: number, locale: Locale = 'ar'): Promise<{ surah: Surah; ayahs: Ayah[] } | null> {

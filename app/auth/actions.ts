@@ -23,7 +23,13 @@ export async function loginAction(formData: FormData) {
   const password = String(formData.get('password') || '');
   const data = await supabaseAuth('token?grant_type=password', { email, password });
   const store = await cookies();
-  if (data.access_token) store.set('sb_access_token', data.access_token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+  if (data.access_token) {
+    const maxAge = data.expires_in || 3600;
+    store.set('sb_access_token', data.access_token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge });
+    if (data.refresh_token) {
+      store.set('sb_refresh_token', data.refresh_token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 30 });
+    }
+  }
   redirect('/profile');
 }
 
@@ -44,21 +50,30 @@ export async function forgotAction(formData: FormData) {
 export async function logoutAction() {
   const store = await cookies();
   store.delete('sb_access_token');
+  store.delete('sb_refresh_token');
   redirect('/');
 }
 
-export async function setSessionAction(accessToken: string) {
+export async function setSessionAction(accessToken: string, refreshToken?: string) {
   if (!accessToken) throw new Error('رمز الجلسة مفقود.');
   const store = await cookies();
-  // Set expiration to 7 days for better persistence
-  const sevenDays = 60 * 60 * 24 * 7;
+  const maxAge = 3600; // Default 1 hour
   store.set('sb_access_token', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: sevenDays,
+    maxAge,
   });
+  if (refreshToken) {
+    store.set('sb_refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    });
+  }
 }
 
 export async function updateProfileAction(formData: FormData) {

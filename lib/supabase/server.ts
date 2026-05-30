@@ -3,7 +3,14 @@ import { getPublicEnv, getServerEnv } from '@/lib/env';
 
 export async function getServerSessionToken() {
   const store = await cookies();
-  return store.get('sb_access_token')?.value ?? null;
+  let token = store.get('sb_access_token')?.value;
+  const refreshToken = store.get('sb_refresh_token')?.value;
+
+  // If token is missing but refresh token exists, we could try to refresh it here
+  // However, in Next.js Server Components, we cannot set cookies easily during a GET request
+  // So we rely on the client or middleware to handle refreshing if needed.
+  // For now, we just return what we have.
+  return token ?? null;
 }
 
 async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole = false): Promise<T> {

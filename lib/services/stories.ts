@@ -8,7 +8,9 @@ export interface Story {
   slug: string;
   title: string;
   summary?: string;
+  content?: string;
   category: StoryCategory;
+  metadata?: Record<string, any>;
   published?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -34,7 +36,7 @@ export async function getStories(): Promise<Story[]> {
     let response: Story[] | undefined;
     try {
       response = await supabaseServerAnonRequest<Story[]>(
-        '/rest/v1/stories?select=id,slug,title,summary,category,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc',
+        '/rest/v1/stories?select=id,slug,title,summary,content,category,metadata,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc',
         { cache: 'force-cache', next: { revalidate: 1800 } },
       );
     } catch (summaryError) {

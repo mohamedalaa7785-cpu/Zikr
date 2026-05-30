@@ -17,9 +17,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
     notFound();
   }
 
-  // In a real scenario, the YouTube ID would come from the story object or metadata
-  // For now, we use a placeholder if not present
-  const youtubeId = (story as any).youtubeId || 'dQw4w9WgXcQ'; 
+  const youtubeId = (story.metadata as any)?.youtubeId;
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -37,25 +35,23 @@ export default async function StoryPage({ params }: StoryPageProps) {
           <p className="text-xl text-muted-foreground">{story.summary}</p>
         </div>
 
-        <div className="aspect-video w-full overflow-hidden rounded-xl bg-muted shadow-lg">
-          <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${youtubeId}`}
-            title={story.title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="h-full w-full"
-          ></iframe>
-        </div>
+        {youtubeId && (
+          <div className="aspect-video w-full overflow-hidden rounded-xl bg-muted shadow-lg">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${youtubeId}`}
+              title={story.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="h-full w-full"
+            ></iframe>
+          </div>
+        )}
 
-        <div className="prose prose-lg dark:prose-invert max-w-none">
-          {/* This would be the story content if available in the DB */}
-          <p>
-            This story provides deep insights into the life and teachings of Islamic history. 
-            Watch the video above for a comprehensive documentary on this subject.
-          </p>
+        <div className="prose prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
+          {story.content}
         </div>
       </div>
     </div>

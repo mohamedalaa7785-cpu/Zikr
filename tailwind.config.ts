@@ -15,7 +15,7 @@ const config: Config = {
         }
       },
       fontFamily: {
-        arabic: ['"Noto Naskh Arabic"', 'serif']
+        arabic: ['var(--font-arabic)', 'serif']
       },
       boxShadow: {
         glow: '0 10px 30px rgba(199,168,107,0.2)'

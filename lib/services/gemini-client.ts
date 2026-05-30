@@ -35,21 +35,30 @@ export async function generateGeminiText(prompt: string): Promise<string | null>
   const client = getClient();
   if (!client) return null;
 
-  const model = client.getGenerativeModel({ model: GEMINI_MODEL, safetySettings, generationConfig: freeTierGenerationConfig });
-  const result = await model.generateContent(prompt);
-  return result.response.text().trim() || null;
+  try {
+    const model = client.getGenerativeModel({ model: GEMINI_MODEL, safetySettings, generationConfig: freeTierGenerationConfig });
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim() || null;
+  } catch (error) {
+    console.error('[gemini-service] Failed to generate text:', error);
+    return null;
+  }
 }
 
 export async function* streamGeminiText(prompt: string): AsyncGenerator<string, void, unknown> {
   const client = getClient();
   if (!client) return;
 
-  const model = client.getGenerativeModel({ model: GEMINI_MODEL, safetySettings, generationConfig: freeTierGenerationConfig });
-  const streamResult = await model.generateContentStream(prompt);
+  try {
+    const model = client.getGenerativeModel({ model: GEMINI_MODEL, safetySettings, generationConfig: freeTierGenerationConfig });
+    const streamResult = await model.generateContentStream(prompt);
 
-  for await (const chunk of streamResult.stream) {
-    const text = chunk.text();
-    if (text) yield text;
+    for await (const chunk of streamResult.stream) {
+      const text = chunk.text();
+      if (text) yield text;
+    }
+  } catch (error) {
+    console.error('[gemini-service] Failed to stream text:', error);
   }
 }
 
@@ -57,10 +66,15 @@ export async function generateGeminiFromAudio(prompt: string, audio: { data: str
   const client = getClient();
   if (!client) return null;
 
-  const model = client.getGenerativeModel({ model: GEMINI_MODEL, safetySettings, generationConfig: freeTierGenerationConfig });
-  const result = await model.generateContent([
-    prompt,
-    { inlineData: { data: audio.data, mimeType: audio.mimeType } },
-  ] as never);
-  return result.response.text().trim() || null;
+  try {
+    const model = client.getGenerativeModel({ model: GEMINI_MODEL, safetySettings, generationConfig: freeTierGenerationConfig });
+    const result = await model.generateContent([
+      prompt,
+      { inlineData: { data: audio.data, mimeType: audio.mimeType } },
+    ] as never);
+    return result.response.text().trim() || null;
+  } catch (error) {
+    console.error('[gemini-service] Failed to generate text from audio:', error);
+    return null;
+  }
 }

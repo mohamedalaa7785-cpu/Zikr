@@ -8,7 +8,13 @@ import { setSessionAction } from '@/app/auth/actions';
 
 function parseTokenFromHash() {
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  return hash.get('access_token');
+  const error = hash.get('error');
+  const errorDescription = hash.get('error_description');
+  if (error) throw new Error(errorDescription || error);
+  return {
+    accessToken: hash.get('access_token'),
+    refreshToken: hash.get('refresh_token'),
+  };
 }
 
 export default function CallbackPage() {
@@ -20,9 +26,9 @@ export default function CallbackPage() {
   useEffect(() => {
     const run = async () => {
       try {
-        const token = parseTokenFromHash();
-        if (!token) throw new Error('تعذر إكمال تسجيل الدخول عبر Google.');
-        await setSessionAction(token);
+        const { accessToken, refreshToken } = parseTokenFromHash();
+        if (!accessToken) throw new Error('تعذر إكمال تسجيل الدخول عبر Google.');
+        await setSessionAction(accessToken, refreshToken || undefined);
         router.replace(next);
       } catch (e) {
         const message = e instanceof Error ? e.message : 'حدث خطأ غير متوقع.';

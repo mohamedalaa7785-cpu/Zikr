@@ -22,7 +22,7 @@ export async function globalSearch(query: string): Promise<GlobalSearchResult[]>
   ]);
 
   const storyMatches = stories.filter((story) =>
-    [story.title, story.summary, story.slug, story.category].some((field) => field.toLowerCase().includes(q.toLowerCase())),
+    [story.title, story.summary ?? '', story.slug, story.category].some((field) => field?.toLowerCase().includes(q.toLowerCase())),
   );
 
   return [
@@ -51,7 +51,7 @@ export async function globalSearch(query: string): Promise<GlobalSearchResult[]>
       type: 'story' as const,
       id: s.id,
       title: s.title,
-      description: s.summary,
+      description: s.summary ?? '',
       data: { slug: s.slug, category: s.category },
     })),
   ];

@@ -18,11 +18,13 @@ export async function getHadithBooks(): Promise<HadithBook[]> {
 export async function getHadithBook(slug: string, page = 1, limit = 20): Promise<HadithResponse<Hadith[]> | null> {
   const clean = slug.trim();
   if (!clean) return null;
-  const { data: result } = await safeApiFetch<ApiResponse<{ name: string; id: string; available: number; requested: number; hadiths: Hadith[] }>>(
-    `${HADITH_API_BASE}/books/${encodeURIComponent(clean)}?range=${page}-${page + limit - 1}`,
-  );
+  
+  try {
+    const { data: result } = await safeApiFetch<ApiResponse<{ name: string; id: string; available: number; requested: number; hadiths: Hadith[] }>>(
+      `${HADITH_API_BASE}/books/${encodeURIComponent(clean)}?range=${page}-${page + limit - 1}`,
+    );
 
-  const total = result?.data?.available ?? 0;
+    const total = result?.data?.available ?? 0;
   const pagination: PaginationMeta = {
     currentPage: page,
     pageSize: limit,
@@ -30,13 +32,17 @@ export async function getHadithBook(slug: string, page = 1, limit = 20): Promise
     totalPages: Math.max(1, Math.ceil(total / limit)),
   };
 
-  return {
-    name: result?.data?.name ?? clean,
-    slug: result?.data?.id ?? clean,
-    total,
-    pagination,
-    data: result?.data?.hadiths ?? [],
-  };
+    return {
+      name: result?.data?.name ?? clean,
+      slug: result?.data?.id ?? clean,
+      total,
+      pagination,
+      data: result?.data?.hadiths ?? [],
+    };
+  } catch (error) {
+    console.error('[hadith-service] Failed to fetch book:', clean, error);
+    return null;
+  }
 }
 
 export async function getHadithByNumber(book: string, number: number): Promise<Hadith | null> {

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/Logo';
 import { logoutAction } from '@/app/auth/actions';
 import { getSiteSetting } from '@/lib/services/site-content';
+import { getCurrentProfile } from '@/lib/services/admin';
 
 const links = [
   { href: '/quran', label: 'القرآن' },
@@ -16,10 +17,14 @@ const links = [
   { href: '/memorization', label: 'الحفظ' },
   { href: '/youtube', label: 'يوتيوب' },
   { href: '/competitions', label: 'مسابقات' },
+  { href: '/favorites', label: 'المفضلة' },
+  { href: '/search', label: 'بحث' },
 ];
 
 export async function Navbar() {
   const token = (await cookies()).get('sb_access_token')?.value;
+  const profile = token ? await getCurrentProfile() : null;
+  const isAdmin = profile?.role === 'admin';
   const homepage = await getSiteSetting('homepage');
 
   return (
@@ -44,9 +49,11 @@ export async function Navbar() {
               <Button variant='ghost' href='/profile'>
                 الملف الشخصي
               </Button>
-              <Button variant='ghost' href='/admin'>
-                الأدمن
-              </Button>
+              {isAdmin && (
+                <Button variant='ghost' href='/admin'>
+                  الأدمن
+                </Button>
+              )}
               <form action={logoutAction}>
                 <Button variant='secondary' type='submit'>
                   خروج

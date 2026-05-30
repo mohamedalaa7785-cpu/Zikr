@@ -8,22 +8,22 @@ import { getPinnedMessages, getSiteSetting } from '@/lib/services/site-content';
 
 const sections = [
   {
-    title: 'Quran Preview',
+    title: 'القرآن الكريم',
     body: 'تصفح السور بسرعة، مع تجربة قراءة واضحة وهادئة على كل الأجهزة.',
     href: '/quran',
   },
   {
-    title: 'Hadith Preview',
+    title: 'الأحاديث النبوية',
     body: 'استكشاف منظم للأحاديث مع بنية قابلة للتوسع والبحث لاحقًا.',
     href: '/hadith',
   },
   {
-    title: 'Stories Preview',
+    title: 'قصص وعبر',
     body: 'عرض قصصي بسيط ومتماسك بصريًا لرحلات الإيمان والتأمل.',
     href: '/stories',
   },
   {
-    title: 'Scholars Preview',
+    title: 'العلماء والدعاة',
     body: 'واجهة أولية منظمة لعرض العلماء والمحتوى المعرفي المرتبط بهم.',
     href: '/scholars',
   },
@@ -41,7 +41,7 @@ export default async function HomePage() {
         />
 
         <div className='flex flex-wrap items-center justify-end gap-3'>
-          <Badge>Premium Islamic Experience</Badge>
+          <Badge>تجربة إسلامية متميزة</Badge>
           <Button href='/quran'>ابدأ التلاوة</Button>
           <Button variant='secondary' href='/memorization'>خطة الحفظ</Button>
           <Button variant='secondary' href='/competitions'>المسابقات</Button>

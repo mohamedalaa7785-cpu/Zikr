@@ -8,4 +8,4 @@ body {
   color: var(--text);
 }
 
-.arabic-muted { color: var(--muted); }
+.arabic-muted { color: var(--muted); transition: color 0.2s ease; }
