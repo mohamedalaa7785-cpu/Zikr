@@ -19,6 +19,8 @@ export const envSchema = z.object({
   YOUTUBE_API_KEY: z.string().optional(),
   YOUTUBE_CHANNEL_ID: z.string().optional(),
   YOUTUBE_PLAYLIST_ID: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
