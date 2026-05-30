@@ -28,12 +28,19 @@ export type Env = z.infer<typeof envSchema>;
 export function validateEnv(env: Record<string, string | undefined>): Env {
   const parsed = envSchema.safeParse(env);
   if (!parsed.success) {
-    console.warn('Environment variable validation failed. This might be expected during build if envs are not set.');
-    // In production runtime, we want to fail fast. During build, we might want to continue.
-    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE) {
+    const isNextBuild = Boolean(process.env.NEXT_PHASE);
+
+    // In production runtime, fail fast. During Next.js build, allow partial env so
+    // deployment builds can complete before runtime secrets are injected.
+    if (process.env.NODE_ENV === 'production' && !isNextBuild) {
       console.error('Environment variable validation failed:', parsed.error);
       throw new Error('Invalid environment variables. Please check your .env file and environment configuration.');
     }
+
+    if (!isNextBuild) {
+      console.warn('Environment variable validation failed. This might be expected during build if envs are not set.');
+    }
+
     // Return partial or empty object cast to Env for build phase
     return env as Env;
   }

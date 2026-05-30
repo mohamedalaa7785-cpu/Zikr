@@ -1,12 +1,5 @@
 import type { Metadata } from 'next';
-import { Noto_Naskh_Arabic } from 'next/font/google';
 import './globals.css';
-
-const arabic = Noto_Naskh_Arabic({
-  subsets: ['arabic'],
-  variable: '--font-arabic',
-  weight: ['400', '700'],
-});
 import { SiteShell } from '@/components/layout/site-shell';
 import { defaultOgImage, siteConfig } from '@/lib/site';
 import { Analytics } from '@/components/layout/analytics';
@@ -41,7 +34,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='ar' dir={siteConfig.dir}>
-      <body className={`${arabic.variable} font-arabic antialiased`}>
+      <body className='font-arabic antialiased'>
         <SiteShell>{children}</SiteShell>
         <Analytics />
       </body>

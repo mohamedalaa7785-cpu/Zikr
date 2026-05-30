@@ -13,7 +13,7 @@ The following environment variables are required for the application to function
 | `NEXT_PUBLIC_SITE_URL`          | The public URL of the deployed site.                                        | Public   |
 | `SUPABASE_SERVICE_ROLE_KEY`     | The Supabase service role key, used for server-side operations.             | Server   |
 | `DATABASE_URL`                  | The connection string for the PostgreSQL database.                          | Server   |
-| `AUTH_CALLBACK_URL`             | The callback URL for authentication providers.                              | Server   |
+| `AUTH_CALLBACK_URL`             | Authentication callback URL. Must end with `/auth/callback`.               | Server   |
 
 ## Optional Integration Environment Variables
 
@@ -22,7 +22,7 @@ The following environment variables are optional and are used for integrating wi
 | Variable Name             | Description                                                                 | Type     |
 | :------------------------ | :-------------------------------------------------------------------------- | :------- |
 | `GEMINI_API_KEY`                | API key for Google Gemini services.                                         | Server   |
-| `GEMINI_MODEL`                  | Optional Gemini model override (default: `gemini-1.5-flash`).               | Server   |
+| `GEMINI_MODEL`                  | Optional Gemini model override (recommended: `gemini-2.5-flash`).           | Server   |
 | `AWS_S3_ACCESS_KEY_ID`          | AWS S3 access key ID for storage.                                           | Server   |
 | `AWS_S3_SECRET_ACCESS_KEY`      | AWS S3 secret access key for storage.                                       | Server   |
 | `AWS_S3_BUCKET_NAME`            | AWS S3 bucket name for storage.                                             | Server   |
@@ -33,6 +33,20 @@ The following environment variables are optional and are used for integrating wi
 | `YOUTUBE_API_KEY`               | API key for YouTube services.                                               | Server   |
 | `YOUTUBE_CHANNEL_ID`            | YouTube channel ID.                                                         | Server   |
 | `YOUTUBE_PLAYLIST_ID`           | YouTube playlist ID.                                                        | Server   |
+| `GOOGLE_CLIENT_ID`               | Google OAuth client ID.                                                     | Server   |
+| `GOOGLE_CLIENT_SECRET`           | Google OAuth client secret. Keep secret.                                    | Server   |
+
+## Deployment Validation
+
+Run the deployment environment check before shipping a release:
+
+```bash
+pnpm deploy:check
+```
+
+The command validates required runtime variables, URL shape, Supabase REST reachability, optional YouTube reachability, and common `DATABASE_URL` formatting mistakes without printing secret values.
+
+> Security note: never commit real Supabase service-role keys, database URLs, Gemini keys, YouTube keys, or Google OAuth secrets. If any secret is shared in chat or logs, rotate it in the provider dashboard before deploying.
 
 ## Runtime Validation
 

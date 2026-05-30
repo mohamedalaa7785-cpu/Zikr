@@ -2,9 +2,8 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getPublicEnv } from '@/lib/env';
+import { getPublicEnv, getServerEnv } from '@/lib/env';
 import { supabaseServerAnonRequest } from '@/lib/supabase/server';
-import { siteConfig } from '@/lib/site';
 
 async function supabaseAuth(path: string, body: Record<string, unknown>) {
   const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = getPublicEnv();
@@ -42,8 +41,8 @@ export async function registerAction(formData: FormData) {
 
 export async function forgotAction(formData: FormData) {
   const email = String(formData.get('email') || '');
-  const { NEXT_PUBLIC_SITE_URL } = getPublicEnv();
-  await supabaseAuth('recover', { email, redirect_to: `${NEXT_PUBLIC_SITE_URL}/auth/callback` });
+  const { AUTH_CALLBACK_URL } = getServerEnv();
+  await supabaseAuth('recover', { email, redirect_to: AUTH_CALLBACK_URL });
   redirect('/auth/login');
 }
 
