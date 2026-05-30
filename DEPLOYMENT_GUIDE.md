@@ -1,5 +1,7 @@
 # Zikr Project Deployment Guide
 
+**Latest Update**: Supabase + Vercel sync is configured and ready. Follow steps below to complete the setup.
+
 To ensure the project works correctly on production (Vercel) and with Supabase, follow these steps:
 
 ## 1. Supabase Configuration
