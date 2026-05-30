@@ -52,22 +52,32 @@ async function youtubeFetch<T>(path: string, params: Record<string, string | num
     if (value !== undefined && value !== '') searchParams.set(key, String(value));
   });
 
-  const response = await fetch(`https://www.googleapis.com/youtube/v3/${path}?${searchParams.toString()}`, {
-    cache: 'no-store',
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`YouTube API failed (${response.status}): ${body.slice(0, 220)}`);
+  try {
+    const response = await fetch(`https://www.googleapis.com/youtube/v3/${path}?${searchParams.toString()}`, {
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`YouTube API failed (${response.status}): ${body.slice(0, 220)}`);
+    }
+
+    return response.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json() as Promise<T>;
 }
 
 export async function getYoutubeChannelFeed(maxResults = 24): Promise<YoutubeChannelFeed> {
-  const { YOUTUBE_CHANNEL_ID } = getServerEnv();
-  if (!YOUTUBE_CHANNEL_ID) {
-    return { configured: false, channelId: null, videos: [], playlists: [], error: 'YOUTUBE_CHANNEL_ID is missing.' };
+  const { YOUTUBE_CHANNEL_ID, YOUTUBE_API_KEY } = getServerEnv();
+  
+  // Return early if not configured
+  if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
+    return { configured: false, channelId: null, videos: [], playlists: [] };
   }
 
   try {
