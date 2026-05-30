@@ -21,11 +21,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
+    // Skip dynamic routes if Supabase URL is missing (common during build)
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NODE_ENV === 'production') {
+      console.warn('[sitemap] Skipping dynamic routes due to missing NEXT_PUBLIC_SUPABASE_URL');
+      return staticRoutes;
+    }
+
     const [surahs, scholars, hadithBooks, stories] = await Promise.all([
-      getAllSurahs('ar').catch(() => []),
-      getAllScholars().catch(() => []),
-      getHadithBooks().catch(() => []),
-      getStories().catch(() => []),
+      getAllSurahs('ar').catch((err) => { console.error('[sitemap] Quran fetch failed:', err); return []; }),
+      getAllScholars().catch((err) => { console.error('[sitemap] Scholars fetch failed:', err); return []; }),
+      getHadithBooks().catch((err) => { console.error('[sitemap] Hadith fetch failed:', err); return []; }),
+      getStories().catch((err) => { console.error('[sitemap] Stories fetch failed:', err); return []; }),
     ]);
 
     const dynamicRoutes = [
