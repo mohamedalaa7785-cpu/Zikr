@@ -5,9 +5,48 @@ export type Reciter={id:string;nameAr:string;nameEn:string;code:string;baseUrlTe
 export type HadithBook={id:string;slug:string;nameAr:string;nameEn:string;source:string};
 export type Hadith={id:string;bookId:string;hadithNumber:string;textAr:string;narrator:string;grade:string;chapter:string;ref:string};
 
-export const surahs:Surah[]=[{id:1,nameAr:'الفاتحة',nameEn:'Al-Fatihah',ayahCount:7,revelationPlace:'meccan',slug:'al-fatihah'},{id:2,nameAr:'البقرة',nameEn:'Al-Baqarah',ayahCount:286,revelationPlace:'medinan',slug:'al-baqarah'},{id:112,nameAr:'الإخلاص',nameEn:'Al-Ikhlas',ayahCount:4,revelationPlace:'meccan',slug:'al-ikhlas'}];
-export const ayahs:Ayah[]=[{surahId:1,ayahNumber:1,textUthmani:'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',textSimple:'بسم الله الرحمن الرحيم',page:1,juz:1,hizb:1,rub:1,sajda:false},{surahId:1,ayahNumber:2,textUthmani:'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',textSimple:'الحمد لله رب العالمين',page:1,juz:1,hizb:1,rub:1,sajda:false},{surahId:112,ayahNumber:1,textUthmani:'قُلْ هُوَ اللَّهُ أَحَدٌ',textSimple:'قل هو الله أحد',page:604,juz:30,hizb:60,rub:240,sajda:false}];
-export const tafsir:Tafsir[]=[{surahId:1,ayahNumber:1,source:'التفسير الميسر',text:'ابتداءٌ باسم الله الجامع لصفات الكمال.'},{surahId:1,ayahNumber:2,source:'التفسير الميسر',text:'الثناء على الله رب جميع الخلق.'}];
-export const reciters:Reciter[]=[{id:'husary',nameAr:'الحصري',nameEn:'Al-Husary',code:'husary',baseUrlTemplate:'https://everyayah.com/data/Husary_128kbps'},{id:'minshawi',nameAr:'المنشاوي',nameEn:'Al-Minshawi',code:'minshawi',baseUrlTemplate:'https://everyayah.com/data/Minshawy_Murattal_128kbps'}];
-export const hadithBooks:HadithBook[]=[{id:'bukhari',slug:'bukhari',nameAr:'صحيح البخاري',nameEn:'Sahih al-Bukhari',source:'sunnah.com'}];
-export const hadiths:Hadith[]=[{id:'b1',bookId:'bukhari',hadithNumber:'1',textAr:'إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ...',narrator:'عمر بن الخطاب',grade:'صحيح',chapter:'بدء الوحي',ref:'bukhari:1'}];
+export const surahs:Surah[]=[
+  {id:1,nameAr:'الفاتحة',nameEn:'Al-Fatihah',ayahCount:7,revelationPlace:'meccan',slug:'al-fatihah'},
+  {id:2,nameAr:'البقرة',nameEn:'Al-Baqarah',ayahCount:286,revelationPlace:'medinan',slug:'al-baqarah'},
+  {id:3,nameAr:'آل عمران',nameEn:'Aal-Imran',ayahCount:200,revelationPlace:'medinan',slug:'aal-imran'},
+  {id:36,nameAr:'يس',nameEn:'Ya-Sin',ayahCount:83,revelationPlace:'meccan',slug:'ya-sin'},
+  {id:55,nameAr:'الرحمن',nameEn:'Ar-Rahman',ayahCount:78,revelationPlace:'medinan',slug:'ar-rahman'},
+  {id:67,nameAr:'الملك',nameEn:'Al-Mulk',ayahCount:30,revelationPlace:'meccan',slug:'al-mulk'},
+  {id:112,nameAr:'الإخلاص',nameEn:'Al-Ikhlas',ayahCount:4,revelationPlace:'meccan',slug:'al-ikhlas'},
+  {id:113,nameAr:'الفلق',nameEn:'Al-Falaq',ayahCount:5,revelationPlace:'meccan',slug:'al-falaq'},
+  {id:114,nameAr:'الناس',nameEn:'An-Nas',ayahCount:6,revelationPlace:'meccan',slug:'an-nas'},
+];
+
+export const ayahs:Ayah[]=[
+  {surahId:1,ayahNumber:1,textUthmani:'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',textSimple:'بسم الله الرحمن الرحيم',page:1,juz:1,hizb:1,rub:1,sajda:false},
+  {surahId:1,ayahNumber:2,textUthmani:'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',textSimple:'الحمد لله رب العالمين',page:1,juz:1,hizb:1,rub:1,sajda:false},
+  {surahId:112,ayahNumber:1,textUthmani:'قُلْ هُوَ اللَّهُ أَحَدٌ',textSimple:'قل هو الله أحد',page:604,juz:30,hizb:60,rub:240,sajda:false},
+];
+
+export const tafsir:Tafsir[]=[
+  {surahId:1,ayahNumber:1,source:'التفسير الميسر',text:'ابتداءٌ باسم الله الجامع لصفات الكمال.'},
+  {surahId:1,ayahNumber:2,source:'التفسير الميسر',text:'الثناء على الله رب جميع الخلق.'},
+];
+
+export const reciters:Reciter[]=[
+  {id:'husary',nameAr:'محمود خليل الحصري',nameEn:'Mahmoud Khalil Al-Husary',code:'husary',baseUrlTemplate:'https://everyayah.com/data/Husary_128kbps'},
+  {id:'minshawi',nameAr:'محمد صديق المنشاوي',nameEn:'Muhammad Siddiq Al-Minshawi',code:'minshawi',baseUrlTemplate:'https://everyayah.com/data/Minshawy_Murattal_128kbps'},
+  {id:'abdulbasit',nameAr:'عبد الباسط عبد الصمد',nameEn:'Abdul Basit Abdul Samad',code:'abdulbasit',baseUrlTemplate:'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps'},
+  {id:'sudais',nameAr:'عبد الرحمن السديس',nameEn:'Abdurrahman As-Sudais',code:'sudais',baseUrlTemplate:'https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps'},
+  {id:'shuraim',nameAr:'سعود الشريم',nameEn:'Saud Al-Shuraim',code:'shuraim',baseUrlTemplate:'https://everyayah.com/data/Saood_ash-Shuraym_128kbps'},
+  {id:'alafasy',nameAr:'مشاري راشد العفاسي',nameEn:'Mishary Rashid Alafasy',code:'alafasy',baseUrlTemplate:'https://everyayah.com/data/Alafasy_128kbps'},
+  {id:'mahermuaiqly',nameAr:'ماهر المعيقلي',nameEn:'Maher Al-Muaiqly',code:'mahermuaiqly',baseUrlTemplate:'https://everyayah.com/data/MashaRashidAlafay_64kbps'},
+  {id:'ghamdi',nameAr:'سعد الغامدي',nameEn:'Saad Al-Ghamdi',code:'ghamdi',baseUrlTemplate:'https://everyayah.com/data/Ghamadi_40kbps'},
+];
+
+export const hadithBooks:HadithBook[]=[
+  {id:'bukhari',slug:'bukhari',nameAr:'صحيح البخاري',nameEn:'Sahih al-Bukhari',source:'sunnah.com'},
+  {id:'muslim',slug:'muslim',nameAr:'صحيح مسلم',nameEn:'Sahih Muslim',source:'sunnah.com'},
+  {id:'tirmidhi',slug:'tirmidhi',nameAr:'سنن الترمذي',nameEn:'Jami at-Tirmidhi',source:'sunnah.com'},
+  {id:'abudawud',slug:'abudawud',nameAr:'سنن أبي داود',nameEn:'Sunan Abu Dawud',source:'sunnah.com'},
+];
+
+export const hadiths:Hadith[]=[
+  {id:'b1',bookId:'bukhari',hadithNumber:'1',textAr:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى...',narrator:'عمر بن الخطاب رضي الله عنه',grade:'صحيح',chapter:'بدء الوحي',ref:'bukhari:1'},
+  {id:'b2',bookId:'bukhari',hadithNumber:'13',textAr:'لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ.',narrator:'أنس بن مالك رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'bukhari:13'},
+];

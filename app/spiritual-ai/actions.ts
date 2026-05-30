@@ -93,7 +93,7 @@ export async function searchSpiritualContent(feeling: string): Promise<AISearchR
         type: 'quran',
         content: quranResults[0].text,
         source: 'القرآن الكريم',
-        reference: `سورة ${quranResults[0].surah?.name ?? ''} - آية ${quranResults[0].numberInSurah}`,
+        reference: `آية ${quranResults[0].numberInSurah}`,
       });
     }
 
