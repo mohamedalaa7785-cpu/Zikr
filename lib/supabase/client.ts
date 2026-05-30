@@ -13,7 +13,12 @@ export function createBrowserSupabaseClient() {
       },
     });
     if (!res.ok) throw new Error(`Supabase request failed: ${res.status}`);
-    return res.json() as Promise<T>;
+    if (res.status === 204) return undefined as T;
+
+    const text = await res.text();
+    if (!text) return undefined as T;
+
+    return JSON.parse(text) as T;
   };
 
   const healthcheck = () => request<Record<string, unknown>>('/rest/v1/');
