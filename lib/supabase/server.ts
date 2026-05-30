@@ -18,16 +18,29 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
   const service = getServerEnv().SUPABASE_SERVICE_ROLE_KEY;
   const key = useServiceRole ? service : NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      ...(init?.headers || {}),
-    },
-    cache: init?.cache ?? 'no-store',
-  });
+  if (!NEXT_PUBLIC_SUPABASE_URL || !key) {
+    throw new Error('Supabase environment variables are not configured.');
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  let res: Response;
+  try {
+    res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        ...(init?.headers || {}),
+      },
+      cache: init?.cache ?? 'no-store',
+      signal: init?.signal ?? controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!res.ok) {
     const body = await res.text();

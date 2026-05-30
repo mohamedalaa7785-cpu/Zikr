@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-arabic: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
 body {
   background: radial-gradient(circle at top, #0e4b45 0%, #072e2a 60%);
   color: var(--text);
