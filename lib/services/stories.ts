@@ -17,9 +17,12 @@ export interface Story {
 }
 
 const FALLBACK_STORIES: Story[] = [
-  { id: '1', slug: 'story-of-musa', title: 'Story of Musa', summary: 'Patience and trust in Allah.', category: 'prophets', published: true },
-  { id: '2', slug: 'abu-bakr-siddiq', title: 'Abu Bakr As-Siddiq', summary: 'Companionship and sacrifice.', category: 'sahaba', published: true },
-  { id: '3', slug: 'andalus-documentary', title: 'Andalus Documentary', summary: 'Islamic civilization journey.', category: 'documentaries', published: true },
+  { id: '1', slug: 'story-of-musa', title: 'قصة موسى عليه السلام', summary: 'الصبر والتوكل على الله في مواجهة فرعون وقومه.', category: 'prophets', published: true },
+  { id: '2', slug: 'abu-bakr-siddiq', title: 'أبو بكر الصديق رضي الله عنه', summary: 'الصاحب الأول ورفيق الهجرة والخليفة الراشد.', category: 'sahaba', published: true },
+  { id: '3', slug: 'andalus-documentary', title: 'الأندلس: حضارة خالدة', summary: 'رحلة في تاريخ الحضارة الإسلامية في الأندلس.', category: 'documentaries', published: true },
+  { id: '4', slug: 'story-of-yusuf', title: 'قصة يوسف عليه السلام', summary: 'أحسن القصص - من الجب إلى عرش مصر.', category: 'prophets', published: true },
+  { id: '5', slug: 'omar-ibn-khattab', title: 'عمر بن الخطاب رضي الله عنه', summary: 'الفاروق الذي فرق الله به بين الحق والباطل.', category: 'sahaba', published: true },
+  { id: '6', slug: 'battle-of-badr', title: 'غزوة بدر الكبرى', summary: 'أول معركة فاصلة في تاريخ الإسلام.', category: 'history', published: true },
 ];
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes

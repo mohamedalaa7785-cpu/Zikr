@@ -8,7 +8,7 @@ import { Container } from '@/components/ui/container';
 import { getSurahById } from '@/lib/services/quran';
 import { Badge } from '@/components/ui/badge';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // Surah page cache
 
 export async function generateMetadata({ params }: { params: Promise<{ surah: string }> }): Promise<Metadata> {
   const p = await params;
