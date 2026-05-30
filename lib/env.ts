@@ -28,6 +28,8 @@ export function getServerEnv() {
     YOUTUBE_API_KEY: validatedEnv.YOUTUBE_API_KEY,
     YOUTUBE_CHANNEL_ID: validatedEnv.YOUTUBE_CHANNEL_ID,
     YOUTUBE_PLAYLIST_ID: validatedEnv.YOUTUBE_PLAYLIST_ID,
+    GOOGLE_CLIENT_ID: validatedEnv.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: validatedEnv.GOOGLE_CLIENT_SECRET,
   };
 }
 
@@ -44,7 +46,7 @@ export function getEnvAudit() {
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "NEXT_PUBLIC_SITE_URL",
     ],
-    serverOnly: ["SUPABASE_SERVICE_ROLE_KEY"],
+    serverOnly: ["SUPABASE_SERVICE_ROLE_KEY", "GOOGLE_CLIENT_SECRET"],
     runtimeServer: [
       "NEXT_PUBLIC_SUPABASE_URL",
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
@@ -58,6 +60,8 @@ export function getEnvAudit() {
       "AWS_S3_SECRET_ACCESS_KEY",
       "AWS_S3_BUCKET_NAME",
       "AWS_S3_REGION",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
     ],
     scriptsOnly: ["DATABASE_URL"],
     optionalIntegrations: [
@@ -73,6 +77,8 @@ export function getEnvAudit() {
       "AWS_S3_SECRET_ACCESS_KEY",
       "AWS_S3_BUCKET_NAME",
       "AWS_S3_REGION",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
     ],
   } as const;
 }
