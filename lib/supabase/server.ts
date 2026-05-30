@@ -19,7 +19,8 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
   const key = useServiceRole ? service : NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!NEXT_PUBLIC_SUPABASE_URL || !key) {
-    throw new Error('Supabase environment variables are not configured.');
+    console.error('[supabase:server] Missing Supabase configuration. URL or API key not set.');
+    throw new Error('Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and appropriate API keys.');
   }
 
   const controller = new AbortController();
@@ -44,7 +45,9 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Supabase server request failed: ${res.status} ${body}`);
+    const errorMsg = `Supabase server request failed: ${res.status} ${body}`;
+    console.error('[supabase:server]', errorMsg);
+    throw new Error(errorMsg);
   }
   if (res.status === 204) return undefined as T;
 
@@ -74,6 +77,11 @@ export async function getSupabaseUser() {
 }
 
 export async function assertSupabaseConnection() {
-  const status = await supabaseServerAnonRequest<{ version: string }>('/rest/v1/');
-  return Boolean(status);
+  try {
+    const status = await supabaseServerAnonRequest<{ version: string }>('/rest/v1/');
+    return Boolean(status);
+  } catch (error) {
+    console.error('[supabase:server] Connection check failed:', error instanceof Error ? error.message : 'unknown error');
+    return false;
+  }
 }

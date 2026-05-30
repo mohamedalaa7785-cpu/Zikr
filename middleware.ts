@@ -12,47 +12,47 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('sb_access_token')?.value;
   const refreshToken = request.cookies.get('sb_refresh_token')?.value;
 
+  const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   // If token is expired but refresh token exists, try to refresh
-  if (refreshToken && (!token || !isTokenValid(token))) {
+  if (refreshToken && (!token || !isTokenValid(token)) && NEXT_PUBLIC_SUPABASE_URL && NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     try {
-      const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = {
-        NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      };
+      const res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: NEXT_PUBLIC_SUPABASE_ANON_KEY },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
 
-      if (NEXT_PUBLIC_SUPABASE_URL && NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        const res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', apikey: NEXT_PUBLIC_SUPABASE_ANON_KEY },
-          body: JSON.stringify({ refresh_token: refreshToken }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const response = NextResponse.next();
-          if (data.access_token) {
-            response.cookies.set('sb_access_token', data.access_token, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: 'lax',
-              path: '/',
-              maxAge: data.expires_in || 3600,
-            });
-          }
-          if (data.refresh_token) {
-            response.cookies.set('sb_refresh_token', data.refresh_token, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: 'lax',
-              path: '/',
-              maxAge: 60 * 60 * 24 * 30,
-            });
-          }
-          return response;
+      if (res.ok) {
+        const data = await res.json();
+        const response = NextResponse.next();
+        if (data.access_token) {
+          response.cookies.set('sb_access_token', data.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: data.expires_in || 3600,
+          });
         }
+        if (data.refresh_token) {
+          response.cookies.set('sb_refresh_token', data.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 30,
+          });
+        }
+        return response;
       }
     } catch (error) {
-      console.error('Middleware token refresh failed:', error);
+      // Log but don't block - middleware should allow request to proceed
+      // The app will handle missing auth gracefully
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[middleware] Token refresh failed:', error instanceof Error ? error.message : 'unknown error');
+      }
     }
   }
 
