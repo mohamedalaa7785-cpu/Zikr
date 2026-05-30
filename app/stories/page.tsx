@@ -36,8 +36,8 @@ export default async function StoriesPage() {
 
       {/* Categories */}
       <section className="space-y-6">
-        <SectionHeader 
-          title="تصنيفات القصص" 
+        <SectionHeader
+          title="تصنيفات القصص"
           subtitle="اختر التصنيف الذي يناسب اهتمامك"
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -53,11 +53,11 @@ export default async function StoriesPage() {
 
       {/* Stories Grid */}
       <section className="space-y-6">
-        <SectionHeader 
-          title="جميع القصص" 
+        <SectionHeader
+          title="جميع القصص"
           subtitle="قصص مختارة من التراث الإسلامي"
         />
-        
+
         {stories.length === 0 ? (
           <Card className="p-8 text-center">
             <p className="arabic-muted">لا توجد قصص متاحة حالياً. جاري إضافة المحتوى.</p>
@@ -93,34 +93,27 @@ export default async function StoriesPage() {
       {/* YouTube Videos Section */}
       {feed.videos.length > 0 && (
         <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <SectionHeader 
-              title="فيديوهات مرتبطة" 
-              subtitle="محتوى مرئي من قناة اليوتيوب"
-            />
-            {feed.channelId && (
-              <Button href={`https://www.youtube.com/channel/${feed.channelId}`} variant="secondary">
-                زيارة القناة
-              </Button>
-            )}
-          </div>
-          
+          <SectionHeader
+            title="فيديوهات مرتبطة"
+            subtitle="محتوى مرئي من قناة اليوتيوب"
+          />
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {feed.videos.slice(0, 6).map((video) => (
               <Card key={video.id} className="space-y-3 overflow-hidden">
-                <a 
-                  href={`https://www.youtube.com/watch?v=${video.id}`} 
-                  target="_blank" 
-                  rel="noreferrer" 
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
+                  target="_blank"
+                  rel="noreferrer"
                   className="block"
                 >
                   {video.thumbnailUrl ? (
-                    <Image 
-                      src={video.thumbnailUrl} 
-                      alt={video.title} 
-                      width={640} 
-                      height={360} 
-                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity" 
+                    <Image
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      width={640}
+                      height={360}
+                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity"
                     />
                   ) : (
                     <div className="aspect-video rounded-xl bg-black/30 flex items-center justify-center">
@@ -134,8 +127,8 @@ export default async function StoriesPage() {
                 <p className="line-clamp-2 text-sm leading-6 arabic-muted">
                   {video.description}
                 </p>
-                <Button 
-                  href={`https://www.youtube.com/watch?v=${video.id}`} 
+                <Button
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
                   variant="ghost"
                 >
                   مشاهدة
@@ -143,33 +136,41 @@ export default async function StoriesPage() {
               </Card>
             ))}
           </div>
+
+          {feed.channelId && (
+            <div className="text-center">
+              <Button href={`https://www.youtube.com/channel/${feed.channelId}`} variant="secondary">
+                زيارة قناة اليوتيوب
+              </Button>
+            </div>
+          )}
         </section>
       )}
 
       {/* Playlists Section */}
       {feed.playlists.length > 0 && (
         <section className="space-y-6">
-          <SectionHeader 
-            title="قوائم التشغيل" 
+          <SectionHeader
+            title="قوائم التشغيل"
             subtitle="سلاسل متكاملة من المحتوى المرئي"
           />
-          
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {feed.playlists.slice(0, 6).map((playlist) => (
               <Card key={playlist.id} className="space-y-3">
-                <a 
-                  href={`https://www.youtube.com/playlist?list=${playlist.id}`} 
-                  target="_blank" 
-                  rel="noreferrer" 
+                <a
+                  href={`https://www.youtube.com/playlist?list=${playlist.id}`}
+                  target="_blank"
+                  rel="noreferrer"
                   className="block"
                 >
                   {playlist.thumbnailUrl ? (
-                    <Image 
-                      src={playlist.thumbnailUrl} 
-                      alt={playlist.title} 
-                      width={640} 
-                      height={360} 
-                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity" 
+                    <Image
+                      src={playlist.thumbnailUrl}
+                      alt={playlist.title}
+                      width={640}
+                      height={360}
+                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity"
                     />
                   ) : (
                     <div className="aspect-video rounded-xl bg-black/30 flex items-center justify-center">
@@ -186,8 +187,8 @@ export default async function StoriesPage() {
                 <p className="line-clamp-2 text-sm leading-6 arabic-muted">
                   {playlist.description}
                 </p>
-                <Button 
-                  href={`https://www.youtube.com/playlist?list=${playlist.id}`} 
+                <Button
+                  href={`https://www.youtube.com/playlist?list=${playlist.id}`}
                   variant="ghost"
                 >
                   فتح القائمة

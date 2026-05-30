@@ -20,17 +20,17 @@ export default async function YoutubePage() {
     <Container className="space-y-12 py-10 text-right">
       {/* Hero Section */}
       <section className="space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold">المحتوى المرئي</h1>
+        <h1 className="text-4xl font-bold text-brand-gold">المحتوى المرئي والقصص</h1>
         <p className="max-w-3xl text-lg leading-8 arabic-muted">
-          فيديوهات وقوائم تشغيل متنوعة من قناتنا على يوتيوب. محتوى يغذي الروح ويثري العقل.
+          استكشف مجموعة متنوعة من المحتوى الروحاني: فيديوهات من اليوتيوب وقصص إسلامية ملهمة من التاريخ والتراث.
         </p>
         {feed.channelId && (
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <Button href={`https://www.youtube.com/channel/${feed.channelId}`} variant="secondary">
-              زيارة القناة
+              زيارة القناة على يوتيوب
             </Button>
             <Button href="/stories" variant="ghost">
-              القصص المكتوبة
+              عرض جميع القصص
             </Button>
           </div>
         )}
@@ -38,44 +38,42 @@ export default async function YoutubePage() {
 
       {feed.error && (
         <Card className="border-amber-300/40 text-amber-100 p-4">
-          <p>تنبيه: {feed.error}</p>
+          <p className="font-medium">تنبيه:</p>
+          <p>{feed.error}</p>
           <p className="text-sm mt-2 arabic-muted">
             تأكد من إعداد YOUTUBE_API_KEY و YOUTUBE_CHANNEL_ID في متغيرات البيئة.
           </p>
         </Card>
       )}
 
-      {/* Latest Videos */}
+      {/* Latest Videos Section */}
       <section className="space-y-6">
-        <SectionHeader 
-          title="أحدث الفيديوهات" 
-          subtitle="آخر ما تم نشره على القناة"
+        <SectionHeader
+          title="أحدث الفيديوهات"
+          subtitle="محتوى مرئي جديد من القناة"
         />
-        
+
         {feed.videos.length === 0 ? (
           <Card className="p-8 text-center">
-            <p className="arabic-muted">لا توجد فيديوهات للعرض الآن.</p>
-            <p className="text-sm mt-2 arabic-muted">
-              سيتم عرض الفيديوهات تلقائياً عند إعداد YouTube API.
-            </p>
+            <p className="arabic-muted">لا توجد فيديوهات متاحة حالياً.</p>
           </Card>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {feed.videos.map((video) => (
               <Card key={video.id} className="space-y-3 overflow-hidden hover:border-brand-gold/40 transition-colors">
-                <a 
-                  href={`https://www.youtube.com/watch?v=${video.id}`} 
-                  target="_blank" 
-                  rel="noreferrer" 
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
+                  target="_blank"
+                  rel="noreferrer"
                   className="block"
                 >
                   {video.thumbnailUrl ? (
-                    <Image 
-                      src={video.thumbnailUrl} 
-                      alt={video.title} 
-                      width={640} 
-                      height={360} 
-                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity" 
+                    <Image
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      width={640}
+                      height={360}
+                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity"
                     />
                   ) : (
                     <div className="aspect-video rounded-xl bg-black/30 flex items-center justify-center">
@@ -89,8 +87,8 @@ export default async function YoutubePage() {
                 <p className="line-clamp-3 text-sm leading-6 arabic-muted">
                   {video.description}
                 </p>
-                <Button 
-                  href={`https://www.youtube.com/watch?v=${video.id}`} 
+                <Button
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
                   variant="ghost"
                 >
                   مشاهدة الفيديو
@@ -101,34 +99,30 @@ export default async function YoutubePage() {
         )}
       </section>
 
-      {/* Playlists */}
-      <section className="space-y-6">
-        <SectionHeader 
-          title="قوائم التشغيل" 
-          subtitle="سلاسل متكاملة من المحتوى"
-        />
-        
-        {feed.playlists.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="arabic-muted">لا توجد قوائم تشغيل للعرض الآن.</p>
-          </Card>
-        ) : (
+      {/* Playlists Section */}
+      {feed.playlists.length > 0 && (
+        <section className="space-y-6">
+          <SectionHeader
+            title="قوائم التشغيل"
+            subtitle="سلاسل متكاملة من المحتوى"
+          />
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {feed.playlists.map((playlist) => (
               <Card key={playlist.id} className="space-y-3 hover:border-brand-gold/40 transition-colors">
-                <a 
-                  href={`https://www.youtube.com/playlist?list=${playlist.id}`} 
-                  target="_blank" 
-                  rel="noreferrer" 
+                <a
+                  href={`https://www.youtube.com/playlist?list=${playlist.id}`}
+                  target="_blank"
+                  rel="noreferrer"
                   className="block"
                 >
                   {playlist.thumbnailUrl ? (
-                    <Image 
-                      src={playlist.thumbnailUrl} 
-                      alt={playlist.title} 
-                      width={640} 
-                      height={360} 
-                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity" 
+                    <Image
+                      src={playlist.thumbnailUrl}
+                      alt={playlist.title}
+                      width={640}
+                      height={360}
+                      className="aspect-video w-full rounded-xl object-cover hover:opacity-90 transition-opacity"
                     />
                   ) : (
                     <div className="aspect-video rounded-xl bg-black/30 flex items-center justify-center">
@@ -136,7 +130,7 @@ export default async function YoutubePage() {
                     </div>
                   )}
                 </a>
-                <h3 className="font-semibold leading-7 text-brand-cream">
+                <h3 className="font-semibold leading-7 text-brand-cream line-clamp-2">
                   {playlist.title}
                 </h3>
                 <div className="flex items-center gap-2">
@@ -145,8 +139,8 @@ export default async function YoutubePage() {
                 <p className="line-clamp-3 text-sm leading-6 arabic-muted">
                   {playlist.description}
                 </p>
-                <Button 
-                  href={`https://www.youtube.com/playlist?list=${playlist.id}`} 
+                <Button
+                  href={`https://www.youtube.com/playlist?list=${playlist.id}`}
                   variant="ghost"
                 >
                   فتح القائمة
@@ -154,32 +148,31 @@ export default async function YoutubePage() {
               </Card>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Related Stories */}
+      {/* Stories Section */}
       {stories.length > 0 && (
         <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <SectionHeader 
-              title="قصص مكتوبة" 
-              subtitle="محتوى مكتوب من القصص الإسلامية"
-            />
-            <Button href="/stories" variant="ghost">
-              عرض الكل
-            </Button>
-          </div>
-          
+          <SectionHeader
+            title="القصص الإسلامية"
+            subtitle="قصص مختارة من التراث الإسلامي"
+          />
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {stories.slice(0, 3).map((story) => (
+            {stories.slice(0, 6).map((story) => (
               <Link href={`/stories/${story.slug}`} key={story.id}>
-                <Card className="h-full space-y-3 hover:border-brand-gold/40 transition-colors">
-                  <Badge variant="secondary">{story.category}</Badge>
-                  <h3 className="text-lg font-semibold text-brand-cream leading-7">
+                <Card className="h-full space-y-4 hover:shadow-lg hover:border-brand-gold/40 transition-all">
+                  <div className="flex items-start justify-between gap-2">
+                    <Badge variant="secondary">
+                      {story.category}
+                    </Badge>
+                  </div>
+                  <h3 className="text-xl font-semibold text-brand-cream leading-8">
                     {story.title}
                   </h3>
                   {story.summary && (
-                    <p className="line-clamp-2 text-sm leading-6 arabic-muted">
+                    <p className="line-clamp-3 text-sm leading-7 arabic-muted">
                       {story.summary}
                     </p>
                   )}
@@ -190,8 +183,27 @@ export default async function YoutubePage() {
               </Link>
             ))}
           </div>
+
+          <div className="text-center">
+            <Button href="/stories" variant="secondary">
+              عرض جميع القصص
+            </Button>
+          </div>
         </section>
       )}
+
+      {/* Call to Action */}
+      <section className="text-center space-y-4">
+        <Card className="py-8 space-y-4">
+          <h2 className="text-2xl text-brand-gold">هل لديك محتوى تريد مشاركته؟</h2>
+          <p className="arabic-muted max-w-xl mx-auto leading-7">
+            شاركنا قصصك وتجاربك الروحانية لتلهم الآخرين في رحلتهم الإيمانية.
+          </p>
+          <Button href="/auth/login" variant="secondary">
+            سجل الدخول للمشاركة
+          </Button>
+        </Card>
+      </section>
     </Container>
   );
 }
