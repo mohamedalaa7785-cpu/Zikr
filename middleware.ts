@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { isTokenValid } from '@/lib/middleware-auth';
 
-const PROTECTED_ROUTES = ['/profile', '/favorites'];
+const PROTECTED_ROUTES = ['/profile', '/favorites', '/admin'];
 const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/callback', '/'];
 
 export function middleware(request: NextRequest) {
@@ -34,5 +34,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/profile/:path*', '/favorites/:path*'],
+  matcher: ['/profile/:path*', '/favorites/:path*', '/admin/:path*'],
 };

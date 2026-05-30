@@ -22,6 +22,7 @@ interface LogoProps {
   priority?: boolean;
   variant?: LogoVariant;
   theme?: LogoTheme;
+  srcOverride?: string | null;
 }
 
 export function Logo({
@@ -32,12 +33,13 @@ export function Logo({
   priority = false,
   variant = 'default',
   theme = 'auto',
+  srcOverride,
 }: LogoProps) {
   const [failed, setFailed] = useState(false);
   const logoPath = useMemo(() => {
     if (failed) return FALLBACK_LOGO;
-    return DEFAULT_LOGOS[variant];
-  }, [failed, variant]);
+    return srcOverride || DEFAULT_LOGOS[variant];
+  }, [failed, srcOverride, variant]);
 
   return (
     <Image

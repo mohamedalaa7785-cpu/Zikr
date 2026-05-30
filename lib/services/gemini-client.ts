@@ -52,3 +52,15 @@ export async function* streamGeminiText(prompt: string): AsyncGenerator<string, 
     if (text) yield text;
   }
 }
+
+export async function generateGeminiFromAudio(prompt: string, audio: { data: string; mimeType: string }): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const model = client.getGenerativeModel({ model: GEMINI_MODEL, safetySettings, generationConfig: freeTierGenerationConfig });
+  const result = await model.generateContent([
+    prompt,
+    { inlineData: { data: audio.data, mimeType: audio.mimeType } },
+  ] as never);
+  return result.response.text().trim() || null;
+}

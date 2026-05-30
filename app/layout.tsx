@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { SiteShell } from '@/components/layout/site-shell';
 import { defaultOgImage, siteConfig } from '@/lib/site';
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@/components/layout/analytics';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
