@@ -7,7 +7,7 @@ export interface Story {
   id: string;
   slug: string;
   title: string;
-  summary: string;
+  summary?: string;
   category: StoryCategory;
   published?: boolean;
   createdAt?: string;
@@ -30,10 +30,21 @@ export async function getStories(): Promise<Story[]> {
       return cachedStories.data;
     }
 
-    const response = await supabaseServerAnonRequest<Story[]>(
-      '/rest/v1/stories?select=id,slug,title,summary,category,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc',
-      { cache: 'force-cache', next: { revalidate: 1800 } },
-    );
+    // Try fetching with summary first, fall back to without if column doesn't exist
+    let response: Story[] | undefined;
+    try {
+      response = await supabaseServerAnonRequest<Story[]>(
+        '/rest/v1/stories?select=id,slug,title,summary,category,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc',
+        { cache: 'force-cache', next: { revalidate: 1800 } },
+      );
+    } catch (summaryError) {
+      // If summary column doesn't exist, fetch without it
+      console.warn('[stories] Summary column may not exist, trying without it');
+      response = await supabaseServerAnonRequest<Story[]>(
+        '/rest/v1/stories?select=id,slug,title,category,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc',
+        { cache: 'force-cache', next: { revalidate: 1800 } },
+      );
+    }
 
     // Type validation
     if (!Array.isArray(response)) {
@@ -48,9 +59,9 @@ export async function getStories(): Promise<Story[]> {
       return FALLBACK_STORIES;
     }
 
-    // Validate response shape
+    // Validate response shape - summary is now optional
     const validated = response.every(
-      (item: any) => item.id && item.slug && item.title && item.summary && item.category,
+      (item: any) => item.id && item.slug && item.title && item.category,
     );
 
     if (!validated) {
