@@ -26,7 +26,7 @@ DATABASE_URL='postgres://...' node scripts/audit-db.mjs
 
 ## Drift/sync guidance
 If drift is detected between live DB and `drizzle/schema.ts`:
-1. Add **additive corrective migration** under `drizzle/migrations/`.
+1. Add an **additive corrective migration** under `supabase/migrations/`.
 2. Avoid drops/resets.
 3. Re-run `scripts/audit-db.mjs` and confirm integrity.
 
