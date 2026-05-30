@@ -101,6 +101,7 @@ DROP TABLE "subscriptions" CASCADE;--> statement-breakpoint
 DROP TABLE "tasks" CASCADE;--> statement-breakpoint
 DROP TABLE "user_behavior" CASCADE;--> statement-breakpoint
 DROP TABLE "users" CASCADE;--> statement-breakpoint
+codex/organize-database-migrations-clearly
 ALTER TABLE "hadith_explanations" DROP CONSTRAINT IF EXISTS "hadith_explanations_hadith_id_hadiths_id_fk";
 --> statement-breakpoint
 ALTER TABLE "hadiths" DROP CONSTRAINT IF EXISTS "hadiths_book_id_hadith_books_id_fk";
@@ -116,6 +117,22 @@ ALTER TABLE "research_requests" DROP CONSTRAINT IF EXISTS "research_requests_use
 ALTER TABLE "stories" DROP CONSTRAINT IF EXISTS "stories_user_id_users_id_fk";
 --> statement-breakpoint
 ALTER TABLE "user_subscriptions" DROP CONSTRAINT IF EXISTS "user_subscriptions_user_id_users_id_fk";
+ALTER TABLE "hadith_explanations" DROP CONSTRAINT "hadith_explanations_hadith_id_hadiths_id_fk";
+--> statement-breakpoint
+ALTER TABLE "hadiths" DROP CONSTRAINT "hadiths_book_id_hadith_books_id_fk";
+--> statement-breakpoint
+ALTER TABLE "payments" DROP CONSTRAINT "payments_user_id_users_id_fk";
+--> statement-breakpoint
+ALTER TABLE "quran_ayahs" DROP CONSTRAINT "quran_ayahs_surah_id_quran_surahs_id_fk";
+--> statement-breakpoint
+ALTER TABLE "quran_tafsir" DROP CONSTRAINT "quran_tafsir_surah_id_quran_surahs_id_fk";
+--> statement-breakpoint
+ALTER TABLE "research_requests" DROP CONSTRAINT "research_requests_user_id_users_id_fk";
+--> statement-breakpoint
+ALTER TABLE "stories" DROP CONSTRAINT "stories_user_id_users_id_fk";
+--> statement-breakpoint
+ALTER TABLE "user_subscriptions" DROP CONSTRAINT "user_subscriptions_user_id_users_id_fk";
+main
 --> statement-breakpoint
 ALTER TABLE "generated_research" ALTER COLUMN "request_id" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "payments" ALTER COLUMN "user_id" DROP NOT NULL;--> statement-breakpoint
