@@ -5,6 +5,7 @@ import { reciters } from '@/lib/data/content';
 import { Button } from '@/components/ui/button';
 
 export function QuranAudioPlayer({ surahId }: { surahId: number }) {
+  const [isClient, setIsClient] = useState(false);
   const [reciter, setReciter] = useState(reciters[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -13,19 +14,26 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
+  // Hydration guard - ensure component only renders on client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   const [audioSourceIndex, setAudioSourceIndex] = useState(0);
   const audioSources = useMemo(() => {
+    if (!isClient) return [];
     const sources = [`${reciter.baseUrlTemplate}/${surahId}.mp3`];
     // Fallback to EveryAyah if CDN fails
     if (reciter.code) {
       sources.push(`https://everyayah.com/data/${reciter.code}/${String(surahId).padStart(3, '0')}.mp3`);
     }
     return sources;
-  }, [reciter, surahId]);
+  }, [reciter, surahId, isClient]);
 
   const src = audioSources[audioSourceIndex] || audioSources[0];
 
   useEffect(() => {
+    if (!isClient) return;
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -81,9 +89,10 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [src]);
+  }, [src, isClient]);
 
   const togglePlay = () => {
+    if (!isClient) return;
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -102,6 +111,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isClient) return;
     const audio = audioRef.current;
     if (!audio) return;
     const time = Number(e.target.value);

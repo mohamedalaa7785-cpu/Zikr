@@ -25,9 +25,19 @@ const links = [
 
 export async function Navbar() {
   const token = (await cookies()).get('sb_access_token')?.value;
-  const profile = token ? await getCurrentProfile() : null;
-  const isAdmin = profile?.role === 'admin';
-  const homepage = await getSiteSetting('homepage');
+  let profile = null;
+  let isAdmin = false;
+  let homepage = null;
+  
+  try {
+    profile = token ? await getCurrentProfile() : null;
+    isAdmin = profile?.role === 'admin';
+    homepage = await getSiteSetting('homepage');
+  } catch (error) {
+    // Log error but don't crash navbar
+    console.error('[navbar] Error loading user profile or site settings:', error instanceof Error ? error.message : 'unknown error');
+    // Continue with defaults
+  }
 
   return (
     <header className='sticky top-0 z-40 border-b border-brand-gold/20 bg-brand-emeraldDeep/85 backdrop-blur'>

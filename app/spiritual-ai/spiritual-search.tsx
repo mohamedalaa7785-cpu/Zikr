@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,9 +51,15 @@ function ResponseCard({ response }: { response: SpiritualResponse }) {
 }
 
 export function SpiritualSearch() {
+  const [isClient, setIsClient] = useState(false);
   const [feeling, setFeeling] = useState('');
   const [result, setResult] = useState<AISearchResult | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Hydration guard
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleSearch = () => {
     if (!feeling.trim()) return;

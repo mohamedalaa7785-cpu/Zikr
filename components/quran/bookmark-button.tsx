@@ -5,12 +5,19 @@ import { addFavorite, removeFavorite, isFavorite } from '@/app/favorites/actions
 import { toast } from 'sonner';
 
 export function BookmarkButton({ keyRef }: { keyRef: string }) {
+  const [isClient, setIsClient] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // Hydration guard
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
     isFavorite(keyRef).then(setSaved);
-  }, [keyRef]);
+  }, [keyRef, isClient]);
 
   const toggle = () => {
     startTransition(async () => {
@@ -37,6 +44,18 @@ export function BookmarkButton({ keyRef }: { keyRef: string }) {
       }
     });
   };
+
+  if (!isClient) {
+    return (
+      <button
+        className='text-sm text-brand-gold/50 disabled:opacity-50 cursor-default'
+        disabled
+        title='جاري التحميل...'
+      >
+        ☆ حفظ
+      </button>
+    );
+  }
 
   return (
     <button
