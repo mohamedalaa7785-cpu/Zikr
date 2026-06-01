@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { buildOAuthRedirectUri } from '@/lib/auth-enhanced';
 import { Button } from '@/components/ui/button';
 
 export function GoogleOAuthButton({ next, label }: { next?: string; label: string }) {
@@ -12,24 +13,45 @@ export function GoogleOAuthButton({ next, label }: { next?: string; label: strin
     try {
       setLoading(true);
       setError(null);
-      const url = new URL('/auth/callback', window.location.origin);
-      if (next) url.searchParams.set('next', next);
-      await createBrowserSupabaseClient().auth.signInWithOAuth({
+      
+      // Build redirect URI with validation
+      const redirectUri = buildOAuthRedirectUri(window.location.origin, next);
+      
+      // Attempt OAuth login
+      const client = createBrowserSupabaseClient();
+      if (!client.auth) {
+        throw new Error('خادم المصادقة غير متاح. تأكد من تكوين Supabase.');
+      }
+      
+      await client.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: url.toString() },
+        options: { redirectTo: redirectUri },
       });
-    } catch {
+    } catch (err) {
       setLoading(false);
-      setError('تعذر تسجيل الدخول عبر Google. حاول مرة أخرى.');
+      const message = err instanceof Error ? err.message : 'تعذر تسجيل الدخول عبر Google. حاول مرة أخرى.';
+      setError(message);
+      console.error('[oauth] Google login failed:', message);
     }
   };
 
   return (
     <div className='space-y-2'>
-      <Button type='button' variant='secondary' className='w-full' onClick={onClick} disabled={loading}>
-        {loading ? 'جارٍ التحويل إلى Google...' : label}
+      <Button 
+        type='button' 
+        variant='secondary' 
+        className='w-full' 
+        onClick={onClick} 
+        disabled={loading}
+      >
+        {loading ? 'جارٍ التوجيه إلى Google...' : label}
       </Button>
-      {error ? <p className='text-sm text-red-300'>{error}</p> : null}
+      {error && (
+        <div className='rounded-lg bg-red-500/10 border border-red-500/20 p-3'>
+          <p className='text-sm text-red-300'>{error}</p>
+          <p className='text-xs text-red-400 mt-1'>تأكد من تفعيل Google OAuth في إعدادات Supabase</p>
+        </div>
+      )}
     </div>
   );
 }

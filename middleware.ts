@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isTokenValid } from '@/lib/middleware-auth';
+import { isTokenValid, isTokenExpired } from '@/lib/middleware-auth';
 
 const PROTECTED_ROUTES = ['/profile', '/favorites', '/admin'];
 const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/callback', '/'];
@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
   const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // If token is expired but refresh token exists, try to refresh
-  if (refreshToken && (!token || !isTokenValid(token)) && NEXT_PUBLIC_SUPABASE_URL && NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  if (refreshToken && token && isTokenExpired(token) && NEXT_PUBLIC_SUPABASE_URL && NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     try {
       const res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
         method: 'POST',
@@ -50,9 +50,12 @@ export async function middleware(request: NextRequest) {
     } catch (error) {
       // Log but don't block - middleware should allow request to proceed
       // The app will handle missing auth gracefully
-      if (process.env.NODE_ENV === 'development') {
-        console.error('[middleware] Token refresh failed:', error instanceof Error ? error.message : 'unknown error');
-      }
+      console.error('[middleware] Token refresh failed:', error instanceof Error ? error.message : 'unknown error');
+      // Clear invalid tokens
+      const response = NextResponse.next();
+      response.cookies.delete('sb_access_token');
+      response.cookies.delete('sb_refresh_token');
+      return response;
     }
   }
 
@@ -60,15 +63,19 @@ export async function middleware(request: NextRequest) {
 
   // Validate token existence and validity
   if (!token || !isTokenValid(token)) {
-    if (pathname === '/auth/login') return NextResponse.next();
+    // Allow login and register pages to render
+    if (pathname === '/auth/login' || pathname === '/auth/register') {
+      return NextResponse.next();
+    }
 
+    // Redirect to login with return path
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('next', pathname);
     const response = NextResponse.redirect(loginUrl);
     
-    if (token) {
-      response.cookies.delete('sb_access_token');
-    }
+    // Clear invalid tokens
+    response.cookies.delete('sb_access_token');
+    response.cookies.delete('sb_refresh_token');
     
     return response;
   }
