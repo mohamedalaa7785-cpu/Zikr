@@ -151,46 +151,7 @@ export default async function YoutubePage() {
         </section>
       )}
 
-      {/* Stories Section */}
-      {stories.length > 0 && (
-        <section className="space-y-6">
-          <SectionHeader
-            title="القصص الإسلامية"
-            subtitle="قصص مختارة من التراث الإسلامي"
-          />
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {stories.slice(0, 6).map((story) => (
-              <Link href={`/stories/${story.slug}`} key={story.id}>
-                <Card className="h-full space-y-4 hover:shadow-lg hover:border-brand-gold/40 transition-all">
-                  <div className="flex items-start justify-between gap-2">
-                    <Badge variant="secondary">
-                      {story.category}
-                    </Badge>
-                  </div>
-                  <h3 className="text-xl font-semibold text-brand-cream leading-8">
-                    {story.title}
-                  </h3>
-                  {story.summary && (
-                    <p className="line-clamp-3 text-sm leading-7 arabic-muted">
-                      {story.summary}
-                    </p>
-                  )}
-                  <Button variant="ghost" className="w-full">
-                    قراءة القصة
-                  </Button>
-                </Card>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Button href="/stories" variant="secondary">
-              عرض جميع القصص
-            </Button>
-          </div>
-        </section>
-      )}
+      {/* Stories Section - Removed: stories content moved to dedicated /stories page */}
 
       {/* Call to Action */}
       <section className="text-center space-y-4">
