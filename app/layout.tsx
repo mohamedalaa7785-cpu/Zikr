@@ -3,6 +3,7 @@ import './globals.css';
 import { SiteShell } from '@/components/layout/site-shell';
 import { defaultOgImage, siteConfig } from '@/lib/site';
 import { Analytics } from '@/components/layout/analytics';
+import { ServiceWorkerRegister } from '@/components/layout/service-worker-register';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -34,9 +35,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='ar' dir={siteConfig.dir}>
+      <head>
+        <meta name='theme-color' content='#0E4B45' />
+        <meta name='mobile-web-app-capable' content='yes' />
+        <meta name='apple-mobile-web-app-capable' content='yes' />
+        <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
+        <meta name='apple-mobile-web-app-title' content={siteConfig.shortName} />
+        <link rel='apple-touch-icon' href='/icons/icon-192.svg' />
+        <link rel='manifest' href='/manifest.webmanifest' />
+      </head>
       <body className='font-arabic antialiased'>
         <SiteShell>{children}</SiteShell>
         <Analytics />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
