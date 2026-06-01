@@ -5,11 +5,115 @@
 
 :root {
   --font-arabic: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', 'Segoe UI', Tahoma, Arial, sans-serif;
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: radial-gradient(circle at top, #0e4b45 0%, #072e2a 60%);
   color: var(--text);
+  font-family: var(--font-arabic), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.arabic-muted { color: var(--muted); transition: color 0.2s ease; }
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-arabic), system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* Colors and utilities */
+.arabic-muted {
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+.arabic-text {
+  font-family: var(--font-arabic), system-ui, sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.4s ease-out;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(199, 168, 107, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(199, 168, 107, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(199, 168, 107, 0.5);
+}
+
+/* Focus states for accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(199, 168, 107, 0.3);
+  color: var(--text);
+}
