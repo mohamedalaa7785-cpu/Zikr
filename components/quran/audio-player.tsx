@@ -4,6 +4,16 @@ import { useMemo, useRef, useState, useEffect } from 'react';
 import { reciters } from '@/lib/data/content';
 import { Button } from '@/components/ui/button';
 
+// Audio URL generation function (client-safe)
+function getAudioUrl(surahId: number, reciterCode: string) {
+  const QURAN_CDN_URL = 'https://cdn.islamic.network/quran/audio-surah/128';
+  const FALLBACK_CDN_URL = 'https://everyayah.com/data';
+  const surahNumber = String(surahId).padStart(3, '0');
+  const primary = `${QURAN_CDN_URL}/${reciterCode}/${surahNumber}.mp3`;
+  const fallback = [`${FALLBACK_CDN_URL}/${reciterCode}/${surahNumber}.mp3`];
+  return { primary, fallback };
+}
+
 export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const [isClient, setIsClient] = useState(false);
   const [reciter, setReciter] = useState(reciters[0]);
@@ -22,12 +32,10 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const [audioSourceIndex, setAudioSourceIndex] = useState(0);
   const audioSources = useMemo(() => {
     if (!isClient) return [];
-    const sources = [`${reciter.baseUrlTemplate}/${surahId}.mp3`];
-    // Fallback to EveryAyah if CDN fails
-    if (reciter.code) {
-      sources.push(`https://everyayah.com/data/${reciter.code}/${String(surahId).padStart(3, '0')}.mp3`);
-    }
-    return sources;
+    if (!reciter.code) return [];
+    
+    const { primary, fallback } = getAudioUrl(surahId, reciter.code);
+    return [primary, ...fallback];
   }, [reciter, surahId, isClient]);
 
   const src = audioSources[audioSourceIndex] || audioSources[0];
@@ -53,11 +61,11 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     
     const handleError = () => {
       if (audioSourceIndex < audioSources.length - 1) {
-        console.warn(`Failed to load audio from ${src}, trying fallback...`);
+        console.warn(`Failed to load audio from ${src}, trying fallback source ${audioSourceIndex + 1}...`);
         setAudioSourceIndex(prev => prev + 1);
       } else {
         setIsLoading(false);
-        setError('تعذر تحميل المقطع الصوتي من جميع المصادر المتاحة. جرب قارئ آخر.');
+        setError('تعذر تحميل المقطع الصوتي من جميع المصادر المتاحة. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
       }
     };
 
@@ -128,11 +136,19 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
 
   const handleReciterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newReciter = reciters.find(r => r.id === e.target.value) ?? reciters[0];
+    if (!isClient) return;
+    
     setReciter(newReciter);
     setAudioSourceIndex(0);
     setIsPlaying(false);
     setCurrentTime(0);
     setError(null);
+    
+    // Reset audio element
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   };
 
   return (

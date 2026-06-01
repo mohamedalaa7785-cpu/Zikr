@@ -2,25 +2,54 @@ import { getAllSurahs } from '@/lib/services/quran';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { SurahSearch } from '@/components/quran/surah-search';
+import { Suspense } from 'react';
+import { SurahSkeleton } from '@/components/quran/surah-skeleton';
 
 export const revalidate = 3600;
 
-export default async function QuranPage() {
-  const surahs = await getAllSurahs('ar');
+async function QuranContent() {
+  try {
+    const surahs = await getAllSurahs('ar');
 
-  return (
-    <Container className='space-y-4 py-12'>
-      <h1 className='text-3xl text-brand-gold mb-6'>القرآن الكريم</h1>
+    if (surahs.length === 0) {
+      return (
+        <Container className='space-y-4 py-12'>
+          <h1 className='text-3xl text-brand-gold mb-6'>القرآن الكريم</h1>
+          <Card className='p-4 arabic-muted text-center'>
+            لا توجد سور متاحة الآن. يرجى المحاولة لاحقًا.
+          </Card>
+        </Container>
+      );
+    }
 
-      {surahs.length === 0 ? (
-        <Card className='p-4 arabic-muted text-center'>لا توجد سور متاحة الآن. حاول مرة أخرى لاحقًا.</Card>
-      ) : (
+    return (
+      <Container className='space-y-4 py-12'>
+        <h1 className='text-3xl text-brand-gold mb-6'>القرآن الكريم</h1>
         <SurahSearch initialSurahs={surahs.map(s => ({
           number: s.number,
           name: s.name,
           numberOfAyahs: s.numberOfAyahs
         }))} />
-      )}
-    </Container>
+      </Container>
+    );
+  } catch (error) {
+    console.error('[quran-page] Error loading surahs:', error);
+    return (
+      <Container className='space-y-4 py-12'>
+        <h1 className='text-3xl text-brand-gold mb-6'>القرآن الكريم</h1>
+        <Card className='p-4 text-center'>
+          <p className='text-red-300 mb-2'>حدث خطأ في تحميل السور</p>
+          <p className='text-xs arabic-muted'>يرجى تحديث الصفحة والمحاولة مرة أخرى</p>
+        </Card>
+      </Container>
+    );
+  }
+}
+
+export default function QuranPage() {
+  return (
+    <Suspense fallback={<SurahSkeleton />}>
+      <QuranContent />
+    </Suspense>
   );
 }
