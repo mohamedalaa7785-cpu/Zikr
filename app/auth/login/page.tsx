@@ -11,6 +11,13 @@ import { useSearchParams } from 'next/navigation';
 
 function LoginForm() {
   const searchParams = useSearchParams();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -95,7 +102,11 @@ function LoginForm() {
         </div>
       </div>
 
-      <GoogleOAuthButton next={searchParams.get('next') || undefined} label="المتابعة باستخدام Google" />
+      {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
+        <GoogleOAuthButton next={searchParams.get('next') || undefined} label="المتابعة باستخدام Google" />
+      ) : (
+        <p className="text-center text-xs text-brand-gold/50 italic">تسجيل الدخول عبر Google غير متوفر حالياً</p>
+      )}
 
       <p className="text-center text-sm arabic-muted">
         ليس لديك حساب؟{' '}
