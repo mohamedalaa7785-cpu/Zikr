@@ -102,7 +102,7 @@ function LoginForm() {
         </div>
       </div>
 
-      {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
+      {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID ? (
         <GoogleOAuthButton next={searchParams.get('next') || undefined} label="المتابعة باستخدام Google" />
       ) : (
         <p className="text-center text-xs text-brand-gold/50 italic">تسجيل الدخول عبر Google غير متوفر حالياً</p>

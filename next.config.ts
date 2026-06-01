@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
   // Output optimization
   productionBrowserSourceMaps: false,
   trailingSlash: false,
-  swcMinify: true,
+  // swcMinify: true, // Removed as it is unrecognized in Next.js 15.5.x
   // Webpack optimization
   webpack: (config, { isServer }) => {
     if (!isServer) {

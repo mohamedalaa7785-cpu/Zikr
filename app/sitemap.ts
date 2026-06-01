@@ -28,7 +28,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     // Use force-cache for sitemap generation to avoid dynamic server usage error
-    const fetchOptions = { cache: 'force-cache' as const };
+    // Also check if we are in build phase to avoid crashing
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      console.info('[sitemap] Skipping dynamic fetch during build phase to avoid dynamic usage error');
+      return staticRoutes;
+    }
 
     const [surahs, scholars, hadithBooks, stories] = await Promise.all([
       getAllSurahs('ar').catch((err) => { console.error('[sitemap] Quran fetch failed:', err); return []; }),
