@@ -5,12 +5,20 @@ import { reciters } from '@/lib/data/content';
 import { Button } from '@/components/ui/button';
 
 // Audio URL generation function (client-safe)
-function getAudioUrl(surahId: number, reciterCode: string) {
-  const QURAN_CDN_URL = 'https://cdn.islamic.network/quran/audio-surah/128';
-  const FALLBACK_CDN_URL = 'https://everyayah.com/data';
+function getAudioUrl(surahId: number, reciter: any) {
   const surahNumber = String(surahId).padStart(3, '0');
-  const primary = `${QURAN_CDN_URL}/${reciterCode}/${surahNumber}.mp3`;
-  const fallback = [`${FALLBACK_CDN_URL}/${reciterCode}/${surahNumber}.mp3`];
+  
+  // Use reciter's baseUrlTemplate if available
+  const primary = reciter.baseUrlTemplate 
+    ? `${reciter.baseUrlTemplate}/${surahNumber}.mp3`
+    : `https://cdn.islamic.network/quran/audio-surah/128/${reciter.code}/${surahNumber}.mp3`;
+  
+  // Fallback sources
+  const fallback = [
+    `https://everyayah.com/data/${reciter.code}/${surahNumber}.mp3`,
+    `https://quranaudio.pages.dev/1_0_2/${reciter.code}/${surahNumber}.mp3`,
+  ];
+  
   return { primary, fallback };
 }
 
@@ -34,7 +42,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     if (!isClient) return [];
     if (!reciter.code) return [];
     
-    const { primary, fallback } = getAudioUrl(surahId, reciter.code);
+    const { primary, fallback } = getAudioUrl(surahId, reciter);
     return [primary, ...fallback];
   }, [reciter, surahId, isClient]);
 
@@ -57,15 +65,20 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     
     const handleCanPlay = () => {
       setIsLoading(false);
+      console.debug(`[audio] Successfully loaded from source ${audioSourceIndex + 1}`);
     };
     
-    const handleError = () => {
+    const handleError = (event: Event) => {
+      const audioError = (event.target as HTMLAudioElement).error;
+      const errorMsg = audioError?.message || 'Unknown error';
+      
       if (audioSourceIndex < audioSources.length - 1) {
-        console.warn(`Failed to load audio from ${src}, trying fallback source ${audioSourceIndex + 1}...`);
+        console.warn(`[audio] Failed to load from source ${audioSourceIndex + 1}/${audioSources.length}: ${errorMsg}. Trying next...`);
         setAudioSourceIndex(prev => prev + 1);
       } else {
         setIsLoading(false);
         setError('تعذر تحميل المقطع الصوتي من جميع المصادر المتاحة. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+        console.error('[audio] All audio sources failed:', { surahId, reciter: reciter.id, sources: audioSources });
       }
     };
 
@@ -84,7 +97,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
 
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('error', handleError);
+    audio.addEventListener('error', handleError as EventListener);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
@@ -92,7 +105,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     return () => {
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.removeEventListener('canplay', handleCanPlay);
-      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('error', handleError as EventListener);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
@@ -108,13 +121,25 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play().then(() => {
-        setIsPlaying(true);
-      }).catch((err) => {
-        console.error("Playback failed:", err);
-        setError('تعذر تشغيل الصوت. قد يكون هناك قيود من المتصفح.');
-        setIsPlaying(false);
-      });
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            console.debug('[audio] Playback started successfully');
+          })
+          .catch((err: any) => {
+            console.error('[audio] Playback failed:', err);
+            if (err.name === 'NotAllowedError') {
+              setError('يتطلب تفاعل المستخدم. انقر على الزر مرة أخرى.');
+            } else if (err.name === 'NotSupportedError') {
+              setError('صيغة الصوت غير مدعومة على هذا الجهاز.');
+            } else {
+              setError('تعذر تشغيل الصوت. حاول مرة أخرى.');
+            }
+            setIsPlaying(false);
+          });
+      }
     }
   };
 
@@ -138,16 +163,17 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     const newReciter = reciters.find(r => r.id === e.target.value) ?? reciters[0];
     if (!isClient) return;
     
+    console.debug('[audio] Changing reciter to:', newReciter.id);
     setReciter(newReciter);
     setAudioSourceIndex(0);
     setIsPlaying(false);
     setCurrentTime(0);
     setError(null);
     
-    // Reset audio element
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      audioRef.current.src = '';
     }
   };
 
@@ -209,7 +235,14 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
         </div>
       </div>
 
-      <audio ref={audioRef} preload='metadata' src={src} className='hidden' />
+      <audio 
+        ref={audioRef} 
+        preload='metadata' 
+        src={src} 
+        className='hidden'
+        crossOrigin='anonymous'
+        controlsList='nodownload'
+      />
 
       <p className='text-xs text-center arabic-muted'>
         استمع للسورة كاملة بصوت القارئ {reciter.nameAr}
