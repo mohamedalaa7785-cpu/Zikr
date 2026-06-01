@@ -12,21 +12,22 @@ import { useSearchParams } from 'next/navigation';
 function LoginForm() {
   const searchParams = useSearchParams();
   const [isClient, setIsClient] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!isClient) return;
     const errorParam = searchParams.get('error');
     if (errorParam) {
       setError(decodeURIComponent(errorParam));
     }
-  }, [searchParams]);
+  }, [searchParams, isClient]);
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);

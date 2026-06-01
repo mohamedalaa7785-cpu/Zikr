@@ -11,16 +11,22 @@ import { useSearchParams } from 'next/navigation';
 
 function RegisterForm() {
   const searchParams = useSearchParams();
+  const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
     const errorParam = searchParams.get('error');
     if (errorParam) {
       setError(decodeURIComponent(errorParam));
     }
-  }, [searchParams]);
+  }, [searchParams, isClient]);
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);
@@ -40,6 +46,8 @@ function RegisterForm() {
       setLoading(false);
     }
   };
+
+  if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
 
   return (
     <Card className="mx-auto max-w-md space-y-6 text-right">
