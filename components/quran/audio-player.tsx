@@ -14,7 +14,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   
   const src = useMemo(
-    () => `${reciter.baseUrlTemplate}/${String(surahId).padStart(3, '0')}.mp3`,
+    () => `${reciter.baseUrlTemplate}/${surahId}.mp3`,
     [reciter, surahId]
   );
 
@@ -22,6 +22,11 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // Reset state when source changes
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    
     const handleLoadStart = () => {
       setIsLoading(true);
       setError(null);
@@ -72,10 +77,16 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
 
     if (isPlaying) {
       audio.pause();
+      setIsPlaying(false);
     } else {
-      audio.play();
+      audio.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.error("Playback failed:", err);
+        setError('تعذر تشغيل الصوت. قد يكون هناك قيود من المتصفح.');
+        setIsPlaying(false);
+      });
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +123,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
         >
           {reciters.map(r => (
             <option key={r.id} value={r.id} className='bg-brand-emeraldDeep'>
-              {r.nameAr} - {r.nameEn}
+              {r.nameAr}
             </option>
           ))}
         </select>
@@ -162,7 +173,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
       <audio ref={audioRef} preload='metadata' src={src} className='hidden' />
 
       <p className='text-xs text-center arabic-muted'>
-        المصدر: EveryAyah.com - استمع للسورة كاملة بصوت القارئ {reciter.nameAr}
+        استمع للسورة كاملة بصوت القارئ {reciter.nameAr}
       </p>
     </div>
   );

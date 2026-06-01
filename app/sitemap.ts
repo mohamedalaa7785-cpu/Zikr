@@ -4,7 +4,7 @@ import { getAllScholars } from '@/lib/services/scholars';
 import { getHadithBooks } from '@/lib/services/hadith';
 import { getStories } from '@/lib/services/stories';
 
-export const revalidate = 3600;
+export const revalidate = 86400; // 24 hours
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zikr.app';
@@ -26,6 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       console.warn('[sitemap] Skipping dynamic routes due to missing NEXT_PUBLIC_SUPABASE_URL');
       return staticRoutes;
     }
+
+    // Use force-cache for sitemap generation to avoid dynamic server usage error
+    const fetchOptions = { cache: 'force-cache' as const };
 
     const [surahs, scholars, hadithBooks, stories] = await Promise.all([
       getAllSurahs('ar').catch((err) => { console.error('[sitemap] Quran fetch failed:', err); return []; }),

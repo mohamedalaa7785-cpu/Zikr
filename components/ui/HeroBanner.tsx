@@ -11,8 +11,8 @@ interface HeroBannerProps {
   imageSrc?: string;
 }
 
-const DEFAULT_HERO = '/branding/hero-bg.png';
-const HERO_FALLBACK = '/branding/hero-bg.png';
+const DEFAULT_HERO = '/branding/hero-bg.webp';
+const HERO_FALLBACK = '/branding/hero-bg.webp';
 
 export function HeroBanner({ className, title, subtitle, imageSrc = DEFAULT_HERO }: HeroBannerProps) {
   const [src, setSrc] = useState(imageSrc);

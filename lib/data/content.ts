@@ -1,7 +1,7 @@
 export type Surah={id:number;nameAr:string;nameEn:string;ayahCount:number;revelationPlace:string;slug:string};
 export type Ayah={surahId:number;ayahNumber:number;textUthmani:string;textSimple:string;page:number;juz:number;hizb:number;rub:number;sajda:boolean};
 export type Tafsir={surahId:number;ayahNumber:number;source:string;text:string};
-export type Reciter={id:string;nameAr:string;nameEn:string;code:string;baseUrlTemplate:string};
+export type Reciter={id:string;nameAr:string;nameEn:string;code:string;baseUrlTemplate:string;type:'surah'|'ayah'};
 export type HadithBook={id:string;slug:string;nameAr:string;nameEn:string;source:string};
 export type Hadith={id:string;bookId:string;hadithNumber:string;textAr:string;narrator:string;grade:string;chapter:string;ref:string};
 
@@ -29,14 +29,14 @@ export const tafsir:Tafsir[]=[
 ];
 
 export const reciters:Reciter[]=[
-  {id:'husary',nameAr:'محمود خليل الحصري',nameEn:'Mahmoud Khalil Al-Husary',code:'husary',baseUrlTemplate:'https://everyayah.com/data/Husary_128kbps'},
-  {id:'minshawi',nameAr:'محمد صديق المنشاوي',nameEn:'Muhammad Siddiq Al-Minshawi',code:'minshawi',baseUrlTemplate:'https://everyayah.com/data/Minshawy_Murattal_128kbps'},
-  {id:'abdulbasit',nameAr:'عبد الباسط عبد الصمد',nameEn:'Abdul Basit Abdul Samad',code:'abdulbasit',baseUrlTemplate:'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps'},
-  {id:'sudais',nameAr:'عبد الرحمن السديس',nameEn:'Abdurrahman As-Sudais',code:'sudais',baseUrlTemplate:'https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps'},
-  {id:'shuraim',nameAr:'سعود الشريم',nameEn:'Saud Al-Shuraim',code:'shuraim',baseUrlTemplate:'https://everyayah.com/data/Saood_ash-Shuraym_128kbps'},
-  {id:'alafasy',nameAr:'مشاري راشد العفاسي',nameEn:'Mishary Rashid Alafasy',code:'alafasy',baseUrlTemplate:'https://everyayah.com/data/Alafasy_128kbps'},
-  {id:'mahermuaiqly',nameAr:'ماهر المعيقلي',nameEn:'Maher Al-Muaiqly',code:'mahermuaiqly',baseUrlTemplate:'https://everyayah.com/data/MashaRashidAlafay_64kbps'},
-  {id:'ghamdi',nameAr:'سعد الغامدي',nameEn:'Saad Al-Ghamdi',code:'ghamdi',baseUrlTemplate:'https://everyayah.com/data/Ghamadi_40kbps'},
+  {id:'alafasy',nameAr:'مشاري راشد العفاسي',nameEn:'Mishary Rashid Alafasy',code:'ar.alafasy',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy',type:'surah'},
+  {id:'minshawi',nameAr:'محمد صديق المنشاوي',nameEn:'Muhammad Siddiq Al-Minshawi',code:'ar.minshawi',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.minshawi',type:'surah'},
+  {id:'husary',nameAr:'محمود خليل الحصري',nameEn:'Mahmoud Khalil Al-Husary',code:'ar.husary',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.husary',type:'surah'},
+  {id:'abdulbasit',nameAr:'عبد الباسط عبد الصمد',nameEn:'Abdul Basit Abdul Samad',code:'ar.abdulsamad',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.abdulsamad',type:'surah'},
+  {id:'sudais',nameAr:'عبد الرحمن السديس',nameEn:'Abdurrahman As-Sudais',code:'ar.as-sudais',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.as-sudais',type:'surah'},
+  {id:'shuraim',nameAr:'سعود الشريم',nameEn:'Saud Al-Shuraim',code:'ar.shuraym',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.shuraym',type:'surah'},
+  {id:'mahermuaiqly',nameAr:'ماهر المعيقلي',nameEn:'Maher Al-Muaiqly',code:'ar.mahermuaiqly',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.mahermuaiqly',type:'surah'},
+  {id:'ghamdi',nameAr:'سعد الغامدي',nameEn:'Saad Al-Ghamdi',code:'ar.saadghamidi',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.saadghamidi',type:'surah'},
 ];
 
 export const hadithBooks:HadithBook[]=[
