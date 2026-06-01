@@ -41,12 +41,25 @@ const nextConfig: NextConfig = {
           value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://*.supabase.co https://i.ytimg.com https://img.youtube.com; media-src 'self' blob: https://*.supabase.co https://cdn.islamic.network; connect-src 'self' https://*.supabase.co https://www.googleapis.com https://generativelanguage.googleapis.com https://api.hadith.gading.dev https://api.aladhan.com https://api.alquran.cloud; font-src 'self' data:;",
         },
         { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(self), camera=()' },
+        { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
       ],
     },
     {
       source: '/api/:path*',
       headers: [
         { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+      ],
+    },
+    {
+      source: '/static/:path*',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+      ],
+    },
+    {
+      source: '/:path*.svg',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
       ],
     },
   ],
@@ -57,6 +70,41 @@ const nextConfig: NextConfig = {
       permanent: false,
     },
   ],
+  
+  // Output optimization
+  productionBrowserSourceMaps: false,
+  trailingSlash: false,
+  swcMinify: true,
+  // Webpack optimization
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            vendor: {
+              filename: 'chunks/vendor.js',
+              test: /node_modules/,
+              priority: 10,
+              reuseExistingChunk: true,
+              name: 'vendor',
+            },
+            common: {
+              minChunks: 2,
+              priority: 5,
+              reuseExistingChunk: true,
+              name: 'common',
+            },
+          },
+        },
+      };
+    }
+    return config;
+  },
+
   experimental: {
     optimizePackageImports: [
       'lucide-react',
