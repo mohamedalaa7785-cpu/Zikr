@@ -8,6 +8,7 @@ export function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [result, setResult] = useState<string>('');
+  const [expanded, setExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -62,6 +63,48 @@ export function VoiceRecorder() {
       {audioBlob ? <span className='text-sm text-emerald-300'>تم تسجيل الصوت وجاهز للتقييم.</span> : <span className='text-sm arabic-muted'>اسمح للمتصفح باستخدام الميكروفون.</span>}
     </div>
 
-    {result ? <div className='rounded-xl border border-brand-gold/25 bg-black/20 p-4 leading-8 whitespace-pre-wrap'>{result}</div> : null}
+    {result ? (
+      <div className='space-y-3'>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-lg font-bold text-brand-gold'>نتائج التقييم:</h3>
+          <div className='flex gap-2'>
+            <Button 
+              type='button' 
+              variant='secondary' 
+              size='sm' 
+              onClick={() => {
+                navigator.clipboard.writeText(result);
+                alert('تم نسخ التقييم');
+              }}
+            >
+              نسخ التقييم
+            </Button>
+            <Button 
+              type='button' 
+              variant='secondary' 
+              size='sm' 
+              onClick={() => setResult('')}
+            >
+              مسح
+            </Button>
+          </div>
+        </div>
+        <div className='relative group'>
+          <div className={`rounded-xl border border-brand-gold/25 bg-black/20 p-4 leading-8 whitespace-pre-wrap transition-all duration-300 ${!expanded && result.length > 300 ? 'max-h-48 overflow-hidden' : ''}`}>
+            {result}
+            {!expanded && result.length > 300 && (
+              <div className='absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent flex items-end justify-center pb-2'>
+                <Button type='button' variant='secondary' size='sm' onClick={() => setExpanded(true)}>عرض المزيد</Button>
+              </div>
+            )}
+          </div>
+          {expanded && result.length > 300 && (
+            <div className='mt-2 text-center'>
+              <Button type='button' variant='secondary' size='sm' onClick={() => setExpanded(false)}>عرض أقل</Button>
+            </div>
+          )}
+        </div>
+      </div>
+    ) : null}
   </form>;
 }

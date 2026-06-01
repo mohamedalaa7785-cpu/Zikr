@@ -7,7 +7,16 @@ export async function evaluateMemorizationAction(formData: FormData) {
   const expectedText = String(formData.get('expectedText') ?? '').trim();
   const audio = formData.get('audio');
 
-  const prompt = `قيّم تسميع القرآن التالي باحترام وبالعربية. ركّز على: الحفظ، مواضع التردد، التجويد، مخارج الحروف، المدود، والغنة. أعط درجة من 100 وخطة مراجعة قصيرة. المقرر: ${target || 'غير محدد'}. النص المتوقع/سؤال أكمل: ${expectedText || 'غير محدد'}. إذا كان الصوت غير واضح قل ذلك بوضوح.`;
+  const prompt = `أنت مصحح قرآني خبير. قيّم تسميع القرآن التالي باحترام وبالعربية. 
+  يجب أن يكون التقييم مفصلاً ويشمل:
+  1. جودة الحفظ: (ذكر مواضع الخطأ أو التردد إن وجدت).
+  2. أحكام التجويد: (مخارج الحروف، المدود، الغنة، والقلقلة).
+  3. التقييم العام: درجة من 100.
+  4. نصيحة للمراجعة: خطة قصيرة لتثبيت هذا الورد.
+  
+  المقرر: ${target || 'غير محدد'}. 
+  النص المتوقع/سؤال أكمل: ${expectedText || 'غير محدد'}. 
+  إذا كان الصوت غير واضح أو فارغ، أخبر المستخدم بذلك بأدب.`;
 
   if (audio instanceof File && audio.size > 0) {
     const bytes = Buffer.from(await audio.arrayBuffer()).toString('base64');

@@ -28,7 +28,7 @@ const freeTierGenerationConfig: GenerationConfig = {
   temperature: 0.4,
   topP: 0.9,
   topK: 32,
-  maxOutputTokens: 400,
+  maxOutputTokens: 1000,
 };
 
 export async function generateGeminiText(prompt: string): Promise<string | null> {

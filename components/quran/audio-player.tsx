@@ -13,10 +13,17 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
-  const src = useMemo(
-    () => `${reciter.baseUrlTemplate}/${surahId}.mp3`,
-    [reciter, surahId]
-  );
+  const [audioSourceIndex, setAudioSourceIndex] = useState(0);
+  const audioSources = useMemo(() => {
+    const sources = [`${reciter.baseUrlTemplate}/${surahId}.mp3`];
+    // Fallback to EveryAyah if CDN fails
+    if (reciter.code) {
+      sources.push(`https://everyayah.com/data/${reciter.code}/${String(surahId).padStart(3, '0')}.mp3`);
+    }
+    return sources;
+  }, [reciter, surahId]);
+
+  const src = audioSources[audioSourceIndex] || audioSources[0];
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -37,8 +44,13 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     };
     
     const handleError = () => {
-      setIsLoading(false);
-      setError('تعذر تحميل المقطع الصوتي. جرب قارئ آخر.');
+      if (audioSourceIndex < audioSources.length - 1) {
+        console.warn(`Failed to load audio from ${src}, trying fallback...`);
+        setAudioSourceIndex(prev => prev + 1);
+      } else {
+        setIsLoading(false);
+        setError('تعذر تحميل المقطع الصوتي من جميع المصادر المتاحة. جرب قارئ آخر.');
+      }
     };
 
     const handleTimeUpdate = () => {
@@ -107,6 +119,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const handleReciterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newReciter = reciters.find(r => r.id === e.target.value) ?? reciters[0];
     setReciter(newReciter);
+    setAudioSourceIndex(0);
     setIsPlaying(false);
     setCurrentTime(0);
     setError(null);
