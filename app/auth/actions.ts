@@ -20,6 +20,7 @@ async function supabaseAuth(path: string, body: Record<string, unknown>) {
 export async function loginAction(formData: FormData) {
   const email = String(formData.get('email') || '');
   const password = String(formData.get('password') || '');
+  const next = String(formData.get('next') || '/profile').replace(/^(?!\/)/g, '/');
   const data = await supabaseAuth('token?grant_type=password', { email, password });
   const store = await cookies();
   if (data.access_token) {
@@ -29,7 +30,7 @@ export async function loginAction(formData: FormData) {
       store.set('sb_refresh_token', data.refresh_token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 30 });
     }
   }
-  redirect('/profile');
+  redirect(next);
 }
 
 export async function registerAction(formData: FormData) {

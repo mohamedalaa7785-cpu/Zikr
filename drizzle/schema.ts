@@ -362,13 +362,15 @@ export const pinnedMessages = pgTable("pinned_messages", {
   // Policies will be defined in Supabase directly or via SQL migrations
 
   id: uuid('id').defaultRandom().primaryKey(),
-  title: text('title').notNull(),
-  body: text('body').notNull(),
-  ctaLabel: text('cta_label'),
-  ctaHref: text('cta_href'),
-  published: boolean('published').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  title: text('title'),
+  body: text('body'),
+  type: text('type'),
+  isActive: boolean('is_active').notNull().default(true),
+  startAt: timestamp('start_at', { withTimezone: true }),
+  endAt: timestamp('end_at', { withTimezone: true }),
+  priority: integer('priority').notNull().default(0),
 });
 
 export const memorizationPlans = pgTable("memorization_plans", {

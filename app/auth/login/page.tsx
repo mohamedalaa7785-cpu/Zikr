@@ -55,6 +55,7 @@ function LoginForm() {
       )}
 
       <form action={handleSubmit} className="space-y-4">
+        <input type="hidden" name="next" value={searchParams.get('next') || '/profile'} />
         <div className="space-y-2">
           <label htmlFor="email" className="block text-sm font-medium">البريد الإلكتروني</label>
           <input
