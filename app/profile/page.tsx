@@ -10,16 +10,15 @@ import Link from 'next/link';
 type Favorite = {
   id: string;
   item_type: string;
-  item_id: string;
-  item_title: string;
+  item_ref: string;
   created_at: string;
 };
 
 type ReadingProgress = {
   id: string;
-  content_type: string;
-  content_id: string;
-  progress: number;
+  scope: string;
+  ref: string;
+  progress_json: Record<string, unknown>;
   updated_at: string;
 };
 
@@ -42,7 +41,7 @@ export default async function ProfilePage() {
 
   try {
     favorites = await supabaseServerAnonRequest<Favorite[]>(
-      `/rest/v1/favorites?select=id,item_type,item_id,item_title,created_at&user_id=eq.${user.id}&order=created_at.desc&limit=20`,
+      `/rest/v1/favorites?select=id,item_type,item_ref,created_at&user_id=eq.${user.id}&order=created_at.desc&limit=20`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
   } catch {
@@ -51,7 +50,7 @@ export default async function ProfilePage() {
 
   try {
     readingProgress = await supabaseServerAnonRequest<ReadingProgress[]>(
-      `/rest/v1/reading_progress?select=id,content_type,content_id,progress,updated_at&user_id=eq.${user.id}&order=updated_at.desc&limit=20`,
+      `/rest/v1/reading_progress?select=id,scope,ref,progress_json,updated_at&user_id=eq.${user.id}&order=updated_at.desc&limit=20`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
   } catch {
@@ -69,12 +68,10 @@ export default async function ProfilePage() {
     poetry: 'الشعر',
   };
 
-  const progressLabels: Record<string, string> = {
+  const scopeLabels: Record<string, string> = {
     quran: 'القرآن',
     hadith: 'الحديث',
-    story: 'القصص',
-    memorization: 'الحفظ',
-    article: 'المقالات',
+    stories: 'القصص',
   };
 
   return (
@@ -117,7 +114,7 @@ export default async function ProfilePage() {
                   <span className="text-brand-gold text-xs px-2 py-0.5 rounded-full bg-brand-gold/10">
                     {typeLabels[fav.item_type] ?? fav.item_type}
                   </span>
-                  <p className="mt-1 text-brand-cream/90">{fav.item_title}</p>
+                  <p className="mt-1 text-brand-cream/90">{fav.item_ref}</p>
                 </div>
                 <span className="text-xs arabic-muted">
                   {new Date(fav.created_at).toLocaleDateString('ar-SA')}
@@ -138,15 +135,11 @@ export default async function ProfilePage() {
               <div key={rp.id} className="space-y-1">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-brand-cream/90">
-                    {progressLabels[rp.content_type] ?? rp.content_type} - {rp.content_id}
+                    {scopeLabels[rp.scope] ?? rp.scope} - {rp.ref}
                   </span>
-                  <span className="text-brand-gold">{Math.round(rp.progress)}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-black/30 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-brand-gold/60 transition-all"
-                    style={{ width: `${Math.min(100, Math.max(0, rp.progress))}%` }}
-                  />
+                  <span className="text-xs arabic-muted">
+                    {new Date(rp.updated_at).toLocaleDateString('ar-SA')}
+                  </span>
                 </div>
               </div>
             ))}

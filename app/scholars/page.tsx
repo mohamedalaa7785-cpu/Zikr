@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -156,7 +156,8 @@ export default function ScholarsPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredScholars.map((scholar) => (
-              <Card key={scholar.id} className="space-y-4 hover:border-brand-gold/50 transition-colors">
+              <Link key={scholar.id} href={`/scholars/${scholar.id}`}>
+              <Card className="space-y-4 hover:border-brand-gold/50 transition-colors cursor-pointer h-full">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-xl font-semibold text-brand-gold">{scholar.nameAr}</h3>
@@ -181,6 +182,7 @@ export default function ScholarsPage() {
                   </ul>
                 </div>
               </Card>
+              </Link>
             ))}
           </div>
         )}

@@ -67,10 +67,39 @@ const FALLBACK_STORIES: Story[] = [
   },
 ];
 
-function isStory(item: unknown): item is Story {
+interface StoryRow {
+  id: string;
+  slug: string;
+  title: string;
+  summary?: string;
+  content?: string;
+  category: string;
+  mood?: string;
+  published?: boolean;
+  metadata?: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
+}
+
+function mapStoryRow(row: StoryRow): Story {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    summary: row.summary,
+    content: row.content,
+    category: row.category as StoryCategory,
+    metadata: row.metadata,
+    published: row.published,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function isStoryRow(item: unknown): item is StoryRow {
   if (!item || typeof item !== "object") return false;
-  const story = item as Partial<Story>;
-  return Boolean(story.id && story.slug && story.title && story.category);
+  const row = item as Partial<StoryRow>;
+  return Boolean(row.id && row.slug && row.title && row.category);
 }
 
 function hasSupabaseConfig() {
@@ -96,16 +125,15 @@ export async function getStories(): Promise<Story[]> {
     }
 
     // Try fetching with summary first, fall back to without if column doesn't exist
-    let response: Story[] | undefined;
+    let response: StoryRow[] | undefined;
     try {
-      response = await supabaseServerAnonRequest<Story[]>(
-        "/rest/v1/stories?select=id,slug,title,summary,content,category,metadata,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc",
+      response = await supabaseServerAnonRequest<StoryRow[]>(
+        "/rest/v1/stories?select=id,slug,title,summary,content,category,mood,metadata,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc",
         { cache: "force-cache", next: { revalidate: 1800 } }
       );
     } catch (summaryError) {
-      // If summary column doesn't exist, fetch without it
       console.warn("[stories] Summary column may not exist, trying without it");
-      response = await supabaseServerAnonRequest<Story[]>(
+      response = await supabaseServerAnonRequest<StoryRow[]>(
         "/rest/v1/stories?select=id,slug,title,category,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc",
         { cache: "force-cache", next: { revalidate: 1800 } }
       );
@@ -127,8 +155,8 @@ export async function getStories(): Promise<Story[]> {
       return FALLBACK_STORIES;
     }
 
-    // Validate response shape - summary is now optional
-    const validated = response.every(isStory);
+    // Validate response shape and map snake_case to camelCase
+    const validated = response.every(isStoryRow);
 
     if (!validated) {
       console.warn("[stories] Response validation failed, using fallback");
@@ -136,8 +164,9 @@ export async function getStories(): Promise<Story[]> {
       return FALLBACK_STORIES;
     }
 
-    cachedStories = { data: response, timestamp: Date.now() };
-    return response;
+    const mapped = response.map(mapStoryRow);
+    cachedStories = { data: mapped, timestamp: Date.now() };
+    return mapped;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error("[stories] Failed to fetch from Supabase:", errorMsg);
