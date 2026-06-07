@@ -4,7 +4,7 @@ import { isTokenValid, isTokenExpired } from '@/lib/middleware-auth';
 
 const PROTECTED_ROUTES = ['/profile', '/favorites', '/admin'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
