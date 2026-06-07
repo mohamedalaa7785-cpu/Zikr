@@ -19,10 +19,13 @@ export interface SEOMetadata {
 /**
  * Generate structured data for JSON-LD
  */
-export function generateStructuredData(type: string, data: Record<string, any>) {
+export function generateStructuredData(
+  type: string,
+  data: Record<string, unknown>
+) {
   return {
-    '@context': 'https://schema.org',
-    '@type': type,
+    "@context": "https://schema.org",
+    "@type": type,
     ...data,
   };
 }
@@ -30,10 +33,12 @@ export function generateStructuredData(type: string, data: Record<string, any>) 
 /**
  * Generate breadcrumb structured data
  */
-export function generateBreadcrumbs(items: Array<{ name: string; url: string }>) {
-  return generateStructuredData('BreadcrumbList', {
+export function generateBreadcrumbs(
+  items: Array<{ name: string; url: string }>
+) {
+  return generateStructuredData("BreadcrumbList", {
     itemListElement: items.map((item, index) => ({
-      '@type': 'ListItem',
+      "@type": "ListItem",
       position: index + 1,
       name: item.name,
       item: item.url,
@@ -53,14 +58,14 @@ export function generateArticleSchema(data: {
   author: string;
   url: string;
 }) {
-  return generateStructuredData('Article', {
+  return generateStructuredData("Article", {
     headline: data.headline,
     description: data.description,
     image: data.image,
     datePublished: data.datePublished,
     dateModified: data.dateModified || data.datePublished,
     author: {
-      '@type': 'Person',
+      "@type": "Person",
       name: data.author,
     },
     url: data.url,
@@ -77,7 +82,7 @@ export function generateOrganizationSchema(data: {
   description?: string;
   sameAs?: string[];
 }) {
-  return generateStructuredData('Organization', {
+  return generateStructuredData("Organization", {
     name: data.name,
     url: data.url,
     logo: data.logo,
@@ -89,13 +94,15 @@ export function generateOrganizationSchema(data: {
 /**
  * Generate FAQ structured data
  */
-export function generateFAQSchema(items: Array<{ question: string; answer: string }>) {
-  return generateStructuredData('FAQPage', {
-    mainEntity: items.map((item) => ({
-      '@type': 'Question',
+export function generateFAQSchema(
+  items: Array<{ question: string; answer: string }>
+) {
+  return generateStructuredData("FAQPage", {
+    mainEntity: items.map(item => ({
+      "@type": "Question",
       name: item.question,
       acceptedAnswer: {
-        '@type': 'Answer',
+        "@type": "Answer",
         text: item.answer,
       },
     })),
@@ -105,9 +112,12 @@ export function generateFAQSchema(items: Array<{ question: string; answer: strin
 /**
  * Optimize text for SEO
  */
-export function optimizeTextForSEO(text: string, maxLength: number = 160): string {
+export function optimizeTextForSEO(
+  text: string,
+  maxLength: number = 160
+): string {
   if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength).trim() + '...';
+  return text.substring(0, maxLength).trim() + "...";
 }
 
 /**
@@ -117,9 +127,9 @@ export function generateSlug(text: string): string {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 /**
@@ -127,7 +137,7 @@ export function generateSlug(text: string): string {
  */
 export function checkKeywordDensity(text: string, keyword: string): number {
   const words = text.toLowerCase().split(/\s+/);
-  const keywordCount = words.filter((w) => w === keyword.toLowerCase()).length;
+  const keywordCount = words.filter(w => w === keyword.toLowerCase()).length;
   return (keywordCount / words.length) * 100;
 }
 
@@ -142,7 +152,7 @@ export function generateMetaDescription(text: string): string {
  * Generate meta keywords
  */
 export function generateMetaKeywords(keywords: string[]): string {
-  return keywords.slice(0, 10).join(', ');
+  return keywords.slice(0, 10).join(", ");
 }
 
 /**
@@ -159,8 +169,14 @@ export function calculateSEOScore(data: {
 }): number {
   let score = 0;
 
-  if (data.title && data.title.length > 30 && data.title.length < 60) score += 20;
-  if (data.description && data.description.length > 120 && data.description.length < 160) score += 20;
+  if (data.title && data.title.length > 30 && data.title.length < 60)
+    score += 20;
+  if (
+    data.description &&
+    data.description.length > 120 &&
+    data.description.length < 160
+  )
+    score += 20;
   if (data.keywords && data.keywords.length > 0) score += 15;
   if (data.hasH1) score += 15;
   if (data.hasStructuredData) score += 15;

@@ -1,57 +1,98 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
-import { supabaseServerAnonRequest } from '@/lib/supabase/server';
-import { getSupabaseUser } from '@/lib/supabase/server';
+import { revalidatePath } from "next/cache";
+import {
+  getServerSessionToken,
+  getSupabaseUser,
+  supabaseServerAnonRequest,
+} from "@/lib/supabase/server";
 
-export async function addFavorite(itemRef: string, itemType: string = 'quran') {
+export type FavoriteItemType = "quran" | "hadith" | "story" | "scholar" | "dua";
+
+type FavoriteActionResult = { success: true } | { error: string };
+
+function favoriteFilter(
+  userId: string,
+  itemRef: string,
+  itemType: FavoriteItemType
+) {
+  const userFilter = encodeURIComponent(userId);
+  const refFilter = encodeURIComponent(itemRef);
+  const typeFilter = encodeURIComponent(itemType);
+  return `user_id=eq.${userFilter}&item_type=eq.${typeFilter}&item_ref=eq.${refFilter}`;
+}
+
+export async function addFavorite(
+  itemRef: string,
+  itemType: FavoriteItemType = "quran"
+): Promise<FavoriteActionResult> {
   const user = await getSupabaseUser();
-  if (!user) return { error: 'Unauthorized' };
+  const token = await getServerSessionToken();
+  if (!user || !token) return { error: "Unauthorized" };
 
   try {
-    await supabaseServerAnonRequest('/rest/v1/favorites', {
-      method: 'POST',
+    await supabaseServerAnonRequest("/rest/v1/favorites", {
+      method: "POST",
       body: JSON.stringify({
         user_id: user.id,
         item_type: itemType,
         item_ref: itemRef,
       }),
       headers: {
-        Prefer: 'return=minimal',
+        Authorization: `Bearer ${token}`,
+        Prefer: "return=minimal",
       },
     });
-    revalidatePath('/favorites');
+    revalidatePath("/favorites");
     return { success: true };
   } catch (error) {
-    console.error('Failed to add favorite:', error);
-    return { error: 'Failed to add favorite' };
+    console.error("Failed to add favorite:", error);
+    return { error: "Failed to add favorite" };
   }
 }
 
-export async function removeFavorite(itemRef: string) {
+export async function removeFavorite(
+  itemRef: string,
+  itemType: FavoriteItemType = "quran"
+): Promise<FavoriteActionResult> {
   const user = await getSupabaseUser();
-  if (!user) return { error: 'Unauthorized' };
+  const token = await getServerSessionToken();
+  if (!user || !token) return { error: "Unauthorized" };
 
   try {
-    await supabaseServerAnonRequest(`/rest/v1/favorites?user_id=eq.${user.id}&item_ref=eq.${itemRef}`, {
-      method: 'DELETE',
-    });
-    revalidatePath('/favorites');
+    await supabaseServerAnonRequest(
+      `/rest/v1/favorites?${favoriteFilter(user.id, itemRef, itemType)}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Prefer: "return=minimal",
+        },
+      }
+    );
+    revalidatePath("/favorites");
     return { success: true };
   } catch (error) {
-    console.error('Failed to remove favorite:', error);
-    return { error: 'Failed to remove favorite' };
+    console.error("Failed to remove favorite:", error);
+    return { error: "Failed to remove favorite" };
   }
 }
 
-export async function isFavorite(itemRef: string) {
+export async function isFavorite(
+  itemRef: string,
+  itemType: FavoriteItemType = "quran"
+) {
   const user = await getSupabaseUser();
-  if (!user) return false;
+  const token = await getServerSessionToken();
+  if (!user || !token) return false;
 
   try {
-    const data = await supabaseServerAnonRequest<any[]>(`/rest/v1/favorites?user_id=eq.${user.id}&item_ref=eq.${itemRef}&select=id`);
-    return data && data.length > 0;
-  } catch (error) {
+    const data = await supabaseServerAnonRequest<Array<{ id: string }>>(
+      `/rest/v1/favorites?${favoriteFilter(user.id, itemRef, itemType)}&select=id`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return data.length > 0;
+  } catch {
     return false;
   }
 }

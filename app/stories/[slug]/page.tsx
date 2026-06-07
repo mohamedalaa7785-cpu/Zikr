@@ -1,9 +1,8 @@
-import { getStoryBySlug } from '@/lib/services/stories';
-import { notFound } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
-import Link from 'next/link';
+import { getStoryBySlug } from "@/lib/services/stories";
+import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 interface StoryPageProps {
   params: Promise<{ slug: string }>;
@@ -17,16 +16,17 @@ export default async function StoryPage({ params }: StoryPageProps) {
     notFound();
   }
 
-  const youtubeId = (story.metadata as any)?.youtubeId;
+  const youtubeId =
+    typeof story.metadata?.youtubeId === "string"
+      ? story.metadata.youtubeId
+      : null;
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <Link href="/stories">
-        <Button variant="ghost" className="mb-6">
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Back to Stories
-        </Button>
-      </Link>
+      <Button href="/stories" variant="ghost" className="mb-6">
+        <ChevronLeft className="mr-2 h-4 w-4" />
+        Back to Stories
+      </Button>
 
       <div className="flex flex-col gap-8">
         <div className="space-y-4">

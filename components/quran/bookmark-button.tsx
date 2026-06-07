@@ -1,10 +1,23 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useTransition } from 'react';
-import { addFavorite, removeFavorite, isFavorite } from '@/app/favorites/actions';
-import { toast } from 'sonner';
+import { useEffect, useState, useTransition } from "react";
+import {
+  addFavorite,
+  isFavorite,
+  removeFavorite,
+  type FavoriteItemType,
+} from "@/app/favorites/actions";
+import { toast } from "sonner";
 
-export function BookmarkButton({ keyRef }: { keyRef: string }) {
+type BookmarkButtonProps = {
+  keyRef: string;
+  itemType?: FavoriteItemType;
+};
+
+export function BookmarkButton({
+  keyRef,
+  itemType = "quran",
+}: BookmarkButtonProps) {
   const [isClient, setIsClient] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -16,30 +29,30 @@ export function BookmarkButton({ keyRef }: { keyRef: string }) {
 
   useEffect(() => {
     if (!isClient) return;
-    isFavorite(keyRef).then(setSaved);
-  }, [keyRef, isClient]);
+    isFavorite(keyRef, itemType).then(setSaved);
+  }, [keyRef, itemType, isClient]);
 
   const toggle = () => {
     startTransition(async () => {
       if (saved) {
-        const res = await removeFavorite(keyRef);
-        if (res.error) {
-          toast.error('فشل في إزالة المفضلة');
+        const res = await removeFavorite(keyRef, itemType);
+        if ("error" in res) {
+          toast.error("فشل في إزالة المفضلة");
         } else {
           setSaved(false);
-          toast.success('تمت الإزالة من المفضلة');
+          toast.success("تمت الإزالة من المفضلة");
         }
       } else {
-        const res = await addFavorite(keyRef);
-        if (res.error) {
-          if (res.error === 'Unauthorized') {
-            toast.error('يرجى تسجيل الدخول لحفظ المفضلة');
+        const res = await addFavorite(keyRef, itemType);
+        if ("error" in res) {
+          if (res.error === "Unauthorized") {
+            toast.error("يرجى تسجيل الدخول لحفظ المفضلة");
           } else {
-            toast.error('فشل في إضافة المفضلة');
+            toast.error("فشل في إضافة المفضلة");
           }
         } else {
           setSaved(true);
-          toast.success('تمت الإضافة إلى المفضلة');
+          toast.success("تمت الإضافة إلى المفضلة");
         }
       }
     });
@@ -48,9 +61,9 @@ export function BookmarkButton({ keyRef }: { keyRef: string }) {
   if (!isClient) {
     return (
       <button
-        className='text-sm text-brand-gold/50 disabled:opacity-50 cursor-default'
+        className="text-sm text-brand-gold/50 disabled:opacity-50 cursor-default"
         disabled
-        title='جاري التحميل...'
+        title="جاري التحميل..."
       >
         ☆ حفظ
       </button>
@@ -59,12 +72,12 @@ export function BookmarkButton({ keyRef }: { keyRef: string }) {
 
   return (
     <button
-      className='text-sm text-brand-gold disabled:opacity-50 hover:scale-110 transition-transform'
+      className="text-sm text-brand-gold disabled:opacity-50 hover:scale-110 transition-transform"
       onClick={toggle}
       disabled={isPending}
-      title={saved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+      title={saved ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
     >
-      {saved ? '★ محفوظ' : '☆ حفظ'}
+      {saved ? "★ محفوظ" : "☆ حفظ"}
     </button>
   );
 }
