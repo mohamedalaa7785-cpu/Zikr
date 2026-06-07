@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 export const roleEnum = pgEnum('role', ['user', 'admin']);
 export const favoriteItemTypeEnum = pgEnum('favorite_item_type', ['quran', 'hadith', 'story', 'scholar', 'dua']);
@@ -20,17 +21,8 @@ export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'approved'
 export const planEnum = pgEnum('plan', ['free', 'pro', 'premium']);
 export const statusEnum = pgEnum('status', ['pending', 'completed', 'failed']);
 
+// User-owned tables
 export const profiles = pgTable("profiles", {
-  // RLS: Users can view and update their own profile
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for all users
-  // Policy: Enable insert for authenticated users
-  // Policy: Enable update for authenticated users on their own profile
-  // Policy: Enable delete for authenticated users on their own profile
-
-  // RLS: Users can view and update their own profile
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').primaryKey(),
   displayName: text('display_name'),
   avatarUrl: text('avatar_url'),
@@ -41,16 +33,6 @@ export const profiles = pgTable("profiles", {
 });
 
 export const favorites = pgTable("favorites", {
-  // RLS: Users can only manage their own favorites
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for authenticated users on their own favorites
-  // Policy: Enable insert for authenticated users on their own favorites
-  // Policy: Enable update for authenticated users on their own favorites
-  // Policy: Enable delete for authenticated users on their own favorites
-
-  // RLS: Users can only manage their own favorites
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   itemType: favoriteItemTypeEnum('item_type').notNull(),
@@ -59,16 +41,6 @@ export const favorites = pgTable("favorites", {
 }, (t) => ({ uniq: uniqueIndex('favorites_user_item_unique').on(t.userId, t.itemType, t.itemRef) }));
 
 export const readingProgress = pgTable("reading_progress", {
-  // RLS: Users can only manage their own reading progress
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for authenticated users on their own reading progress
-  // Policy: Enable insert for authenticated users on their own reading progress
-  // Policy: Enable update for authenticated users on their own reading progress
-  // Policy: Enable delete for authenticated users on their own reading progress
-
-  // RLS: Users can only manage their own reading progress
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   scope: progressScopeEnum('scope').notNull(),
@@ -78,16 +50,6 @@ export const readingProgress = pgTable("reading_progress", {
 }, (t) => ({ uniq: uniqueIndex('reading_progress_user_scope_ref_unique').on(t.userId, t.scope, t.ref) }));
 
 export const reminders = pgTable("reminders", {
-  // RLS: Users can only manage their own reminders
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for authenticated users on their own reminders
-  // Policy: Enable insert for authenticated users on their own reminders
-  // Policy: Enable update for authenticated users on their own reminders
-  // Policy: Enable delete for authenticated users on their own reminders
-
-  // RLS: Users can only manage their own reminders
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   type: reminderTypeEnum('type').notNull(),
@@ -97,6 +59,7 @@ export const reminders = pgTable("reminders", {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Quran content (public read, admin write)
 export const quranSurahs = pgTable('quran_surahs', {
   id: integer('id').primaryKey(),
   nameAr: text('name_ar').notNull(),
@@ -156,6 +119,7 @@ export const quranReciters = pgTable('quran_reciters', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Hadith content (public read, admin write)
 export const hadithBooks = pgTable('hadith_books', {
   id: uuid('id').defaultRandom().primaryKey(),
   slug: text('slug').notNull().unique(),
@@ -198,6 +162,7 @@ export const hadithExplanations = pgTable('hadith_explanations', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Scholars & Stories (public read, admin write)
 export const scholars = pgTable('scholars', {
   id: uuid('id').defaultRandom().primaryKey(),
   nameAr: text('name_ar').notNull(),
@@ -229,17 +194,8 @@ export const stories = pgTable('stories', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Subscription & Payments (user-owned)
 export const userSubscriptions = pgTable("user_subscriptions", {
-  // RLS: Users can only view and manage their own subscriptions
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for authenticated users on their own subscriptions
-  // Policy: Enable insert for authenticated users on their own subscriptions
-  // Policy: Enable update for authenticated users on their own subscriptions
-  // Policy: Enable delete for authenticated users on their own subscriptions
-
-  // RLS: Users can only view and manage their own subscriptions
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => profiles.id),
   plan: planEnum('plan').notNull().default('free'),
@@ -250,16 +206,6 @@ export const userSubscriptions = pgTable("user_subscriptions", {
 });
 
 export const payments = pgTable("payments", {
-  // RLS: Users can only view their own payments
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for authenticated users on their own payments
-  // Policy: Enable insert for authenticated users on their own payments
-  // Policy: Enable update for authenticated users on their own payments
-  // Policy: Enable delete for authenticated users on their own payments
-
-  // RLS: Users can only view their own payments
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id'),
   amount: integer('amount').notNull(),
@@ -270,17 +216,8 @@ export const payments = pgTable("payments", {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Research (user-owned)
 export const researchRequests = pgTable("research_requests", {
-  // RLS: Users can only view and manage their own research requests
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for authenticated users on their own research requests
-  // Policy: Enable insert for authenticated users on their own research requests
-  // Policy: Enable update for authenticated users on their own research requests
-  // Policy: Enable delete for authenticated users on their own research requests
-
-  // RLS: Users can only view and manage their own research requests
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id'),
   title: text('title').notNull(),
@@ -293,33 +230,14 @@ export const researchRequests = pgTable("research_requests", {
 });
 
 export const generatedResearch = pgTable("generated_research", {
-  // RLS: Users can only view their own generated research
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for authenticated users on their own generated research
-  // Policy: Enable insert for authenticated users on their own generated research
-  // Policy: Enable update for authenticated users on their own generated research
-  // Policy: Enable delete for authenticated users on their own generated research
-
-  // RLS: Users can only view their own generated research
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   requestId: uuid('request_id').references(() => researchRequests.id),
   content: text('content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Site admin (admin-only write)
 export const siteSettings = pgTable("site_settings", {
-  // RLS: Only admins can manage site settings
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for all users
-  // Policy: Enable insert for admin users
-  // Policy: Enable update for admin users
-  // Policy: Enable delete for admin users
-
-  // RLS: Only admins can manage site settings
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   key: text('key').notNull().unique(),
   value: jsonb('value').notNull().default({}),
@@ -328,16 +246,6 @@ export const siteSettings = pgTable("site_settings", {
 });
 
 export const competitions = pgTable("competitions", {
-  // RLS: Public read, admin write
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for all users
-  // Policy: Enable insert for admin users
-  // Policy: Enable update for admin users
-  // Policy: Enable delete for admin users
-
-  // RLS: Public read, admin write
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   title: text('title').notNull(),
   description: text('description'),
@@ -351,16 +259,6 @@ export const competitions = pgTable("competitions", {
 });
 
 export const pinnedMessages = pgTable("pinned_messages", {
-  // RLS: Public read, admin write
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for all users
-  // Policy: Enable insert for admin users
-  // Policy: Enable update for admin users
-  // Policy: Enable delete for admin users
-
-  // RLS: Public read, admin write
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -374,16 +272,6 @@ export const pinnedMessages = pgTable("pinned_messages", {
 });
 
 export const memorizationPlans = pgTable("memorization_plans", {
-  // RLS: Public read, admin write
-  // Policies will be defined in Supabase directly or via SQL migrations
-  // Policy: Enable read access for all users
-  // Policy: Enable insert for admin users
-  // Policy: Enable update for admin users
-  // Policy: Enable delete for admin users
-
-  // RLS: Public read, admin write
-  // Policies will be defined in Supabase directly or via SQL migrations
-
   id: uuid('id').defaultRandom().primaryKey(),
   title: text('title').notNull(),
   cadence: text('cadence').notNull().default('daily'),
@@ -394,3 +282,187 @@ export const memorizationPlans = pgTable("memorization_plans", {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+// Prophets (public read, admin write)
+export const prophets = pgTable('prophets', {
+  id: uuid('id').primaryKey(),
+  nameAr: text('name_ar').notNull(),
+  nameEn: text('name_en').notNull(),
+  slug: text('slug').notNull().unique(),
+  bioAr: text('bio_ar'),
+  bioEn: text('bio_en'),
+  birthPlaceAr: text('birth_place_ar'),
+  deathPlaceAr: text('death_place_ar'),
+  featuredImageUrl: text('featured_image_url'),
+  thumbnailUrl: text('thumbnail_url'),
+  orderNum: integer('order_num').notNull().default(0),
+  published: boolean('published').notNull().default(true),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const prophetSections = pgTable('prophet_sections', {
+  id: uuid('id').primaryKey(),
+  prophetId: uuid('prophet_id').notNull().references(() => prophets.id, { onDelete: 'cascade' }),
+  titleAr: text('title_ar').notNull(),
+  titleEn: text('title_en'),
+  contentAr: text('content_ar').notNull(),
+  contentEn: text('content_en'),
+  sectionType: text('section_type'),
+  orderNum: integer('order_num').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Duas (public read, admin write)
+export const duaCategories = pgTable('dua_categories', {
+  id: uuid('id').primaryKey(),
+  nameAr: text('name_ar').notNull(),
+  nameEn: text('name_en').notNull(),
+  slug: text('slug').notNull().unique(),
+  icon: text('icon'),
+  published: boolean('published').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const duas = pgTable('duas', {
+  id: uuid('id').primaryKey(),
+  titleAr: text('title_ar').notNull(),
+  titleEn: text('title_en').notNull(),
+  slug: text('slug').notNull().unique(),
+  textAr: text('text_ar').notNull(),
+  textEn: text('text_en'),
+  occasionAr: text('occasion_ar'),
+  occasionEn: text('occasion_en'),
+  sourceAr: text('source_ar'),
+  sourceEn: text('source_en'),
+  benefitsAr: text('benefits_ar'),
+  benefitsEn: text('benefits_en'),
+  categoryId: uuid('category_id').references(() => duaCategories.id, { onDelete: 'set null' }),
+  published: boolean('published').notNull().default(true),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Kids content (public read, admin write)
+export const kidsContent = pgTable('kids_content', {
+  id: uuid('id').primaryKey(),
+  titleAr: text('title_ar').notNull(),
+  titleEn: text('title_en').notNull(),
+  slug: text('slug').notNull().unique(),
+  contentAr: text('content_ar'),
+  contentEn: text('content_en'),
+  type: text('type').notNull().default('story'),
+  ageGroup: text('age_group').notNull().default('6-8'),
+  featuredImageUrl: text('featured_image_url'),
+  videoUrl: text('video_url'),
+  quizData: jsonb('quiz_data'),
+  published: boolean('published').notNull().default(true),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Articles (public read, admin write)
+export const articleCategories = pgTable('article_categories', {
+  id: uuid('id').primaryKey(),
+  nameAr: text('name_ar').notNull(),
+  nameEn: text('name_en').notNull(),
+  slug: text('slug').notNull().unique(),
+  icon: text('icon'),
+  published: boolean('published').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const articles = pgTable('articles', {
+  id: uuid('id').primaryKey(),
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(),
+  summary: text('summary'),
+  content: text('content'),
+  author: text('author'),
+  featuredImageUrl: text('featured_image_url'),
+  categoryId: uuid('category_id').references(() => articleCategories.id, { onDelete: 'set null' }),
+  views: integer('views').notNull().default(0),
+  tags: jsonb('tags').notNull().default([]),
+  published: boolean('published').notNull().default(true),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Videos (public read, admin write)
+export const videoCategories = pgTable('video_categories', {
+  id: uuid('id').primaryKey(),
+  nameAr: text('name_ar').notNull(),
+  nameEn: text('name_en').notNull(),
+  slug: text('slug').notNull().unique(),
+  icon: text('icon'),
+  published: boolean('published').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const videos = pgTable('videos', {
+  id: uuid('id').primaryKey(),
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  youtubeId: text('youtube_id'),
+  thumbnailUrl: text('thumbnail_url'),
+  categoryId: uuid('category_id').references(() => videoCategories.id, { onDelete: 'set null' }),
+  duration: integer('duration'),
+  views: integer('views').notNull().default(0),
+  published: boolean('published').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Relations
+export const prophetsRelations = relations(prophets, ({ many }) => ({
+  sections: many(prophetSections),
+}));
+
+export const prophetSectionsRelations = relations(prophetSections, ({ one }) => ({
+  prophet: one(prophets, {
+    fields: [prophetSections.prophetId],
+    references: [prophets.id],
+  }),
+}));
+
+export const duaCategoriesRelations = relations(duaCategories, ({ many }) => ({
+  duas: many(duas),
+}));
+
+export const duasRelations = relations(duas, ({ one }) => ({
+  category: one(duaCategories, {
+    fields: [duas.categoryId],
+    references: [duaCategories.id],
+  }),
+}));
+
+export const articleCategoriesRelations = relations(articleCategories, ({ many }) => ({
+  articles: many(articles),
+}));
+
+export const articlesRelations = relations(articles, ({ one }) => ({
+  category: one(articleCategories, {
+    fields: [articles.categoryId],
+    references: [articleCategories.id],
+  }),
+}));
+
+export const videoCategoriesRelations = relations(videoCategories, ({ many }) => ({
+  videos: many(videos),
+}));
+
+export const videosRelations = relations(videos, ({ one }) => ({
+  category: one(videoCategories, {
+    fields: [videos.categoryId],
+    references: [videoCategories.id],
+  }),
+}));

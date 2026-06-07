@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
 export const envSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
-  NEXT_PUBLIC_SITE_URL: z.string().url(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string(),
-  DATABASE_URL: z.string().url().optional(),
-  AUTH_CALLBACK_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional().or(z.literal('')),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
+  NEXT_PUBLIC_SITE_URL: z.string().url().optional().or(z.literal('')),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  DATABASE_URL: z.string().url().optional().or(z.literal('')),
+  AUTH_CALLBACK_URL: z.string().url().optional().or(z.literal('')),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().optional(),
   AWS_S3_ACCESS_KEY_ID: z.string().optional(),
