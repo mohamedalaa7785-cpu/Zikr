@@ -70,16 +70,8 @@ const nextConfig: NextConfig = {
       permanent: false,
     },
   ],
-  
-  // Output optimization
   productionBrowserSourceMaps: false,
   trailingSlash: false,
-  // swcMinify: true, // Removed as it is unrecognized in Next.js 15.5.x
-  // Webpack optimization - removed custom chunking to prevent 404s
-  webpack: (config, { isServer }) => {
-    return config;
-  },
-
   experimental: {
     optimizePackageImports: [
       'lucide-react',
