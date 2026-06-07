@@ -185,4 +185,4 @@ export async function updateProfileAction(formData: FormData) {
   });
 
   redirect('/profile');
-            }
+}
