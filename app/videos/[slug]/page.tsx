@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { Container } from '@/components/ui/container';
-import { Card } from '@/components/ui/card';
-import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Container } from "@/components/ui/container";
+import { Card } from "@/components/ui/card";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 interface Video {
   id: string;
@@ -14,7 +14,7 @@ interface Video {
   thumbnail_url?: string;
   duration?: number;
   views: number;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export default function VideoDetailPage() {
@@ -35,22 +35,19 @@ export default function VideoDetailPage() {
         if (data && data.length > 0) {
           const video = data[0];
           setVideo(video);
-          
+
           // Increment views
           try {
-            await supabase.request(
-              `/rest/v1/videos?id=eq.${video.id}`,
-              {
-                method: 'PATCH',
-                body: JSON.stringify({ views: (video.views || 0) + 1 }),
-              }
-            );
+            await supabase.request(`/rest/v1/videos?id=eq.${video.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ views: (video.views || 0) + 1 }),
+            });
           } catch (error) {
-            console.error('Error updating views:', error);
+            console.error("Error updating views:", error);
           }
         }
       } catch (error) {
-        console.error('Error fetching video:', error);
+        console.error("Error fetching video:", error);
       } finally {
         setLoading(false);
       }
@@ -72,7 +69,9 @@ export default function VideoDetailPage() {
   if (!video) {
     return (
       <Container className="py-12">
-        <p className="text-center text-brand-cream/70">لم يتم العثور على الفيديو</p>
+        <p className="text-center text-brand-cream/70">
+          لم يتم العثور على الفيديو
+        </p>
       </Container>
     );
   }
@@ -103,14 +102,19 @@ export default function VideoDetailPage() {
         <div className="flex justify-between items-center text-sm text-brand-cream/70">
           <span>👁 {video.views} مشاهدة</span>
           {video.duration && (
-            <span>⏱ {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}</span>
+            <span>
+              ⏱ {Math.floor(video.duration / 60)}:
+              {(video.duration % 60).toString().padStart(2, "0")}
+            </span>
           )}
         </div>
 
         {video.description && (
           <div className="space-y-2">
             <h3 className="text-lg font-bold text-brand-gold">الوصف</h3>
-            <p className="text-brand-cream/90 leading-relaxed">{video.description}</p>
+            <p className="text-brand-cream/90 leading-relaxed">
+              {video.description}
+            </p>
           </div>
         )}
       </Card>

@@ -15,7 +15,7 @@ const DEBUG_QURAN = process.env.NODE_ENV !== "production";
 const REQUEST_TIMEOUT = 8000; // 8 second timeout
 
 // Cache for in-memory storage (valid for the duration of the request)
-const requestCache = new Map<string, any>();
+const requestCache = new Map<string, unknown>();
 
 function debugLog(message: string, payload?: unknown) {
   if (!DEBUG_QURAN) return;
@@ -109,7 +109,7 @@ export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
   const cacheKey = `surahs_${locale}`;
   if (requestCache.has(cacheKey)) {
     debugLog("getAllSurahs cache hit");
-    return requestCache.get(cacheKey);
+    return requestCache.get(cacheKey) as Surah[];
   }
 
   // Try Supabase first
@@ -119,7 +119,7 @@ export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
 
   if (dbSurahs?.length) {
     debugLog("getAllSurahs Supabase success", { count: dbSurahs.length });
-    const result = dbSurahs.map((surah) => mapDbSurah(surah, locale));
+    const result = dbSurahs.map(surah => mapDbSurah(surah, locale));
     requestCache.set(cacheKey, result);
     return result;
   }
@@ -137,7 +137,7 @@ export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
     debugLog("getAllSurahs API success", { count: response.data.length });
     const result =
       locale === "en"
-        ? response.data.map((surah) => ({ ...surah, name: surah.englishName }))
+        ? response.data.map(surah => ({ ...surah, name: surah.englishName }))
         : response.data;
 
     requestCache.set(cacheKey, result);
@@ -149,14 +149,13 @@ export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
     );
 
     // Use fallback data
-    const result = fallbackSurahs.map((s) => ({
+    const result = fallbackSurahs.map(s => ({
       number: s.id,
       name: locale === "en" ? s.nameEn : s.nameAr,
       englishName: s.nameEn,
       englishNameTranslation: "",
       numberOfAyahs: s.ayahCount,
-      revelationType:
-        s.revelationPlace === "meccan" ? "Meccan" : "Medinan",
+      revelationType: s.revelationPlace === "meccan" ? "Meccan" : "Medinan",
     })) as Surah[];
 
     requestCache.set(cacheKey, result);
@@ -178,7 +177,7 @@ export async function getSurahById(
   const cacheKey = `surah_${id}_${locale}`;
   if (requestCache.has(cacheKey)) {
     debugLog("getSurahById cache hit");
-    return requestCache.get(cacheKey);
+    return requestCache.get(cacheKey) as { surah: Surah; ayahs: Ayah[] } | null;
   }
 
   // Try Supabase first
@@ -193,7 +192,7 @@ export async function getSurahById(
 
     const result = {
       surah: mapDbSurah(dbSurahs[0], locale),
-      ayahs: (dbAyahs ?? []).map((ayah) => mapDbAyah(ayah, locale)),
+      ayahs: (dbAyahs ?? []).map(ayah => mapDbAyah(ayah, locale)),
     };
 
     requestCache.set(cacheKey, result);
@@ -239,7 +238,7 @@ export async function getAyah(
   const cacheKey = `ayah_${surahId}_${ayahId}_${locale}`;
   if (requestCache.has(cacheKey)) {
     debugLog("getAyah cache hit");
-    return requestCache.get(cacheKey);
+    return requestCache.get(cacheKey) as Ayah | null;
   }
 
   // Try Supabase first
@@ -286,7 +285,7 @@ export async function getTafsir(
   const cacheKey = `tafsir_${surahId}_${ayahId}`;
   if (requestCache.has(cacheKey)) {
     debugLog("getTafsir cache hit");
-    return requestCache.get(cacheKey);
+    return requestCache.get(cacheKey) as string | null;
   }
 
   // Try Supabase first
@@ -355,8 +354,7 @@ export async function searchQuran(
     )}&limit=20`
   );
 
-  if (dbMatches?.length)
-    return dbMatches.map((ayah) => mapDbAyah(ayah, locale));
+  if (dbMatches?.length) return dbMatches.map(ayah => mapDbAyah(ayah, locale));
 
   // Fallback to external API
   try {
@@ -384,9 +382,7 @@ export function getAudioUrl(
 ): { primary: string; fallback: string[] } {
   const surahNumber = String(surahId).padStart(3, "0");
   const primary = `${QURAN_CDN_URL}/${reciterCode}/${surahNumber}.mp3`;
-  const fallback = [
-    `${FALLBACK_CDN_URL}/${reciterCode}/${surahNumber}.mp3`,
-  ];
+  const fallback = [`${FALLBACK_CDN_URL}/${reciterCode}/${surahNumber}.mp3`];
 
   return { primary, fallback };
 }

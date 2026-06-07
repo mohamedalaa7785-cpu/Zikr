@@ -1,10 +1,10 @@
-import { cookies } from 'next/headers';
-import { getPublicEnv, getServerEnv } from '@/lib/env';
+import { cookies } from "next/headers";
+import { getPublicEnv, getServerEnv } from "@/lib/env";
 
 export async function getServerSessionToken() {
   const store = await cookies();
-  let token = store.get('sb_access_token')?.value;
-  const refreshToken = store.get('sb_refresh_token')?.value;
+  let token = store.get("sb_access_token")?.value;
+  const refreshToken = store.get("sb_refresh_token")?.value;
 
   // If token is missing but refresh token exists, we could try to refresh it here
   // However, in Next.js Server Components, we cannot set cookies easily during a GET request
@@ -13,14 +13,20 @@ export async function getServerSessionToken() {
   return token ?? null;
 }
 
-async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole = false): Promise<T> {
-  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = getPublicEnv();
+async function serverRequest<T>(
+  path: string,
+  init?: RequestInit,
+  useServiceRole = false
+): Promise<T> {
+  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } =
+    getPublicEnv();
   const service = getServerEnv().SUPABASE_SERVICE_ROLE_KEY;
   const key = useServiceRole ? service : NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!NEXT_PUBLIC_SUPABASE_URL || !key) {
-    console.error('[supabase:server] Missing Supabase configuration. URL or API key not set.');
-    throw new Error('Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and appropriate API keys.');
+    throw new Error(
+      "Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and appropriate API keys."
+    );
   }
 
   const controller = new AbortController();
@@ -31,12 +37,12 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
     res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}${path}`, {
       ...init,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         apikey: key,
         Authorization: `Bearer ${key}`,
         ...(init?.headers || {}),
       },
-      cache: init?.cache ?? 'no-store',
+      cache: init?.cache ?? "no-store",
       signal: init?.signal ?? controller.signal,
     });
   } finally {
@@ -46,7 +52,7 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
   if (!res.ok) {
     const body = await res.text();
     const errorMsg = `Supabase server request failed: ${res.status} ${body}`;
-    console.error('[supabase:server]', errorMsg);
+    console.error("[supabase:server]", errorMsg);
     throw new Error(errorMsg);
   }
   if (res.status === 204) return undefined as T;
@@ -57,8 +63,14 @@ async function serverRequest<T>(path: string, init?: RequestInit, useServiceRole
   return JSON.parse(text) as T;
 }
 
-export const supabaseServerAnonRequest = <T>(path: string, init?: RequestInit) => serverRequest<T>(path, init, false);
-export const supabaseServerAdminRequest = <T>(path: string, init?: RequestInit) => serverRequest<T>(path, init, true);
+export const supabaseServerAnonRequest = <T>(
+  path: string,
+  init?: RequestInit
+) => serverRequest<T>(path, init, false);
+export const supabaseServerAdminRequest = <T>(
+  path: string,
+  init?: RequestInit
+) => serverRequest<T>(path, init, true);
 
 export async function getSupabaseUser() {
   const token = await getServerSessionToken();
@@ -66,22 +78,27 @@ export async function getSupabaseUser() {
 
   type AuthUserResponse = { id: string; email?: string };
   return serverRequest<AuthUserResponse>(
-    '/auth/v1/user',
+    "/auth/v1/user",
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     },
-    false,
+    false
   );
 }
 
 export async function assertSupabaseConnection() {
   try {
-    const status = await supabaseServerAnonRequest<{ version: string }>('/rest/v1/');
+    const status = await supabaseServerAnonRequest<{ version: string }>(
+      "/rest/v1/"
+    );
     return Boolean(status);
   } catch (error) {
-    console.error('[supabase:server] Connection check failed:', error instanceof Error ? error.message : 'unknown error');
+    console.error(
+      "[supabase:server] Connection check failed:",
+      error instanceof Error ? error.message : "unknown error"
+    );
     return false;
   }
 }
