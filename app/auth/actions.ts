@@ -68,7 +68,7 @@ export async function loginAction(formData: FormData) {
 
   store.set('sb_access_token', data.access_token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'lax',
     path: '/',
     maxAge,
@@ -77,7 +77,7 @@ export async function loginAction(formData: FormData) {
   if (data.refresh_token) {
     store.set('sb_refresh_token', data.refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 30,
@@ -137,7 +137,7 @@ export async function setSessionAction(accessToken: string, refreshToken?: strin
 
   store.set('sb_access_token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'lax',
     path: '/',
     maxAge: 3600,
@@ -146,7 +146,7 @@ export async function setSessionAction(accessToken: string, refreshToken?: strin
   if (refreshToken?.trim()) {
     store.set('sb_refresh_token', refreshToken.trim(), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 30,

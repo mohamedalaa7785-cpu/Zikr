@@ -28,7 +28,7 @@ export function GoogleOAuthButton({
           : '/profile';
 
       const redirectUri = buildOAuthRedirectUri(
-        window.location.origin,
+        process.env.NEXT_PUBLIC_SITE_URL || window.location.origin,
         safeNext
       );
 
