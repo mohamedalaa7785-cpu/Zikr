@@ -1,24 +1,33 @@
-import postgres from 'postgres';
-import dotenv from 'dotenv';
+import postgres from "postgres";
+import * as dotenv from "dotenv";
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: ".env.local" });
 
-const sql = postgres(process.env.DATABASE_URL!);
+const connectionString = process.env.DATABASE_URL;
 
-async function main() {
+if (!connectionString) {
+  console.error("DATABASE_URL is not set");
+  process.exit(1);
+}
+
+async function checkDb() {
+  const sql = postgres(connectionString!);
   try {
-    const result = await sql`
+    const tables = await sql`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public'
     `;
-    console.log('Tables in public schema:');
-    result.forEach(row => console.log(`- ${row.table_name}`));
-    process.exit(0);
+    console.log("Tables in database:");
+    tables.forEach(t => console.log(`- ${t.table_name}`));
+    
+    const usersCount = await sql`SELECT count(*) FROM users`;
+    console.log(`Total users: ${usersCount[0].count}`);
   } catch (error) {
-    console.error('Error connecting to database:', error);
-    process.exit(1);
+    console.error("Database check failed:", error);
+  } finally {
+    await sql.end();
   }
 }
 
-main();
+checkDb();

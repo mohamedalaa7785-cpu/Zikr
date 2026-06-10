@@ -112,7 +112,7 @@ function hasSupabaseConfig() {
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 let cachedStories: { data: Story[]; timestamp: number } | null = null;
 
-export async function getStories(): Promise<Story[]> {
+export async function getStories(limit = 100): Promise<Story[]> {
   try {
     // Use cache if fresh
     if (cachedStories && Date.now() - cachedStories.timestamp < CACHE_TTL) {
@@ -128,13 +128,13 @@ export async function getStories(): Promise<Story[]> {
     let response: StoryRow[] | undefined;
     try {
       response = await supabaseServerAnonRequest<StoryRow[]>(
-        "/rest/v1/stories?select=id,slug,title,summary,content,category,mood,metadata,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc",
+        `/rest/v1/stories?select=id,slug,title,summary,content,category,mood,metadata,published,created_at,updated_at&published=eq.true&limit=${limit}&order=created_at.desc`,
         { cache: "force-cache", next: { revalidate: 1800 } }
       );
     } catch (summaryError) {
       console.warn("[stories] Summary column may not exist, trying without it");
       response = await supabaseServerAnonRequest<StoryRow[]>(
-        "/rest/v1/stories?select=id,slug,title,category,published,created_at,updated_at&published=eq.true&limit=100&order=created_at.desc",
+        `/rest/v1/stories?select=id,slug,title,category,published,created_at,updated_at&published=eq.true&limit=${limit}&order=created_at.desc`,
         { cache: "force-cache", next: { revalidate: 1800 } }
       );
     }

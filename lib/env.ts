@@ -7,6 +7,7 @@ export function getPublicEnv() {
     NEXT_PUBLIC_SUPABASE_URL: validatedEnv.NEXT_PUBLIC_SUPABASE_URL || '',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: validatedEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
     NEXT_PUBLIC_SITE_URL: validatedEnv.NEXT_PUBLIC_SITE_URL || '',
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: validatedEnv.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
   };
 }
 
@@ -45,6 +46,7 @@ export function getEnvAudit() {
       "NEXT_PUBLIC_SUPABASE_URL",
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "NEXT_PUBLIC_SITE_URL",
+      "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
     ],
     serverOnly: ["SUPABASE_SERVICE_ROLE_KEY", "GOOGLE_CLIENT_SECRET"],
     runtimeServer: [

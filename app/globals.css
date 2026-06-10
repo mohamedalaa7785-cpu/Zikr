@@ -13,11 +13,34 @@ html {
 }
 
 body {
-  background: radial-gradient(circle at top, #0e4b45 0%, #072e2a 60%);
-  color: var(--text);
+  background: #000000;
+  color: #F5F5F0;
   font-family: var(--font-arabic), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Custom background pattern overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('/branding/pattern.svg');
+  background-size: 400px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Premium gradient overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(10, 42, 30, 0.4) 0%, rgba(0, 0, 0, 1) 70%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Typography */
@@ -28,35 +51,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 p {
-  line-height: 1.6;
+  line-height: 1.8;
 }
 
 /* Colors and utilities */
 .arabic-muted {
-  color: var(--muted);
+  color: rgba(245, 245, 240, 0.5);
   transition: color 0.2s ease;
 }
 
-.arabic-text {
+.font-arabic {
   font-family: var(--font-arabic), system-ui, sans-serif;
-  direction: rtl;
-  text-align: right;
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -64,150 +81,59 @@ p {
   }
 }
 
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 .animate-fadeIn {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
 .animate-slideUp {
-  animation: slideUp 0.4s ease-out;
-}
-
-.animate-slideInRight {
-  animation: slideInRight 0.4s ease-out;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(199, 168, 107, 0.1);
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(199, 168, 107, 0.3);
-  border-radius: 4px;
+  background: rgba(199, 168, 107, 0.2);
+  border-radius: 10px;
+  border: 2px solid #000000;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(199, 168, 107, 0.5);
-}
-
-/* Focus states for accessibility */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  background: rgba(199, 168, 107, 0.4);
 }
 
 /* Selection styling */
 ::selection {
   background-color: rgba(199, 168, 107, 0.3);
-  color: var(--text);
+  color: #FFFFFF;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(199, 168, 107, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(199, 168, 107, 0);
-  }
+/* Premium Glassmorphism */
+.glass {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(199, 168, 107, 0.1);
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
+/* Text Shadow for Arabic */
+.text-shadow-gold {
+  text-shadow: 0 0 20px rgba(199, 168, 107, 0.3);
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+/* RTL Utilities */
+[dir="rtl"] .pr-6 {
+  padding-right: 1.5rem;
+  padding-left: 0;
 }
 
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-  background: linear-gradient(to right, rgba(199, 168, 107, 0.1) 0%, rgba(199, 168, 107, 0.3) 50%, rgba(199, 168, 107, 0.1) 100%);
-  background-size: 1000px 100%;
-}
-
-/* Smooth transitions for interactive elements */
-button,
-a,
-input,
-select,
-textarea {
-  transition: colors 0.2s ease;
-}
-
-/* Better focus states */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--accent, #C7A86B);
-  outline-offset: 2px;
-}
-
-/* Improved link styling */
-a {
-  color: var(--link-color, #C7A86B);
-}
-
-a:hover {
-  color: var(--link-hover-color, #E6D7B3);
-}
-
-/* Better input styling */
-input:disabled,
-select:disabled,
-textarea:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Smooth page transitions */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Print styles */
-@media print {
-  body {
-    background: white;
-    color: black;
-  }
-  
-  a {
-    text-decoration: underline;
-  }
+[dir="rtl"] .border-r-4 {
+  border-right-width: 4px;
+  border-left-width: 0;
 }

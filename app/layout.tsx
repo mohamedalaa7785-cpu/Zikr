@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang='ar' dir={siteConfig.dir}>
       <head>
-        <meta name='theme-color' content='#0E4B45' />
+        <meta name='theme-color' content='#0A2A1E' />
         <meta name='mobile-web-app-capable' content='yes' />
         <meta name='apple-mobile-web-app-capable' content='yes' />
         <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
