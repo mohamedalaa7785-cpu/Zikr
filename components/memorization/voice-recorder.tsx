@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { evaluateMemorizationAction } from './actions';
+import { evaluateMemorizationAction } from '@/app/memorization/actions';
 
 export function VoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);

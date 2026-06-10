@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { searchSpiritualContent, type AISearchResult, type SpiritualResponse } from './actions';
+import { searchSpiritualContent, type AISearchResult, type SpiritualResponse } from '@/app/spiritual-ai/actions';
 
 const FEELING_SUGGESTIONS = [
   { label: '😔 حزين', value: 'أشعر بالحزن والضيق وأبحث عن السكينة' },
@@ -169,15 +169,15 @@ export function SpiritualSearch() {
             )}
 
             {/* Quran & Hadith Results */}
-            {result.responses.filter(r => r.type === 'quran' || r.type === 'hadith').length > 0 && (
+            {result.responses.filter((r: SpiritualResponse) => r.type === 'quran' || r.type === 'hadith').length > 0 && (
               <section className="space-y-6">
                 <div className="flex items-center gap-4 border-r-4 border-brand-gold pr-4">
                   <h3 className="text-2xl font-bold text-brand-gold">من مشكاة النبوة وأنوار التنزيل</h3>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2">
                   {result.responses
-                    .filter(r => r.type === 'quran' || r.type === 'hadith')
-                    .map((response, index) => (
+                    .filter((r: SpiritualResponse) => r.type === 'quran' || r.type === 'hadith')
+                    .map((response: SpiritualResponse, index: number) => (
                       <ResponseCard key={index} response={response} />
                     ))}
                 </div>
@@ -185,15 +185,15 @@ export function SpiritualSearch() {
             )}
 
             {/* Dhikr & Duas */}
-            {result.responses.filter(r => r.type === 'dhikr').length > 0 && (
+            {result.responses.filter((r: SpiritualResponse) => r.type === 'dhikr').length > 0 && (
               <section className="space-y-6">
                 <div className="flex items-center gap-4 border-r-4 border-brand-emerald pr-4">
                   <h3 className="text-2xl font-bold text-brand-gold">أذكار وأدعية لسكينة القلب</h3>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {result.responses
-                    .filter(r => r.type === 'dhikr')
-                    .map((response, index) => (
+                    .filter((r: SpiritualResponse) => r.type === 'dhikr')
+                    .map((response: SpiritualResponse, index: number) => (
                       <Card key={index} className="p-6 bg-black/20 border-brand-gold/10 hover:border-brand-gold/30 transition-all text-center space-y-4">
                         <div className="text-brand-gold/20 text-4xl">📿</div>
                         <p className="text-xl font-arabic leading-relaxed text-brand-cream" dir="rtl">
