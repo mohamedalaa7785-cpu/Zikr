@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
+import { getPrayerTimesByCoordinates } from '@/lib/services/prayer';
+import type { PrayerResponse } from '@/lib/types/prayer';
 
 const categories = [
   { icon: '📖', label: 'القرآن', href: '/quran' },
@@ -49,13 +51,52 @@ const stats = [
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [prayerTimes, setPrayerTimes] = useState<PrayerResponse | null>(null);
+  const [currentTime, setCurrentTime] = useState<string>('');
+
+  // Update current time
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch prayer times on mount
+  useEffect(() => {
+    const fetchPrayerTimes = async () => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+              const times = await getPrayerTimesByCoordinates(latitude, longitude);
+              if (times) {
+                setPrayerTimes(times);
+              }
+            } catch (err) {
+              console.error('Failed to fetch prayer times:', err);
+            }
+          },
+          (err) => {
+            console.warn('Geolocation error:', err);
+          }
+        );
+      }
+    };
+
+    fetchPrayerTimes();
+  }, []);
 
   return (
     <div className='min-h-screen bg-brand-emeraldDeep text-brand-cream'>
       {/* Main Dashboard Layout */}
       <div className='flex'>
         {/* Right Sidebar Navigation */}
-        <aside className='hidden lg:flex w-64 flex-col border-l border-brand-gold/20 bg-brand-emeraldDeep/50 p-6 space-y-8 sticky top-16 h-[calc(100vh-4rem)]'>
+        <aside className='hidden lg:flex w-64 flex-col border-l border-brand-gold/20 bg-brand-emeraldDeep/50 p-6 space-y-8 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto'>
           <div className='space-y-4'>
             <h3 className='text-sm font-bold text-brand-gold uppercase tracking-wider'>التنقل السريع</h3>
             <nav className='space-y-2'>
@@ -84,20 +125,35 @@ export default function HomePage() {
           {/* Prayer Times Widget */}
           <Card className='border-brand-gold/20 bg-black/20 p-4 space-y-3'>
             <h4 className='text-xs font-bold text-brand-gold uppercase'>أوقات الصلاة</h4>
-            <div className='space-y-2 text-xs'>
-              <div className='flex justify-between'>
-                <span>الفجر</span>
-                <span className='text-brand-gold'>04:30</span>
+            {prayerTimes ? (
+              <div className='space-y-2 text-xs'>
+                <div className='flex justify-between'>
+                  <span>الفجر</span>
+                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Fajr}</span>
+                </div>
+                <div className='flex justify-between'>
+                  <span>الظهر</span>
+                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Dhuhr}</span>
+                </div>
+                <div className='flex justify-between'>
+                  <span>العصر</span>
+                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Asr}</span>
+                </div>
+                <div className='flex justify-between'>
+                  <span>المغرب</span>
+                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Maghrib}</span>
+                </div>
+                <div className='flex justify-between'>
+                  <span>العشاء</span>
+                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Isha}</span>
+                </div>
               </div>
-              <div className='flex justify-between'>
-                <span>الظهر</span>
-                <span className='text-brand-gold'>12:15</span>
-              </div>
-              <div className='flex justify-between'>
-                <span>العصر</span>
-                <span className='text-brand-gold'>15:45</span>
-              </div>
-            </div>
+            ) : (
+              <p className='text-xs text-brand-cream/60'>جاري تحميل المواقيت...</p>
+            )}
+            <Link href='/prayer' className='text-xs text-brand-gold hover:underline mt-2 block'>
+              عرض التفاصيل →
+            </Link>
           </Card>
 
           {/* Supplications Widget */}
@@ -118,6 +174,9 @@ export default function HomePage() {
               <div className='text-center space-y-3'>
                 <h1 className='text-4xl md:text-5xl font-bold text-brand-gold'>ذِكرٌ</h1>
                 <p className='text-brand-cream/80 text-lg'>منصتك الروحانية الشاملة</p>
+                {currentTime && (
+                  <p className='text-sm text-brand-gold'>{currentTime}</p>
+                )}
               </div>
 
               {/* Search Bar */}
@@ -149,6 +208,64 @@ export default function HomePage() {
                   </Link>
                 ))}
               </div>
+            </Container>
+          </section>
+
+          {/* Featured Prayer Times Section */}
+          <section className='border-b border-brand-gold/20 px-4 py-12 bg-gradient-to-r from-brand-gold/5 to-brand-emerald/5'>
+            <Container className='space-y-6'>
+              <div className='flex items-center justify-between'>
+                <h2 className='text-2xl font-bold text-brand-gold'>مواقيت الصلاة</h2>
+                <Link href='/prayer' className='text-sm text-brand-gold hover:text-brand-goldSoft'>
+                  عرض التفاصيل →
+                </Link>
+              </div>
+              {prayerTimes ? (
+                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'>
+                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
+                    <p className='text-xs text-brand-gold/70 mb-2'>الفجر</p>
+                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Fajr}</p>
+                  </Card>
+                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
+                    <p className='text-xs text-brand-gold/70 mb-2'>الشروق</p>
+                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Sunrise}</p>
+                  </Card>
+                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
+                    <p className='text-xs text-brand-gold/70 mb-2'>الظهر</p>
+                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Dhuhr}</p>
+                  </Card>
+                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
+                    <p className='text-xs text-brand-gold/70 mb-2'>العصر</p>
+                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Asr}</p>
+                  </Card>
+                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
+                    <p className='text-xs text-brand-gold/70 mb-2'>المغرب</p>
+                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Maghrib}</p>
+                  </Card>
+                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
+                    <p className='text-xs text-brand-gold/70 mb-2'>العشاء</p>
+                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Isha}</p>
+                  </Card>
+                </div>
+              ) : (
+                <Card className='text-center py-8'>
+                  <p className='text-brand-gold'>جاري تحميل مواقيت الصلاة...</p>
+                </Card>
+              )}
+            </Container>
+          </section>
+
+          {/* Quran Section */}
+          <section className='border-b border-brand-gold/20 px-4 py-12'>
+            <Container className='space-y-6'>
+              <div className='flex items-center justify-between'>
+                <h2 className='text-2xl font-bold text-brand-gold'>📖 القرآن الكريم</h2>
+                <Link href='/quran' className='text-sm text-brand-gold hover:text-brand-goldSoft'>
+                  عرض الكل →
+                </Link>
+              </div>
+              <p className='text-brand-cream/70'>اقرأ واستمع إلى القرآن الكريم بأصوات قراء مميزين</p>
+              <Button href='/quran' variant='secondary'>ابدأ القراءة</Button>
             </Container>
           </section>
 
