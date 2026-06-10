@@ -1,25 +1,42 @@
 import postgres from "postgres";
-import { getScriptEnv } from "../lib/env";
+import dotenv from "dotenv";
 
-const { DATABASE_URL } = getScriptEnv();
+dotenv.config({ path: '.env.local' });
+const { DATABASE_URL } = process.env;
+if (!DATABASE_URL) throw new Error('DATABASE_URL is not set');
 const sql = postgres(DATABASE_URL);
 
 async function main() {
+  console.log("Starting Reciters import...");
   const reciters = [
     {
-      name_ar: "الحصري",
-      name_en: "Al-Husary",
+      name_ar: "محمود خليل الحصري",
+      name_en: "Mahmoud Khalil Al-Husary",
       code: "husary",
-      style: "murattal",
+      style: "Murattal",
       base_url_template: "https://everyayah.com/data/Husary_128kbps",
     },
     {
-      name_ar: "المنشاوي",
-      name_en: "Al-Minshawi",
+      name_ar: "محمد صديق المنشاوي",
+      name_en: "Mohamed Siddiq Al-Minshawi",
       code: "minshawi",
-      style: "murattal",
+      style: "Murattal",
       base_url_template: "https://everyayah.com/data/Minshawy_Murattal_128kbps",
     },
+    {
+      name_ar: "عبد الباسط عبد الصمد",
+      name_en: "AbdulBaset AbdulSamad",
+      code: "abdulbaset",
+      style: "Mujawwad",
+      base_url_template: "https://everyayah.com/data/AbdulSamad_64kbps_QuranExplorer.Com",
+    },
+    {
+      name_ar: "مشاري راشد العفاسي",
+      name_en: "Mishary Rashid Alafasy",
+      code: "alafasy",
+      style: "Murattal",
+      base_url_template: "https://everyayah.com/data/Alafasy_128kbps",
+    }
   ];
 
   for (const reciter of reciters) {
@@ -35,6 +52,7 @@ async function main() {
     `;
   }
 
+  console.log("Reciters import completed successfully.");
   await sql.end();
 }
 

@@ -1,17 +1,26 @@
 import postgres from "postgres";
-import { getScriptEnv } from "../lib/env";
+import dotenv from "dotenv";
 
-const { DATABASE_URL } = getScriptEnv();
+dotenv.config({ path: '.env.local' });
+const { DATABASE_URL } = process.env;
+if (!DATABASE_URL) throw new Error('DATABASE_URL is not set');
 const sql = postgres(DATABASE_URL);
 
 async function main() {
+  console.log("Starting Tafsir import...");
   const rows = [
     {
       surah_id: 1,
       ayah_number: 1,
-      text: "ابتداء باسم الله",
+      text: "باسم الله أبدأ قراءتي، مستعينا به سبحانه، متبركا بذكر اسمه. و (الله) هو المألوه المعبود، الذي يتوجه إليه الخلق بالعبادة والتعظيم، وهو أخص أسماء الله تعالى، ولا يسمى به غيره سبحانه.",
       source: "التفسير الميسر",
     },
+    {
+      surah_id: 1,
+      ayah_number: 2,
+      text: "(الحمد لله) الثناء على الله بصفاته التي كلُّها كمال، وبنعمه الظاهرة والباطنة، الدينية والدنيوية، وفي ضمنه أمر لعباده أن يحمدوه، فهو المستحق له وحده، وهو سبحانه المنشئ للخلق، القائم بأمورهم، المربي لجميع خلقه بنعمه، ولأوليائه بالإيمان والعمل الصالح.",
+      source: "التفسير الميسر",
+    }
   ];
 
   for (const row of rows) {
@@ -24,6 +33,7 @@ async function main() {
     `;
   }
 
+  console.log("Tafsir import completed successfully.");
   await sql.end();
 }
 
