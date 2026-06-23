@@ -1,92 +1,161 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
+import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 
-const categories = [
-  { id: 1, name: 'التواشيح الكلاسيكية', icon: '🎵' },
-  { id: 2, name: 'التواشيح الحديثة', icon: '🎶' },
-  { id: 3, name: 'الأناشيد الإسلامية', icon: '🎤' },
-  { id: 4, name: 'الأذكار الملحنة', icon: '🕌' },
+interface Tawasheeh {
+  id: string;
+  title: string;
+  artist: string;
+  category_id: string;
+  audio_url: string;
+  duration: string;
+  views: number;
+  featured: boolean;
+}
+
+interface Category {
+  id: string;
+  name_ar: string;
+  icon: string;
+}
+
+const defaultCategories: Category[] = [
+  { id: '1', name_ar: 'التواشيح الكلاسيكية', icon: '🎵' },
+  { id: '2', name_ar: 'التواشيح الحديثة', icon: '🎶' },
+  { id: '3', name_ar: 'الأناشيد الإسلامية', icon: '🎤' },
+  { id: '4', name_ar: 'الأذكار الملحنة', icon: '🕌' },
 ];
 
-const tawasheeh = [
+const defaultTawasheeh: Tawasheeh[] = [
   {
-    id: 1,
+    id: '1',
     title: 'يا نور الله',
     artist: 'فريق التواشيح',
-    category: 'التواشيح الكلاسيكية',
+    category_id: '1',
+    audio_url: 'https://example.com/audio/1.mp3',
     duration: '4:32',
-    views: '12.5K',
+    views: 12500,
     featured: true,
   },
   {
-    id: 2,
+    id: '2',
     title: 'سلام عليك',
     artist: 'الفنان المشهور',
-    category: 'التواشيح الحديثة',
+    category_id: '2',
+    audio_url: 'https://example.com/audio/2.mp3',
     duration: '5:15',
-    views: '8.3K',
+    views: 8300,
     featured: false,
   },
   {
-    id: 3,
+    id: '3',
     title: 'يا إلهي',
     artist: 'فريق التواشيح',
-    category: 'الأناشيد الإسلامية',
+    category_id: '3',
+    audio_url: 'https://example.com/audio/3.mp3',
     duration: '3:45',
-    views: '15.2K',
+    views: 15200,
     featured: true,
   },
   {
-    id: 4,
+    id: '4',
     title: 'سبحان الله',
     artist: 'المنشد الموهوب',
-    category: 'الأذكار الملحنة',
+    category_id: '4',
+    audio_url: 'https://example.com/audio/4.mp3',
     duration: '2:30',
-    views: '9.8K',
+    views: 9800,
     featured: false,
   },
   {
-    id: 5,
+    id: '5',
     title: 'الحمد لله',
     artist: 'فريق التواشيح',
-    category: 'الأذكار الملحنة',
+    category_id: '4',
+    audio_url: 'https://example.com/audio/5.mp3',
     duration: '3:20',
-    views: '11.4K',
+    views: 11400,
     featured: true,
   },
   {
-    id: 6,
+    id: '6',
     title: 'لا إله إلا الله',
     artist: 'الفنان المشهور',
-    category: 'التواشيح الكلاسيكية',
+    category_id: '1',
+    audio_url: 'https://example.com/audio/6.mp3',
     duration: '4:10',
-    views: '13.7K',
+    views: 13700,
     featured: false,
   },
 ];
 
 export default function TawasheehPage() {
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [tawasheeh, setTawasheeh] = useState<Tawasheeh[]>(defaultTawasheeh);
+  const [categories, setCategories] = useState<Category[]>(defaultCategories);
+  const [isLoading, setIsLoading] = useState(true);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load data from database
+    const loadData = async () => {
+      try {
+        // Try to fetch from Supabase
+        // For now, use default data as fallback
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to load tawasheeh data:', error);
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const filteredTawasheeh = tawasheeh.filter((item) => {
-    const matchesCategory = !selectedCategory || categories.find(c => c.id === selectedCategory)?.name === item.category;
-    const matchesSearch = !searchQuery || item.title.includes(searchQuery) || item.artist.includes(searchQuery);
+    const matchesCategory = !selectedCategory || item.category_id === selectedCategory;
+    const matchesSearch = !searchQuery || 
+      item.title.includes(searchQuery) || 
+      item.artist.includes(searchQuery);
     return matchesCategory && matchesSearch;
   });
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = (id: string) => {
     setFavorites((prev) => 
       prev.includes(id) ? prev.filter(fav => fav !== id) : [...prev, id]
     );
   };
+
+  const getCategoryName = (categoryId: string) => {
+    return categories.find(c => c.id === categoryId)?.name_ar || 'غير محدد';
+  };
+
+  const playAudio = (id: string, audioUrl: string) => {
+    setPlayingId(id);
+    // Create audio element and play
+    const audio = new Audio(audioUrl);
+    audio.play().catch(err => {
+      console.error('Failed to play audio:', err);
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <Container className="py-12 space-y-10">
+        <div className="text-center">
+          <p className="text-brand-cream/60">جاري التحميل...</p>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container className="py-12 space-y-10">
@@ -130,7 +199,7 @@ export default function TawasheehPage() {
               }`}
             >
               <div className="text-3xl mb-2">{cat.icon}</div>
-              <p className="text-sm font-semibold text-brand-cream">{cat.name}</p>
+              <p className="text-sm font-semibold text-brand-cream">{cat.name_ar}</p>
             </Card>
           ))}
         </div>
@@ -152,9 +221,15 @@ export default function TawasheehPage() {
               <div className="p-4 space-y-3">
                 <h3 className="font-semibold text-brand-cream text-lg">{item.title}</h3>
                 <p className="text-sm text-brand-gold/70">{item.artist}</p>
-                <p className="text-xs text-brand-cream/50">{item.views} مشاهدة</p>
+                <p className="text-xs text-brand-cream/50">{item.views.toLocaleString('ar-SA')} مشاهدة</p>
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1">▶ استمع</Button>
+                  <Button 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => playAudio(item.id, item.audio_url)}
+                  >
+                    {playingId === item.id ? '⏸ إيقاف' : '▶ استمع'}
+                  </Button>
                   <Button 
                     size="sm" 
                     variant="outline"
@@ -186,10 +261,16 @@ export default function TawasheehPage() {
                 <div className="p-4 space-y-3">
                   <h3 className="font-semibold text-brand-cream">{item.title}</h3>
                   <p className="text-sm text-brand-gold/70">{item.artist}</p>
-                  <Badge variant="secondary" className="text-xs">{item.category}</Badge>
-                  <p className="text-xs text-brand-cream/50">{item.views} مشاهدة</p>
+                  <Badge variant="secondary" className="text-xs">{getCategoryName(item.category_id)}</Badge>
+                  <p className="text-xs text-brand-cream/50">{item.views.toLocaleString('ar-SA')} مشاهدة</p>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1">▶ استمع</Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => playAudio(item.id, item.audio_url)}
+                    >
+                      {playingId === item.id ? '⏸ إيقاف' : '▶ استمع'}
+                    </Button>
                     <Button 
                       size="sm" 
                       variant="outline"
