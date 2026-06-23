@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         {
           key: 'Content-Security-Policy',
-          value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://*.supabase.co https://i.ytimg.com https://img.youtube.com; media-src 'self' blob: https://*.supabase.co https://cdn.islamic.network https://everyayah.com https://quranaudio.pages.dev; connect-src 'self' https://*.supabase.co https://www.googleapis.com https://generativelanguage.googleapis.com https://api.hadith.gading.dev https://api.aladhan.com https://api.alquran.cloud https://everyayah.com https://quranaudio.pages.dev; font-src 'self' data:;",
+          value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://*.supabase.co https://i.ytimg.com https://img.youtube.com; media-src 'self' blob: https://*.supabase.co https://cdn.islamic.network https://everyayah.com https://quranaudio.pages.dev https://*.mp3quran.net https://download.quranicaudio.com; connect-src 'self' https://*.supabase.co https://www.googleapis.com https://generativelanguage.googleapis.com https://api.hadith.gading.dev https://api.aladhan.com https://api.alquran.cloud https://everyayah.com https://quranaudio.pages.dev https://*.mp3quran.net https://download.quranicaudio.com; font-src 'self' data:;",
         },
         { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(self), camera=()' },
         { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
