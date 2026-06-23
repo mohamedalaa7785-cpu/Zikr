@@ -29,14 +29,13 @@ export const tafsir:Tafsir[]=[
 ];
 
 export const reciters:Reciter[]=[
-  {id:'alafasy',nameAr:'مشاري راشد العفاسي',nameEn:'Mishary Rashid Alafasy',code:'ar.alafasy',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy',type:'surah'},
-  {id:'minshawi',nameAr:'محمد صديق المنشاوي',nameEn:'Muhammad Siddiq Al-Minshawi',code:'ar.minshawi',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.minshawi',type:'surah'},
-  {id:'husary',nameAr:'محمود خليل الحصري',nameEn:'Mahmoud Khalil Al-Husary',code:'ar.husary',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.husary',type:'surah'},
-  {id:'abdulbasit',nameAr:'عبد الباسط عبد الصمد',nameEn:'Abdul Basit Abdul Samad',code:'ar.abdulsamad',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.abdulsamad',type:'surah'},
-  {id:'sudais',nameAr:'عبد الرحمن السديس',nameEn:'Abdurrahman As-Sudais',code:'ar.as-sudais',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.as-sudais',type:'surah'},
-  {id:'shuraim',nameAr:'سعود الشريم',nameEn:'Saud Al-Shuraim',code:'ar.shuraym',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.shuraym',type:'surah'},
-  {id:'mahermuaiqly',nameAr:'ماهر المعيقلي',nameEn:'Maher Al-Muaiqly',code:'ar.mahermuaiqly',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.mahermuaiqly',type:'surah'},
-  {id:'ghamdi',nameAr:'سعد الغامدي',nameEn:'Saad Al-Ghamdi',code:'ar.saadghamidi',baseUrlTemplate:'https://cdn.islamic.network/quran/audio-surah/128/ar.saadghamidi',type:'surah'},
+  {id:'alafasy',nameAr:'مشاري راشد العفاسي',nameEn:'Mishary Rashid Alafasy',code:'ar.alafasy',baseUrlTemplate:'https://server8.mp3quran.net/afs',type:'surah'},
+  {id:'minshawi',nameAr:'محمد صديق المنشاوي',nameEn:'Muhammad Siddiq Al-Minshawi',code:'ar.minshawi',baseUrlTemplate:'https://server10.mp3quran.net/minsh',type:'surah'},
+  {id:'abdulbasit',nameAr:'عبد الباسط عبد الصمد',nameEn:'Abdul Basit Abdul Samad',code:'ar.abdulsamad',baseUrlTemplate:'https://server7.mp3quran.net/basit',type:'surah'},
+  {id:'sudais',nameAr:'عبد الرحمن السديس',nameEn:'Abdurrahman As-Sudais',code:'ar.as-sudais',baseUrlTemplate:'https://server11.mp3quran.net/sds',type:'surah'},
+  {id:'shuraim',nameAr:'سعود الشريم',nameEn:'Saud Al-Shuraim',code:'ar.shuraym',baseUrlTemplate:'https://server7.mp3quran.net/shur',type:'surah'},
+  {id:'mahermuaiqly',nameAr:'ماهر المعيقلي',nameEn:'Maher Al-Muaiqly',code:'ar.mahermuaiqly',baseUrlTemplate:'https://server12.mp3quran.net/maher',type:'surah'},
+  {id:'ghamdi',nameAr:'سعد الغامدي',nameEn:'Saad Al-Ghamdi',code:'ar.saadghamidi',baseUrlTemplate:'https://server7.mp3quran.net/s_gmd',type:'surah'},
 ];
 
 export const hadithBooks:HadithBook[]=[
@@ -63,7 +62,7 @@ export const prophets:Prophet[]=[
   {id:'5',nameAr:'عيسى عليه السلام',nameEn:'Jesus',slug:'jesus',order:5,bioAr:'روح الله وكلمته، أرسل إلى بني إسرائيل'},
   {id:'6',nameAr:'يوسف عليه السلام',nameEn:'Yusuf',slug:'yusuf',order:6,bioAr:'صاحب قصة الصبر والعفة، ملك مصر'},
   {id:'7',nameAr:'أيوب عليه السلام',nameEn:'Ayyub',slug:'ayyub',order:7,bioAr:'ضرب به المثل في الصبر على البلاء'},
-  {id:'8',nameAr:'محمد صلى الله عليه وسلم',nameEn:'Muhammad',slug:'muhammad',order:8,bioAr:'خاتم الأنبياء والمرسلين، أرسل رحمة للعالمين'},
+  {id:'8',nameAr:'محمد صلى الله عليه وسلم',nameEn:'Muhammad',slug:'muhammad',order:8,bioAr:'خاتم الأنبياء والمرسلين، أرسل ��حمة للعالمين'},
 ];
 
 export type Tawasheeh={id:string;titleAr:string;titleEn:string;artistAr:string;artistEn:string;audioUrl:string;duration:number;views:number;featured:boolean};

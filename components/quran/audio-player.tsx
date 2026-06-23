@@ -8,16 +8,23 @@ import { Button } from "@/components/ui/button";
 function getAudioUrl(surahId: number, reciter: Reciter) {
   const surahNumber = String(surahId).padStart(3, "0");
 
-  // Use reciter's baseUrlTemplate if available
-  const primary = reciter.baseUrlTemplate
-    ? `${reciter.baseUrlTemplate}/${surahNumber}.mp3`
-    : `https://cdn.islamic.network/quran/audio-surah/128/${reciter.code}/${surahNumber}.mp3`;
+  // Primary: use reciter's baseUrlTemplate (mp3quran.net verified working)
+  const primary = `${reciter.baseUrlTemplate}/${surahNumber}.mp3`;
 
-  // Fallback sources
-  const fallback = [
-    `https://everyayah.com/data/${reciter.code}/${surahNumber}.mp3`,
-    `https://quranaudio.pages.dev/1_0_2/${reciter.code}/${surahNumber}.mp3`,
-  ];
+  // Fallback: quranicaudio.com
+  const quranicAudioMap: Record<string, string> = {
+    alafasy: "mishaari_raashid_al_3afaasee",
+    minshawi: "muhammad_siddeeq_al-minshaawee",
+    abdulbasit: "abdulbasit_murattal_new",
+    sudais: "abdurrahmaan_as-sudays",
+    shuraim: "saood_ash-shuraym",
+    mahermuaiqly: "maher_al_muaiqly",
+    ghamdi: "sa3d_al-ghaamidi",
+  };
+  const quranicPath = quranicAudioMap[reciter.id];
+  const fallback = quranicPath
+    ? [`https://download.quranicaudio.com/quran/${quranicPath}/${surahNumber}.mp3`]
+    : [];
 
   return { primary, fallback };
 }
@@ -255,7 +262,6 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
         preload="metadata"
         src={src}
         className="hidden"
-        crossOrigin="anonymous"
         controlsList="nodownload"
       />
 
