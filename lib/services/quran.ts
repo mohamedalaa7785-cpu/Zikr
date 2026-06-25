@@ -1,8 +1,8 @@
 import { safeApiFetch } from "@/lib/services/http";
-import { supabaseServerAnonRequest } from "@/lib/supabase/server";
+// Server-only imports are moved to lib/services/quran-server.ts
 import { ServiceError } from "@/lib/types/common";
-import type { Ayah, Juz, QuranApiResponse, Surah } from "@/lib/types/quran";
-import { surahs as fallbackSurahs } from "@/lib/data/content";
+import type { Ayah, Juz, QuranApiResponse, Surah, Reciter } from "@/lib/types/quran";
+import { surahs as fallbackSurahs, reciters as fallbackReciters } from "@/lib/data/content";
 
 const QURAN_API_BASE = "https://api.alquran.cloud/v1";
 const DEBUG_QURAN = process.env.NODE_ENV !== "production";
@@ -53,6 +53,25 @@ type DbTafsir = {
   tafsir_en: string | null;
 };
 
+type DbReciter = {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  code: string;
+  base_url_template: string;
+};
+
+function mapDbReciter(reciter: DbReciter): Reciter {
+  return {
+    id: reciter.code,
+    nameAr: reciter.name_ar,
+    nameEn: reciter.name_en,
+    code: reciter.code,
+    baseUrlTemplate: reciter.base_url_template,
+    type: "surah",
+  };
+}
+
 function mapDbSurah(surah: DbSurah, locale: Locale): Surah {
   return {
     number: surah.id,
@@ -78,29 +97,13 @@ function mapDbAyah(ayah: DbAyah, locale: Locale): Ayah {
   };
 }
 
-async function readSupabase<T>(path: string): Promise<T | null> {
-  try {
-    return await supabaseServerAnonRequest<T>(path);
-  } catch (error) {
-    debugLog(
-      "Supabase content read failed; falling back to external API",
-      error
-    );
-    return null;
-  }
-}
+// Supabase reads are now handled server-side in lib/services/quran-server.ts
+// This client-side service only uses external APIs as fallback
 
 export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
   debugLog("getAllSurahs request", { locale });
 
-  const dbSurahs = await readSupabase<DbSurah[]>(
-    "/rest/v1/quran_surahs?select=id,name_ar,name_en,name_translation,revelation_place,ayahs_count&order=order.asc"
-  );
-  if (dbSurahs?.length) {
-    debugLog("getAllSurahs Supabase success", { count: dbSurahs.length });
-    return dbSurahs.map(surah => mapDbSurah(surah, locale));
-  }
-
+  // Supabase reads moved to server-side; use external API as fallback
   try {
     const { data: response } = await safeApiFetch<QuranApiResponse<Surah[]>>(
       `${QURAN_API_BASE}/surah`
@@ -136,30 +139,27 @@ export async function getSurahById(
 
   debugLog("getSurahById request", { id, locale });
 
-  const dbSurahs = await readSupabase<DbSurah[]>(
-    `/rest/v1/quran_surahs?select=id,name_ar,name_en,name_translation,revelation_place,ayahs_count&id=eq.${id}&limit=1`
-  );
-  if (dbSurahs?.[0]) {
-    const dbAyahs = await readSupabase<DbAyah[]>(
-      `/rest/v1/quran_ayahs?select=id,surah_id,ayah_number,text_ar,text_en,text_uthmani,text_simple,page,juz,hizb,rub,sajda&surah_id=eq.${id}&order=ayah_number.asc`
-    );
-    return {
-      surah: mapDbSurah(dbSurahs[0], locale),
-      ayahs: (dbAyahs ?? []).map(ayah => mapDbAyah(ayah, locale)),
-    };
+  try {
+    // Supabase reads moved to server-side; use external API as fallback
+    debugLog("getSurahById trying external API", { id });
+    const { data: response } = await safeApiFetch<
+      QuranApiResponse<{ ayahs: Ayah[] } & Surah>
+    >(`${QURAN_API_BASE}/surah/${id}/${EDITIONS[locale]}`);
+
+    if (!response?.data) {
+      console.warn(`[quran-service] getSurahById failed: no data for surah ${id}`);
+      return null;
+    }
+    const { ayahs = [], ...surah } = response.data;
+    debugLog("getSurahById API success", {
+      surah: surah.number,
+      ayahCount: ayahs.length,
+    });
+    return { surah, ayahs };
+  } catch (error) {
+    console.error(`[quran-service] getSurahById error for surah ${id}:`, error);
+    return null;
   }
-
-  const { data: response } = await safeApiFetch<
-    QuranApiResponse<{ ayahs: Ayah[] } & Surah>
-  >(`${QURAN_API_BASE}/surah/${id}/${EDITIONS[locale]}`);
-
-  if (!response?.data) return null;
-  const { ayahs = [], ...surah } = response.data;
-  debugLog("getSurahById API success", {
-    surah: surah.number,
-    ayahCount: ayahs.length,
-  });
-  return { surah, ayahs };
 }
 
 export async function getAyah(
@@ -171,18 +171,20 @@ export async function getAyah(
 
   debugLog("getAyah request", { surahId, ayahId, locale });
 
-  const dbAyahs = await readSupabase<DbAyah[]>(
-    `/rest/v1/quran_ayahs?select=id,surah_id,ayah_number,text_ar,text_en,text_uthmani,text_simple,page,juz,hizb,rub,sajda&surah_id=eq.${surahId}&ayah_number=eq.${ayahId}&limit=1`
-  );
-  if (dbAyahs?.[0]) return mapDbAyah(dbAyahs[0], locale);
-
-  const { data: response } = await safeApiFetch<QuranApiResponse<Ayah>>(
-    `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS[locale]}`
-  );
-  debugLog("getAyah API success", {
-    number: response?.data?.numberInSurah ?? null,
-  });
-  return response?.data ?? null;
+  try {
+    // Supabase reads moved to server-side; use external API as fallback
+    debugLog("getAyah trying external API", { surahId, ayahId });
+    const { data: response } = await safeApiFetch<QuranApiResponse<Ayah>>(
+      `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS[locale]}`
+    );
+    debugLog("getAyah API success", {
+      number: response?.data?.numberInSurah ?? null,
+    });
+    return response?.data ?? null;
+  } catch (error) {
+    console.error(`[quran-service] getAyah error for ${surahId}:${ayahId}:`, error);
+    return null;
+  }
 }
 
 export async function getTafsir(
@@ -193,15 +195,18 @@ export async function getTafsir(
 
   debugLog("getTafsir request", { surahId, ayahId });
 
-  const dbTafsir = await readSupabase<DbTafsir[]>(
-    `/rest/v1/quran_tafsir?select=tafsir_ar,tafsir_en&surah_id=eq.${surahId}&ayah_number=eq.${ayahId}&limit=1`
-  );
-  if (dbTafsir?.[0]) return dbTafsir[0].tafsir_ar;
-
-  const { data: response } = await safeApiFetch<QuranApiResponse<Ayah>>(
-    `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS.tafsir}`
-  );
-  return response?.data?.text ?? null;
+  try {
+    // Supabase reads moved to server-side; use external API as fallback
+    debugLog("getTafsir trying external API", { surahId, ayahId });
+    const { data: response } = await safeApiFetch<QuranApiResponse<Ayah>>(
+      `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS.tafsir}`
+    );
+    debugLog("getAyah API success", { surahId, ayahId });
+    return response?.data?.text ?? null;
+  } catch (error) {
+    console.error(`[quran-service] getTafsir error for ${surahId}:${ayahId}:`, error);
+    return null;
+  }
 }
 
 export async function getJuz(
@@ -224,10 +229,7 @@ export async function searchQuran(
   if (!cleanQuery) return [];
 
   const escapedQuery = cleanQuery.replace(/[*,()]/g, "");
-  const dbMatches = await readSupabase<DbAyah[]>(
-    `/rest/v1/quran_ayahs?select=id,surah_id,ayah_number,text_ar,text_en,text_uthmani,text_simple,page,juz,hizb,rub,sajda&or=${encodeURIComponent(`(text_ar.ilike.*${escapedQuery}*,text_simple.ilike.*${escapedQuery}*,text_uthmani.ilike.*${escapedQuery}*)`)}&limit=20`
-  );
-  if (dbMatches?.length) return dbMatches.map(ayah => mapDbAyah(ayah, locale));
+  // Supabase reads moved to server-side; use external API as fallback
 
   try {
     const { data: response } = await safeApiFetch<
@@ -240,4 +242,11 @@ export async function searchQuran(
     if (error instanceof ServiceError) return [];
     throw error;
   }
+}
+
+export async function getReciters(): Promise<Reciter[]> {
+  debugLog("getReciters request");
+  // Supabase reads moved to server-side; use fallback
+  debugLog("getReciters using fallback");
+  return fallbackReciters;
 }

@@ -15,7 +15,7 @@ function LoginForm() {
   const [error, setError] = useState('');
 
   const nextPath = useMemo(() => searchParams.get('next') || '/profile', [searchParams]);
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
 
   useEffect(() => {
     const errorParam = searchParams.get('error');

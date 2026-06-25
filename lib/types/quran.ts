@@ -36,3 +36,12 @@ export interface QuranApiResponse<T> {
   status: string;
   data: T;
 }
+
+export interface Reciter {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  code: string;
+  baseUrlTemplate: string;
+  type: 'surah' | 'ayah';
+}

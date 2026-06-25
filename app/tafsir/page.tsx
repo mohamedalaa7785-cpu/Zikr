@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
+import { getSurahIdFromName } from '@/lib/utils/surah-mapping';
 
 const tafsirBooks = [
   {
@@ -54,9 +55,9 @@ const tafsirBooks = [
 ];
 
 const recentAyahs = [
-  { surah: 'البقرة', ayah: 216, text: 'وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ' },
-  { surah: 'آل عمران', ayah: 139, text: 'فَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ' },
-  { surah: 'النساء', ayah: 28, text: 'يُرِيدُ اللَّهُ أَن يُخَفِّفَ عَنكُمْ' },
+  { surah: 2, surahName: 'البقرة', ayah: 216, text: 'وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ' },
+  { surah: 3, surahName: 'آل عمران', ayah: 139, text: 'فَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ' },
+  { surah: 4, surahName: 'النساء', ayah: 28, text: 'يُرِيدُ اللَّهُ أَن يُخَفِّفَ عَنكُمْ' },
 ];
 
 export default function TafsirPage() {
@@ -139,7 +140,7 @@ export default function TafsirPage() {
                 {ayah.text}
               </p>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-brand-gold/70">{ayah.surah} - {ayah.ayah}</span>
+                <span className="text-brand-gold/70">{ayah.surahName} - {ayah.ayah}</span>
                 <Link href={`/quran/${ayah.surah}/${ayah.ayah}`}>
                   <Button size="sm" variant="outline">اقرأ التفسير</Button>
                 </Link>
@@ -186,11 +187,14 @@ export default function TafsirPage() {
         <SectionHeader title="ابحث حسب السورة" />
         
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {['الفاتحة', 'البقرة', 'آل عمران', 'النساء', 'المائدة', 'الأنعام', 'الأعراف', 'الأنفال'].map((surah) => (
-            <Link key={surah} href={`/quran/${surah}`}>
-              <Button variant="outline" className="w-full">{surah}</Button>
-            </Link>
-          ))}
+          {['الفاتحة', 'البقرة', 'آل عمران', 'النساء', 'المائدة', 'الأنعام', 'الأعراف', 'الأنفال'].map((surahName) => {
+            const surahId = getSurahIdFromName(surahName);
+            return surahId ? (
+              <Link key={surahName} href={`/quran/${surahId}`}>
+                <Button variant="outline" className="w-full">{surahName}</Button>
+              </Link>
+            ) : null;
+          })}
         </div>
       </section>
 

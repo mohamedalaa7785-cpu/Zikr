@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useRef, useState, useEffect } from "react";
-import { reciters, type Reciter } from "@/lib/data/content";
+import { type Reciter } from "@/lib/types/quran";
+import { getReciters } from "@/lib/services/quran";
 import { Button } from "@/components/ui/button";
 
 // Audio URL generation function (client-safe)
@@ -31,7 +32,8 @@ function getAudioUrl(surahId: number, reciter: Reciter) {
 
 export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const [isClient, setIsClient] = useState(false);
-  const [reciter, setReciter] = useState(reciters[0]);
+  const [availableReciters, setAvailableReciters] = useState<Reciter[]>([]);
+  const [reciter, setReciter] = useState<Reciter | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -42,11 +44,18 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   // Hydration guard - ensure component only renders on client
   useEffect(() => {
     setIsClient(true);
+    // Load reciters from service
+    getReciters().then(data => {
+      setAvailableReciters(data);
+      if (data.length > 0) {
+        setReciter(data[0]);
+      }
+    });
   }, []);
 
   const [audioSourceIndex, setAudioSourceIndex] = useState(0);
   const audioSources = useMemo(() => {
-    if (!isClient) return [];
+    if (!isClient || !reciter) return [];
     if (!reciter.code) return [];
 
     const { primary, fallback } = getAudioUrl(surahId, reciter);
@@ -93,7 +102,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
         );
         console.error("[audio] All audio sources failed:", {
           surahId,
-          reciter: reciter.id,
+          reciter: reciter?.id,
           sources: audioSources,
         });
       }
@@ -182,8 +191,8 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
 
   const handleReciterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newReciter =
-      reciters.find(r => r.id === e.target.value) ?? reciters[0];
-    if (!isClient) return;
+      availableReciters.find(r => r.id === e.target.value) || availableReciters[0];
+    if (!isClient || !newReciter) return;
 
     console.debug("[audio] Changing reciter to:", newReciter.id);
     setReciter(newReciter);
@@ -199,6 +208,8 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     }
   };
 
+  if (!reciter) return null;
+
   return (
     <div className="space-y-4 rounded-xl border border-brand-gold/30 bg-black/20 p-4">
       <div className="flex items-center justify-between gap-4">
@@ -208,7 +219,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
           value={reciter.id}
           onChange={handleReciterChange}
         >
-          {reciters.map(r => (
+          {availableReciters.map(r => (
             <option key={r.id} value={r.id} className="bg-brand-emeraldDeep">
               {r.nameAr}
             </option>

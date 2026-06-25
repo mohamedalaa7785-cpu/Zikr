@@ -15,6 +15,7 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
 
   useEffect(() => {
     setIsClient(true);
@@ -111,7 +112,13 @@ function RegisterForm() {
         </div>
       </div>
 
-      <GoogleOAuthButton next={searchParams.get('next') || undefined} label="إنشاء حساب عبر Google" />
+      {googleClientId ? (
+        <GoogleOAuthButton next={searchParams.get('next') || undefined} label="إنشاء حساب عبر Google" />
+      ) : (
+        <p className="text-center text-xs italic text-brand-gold/50">
+          التسجيل عبر Google غير متوفر حالياً
+        </p>
+      )}
 
       <p className="text-center text-sm arabic-muted">
         لديك حساب بالفعل؟{' '}
