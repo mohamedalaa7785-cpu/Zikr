@@ -6,6 +6,7 @@ import { QuranAudioPlayer } from '@/components/quran/audio-player';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { getSurahById } from '@/lib/services/quran';
+import { getSurahFromDb } from '@/lib/services/quran-server';
 import { Badge } from '@/components/ui/badge';
 
 export const revalidate = 3600; // Surah page cache
@@ -15,7 +16,17 @@ export async function generateMetadata({ params }: { params: Promise<{ surah: st
   const id = Number.parseInt(p.surah, 10);
   if (Number.isNaN(id)) return { title: 'سورة', description: 'قراءة واستماع' };
 
-  const result = await getSurahById(id, 'ar');
+  // Try DB first for metadata
+  let result = await getSurahFromDb(id, 'ar');
+  
+  // Fallback to API if DB fails
+  if (!result) {
+    const apiResult = await getSurahById(id, 'ar');
+    if (apiResult) {
+      result = { surah: apiResult.surah, ayahs: apiResult.ayahs };
+    }
+  }
+
   return {
     title: result ? `سورة ${result.surah.name}` : 'سورة',
     description: 'قراءة وتفسير واستماع',
@@ -27,7 +38,15 @@ export default async function SurahPage({ params }: { params: Promise<{ surah: s
   const id = Number.parseInt(p.surah, 10);
   if (Number.isNaN(id)) return notFound();
 
-  const result = await getSurahById(id, 'ar');
+  // DB-First Strategy
+  let result = await getSurahFromDb(id, 'ar');
+  
+  // Fallback to API if DB is empty/fails
+  if (!result) {
+    console.info(`[surah-page] DB unavailable for surah ${id}, falling back to external API`);
+    result = await getSurahById(id, 'ar');
+  }
+
   if (!result) return notFound();
 
   return (

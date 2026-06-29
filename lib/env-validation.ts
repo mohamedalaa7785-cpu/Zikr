@@ -28,36 +28,24 @@ export type Env = z.infer<typeof envSchema>;
 
 export function validateEnv(env: Record<string, string | undefined>): Env {
   const parsed = envSchema.safeParse(env);
+  
   if (!parsed.success) {
-    const isNextBuild = Boolean(process.env.NEXT_PHASE);
     const nodeEnv = process.env.NODE_ENV;
-    const isBuildPhase = nodeEnv === 'production' && isNextBuild;
+    const missing = Object.keys(parsed.error.flatten().fieldErrors);
 
-    // During Next.js build in CI/production, allow partial env so deployment builds 
-    // can complete before runtime secrets are injected by Vercel
-    if (isBuildPhase) {
-      console.warn('[env] Build phase detected: allowing partial environment variables for deployment');
-      return env as Env;
+    // ALWAYS log errors loudly but NEVER throw at module load time
+    // This prevents site-wide blank screens when optional vars are missing
+    if (nodeEnv === 'production') {
+      console.error('[env] Production runtime validation issues found:');
+      console.error('[env] Missing/invalid variables:', missing.join(', '));
+      console.error('[env] Site will continue to load, but specific features may fail.');
+    } else {
+      console.warn('[env] Environment validation issues:', missing.join(', '));
     }
 
-    // In production runtime (after build), fail fast
-    if (nodeEnv === 'production' && !isNextBuild) {
-      console.error('[env] Production runtime validation failed:', parsed.error.flatten());
-      throw new Error('Invalid environment variables in production. Required vars: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, AUTH_CALLBACK_URL, NEXT_PUBLIC_SITE_URL');
-    }
-
-    // In development, warn but allow partial env
-    if (nodeEnv !== 'production') {
-      console.warn('[env] Development environment: Some environment variables are not set. This may cause runtime errors.');
-      console.warn('[env] Missing/invalid:', 
-        Object.keys(parsed.error.flatten().fieldErrors)
-          .map(key => `${key}`)
-          .join(', ')
-      );
-    }
-
-    // Return partial object for build/dev phases
+    // Return the raw env object as Env type to allow partial access
     return env as Env;
   }
+  
   return parsed.data;
 }

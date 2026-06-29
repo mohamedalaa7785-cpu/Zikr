@@ -1,5 +1,4 @@
 import { safeApiFetch } from "@/lib/services/http";
-// Server-only imports are moved to lib/services/quran-server.ts
 import { ServiceError } from "@/lib/types/common";
 import type { Ayah, Juz, QuranApiResponse, Surah, Reciter } from "@/lib/types/quran";
 import { surahs as fallbackSurahs, reciters as fallbackReciters } from "@/lib/data/content";
@@ -22,9 +21,11 @@ const EDITIONS = {
   tafsir: "ar.jalalayn",
 } as const;
 
-type Locale = keyof typeof EDITIONS;
+export type Locale = keyof typeof EDITIONS;
 
-type DbSurah = {
+// --- Shared Database Types ---
+
+export type DbSurah = {
   id: number;
   name_ar: string;
   name_en: string;
@@ -33,7 +34,7 @@ type DbSurah = {
   ayahs_count: number;
 };
 
-type DbAyah = {
+export type DbAyah = {
   id: string;
   surah_id: number;
   ayah_number: number;
@@ -48,12 +49,12 @@ type DbAyah = {
   sajda: boolean | null;
 };
 
-type DbTafsir = {
+export type DbTafsir = {
   tafsir_ar: string;
   tafsir_en: string | null;
 };
 
-type DbReciter = {
+export type DbReciter = {
   id: string;
   name_ar: string;
   name_en: string;
@@ -61,7 +62,9 @@ type DbReciter = {
   base_url_template: string;
 };
 
-function mapDbReciter(reciter: DbReciter): Reciter {
+// --- Shared Mappers ---
+
+export function mapDbReciter(reciter: DbReciter): Reciter {
   return {
     id: reciter.code,
     nameAr: reciter.name_ar,
@@ -72,7 +75,7 @@ function mapDbReciter(reciter: DbReciter): Reciter {
   };
 }
 
-function mapDbSurah(surah: DbSurah, locale: Locale): Surah {
+export function mapDbSurah(surah: DbSurah, locale: Locale): Surah {
   return {
     number: surah.id,
     name: locale === "en" ? surah.name_en : surah.name_ar,
@@ -83,7 +86,7 @@ function mapDbSurah(surah: DbSurah, locale: Locale): Surah {
   };
 }
 
-function mapDbAyah(ayah: DbAyah, locale: Locale): Ayah {
+export function mapDbAyah(ayah: DbAyah, locale: Locale): Ayah {
   return {
     number: ayah.ayah_number,
     text: locale === "en" ? (ayah.text_en ?? ayah.text_ar) : ayah.text_ar,
@@ -97,13 +100,11 @@ function mapDbAyah(ayah: DbAyah, locale: Locale): Ayah {
   };
 }
 
-// Supabase reads are now handled server-side in lib/services/quran-server.ts
-// This client-side service only uses external APIs as fallback
+// --- Client-Safe Service (API Fallbacks) ---
 
 export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
   debugLog("getAllSurahs request", { locale });
 
-  // Supabase reads moved to server-side; use external API as fallback
   try {
     const { data: response } = await safeApiFetch<QuranApiResponse<Surah[]>>(
       `${QURAN_API_BASE}/surah`
@@ -116,10 +117,7 @@ export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
       ? response.data.map(surah => ({ ...surah, name: surah.englishName }))
       : response.data;
   } catch (error) {
-    console.error(
-      "[quran-service] Failed to fetch surahs, using fallback:",
-      error
-    );
+    console.error("[quran-service] Failed to fetch surahs, using fallback:", error);
     return fallbackSurahs.map(s => ({
       number: s.id,
       name: locale === "en" ? s.nameEn : s.nameAr,
@@ -137,24 +135,14 @@ export async function getSurahById(
 ): Promise<{ surah: Surah; ayahs: Ayah[] } | null> {
   if (!id || id < 1 || id > 114) return null;
 
-  debugLog("getSurahById request", { id, locale });
-
   try {
-    // Supabase reads moved to server-side; use external API as fallback
     debugLog("getSurahById trying external API", { id });
     const { data: response } = await safeApiFetch<
       QuranApiResponse<{ ayahs: Ayah[] } & Surah>
     >(`${QURAN_API_BASE}/surah/${id}/${EDITIONS[locale]}`);
 
-    if (!response?.data) {
-      console.warn(`[quran-service] getSurahById failed: no data for surah ${id}`);
-      return null;
-    }
+    if (!response?.data) return null;
     const { ayahs = [], ...surah } = response.data;
-    debugLog("getSurahById API success", {
-      surah: surah.number,
-      ayahCount: ayahs.length,
-    });
     return { surah, ayahs };
   } catch (error) {
     console.error(`[quran-service] getSurahById error for surah ${id}:`, error);
@@ -169,17 +157,11 @@ export async function getAyah(
 ): Promise<Ayah | null> {
   if (surahId < 1 || surahId > 114 || ayahId < 1) return null;
 
-  debugLog("getAyah request", { surahId, ayahId, locale });
-
   try {
-    // Supabase reads moved to server-side; use external API as fallback
     debugLog("getAyah trying external API", { surahId, ayahId });
     const { data: response } = await safeApiFetch<QuranApiResponse<Ayah>>(
       `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS[locale]}`
     );
-    debugLog("getAyah API success", {
-      number: response?.data?.numberInSurah ?? null,
-    });
     return response?.data ?? null;
   } catch (error) {
     console.error(`[quran-service] getAyah error for ${surahId}:${ayahId}:`, error);
@@ -193,15 +175,11 @@ export async function getTafsir(
 ): Promise<string | null> {
   if (surahId < 1 || surahId > 114 || ayahId < 1) return null;
 
-  debugLog("getTafsir request", { surahId, ayahId });
-
   try {
-    // Supabase reads moved to server-side; use external API as fallback
     debugLog("getTafsir trying external API", { surahId, ayahId });
     const { data: response } = await safeApiFetch<QuranApiResponse<Ayah>>(
       `${QURAN_API_BASE}/ayah/${surahId}:${ayahId}/${EDITIONS.tafsir}`
     );
-    debugLog("getAyah API success", { surahId, ayahId });
     return response?.data?.text ?? null;
   } catch (error) {
     console.error(`[quran-service] getTafsir error for ${surahId}:${ayahId}:`, error);
@@ -228,9 +206,6 @@ export async function searchQuran(
   const cleanQuery = query.trim();
   if (!cleanQuery) return [];
 
-  const escapedQuery = cleanQuery.replace(/[*,()]/g, "");
-  // Supabase reads moved to server-side; use external API as fallback
-
   try {
     const { data: response } = await safeApiFetch<
       QuranApiResponse<{ matches: Ayah[] }>
@@ -245,8 +220,5 @@ export async function searchQuran(
 }
 
 export async function getReciters(): Promise<Reciter[]> {
-  debugLog("getReciters request");
-  // Supabase reads moved to server-side; use fallback
-  debugLog("getReciters using fallback");
   return fallbackReciters;
 }
