@@ -6,26 +6,10 @@ import { Logo } from '@/components/ui/Logo';
 import { logoutAction } from '@/app/auth/actions';
 import { getSiteSetting } from '@/lib/services/site-content';
 import { getCurrentProfile } from '@/lib/services/admin';
+import { navigationRoutes } from '@/lib/site';
 
-const links = [
-  { href: '/quran', label: 'القرآن' },
-  { href: '/hadith', label: 'الأحاديث' },
-  { href: '/stories', label: 'القصص' },
-  { href: '/scholars', label: 'العلماء' },
-  { href: '/prayer', label: 'الصلاة' },
-  { href: '/prayer-times', label: 'مواقيت الصلاة' },
-  { href: '/qibla', label: 'القبلة' },
-  { href: '/adhkar', label: 'الأذكار' },
-  { href: '/tasbeeh', label: 'التسبيح' },
-  { href: '/memorization', label: 'الحفظ' },
-  { href: '/spiritual-ai', label: 'الرفيق الروحاني' },
-  { href: '/poetry', label: 'الشعر' },
-  { href: '/youtube', label: 'يوتيوب' },
-  { href: '/competitions', label: 'مسابقات' },
-  { href: '/favorites', label: 'المفضلة' },
-  { href: '/radio', label: 'الإذاعة' },
-  { href: '/search', label: 'بحث' },
-];
+const primaryLinks = navigationRoutes.filter((link) => link.nav === 'primary');
+const moreLinks = navigationRoutes.filter((link) => link.nav === 'more');
 
 export async function Navbar() {
   const token = (await cookies()).get('sb_access_token')?.value;
@@ -52,8 +36,8 @@ export async function Navbar() {
         </Link>
 
         <nav className='hidden lg:flex items-center gap-6'>
-          {links.slice(0, 6).map((link) => (
-            <Link key={link.href} href={link.href} className='text-sm font-bold text-brand-cream/70 hover:text-brand-gold transition-colors'>
+          {primaryLinks.map((link) => (
+            <Link key={link.path} href={link.path} className='text-sm font-bold text-brand-cream/70 hover:text-brand-gold transition-colors'>
               {link.label}
             </Link>
           ))}
@@ -62,8 +46,8 @@ export async function Navbar() {
               المزيد ▾
             </button>
             <div className="absolute top-full right-0 mt-2 w-48 bg-black/90 border border-brand-gold/20 rounded-xl p-2 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-              {links.slice(6).map((link) => (
-                <Link key={link.href} href={link.href} className='block px-4 py-2 text-sm text-brand-cream/70 hover:text-brand-gold hover:bg-brand-gold/5 rounded-lg'>
+              {moreLinks.map((link) => (
+                <Link key={link.path} href={link.path} className='block px-4 py-2 text-sm text-brand-cream/70 hover:text-brand-gold hover:bg-brand-gold/5 rounded-lg'>
                   {link.label}
                 </Link>
               ))}

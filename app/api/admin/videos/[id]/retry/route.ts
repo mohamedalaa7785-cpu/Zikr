@@ -1,15 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/services/admin';
 import { updateVideoRequestStatus } from '@/lib/services/video-automation';
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
+    const { id } = await context.params;
     
-    const success = await updateVideoRequestStatus(params.id, 'pending');
+    const success = await updateVideoRequestStatus(id, 'pending');
     
     if (!success) {
       return NextResponse.json(
