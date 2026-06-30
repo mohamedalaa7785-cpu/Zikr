@@ -26,12 +26,14 @@ ZIKR embodies a **spiritual, cinematic, luxurious, calm, and immersive** aesthet
 
 ### 🛠️ Tech Stack
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS 4, Framer Motion
-- **Backend**: Express.js, tRPC
-- **Database**: Supabase (PostgreSQL)
-- **Storage**: AWS S3
+- **Framework**: Next.js 16 (App Router, React Server Components, Turbopack)
+- **UI**: React 19, TypeScript, Tailwind CSS 3, Framer Motion
+- **Backend**: Next.js Server Actions + Route Handlers
+- **Database**: Supabase (PostgreSQL) accessed via the Supabase REST API
+- **ORM / Schema**: Drizzle ORM (schema + SQL migrations)
+- **AI**: Google Gemini (`@google/generative-ai`)
+- **Storage**: AWS S3 (optional)
 - **Deployment**: Vercel
-- **Build Tools**: Vite, esbuild
 - **UI Components**: Radix UI
 
 ### 📱 Multi-Language Support
@@ -47,7 +49,7 @@ ZIKR is built with full internationalization (i18n) support:
 #### Prerequisites
 
 - Node.js 18+
-- pnpm 10+
+- pnpm 9+
 - PostgreSQL database (via Supabase)
 
 #### Installation
@@ -82,35 +84,33 @@ See `.env.example` for all required environment variables. Key variables:
 - `SUPABASE_URL` & `SUPABASE_ANON_KEY`: Supabase configuration
 - `AWS_*`: S3 storage configuration
 - `GEMINI_API_KEY`: For AI assistant features via Google Gemini
-- `GEMINI_MODEL`: Optional model override (default `gemini-1.5-flash`)
+- `GEMINI_MODEL`: Optional model override (default `gemini-2.5-flash`)
 
 ### 📁 Project Structure
 
 ```
 zikr/
-├── client/                 # Frontend React application
-│   ├── src/
-│   │   ├── _core/         # Core utilities and types
-│   │   ├── components/    # Reusable React components
-│   │   │   ├── layout/    # Navbar, Footer, etc.
-│   │   │   └── ui/        # UI system components
-│   │   ├── features/      # Feature-specific components
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── lib/           # Utilities and libraries
-│   │   │   └── i18n/      # Internationalization
-│   │   ├── pages/         # Page components
-│   │   ├── services/      # API services
-│   │   ├── store/         # State management
-│   │   ├── styles/        # Design system (colors, typography, etc.)
-│   │   └── types/         # TypeScript type definitions
-│   └── public/            # Static assets
-├── server/                # Backend Express/tRPC server
-│   ├── _core/            # Core server utilities
-│   └── routes/           # API routes
-├── shared/               # Shared types and utilities
-├── drizzle/              # Drizzle schema definitions
-├── supabase/migrations/  # Official Supabase SQL migrations
-└── package.json          # Project dependencies
+├── app/                   # Next.js App Router (pages, layouts, route handlers)
+│   ├── api/               # Route handlers (e.g. poetry-insight)
+│   ├── auth/              # Auth pages + server actions
+│   ├── quran/             # Quran browser, surah & ayah viewers
+│   ├── hadith/            # Hadith library
+│   ├── ...                # Dua, Adhkar, Prayer, Kids, Radio, Videos, Admin, etc.
+│   ├── layout.tsx         # Root layout (fonts, metadata, providers)
+│   ├── manifest.ts        # PWA web manifest
+│   ├── sitemap.ts         # Dynamic sitemap
+│   └── robots.ts          # robots.txt
+├── components/            # Reusable React components (layout, ui, feature)
+├── lib/                   # Services, Supabase clients, env, types, utils
+│   ├── services/          # DB-first content services (quran, hadith, ...)
+│   ├── supabase/          # Browser + server Supabase REST clients
+│   └── env.ts             # Validated environment access
+├── shared/                # Shared types and utilities
+├── drizzle/               # Drizzle schema + migrations
+├── supabase/migrations/   # Official Supabase SQL migrations
+├── scripts/               # Idempotent import / audit / RLS scripts
+├── proxy.ts               # Next.js middleware (auth/token refresh)
+└── package.json           # Project dependencies
 ```
 
 ### 🎯 Development Workflow
@@ -121,7 +121,7 @@ zikr/
 pnpm dev
 ```
 
-This starts both the frontend (Vite) and backend (Express) in development mode.
+This starts the Next.js development server (with Turbopack).
 
 #### Type Checking
 

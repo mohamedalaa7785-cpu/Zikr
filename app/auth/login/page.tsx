@@ -15,7 +15,9 @@ function LoginForm() {
   const [error, setError] = useState('');
 
   const nextPath = useMemo(() => searchParams.get('next') || '/profile', [searchParams]);
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  // Only reference NEXT_PUBLIC_* here. Server-only vars (e.g. GOOGLE_CLIENT_ID) are
+  // undefined in the browser and cause a server/client hydration mismatch.
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
     const errorParam = searchParams.get('error');

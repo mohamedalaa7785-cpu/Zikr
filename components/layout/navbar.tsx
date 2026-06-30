@@ -47,7 +47,7 @@ export async function Navbar() {
     <header className='sticky top-0 z-50 border-b border-brand-gold/10 bg-black/80 backdrop-blur-xl'>
       <Container className='flex min-h-20 flex-wrap items-center justify-between gap-4 py-3'>
         <Link href='/' className='flex items-center gap-3 transition-transform hover:scale-105'>
-          <Logo variant='gold' width={120} height={44} srcOverride={homepage?.logoUrl} />
+          <Logo variant='gold' width={120} height={44} priority srcOverride={homepage?.logoUrl} />
           <span className='sr-only'>ZIKR | ذِكرٌ</span>
         </Link>
 

@@ -1,9 +1,11 @@
-import { getPublicEnv } from "@/lib/env";
-
+// NOTE: In client components, NEXT_PUBLIC_* vars must be referenced as direct
+// `process.env.NEXT_PUBLIC_X` literals so Next.js can statically inline them into
+// the browser bundle. Reading them indirectly (e.g. via a {...process.env} spread)
+// leaves them undefined in the browser and silently disables the client.
 export function createBrowserSupabaseClient() {
   try {
-    const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } =
-      getPublicEnv();
+    const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!NEXT_PUBLIC_SUPABASE_URL || !NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       throw new Error(

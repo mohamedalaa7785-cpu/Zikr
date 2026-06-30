@@ -2,6 +2,7 @@ import { safeApiFetch } from "@/lib/services/http";
 import { ServiceError } from "@/lib/types/common";
 import type { Ayah, Juz, QuranApiResponse, Surah, Reciter } from "@/lib/types/quran";
 import { surahs as fallbackSurahs, reciters as fallbackReciters } from "@/lib/data/content";
+import { getCanonicalAyahCount } from "@/lib/utils/surah-mapping";
 
 const QURAN_API_BASE = "https://api.alquran.cloud/v1";
 const DEBUG_QURAN = process.env.NODE_ENV !== "production";
@@ -81,7 +82,7 @@ export function mapDbSurah(surah: DbSurah, locale: Locale): Surah {
     name: locale === "en" ? surah.name_en : surah.name_ar,
     englishName: surah.name_en,
     englishNameTranslation: surah.name_translation ?? "",
-    numberOfAyahs: surah.ayahs_count,
+    numberOfAyahs: surah.ayahs_count && surah.ayahs_count > 0 ? surah.ayahs_count : getCanonicalAyahCount(surah.id),
     revelationType: surah.revelation_place ?? "",
   };
 }

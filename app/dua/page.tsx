@@ -30,7 +30,8 @@ interface Dua {
 export default function DuaPage() {
   const [categories, setCategories] = useState<DuaCategory[]>([]);
   const [duas, setDuas] = useState<Dua[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  // Default to 'all' so duas load even when no categories are configured.
+  const [selectedCategory, setSelectedCategory] = useState<string | null>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const supabase = createBrowserSupabaseClient();
@@ -47,9 +48,6 @@ export default function DuaPage() {
 
         if (categoriesData) {
           setCategories(categoriesData);
-          if (categoriesData.length > 0) {
-            setSelectedCategory(categoriesData[0].id);
-          }
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
