@@ -20,6 +20,7 @@ const links = [
   { href: '/youtube', label: 'يوتيوب' },
   { href: '/competitions', label: 'مسابقات' },
   { href: '/favorites', label: 'المفضلة' },
+  { href: '/radio', label: 'الإذاعة' },
   { href: '/search', label: 'بحث' },
 ];
 
