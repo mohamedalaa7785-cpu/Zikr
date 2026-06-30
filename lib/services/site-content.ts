@@ -11,10 +11,11 @@ export type SiteSettingValue = {
 
 export type PinnedMessage = {
   id: string;
-  title: string;
-  body: string;
-  cta_label: string | null;
-  cta_href: string | null;
+  title: string | null;
+  body: string | null;
+  type: string | null;
+  is_active: boolean;
+  priority: number;
 };
 
 export type Competition = {
@@ -46,7 +47,7 @@ export async function getSiteSetting(key: string) {
 
 export async function getPinnedMessages(limit = 3) {
   return supabaseServerAdminRequest<PinnedMessage[]>(
-    `/rest/v1/pinned_messages?select=id,title,body,cta_label,cta_href&published=eq.true&order=created_at.desc&limit=${limit}`,
+    `/rest/v1/pinned_messages?select=id,title,body,type,is_active,priority&is_active=eq.true&order=priority.desc,created_at.desc&limit=${limit}`,
     { cache: 'no-store' },
   ).catch(() => []);
 }

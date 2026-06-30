@@ -1,6 +1,13 @@
 import { envSchema, validateEnv } from "./env-validation";
 
-const validatedEnv = validateEnv(process.env);
+// Vercel Supabase integration exposes POSTGRES_URL but the app expects DATABASE_URL.
+// Fall back transparently so drizzle-kit and server actions both work.
+const rawEnv: Record<string, string | undefined> = {
+  ...process.env,
+  DATABASE_URL: process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING,
+};
+
+const validatedEnv = validateEnv(rawEnv);
 
 export function getPublicEnv() {
   return {
