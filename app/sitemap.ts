@@ -3,7 +3,7 @@ import { getAllSurahs } from "@/lib/services/quran";
 import { getAllScholars } from "@/lib/services/scholars";
 import { getHadithBooks } from "@/lib/services/hadith";
 import { getStories } from "@/lib/services/stories";
-import { siteConfig } from "@/lib/site";
+import { appRoutes, siteConfig } from "@/lib/site";
 import type { Surah } from "@/lib/types/quran";
 import type { Scholar } from "@/lib/services/scholars";
 import type { HadithBook } from "@/lib/types/hadith";
@@ -12,6 +12,10 @@ import type { Story } from "@/lib/services/stories";
 export const revalidate = 86400; // 24 hours
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
+
+function siteConfigRoutes() {
+  return appRoutes;
+}
 
 function route(path = "", options: Omit<SitemapEntry, "url">): SitemapEntry {
   const baseUrl = siteConfig.url.replace(/\/$/, "");
@@ -23,60 +27,13 @@ function route(path = "", options: Omit<SitemapEntry, "url">): SitemapEntry {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const staticRoutes: MetadataRoute.Sitemap = [
-    route("", { lastModified: now, changeFrequency: "weekly", priority: 1 }),
-    route("/quran", {
+  const staticRoutes: MetadataRoute.Sitemap = siteConfigRoutes().map((appRoute) =>
+    route(appRoute.path === "/" ? "" : appRoute.path, {
       lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    }),
-    route("/hadith", {
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    }),
-    route("/stories", {
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }),
-    route("/scholars", {
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    }),
-    route("/search", {
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.7,
-    }),
-    route("/about", {
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.5,
-    }),
-    route("/privacy", {
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    }),
-    route("/terms", {
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    }),
-    route("/adhkar", { lastModified: now, changeFrequency: "weekly", priority: 0.8 }),
-    route("/dua", { lastModified: now, changeFrequency: "weekly", priority: 0.8 }),
-    route("/prophets", { lastModified: now, changeFrequency: "monthly", priority: 0.8 }),
-    route("/articles", { lastModified: now, changeFrequency: "daily", priority: 0.8 }),
-    route("/videos", { lastModified: now, changeFrequency: "daily", priority: 0.8 }),
-    route("/kids", { lastModified: now, changeFrequency: "weekly", priority: 0.7 }),
-    route("/prayer", { lastModified: now, changeFrequency: "daily", priority: 0.7 }),
-    route("/poetry", { lastModified: now, changeFrequency: "weekly", priority: 0.6 }),
-    route("/memorization", { lastModified: now, changeFrequency: "weekly", priority: 0.6 }),
-    route("/spiritual-ai", { lastModified: now, changeFrequency: "weekly", priority: 0.6 }),
-  ];
-
+      changeFrequency: appRoute.sitemap.changeFrequency,
+      priority: appRoute.sitemap.priority,
+    })
+  );
   try {
     if (process.env.NEXT_PHASE === "phase-production-build") {
       console.info(
