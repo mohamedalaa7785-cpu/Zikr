@@ -23,6 +23,7 @@ export function Footer() {
             <li><Link href='/quran' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>القرآن الكريم</Link></li>
             <li><Link href='/hadith' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الأحاديث النبوية</Link></li>
             <li><Link href='/adhkar' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>حصن المسلم</Link></li>
+            <li><Link href='/seerah' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>السيرة النبوية</Link></li>
             <li><Link href='/prophets' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>قصص الأنبياء</Link></li>
             <li><Link href='/scholars' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>تراجم العلماء</Link></li>
           </ul>
@@ -33,6 +34,7 @@ export function Footer() {
           <ul className='space-y-3 text-sm'>
             <li><Link href='/prayer' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>مواقيت الصلاة</Link></li>
             <li><Link href='/memorization' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>مساعد الحفظ</Link></li>
+            <li><Link href='/ruqyah' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الرقية الشرعية</Link></li>
             <li><Link href='/spiritual-ai' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الرفيق الروحاني AI</Link></li>
             <li><Link href='/poetry' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>ديوان الشعر</Link></li>
             <li><Link href='/search' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>البحث الشامل</Link></li>
