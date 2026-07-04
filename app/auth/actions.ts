@@ -152,6 +152,47 @@ export async function setSessionAction(accessToken: string, refreshToken?: strin
       maxAge: 60 * 60 * 24 * 30,
     });
   }
+
+  // Ensure user profile exists in database
+  try {
+    const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = getPublicEnv();
+    
+    // Get user info from Supabase
+    const userRes = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        apikey: NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      },
+      cache: 'no-store',
+    });
+
+    if (userRes.ok) {
+      const user = await userRes.json();
+      if (user?.id) {
+        // Try to create profile if it doesn't exist
+        await fetch(`${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            apikey: NEXT_PUBLIC_SUPABASE_ANON_KEY,
+            Prefer: 'resolution=ignore-duplicates',
+          },
+          body: JSON.stringify({
+            id: user.id,
+            role: 'user',
+            locale: 'ar',
+          }),
+          cache: 'no-store',
+        });
+      }
+    }
+  } catch (error) {
+    // Silently fail - the database trigger should handle profile creation
+    console.error('[v0] Failed to ensure profile creation:', error);
+  }
 }
 
 export async function updateProfileAction(formData: FormData) {

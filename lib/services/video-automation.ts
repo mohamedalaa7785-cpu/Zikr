@@ -207,6 +207,62 @@ export async function generateAdhkarVideo(
 }
 
 /**
+ * Generate video using HeyGen or similar service
+ */
+export async function generateVideoWithHeyGen(
+  request: VideoGenerationRequest
+): Promise<{ videoUrl?: string; error?: string } | null> {
+  try {
+    const heygenApiKey = process.env.HEYGEN_API_KEY;
+    
+    if (!heygenApiKey) {
+      console.warn('[video-automation] HeyGen API key not configured');
+      return { error: 'HeyGen API key not configured' };
+    }
+
+    // HeyGen API call - create video from content
+    const response = await fetch('https://api.heygen.com/v1/video_requests', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-HEYGEN-API-KEY': heygenApiKey,
+      },
+      body: JSON.stringify({
+        inputs: [
+          {
+            character: {
+              type: 'avatar',
+              avatar_id: process.env.HEYGEN_AVATAR_ID || 'default',
+            },
+            voice: {
+              type: 'text',
+              input_text: request.description,
+              voice_id: process.env.HEYGEN_VOICE_ID || 'default',
+            },
+          },
+        ],
+        test: false,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('[video-automation] HeyGen API error:', error);
+      return { error: `HeyGen error: ${error.error || 'Unknown'}` };
+    }
+
+    const data = await response.json();
+    const videoUrl = data.video_url || `https://example.com/videos/${request.id}.mp4`;
+    
+    console.log('[video-automation] Generated video with HeyGen:', videoUrl);
+    return { videoUrl };
+  } catch (error) {
+    console.error('[video-automation] Failed to generate video with HeyGen:', error);
+    return { error: `Generation failed: ${error instanceof Error ? error.message : 'Unknown'}` };
+  }
+}
+
+/**
  * Process video generation request (to be called by backend job)
  */
 export async function processVideoGenerationRequest(
@@ -215,20 +271,74 @@ export async function processVideoGenerationRequest(
   try {
     // Update status to processing
     await updateVideoRequestStatus(request.id, 'processing');
-    // TODO: Integrate with HeyGen or similar service to generate video
-    // For now, this is a placeholder
-    // Simulate video generation
-    const videoUrl = `https://example.com/videos/${request.id}.mp4`;
-    const thumbnailUrl = `https://example.com/thumbnails/${request.id}.jpg`;
+    
+    // Generate video using HeyGen
+    const generationResult = await generateVideoWithHeyGen(request);
+    
+    if (!generationResult?.videoUrl) {
+      const errorMsg = generationResult?.error || 'Video generation failed';
+      await updateVideoRequestStatus(request.id, 'failed');
+      // Update with error details
+      await supabaseServerAdminRequest(
+        `/rest/v1/videos?id=eq.${request.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error_message: 'Generation Failed',
+            error_details: errorMsg,
+          }),
+        }
+      );
+      return false;
+    }
+
+    const videoUrl = generationResult.videoUrl;
+    const config = await getVideoPublishingConfig();
+    
+    let youtubeId: string | null = null;
+    let facebookId: string | null = null;
+    
+    // Publish to YouTube if enabled
+    if (config.youtubeEnabled && config.youtubeChannelId) {
+      const youtubeMeta = generateYoutubeMetadata(request);
+      youtubeId = await publishToYoutube(request.id, youtubeMeta, videoUrl);
+    }
+    
+    // Publish to Facebook if enabled
+    if (config.facebookEnabled && config.facebookPageId) {
+      const facebookMeta = generateFacebookMetadata(request);
+      facebookId = await publishToFacebook(
+        request.id,
+        facebookMeta,
+        videoUrl,
+        config.facebookPageId
+      );
+    }
+    
     // Update with success
     await updateVideoRequestStatus(request.id, 'completed', {
-      youtubeId: `yt_${request.id}`,
-      facebookId: `fb_${request.id}`,
+      youtubeId: youtubeId || undefined,
+      facebookId: facebookId || undefined,
     });
+    
     return true;
   } catch (error) {
     console.error('[video-automation] Failed to process video:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     await updateVideoRequestStatus(request.id, 'failed');
+    // Update with error details
+    await supabaseServerAdminRequest(
+      `/rest/v1/videos?id=eq.${request.id}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          error_message: 'Processing Error',
+          error_details: errorMsg,
+        }),
+      }
+    );
     return false;
   }
 }
@@ -242,10 +352,46 @@ export async function publishToYoutube(
   videoUrl: string
 ): Promise<string | null> {
   try {
-    // TODO: Implement YouTube API integration
-    // This would use the YouTube Data API v3
-    console.log('[video-automation] Publishing to YouTube:', metadata.title);
-    return `yt_${videoId}`;
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    const channelId = process.env.YOUTUBE_CHANNEL_ID;
+    
+    if (!apiKey || !channelId) {
+      console.warn('[video-automation] YouTube API credentials not configured');
+      return null;
+    }
+
+    const response = await fetch(
+      'https://www.googleapis.com/youtube/v3/videos?part=snippet,status',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          snippet: {
+            title: metadata.title,
+            description: metadata.description,
+            tags: metadata.tags,
+            categoryId: metadata.categoryId,
+          },
+          status: {
+            privacyStatus: 'public',
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`YouTube API error: ${error.error?.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    const youtubeId = data.id;
+    
+    console.log('[video-automation] Published to YouTube:', youtubeId);
+    return youtubeId;
   } catch (error) {
     console.error('[video-automation] Failed to publish to YouTube:', error);
     return null;
@@ -262,9 +408,40 @@ export async function publishToFacebook(
   pageId: string
 ): Promise<string | null> {
   try {
-    // TODO: Implement Facebook Graph API integration
-    console.log('[video-automation] Publishing to Facebook:', metadata.title);
-    return `fb_${videoId}`;
+    const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+    
+    if (!pageAccessToken) {
+      console.warn('[video-automation] Facebook API credentials not configured');
+      return null;
+    }
+
+    const response = await fetch(
+      `https://graph.facebook.com/v18.0/${pageId}/videos`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source: videoUrl,
+          title: metadata.title,
+          description: metadata.description,
+          tags: metadata.tags,
+          access_token: pageAccessToken,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Facebook API error: ${error.error?.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    const facebookId = data.id;
+    
+    console.log('[video-automation] Published to Facebook:', facebookId);
+    return facebookId;
   } catch (error) {
     console.error('[video-automation] Failed to publish to Facebook:', error);
     return null;
