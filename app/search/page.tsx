@@ -1,84 +1,86 @@
-import type { Metadata } from 'next';
+'use client';
+
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
-import { ayahs, hadiths, surahs } from '@/lib/data/content';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
-function highlight(text: string, q: string): string {
-  if (!q) return text;
-  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(new RegExp(escaped, 'gi'), (m) => `【${m}】`);
-}
+export default function SearchPage() {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [searched, setSearched] = useState(false);
 
-export async function generateMetadata({ searchParams }: { searchParams: Promise<{ q?: string }> }): Promise<Metadata> {
-  const sp = await searchParams;
-  const q = (sp.q || '').trim();
-  return {
-    title: q ? `نتائج البحث: ${q}` : 'البحث',
-    description: 'البحث في القرآن والحديث',
-    alternates: { canonical: q ? `/search?q=${encodeURIComponent(q)}` : '/search' },
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearched(true);
+    
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+
+    // Mock search results - in production this would call API
+    setResults([
+      { type: 'Quran', title: 'آية تحتوي على: ' + query, content: 'القرآن الكريم' },
+      { type: 'Hadith', title: 'حديث يتعلق بـ ' + query, content: 'الأحاديث الشريفة' },
+      { type: 'Dua', title: 'دعاء متعلق بـ ' + query, content: 'الأدعية' },
+    ]);
   };
-}
-
-export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string; type?: string }> }) {
-  const sp = await searchParams;
-  const q = (sp.q || '').trim();
-  const type = sp.type || 'all';
-  const quran = q ? ayahs.filter((a) => a.textSimple.includes(q) || surahs.find((s) => s.id === a.surahId)?.nameAr.includes(q)) : [];
-  const hadith = q ? hadiths.filter((h) => h.textAr.includes(q)) : [];
 
   return (
-    <Container className="py-12 space-y-6">
-      <h1 className="text-3xl text-brand-gold">البحث</h1>
+    <Container className="py-12 space-y-10">
+      <section className="text-center space-y-4">
+        <h1 className="text-4xl font-bold text-brand-gold">بحث شامل</h1>
+        <p className="max-w-2xl mx-auto text-lg leading-8 arabic-muted">
+          ابحث عن أي محتوى في الموقع من آيات قرآنية وأحاديث وأدعية
+        </p>
+      </section>
 
-      <form className="flex gap-2">
-        <input
-          name="q"
-          defaultValue={q}
-          className="flex-1 rounded-lg bg-black/20 p-3"
-          placeholder="ابحث في القرآن والحديث"
+      <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl mx-auto">
+        <Input
+          type="text"
+          placeholder="اكتب ما تبحث عنه..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="flex-1 text-lg"
         />
-        <select name="type" defaultValue={type} className="rounded-lg bg-black/20 p-3">
-          <option value="all">الكل</option>
-          <option value="quran">القرآن</option>
-          <option value="hadith">الحديث</option>
-        </select>
-        <button className="rounded-lg bg-brand-gold px-4 text-brand-emeraldDeep">بحث</button>
+        <Button type="submit" variant="primary" className="px-8">
+          بحث
+        </Button>
       </form>
 
-      {q && (
-        <p className="text-sm arabic-muted">
-          {quran.length + hadith.length} نتيجة لـ &quot;{q}&quot;
-        </p>
-      )}
-
-      {(type === 'all' || type === 'quran') && (
-        <Card className="space-y-3">
-          <h2 className="text-brand-gold">نتائج القرآن ({quran.length})</h2>
-          {quran.length === 0 ? (
-            <p className="arabic-muted">لا نتائج.</p>
-          ) : (
-            quran.map((r) => (
-              <p key={`${r.surahId}:${r.ayahNumber}`} className="text-brand-cream/90 leading-relaxed">
-                [{r.surahId}:{r.ayahNumber}] {highlight(r.textSimple, q)}
-              </p>
-            ))
-          )}
+      {searched && results.length === 0 && query && (
+        <Card className="text-center p-8 text-brand-cream/60">
+          لا توجد نتائج لـ "{query}". جرب كلمات أخرى.
         </Card>
       )}
 
-      {(type === 'all' || type === 'hadith') && (
-        <Card className="space-y-3">
-          <h2 className="text-brand-gold">نتائج الحديث ({hadith.length})</h2>
-          {hadith.length === 0 ? (
-            <p className="arabic-muted">لا نتائج.</p>
-          ) : (
-            hadith.map((h) => (
-              <p key={h.id} className="text-brand-cream/90 leading-relaxed">
-                {highlight(h.textAr, q)}
-              </p>
-            ))
-          )}
-        </Card>
+      {results.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-2xl font-bold text-brand-gold">النتائج ({results.length})</h2>
+          <div className="grid gap-4">
+            {results.map((result, idx) => (
+              <Card key={idx} className="p-6 space-y-3 hover:border-brand-gold/50 cursor-pointer">
+                <div className="flex items-start gap-4">
+                  <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold text-xs font-semibold rounded">
+                    {result.type}
+                  </span>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-brand-cream">{result.title}</h3>
+                    <p className="text-sm text-brand-cream/60 mt-1">{result.content}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!searched && (
+        <section className="text-center p-8 bg-brand-gold/5 rounded">
+          <p className="text-brand-cream/60">ابدأ البحث عن أي موضوع يهمك</p>
+        </section>
       )}
     </Container>
   );

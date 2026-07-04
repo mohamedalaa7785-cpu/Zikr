@@ -1,113 +1,77 @@
+'use client';
+
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/section-header';
-import { SpiritualSearch } from './spiritual-search';
-
-export const metadata = {
-  title: 'البحث الروحاني بالذكاء الاصطناعي',
-  description: 'اكتب ما تشعر به واحصل على آيات قرآنية وأحاديث وأذكار تناسب حالتك النفسية',
-};
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
 
 export default function SpiritualAIPage() {
+  const [question, setQuestion] = useState('');
+  const [response, setResponse] = useState<string | null>(null);
+
+  const handleAsk = async () => {
+    if (!question.trim()) return;
+    
+    // Mock response - in production this would call an AI API
+    setResponse('الحمد لله على جميع أحوالك. نصيحتي لك هي: ');
+  };
+
   return (
-    <Container className="space-y-12 py-10 text-right">
-      {/* Hero Section */}
-      <section className="space-y-4 text-center">
-        <h1 className="text-4xl font-bold text-brand-gold">الرفيق الروحاني</h1>
+    <Container className="py-12 space-y-10">
+      <section className="text-center space-y-4">
+        <h1 className="text-4xl font-bold text-brand-gold">الذكاء الاصطناعي الإسلامي</h1>
         <p className="max-w-2xl mx-auto text-lg leading-8 arabic-muted">
-          منصة ذكية تفهم مشاعرك وتقدم لك الراحة من القرآن والسنة والأذكار.
-          اكتب ما يدور في قلبك، ودعنا نساعدك في إيجاد السكينة.
+          اسأل أسئلتك الدينية والروحية والحصول على إجابات من القرآن والسنة
         </p>
       </section>
 
-      {/* Main Search Component */}
-      <SpiritualSearch />
-
-      {/* Info Cards */}
-      <section className="space-y-6">
-        <SectionHeader 
-          title="كيف يعمل؟" 
-          subtitle="خطوات بسيطة للوصول إلى الراحة النفسية"
-        />
+      <Card className="p-8 space-y-6">
+        <h2 className="text-2xl font-bold text-brand-gold">استشر الذكاء الإسلامي</h2>
         
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="space-y-3 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-brand-gold/20 flex items-center justify-center text-2xl text-brand-gold">
-              1
-            </div>
-            <h3 className="text-lg font-semibold text-brand-cream">عبّر عن مشاعرك</h3>
-            <p className="text-sm leading-6 arabic-muted">
-              اكتب ما تشعر به بكلماتك الخاصة، أو اختر من الاقتراحات السريعة.
-            </p>
-          </Card>
-          
-          <Card className="space-y-3 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-brand-gold/20 flex items-center justify-center text-2xl text-brand-gold">
-              2
-            </div>
-            <h3 className="text-lg font-semibold text-brand-cream">تحليل ذكي</h3>
-            <p className="text-sm leading-6 arabic-muted">
-              يحلل الذكاء الاصطناعي مشاعرك ويحدد ما تحتاجه من دعم روحاني.
-            </p>
-          </Card>
-          
-          <Card className="space-y-3 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-brand-gold/20 flex items-center justify-center text-2xl text-brand-gold">
-              3
-            </div>
-            <h3 className="text-lg font-semibold text-brand-cream">راحة من المصادر الأصيلة</h3>
-            <p className="text-sm leading-6 arabic-muted">
-              تحصل على آيات قرآنية وأحاديث وأذكار مختارة خصيصاً لحالتك.
-            </p>
-          </Card>
+        <div className="space-y-3">
+          <textarea
+            placeholder="اسأل سؤالك الديني أو الروحي..."
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            className="w-full h-24 p-4 bg-black/30 border border-brand-gold/30 rounded text-brand-cream focus:outline-none focus:border-brand-gold resize-none"
+          />
+          <Button onClick={handleAsk} variant="primary" className="w-full">
+            اسأل
+          </Button>
         </div>
-      </section>
 
-      {/* Benefits */}
-      <section className="space-y-6">
-        <SectionHeader 
-          title="فوائد الرفيق الروحاني" 
-          subtitle="لماذا تستخدم هذه الميزة؟"
-        />
-        
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Card className="space-y-2">
-            <h3 className="text-lg text-brand-gold">دعم فوري</h3>
-            <p className="text-sm leading-7 arabic-muted">
-              احصل على الدعم الروحاني في أي وقت تحتاجه، دون انتظار.
-            </p>
-          </Card>
-          
-          <Card className="space-y-2">
-            <h3 className="text-lg text-brand-gold">محتوى موثوق</h3>
-            <p className="text-sm leading-7 arabic-muted">
-              جميع الآيات والأحاديث والأذكار من مصادر إسلامية موثوقة.
-            </p>
-          </Card>
-          
-          <Card className="space-y-2">
-            <h3 className="text-lg text-brand-gold">خصوصية تامة</h3>
-            <p className="text-sm leading-7 arabic-muted">
-              مشاعرك وكلماتك تبقى خاصة ولا يتم حفظها أو مشاركتها.
-            </p>
-          </Card>
-          
-          <Card className="space-y-2">
-            <h3 className="text-lg text-brand-gold">تجربة شخصية</h3>
-            <p className="text-sm leading-7 arabic-muted">
-              كل استجابة مخصصة لحالتك النفسية الحالية.
-            </p>
-          </Card>
-        </div>
-      </section>
-
-      {/* Disclaimer */}
-      <Card className="border-amber-300/30 bg-amber-500/5 text-center">
-        <p className="text-sm leading-7 text-amber-200">
-          ملاحظة: هذه الميزة للدعم الروحاني فقط ولا تغني عن استشارة المتخصصين في حالات الأزمات النفسية.
-          إذا كنت تمر بوقت صعب، لا تتردد في طلب المساعدة من أهل الاختصاص.
-        </p>
+        {response && (
+          <div className="bg-brand-gold/10 border border-brand-gold/30 rounded p-4 space-y-2">
+            <p className="text-brand-gold font-semibold">الإجابة:</p>
+            <p className="text-brand-cream leading-8">{response}</p>
+          </div>
+        )}
       </Card>
+
+      <section className="space-y-6">
+        <SectionHeader title="أمثلة أسئلة" />
+        <div className="grid gap-4 md:grid-cols-2">
+          {[
+            'كيف أتقرب إلى الله أكثر؟',
+            'ما حكم الزكاة والصدقة؟',
+            'كيف أحافظ على صلاتي؟',
+            'ما أفضل الأذكار اليومية؟',
+          ].map((q, i) => (
+            <Card 
+              key={i}
+              className="p-4 cursor-pointer hover:border-brand-gold/50 transition-all"
+              onClick={() => {
+                setQuestion(q);
+                setResponse(null);
+              }}
+            >
+              <p className="text-brand-cream hover:text-brand-gold transition-colors">{q}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
     </Container>
   );
 }

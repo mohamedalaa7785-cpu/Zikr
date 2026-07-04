@@ -38,6 +38,8 @@ export default function QiblaPage() {
   const [heading, setHeading] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [permission, setPermission] = useState<'idle' | 'requesting' | 'granted' | 'denied'>('idle');
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [watchId, setWatchId] = useState<number | null>(null);
 
   const requestLocation = () => {
     setPermission('requesting');
@@ -47,9 +49,12 @@ export default function QiblaPage() {
       setPermission('denied');
       return;
     }
-    navigator.geolocation.getCurrentPosition(
+    
+    // Use watchPosition for continuous updates instead of just getCurrentPosition
+    const id = navigator.geolocation.watchPosition(
       (pos) => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setAccuracy(Math.round(pos.coords.accuracy));
         setPermission('granted');
       },
       (err) => {
@@ -60,9 +65,19 @@ export default function QiblaPage() {
         );
         setPermission('denied');
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+    setWatchId(id);
   };
+
+  useEffect(() => {
+    // Cleanup watcher on unmount
+    return () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
+  }, [watchId]);
 
   useEffect(() => {
     if (!coords) return;
@@ -70,8 +85,8 @@ export default function QiblaPage() {
       const h = e.alpha != null ? 360 - e.alpha : null;
       if (h != null) setHeading(h);
     };
-    window.addEventListener('deviceorientation', handler);
-    return () => window.removeEventListener('deviceorientation', handler);
+    window.addEventListener('deviceorientation', handler, true);
+    return () => window.removeEventListener('deviceorientation', handler, true);
   }, [coords]);
 
   const qiblaDirection = coords ? calculateQiblaDirection(coords.lat, coords.lng) : null;
@@ -133,6 +148,14 @@ export default function QiblaPage() {
                 <span className='arabic-muted'>خط الطول</span>
                 <span>{coords.lng.toFixed(4)}°</span>
               </div>
+              {accuracy !== null && (
+                <div className='flex justify-between border-b border-brand-gold/10 pb-2'>
+                  <span className='arabic-muted'>دقة الموقع</span>
+                  <span className={accuracy < 50 ? 'text-green-400' : accuracy < 100 ? 'text-yellow-400' : 'text-orange-400'}>
+                    ±{accuracy}م
+                  </span>
+                </div>
+              )}
               {distance != null && (
                 <div className='flex justify-between border-b border-brand-gold/10 pb-2'>
                   <span className='arabic-muted'>المسافة إلى الكعبة</span>
@@ -145,7 +168,7 @@ export default function QiblaPage() {
               </div>
             </div>
             <Button onClick={requestLocation} variant='ghost' className='w-full'>
-              تحديث الموقع
+              {permission === 'granted' ? 'تحديث الموقع' : 'تحديد الموقع'}
             </Button>
           </Card>
         </div>
