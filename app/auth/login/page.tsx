@@ -15,19 +15,16 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Initialize client state and handle error param in same effect
   useEffect(() => {
     setIsClient(true);
-  }, []);
-
-  if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
-
-  useEffect(() => {
-    if (!isClient) return;
     const errorParam = searchParams.get('error');
     if (errorParam) {
       setError(decodeURIComponent(errorParam));
     }
-  }, [searchParams, isClient]);
+  }, [searchParams]);
+
+  if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);
