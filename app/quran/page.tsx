@@ -6,7 +6,8 @@ import { SurahSearch } from '@/components/quran/surah-search';
 import { Suspense } from 'react';
 import { SurahSkeleton } from '@/components/quran/surah-skeleton';
 
-export const revalidate = 3600;
+// إجبار الصفحة على الرندرة الديناميكية لمنع أخطاء الـ Build مع الـ no-store fetch
+export const dynamic = 'force-dynamic';
 
 async function QuranContent() {
   try {
