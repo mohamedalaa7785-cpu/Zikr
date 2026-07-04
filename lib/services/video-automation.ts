@@ -1,53 +1,33 @@
-/**
- * Video Automation Service
- * Handles automatic video generation, processing, and publishing to YouTube/Facebook
- */
-
 import { supabaseServerAdminRequest } from '@/lib/supabase/server';
+import type { VideoGenerationRequest } from '@/lib/types/video';
 
-export interface VideoGenerationRequest {
-  id: string;
+export type { VideoGenerationRequest };
+
+/**
+ * Create a new video generation request
+ */
+export async function createVideoGenerationRequest(data: {
   title: string;
   description: string;
-  category: 'quran' | 'hadith' | 'story' | 'dua' | 'adhkar';
+  category: string;
   content: string;
-  duration?: number;
-  thumbnailUrl?: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  youtubeId?: string;
-  facebookId?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface VideoPublishingConfig {
-  youtubeEnabled: boolean;
-  youtubeChannelId?: string;
-  facebookEnabled: boolean;
-  facebookPageId?: string;
-  autoPublish: boolean;
-  publishSchedule?: string; // cron expression
-}
-
-/**
- * Create a video generation request
- */
-export async function createVideoGenerationRequest(
-  data: Omit<VideoGenerationRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>
-): Promise<VideoGenerationRequest | null> {
+}): Promise<VideoGenerationRequest | null> {
   try {
-    const response = await supabaseServerAdminRequest<VideoGenerationRequest[]>(
-      `/rest/v1/video_generation_requests`,
+    const result = await supabaseServerAdminRequest<VideoGenerationRequest>(
+      '/rest/v1/videos',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...data,
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          content: data.content,
           status: 'pending',
         }),
       }
     );
-    return response?.[0] ?? null;
+    return result || null;
   } catch (error) {
     console.error('[video-automation] Failed to create video request:', error);
     return null;
@@ -55,15 +35,14 @@ export async function createVideoGenerationRequest(
 }
 
 /**
- * Get pending video generation requests
+ * Get all pending video requests
  */
 export async function getPendingVideoRequests(): Promise<VideoGenerationRequest[]> {
   try {
-    return (
-      (await supabaseServerAdminRequest<VideoGenerationRequest[]>(
-        `/rest/v1/video_generation_requests?status=eq.pending&order=created_at.asc`
-      )) ?? []
+    const results = await supabaseServerAdminRequest<VideoGenerationRequest[]>(
+      '/rest/v1/videos?status=eq.pending&limit=100'
     );
+    return results || [];
   } catch (error) {
     console.error('[video-automation] Failed to fetch pending requests:', error);
     return [];
@@ -71,24 +50,24 @@ export async function getPendingVideoRequests(): Promise<VideoGenerationRequest[
 }
 
 /**
- * Update video generation request status
+ * Update video request status
  */
 export async function updateVideoRequestStatus(
-  id: string,
-  status: VideoGenerationRequest['status'],
-  metadata?: Partial<VideoGenerationRequest>
+  videoId: string,
+  status: 'pending' | 'processing' | 'completed' | 'failed',
+  metadata?: { youtubeId?: string; facebookId?: string }
 ): Promise<boolean> {
   try {
+    const body: Record<string, unknown> = { status };
+    if (metadata?.youtubeId) body.youtubeId = metadata.youtubeId;
+    if (metadata?.facebookId) body.facebookId = metadata.facebookId;
+
     await supabaseServerAdminRequest(
-      `/rest/v1/video_generation_requests?id=eq.${id}`,
+      `/rest/v1/videos?id=eq.${videoId}`,
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status,
-          ...metadata,
-          updatedAt: new Date().toISOString(),
-        }),
+        body: JSON.stringify(body),
       }
     );
     return true;
@@ -99,49 +78,25 @@ export async function updateVideoRequestStatus(
 }
 
 /**
- * Generate video metadata for YouTube
+ * Generate metadata for YouTube
  */
-export function generateYoutubeMetadata(request: VideoGenerationRequest): {
-  title: string;
-  description: string;
-  tags: string[];
-  category: string;
-} {
-  const categoryMap: Record<string, string> = {
-    quran: 'Quran Recitation',
-    hadith: 'Islamic Teaching',
-    story: 'Islamic Stories',
-    dua: 'Islamic Prayers',
-    adhkar: 'Islamic Remembrance',
-  };
-
+export function generateYoutubeMetadata(request: VideoGenerationRequest) {
   return {
     title: request.title,
-    description: `${request.description}\n\nFrom ZIKR Platform - Islamic Knowledge & Spiritual Guidance\n\nSubscribe for more Islamic content.`,
-    tags: [
-      'Islam',
-      'Quran',
-      categoryMap[request.category],
-      'Islamic',
-      'Spiritual',
-      'Arabic',
-    ],
-    category: 'Education',
+    description: request.description,
+    tags: ['islamic', 'quran', 'hadith', 'dua', 'adhkar'],
+    categoryId: '27', // Education
   };
 }
 
 /**
- * Generate video metadata for Facebook
+ * Generate metadata for Facebook
  */
-export function generateFacebookMetadata(request: VideoGenerationRequest): {
-  title: string;
-  description: string;
-  message: string;
-} {
+export function generateFacebookMetadata(request: VideoGenerationRequest) {
   return {
     title: request.title,
     description: request.description,
-    message: `🕌 New Islamic Content\n\n${request.title}\n\n${request.description}\n\n#Islam #Quran #Islamic #Spiritual`,
+    tags: ['islamic', 'quran', 'hadith', 'dua', 'adhkar'],
   };
 }
 
@@ -156,7 +111,6 @@ export async function generateQuranVideo(
 ): Promise<VideoGenerationRequest | null> {
   const title = `سورة الفاتحة - آية ${ayahStart}:${ayahEnd}`;
   const description = `تلاوة من القرآن الكريم`;
-
   return createVideoGenerationRequest({
     title,
     description,
@@ -180,7 +134,6 @@ export async function generateHadithVideo(
 ): Promise<VideoGenerationRequest | null> {
   const title = `حديث شريف`;
   const description = `حديث من السنة النبوية الشريفة`;
-
   return createVideoGenerationRequest({
     title,
     description,
@@ -201,7 +154,6 @@ export async function generateStoryVideo(
 ): Promise<VideoGenerationRequest | null> {
   const title = `قصة إسلامية`;
   const description = `قصة إسلامية مؤثرة`;
-
   return createVideoGenerationRequest({
     title,
     description,
@@ -221,7 +173,6 @@ export async function generateDuaVideo(
 ): Promise<VideoGenerationRequest | null> {
   const title = `دعاء مستجاب`;
   const description = `دعاء من أدعية القرآن والسنة`;
-
   return createVideoGenerationRequest({
     title,
     description,
@@ -244,7 +195,6 @@ export async function generateAdhkarVideo(
     evening: 'أذكار المساء',
     prayer: 'أذكار بعد الصلاة',
   };
-
   return createVideoGenerationRequest({
     title: titles[adhkarType],
     description: `مجموعة أذكار ${titles[adhkarType]}`,
@@ -265,20 +215,16 @@ export async function processVideoGenerationRequest(
   try {
     // Update status to processing
     await updateVideoRequestStatus(request.id, 'processing');
-
     // TODO: Integrate with HeyGen or similar service to generate video
     // For now, this is a placeholder
-
     // Simulate video generation
     const videoUrl = `https://example.com/videos/${request.id}.mp4`;
     const thumbnailUrl = `https://example.com/thumbnails/${request.id}.jpg`;
-
     // Update with success
     await updateVideoRequestStatus(request.id, 'completed', {
       youtubeId: `yt_${request.id}`,
       facebookId: `fb_${request.id}`,
     });
-
     return true;
   } catch (error) {
     console.error('[video-automation] Failed to process video:', error);
@@ -328,7 +274,7 @@ export async function publishToFacebook(
 /**
  * Get video publishing configuration
  */
-export async function getVideoPublishingConfig(): Promise<VideoPublishingConfig> {
+export async function getVideoPublishingConfig() {
   return {
     youtubeEnabled: !!process.env.YOUTUBE_API_KEY,
     youtubeChannelId: process.env.YOUTUBE_CHANNEL_ID,
