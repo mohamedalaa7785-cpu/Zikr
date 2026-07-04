@@ -7,10 +7,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { VideoGenerationRequest } from '@/lib/services/video-automation';
 
+interface CreateFormState {
+  title: string;
+  description: string;
+  category: 'quran' | 'hadith' | 'story' | 'dua' | 'adhkar' | 'other';
+  content: string;
+}
+
+interface DetailModalState {
+  isOpen: boolean;
+  videoId?: string;
+  video?: VideoGenerationRequest;
+}
+
 export default function AdminVideosPage() {
   const [requests, setRequests] = useState<VideoGenerationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'processing' | 'completed' | 'failed'>('all');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [detailModal, setDetailModal] = useState<DetailModalState>({ isOpen: false });
+  const [createForm, setCreateForm] = useState<CreateFormState>({
+    title: '',
+    description: '',
+    category: 'quran',
+    content: '',
+  });
 
   useEffect(() => {
     loadRequests();
@@ -26,6 +48,48 @@ export default function AdminVideosPage() {
       console.error('Failed to load video requests:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadVideoDetails = async (videoId: string) => {
+    try {
+      const response = await fetch(`/api/admin/videos/${videoId}`);
+      const data = await response.json();
+      setDetailModal({ isOpen: true, videoId, video: data });
+    } catch (error) {
+      console.error('Failed to load video details:', error);
+    }
+  };
+
+  const handleCreateVideo = async () => {
+    if (!createForm.title || !createForm.description || !createForm.content) {
+      alert('يرجى ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    try {
+      setCreateLoading(true);
+      const response = await fetch('/api/admin/videos/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createForm),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`خطأ: ${error.error}`);
+        return;
+      }
+
+      alert('تم إنشاء الفيديو بنجاح');
+      setCreateForm({ title: '', description: '', category: 'quran', content: '' });
+      setShowCreateForm(false);
+      loadRequests();
+    } catch (error) {
+      console.error('Failed to create video:', error);
+      alert('فشل إنشاء الفيديو');
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -50,9 +114,98 @@ export default function AdminVideosPage() {
   return (
     <Container className="py-12 space-y-8">
       <div className="space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold">🎬 إدارة الفيديوهات</h1>
-        <p className="text-brand-cream/70">إدارة طلبات توليد الفيديوهات والنشر التلقائي</p>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-brand-gold">🎬 إدارة الفيديوهات</h1>
+            <p className="text-brand-cream/70">إدارة طلبات توليد الفيديوهات والنشر التلقائي</p>
+          </div>
+          <Button 
+            variant="primary" 
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="whitespace-nowrap"
+          >
+            {showCreateForm ? '✕ إغلاق' : '+ إنشاء فيديو جديد'}
+          </Button>
+        </div>
       </div>
+
+      {/* Create Form */}
+      {showCreateForm && (
+        <Card className="p-6 space-y-4 border-brand-gold/50 bg-brand-dark/50">
+          <h3 className="text-xl font-bold text-brand-gold">إنشاء فيديو جديد</h3>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-brand-cream/80 mb-2">العنوان</label>
+              <Input
+                type="text"
+                placeholder="عنوان الفيديو"
+                value={createForm.title}
+                onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
+                className="bg-black/30 border-brand-gold/30"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-brand-cream/80 mb-2">الوصف</label>
+              <Input
+                type="text"
+                placeholder="وصف الفيديو"
+                value={createForm.description}
+                onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                className="bg-black/30 border-brand-gold/30"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-brand-cream/80 mb-2">الفئة</label>
+              <select
+                value={createForm.category}
+                onChange={(e) => setCreateForm({ ...createForm, category: e.target.value as any })}
+                className="w-full px-4 py-2 bg-black/30 border border-brand-gold/30 rounded text-brand-cream focus:outline-none focus:border-brand-gold"
+              >
+                <option value="quran">القرآن الكريم</option>
+                <option value="hadith">الحديث الشريف</option>
+                <option value="story">القصص الإسلامية</option>
+                <option value="dua">الدعاء والأذكار</option>
+                <option value="adhkar">الأذكار</option>
+                <option value="other">أخرى</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-brand-cream/80 mb-2">المحتوى (JSON)</label>
+              <textarea
+                placeholder='{"type": "quran", "surahId": 1}'
+                value={createForm.content}
+                onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
+                className="w-full h-32 px-4 py-2 bg-black/30 border border-brand-gold/30 rounded text-brand-cream focus:outline-none focus:border-brand-gold resize-none font-mono text-sm"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="primary"
+                onClick={handleCreateVideo}
+                disabled={createLoading}
+                className="flex-1"
+              >
+                {createLoading ? 'جاري الإنشاء...' : 'إنشاء الفيديو'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setCreateForm({ title: '', description: '', category: 'quran', content: '' });
+                }}
+                className="flex-1"
+              >
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Filter Buttons */}
       <div className="flex gap-2 flex-wrap">
@@ -128,29 +281,42 @@ export default function AdminVideosPage() {
                 <Button
                   variant="primary"
                   className="flex-1"
+                  onClick={() => loadVideoDetails(request.id)}
+                >
+                  👁️ التفاصيل
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
                   onClick={() => {
-                    // Copy ID to clipboard
                     navigator.clipboard.writeText(request.id);
                     alert('تم نسخ المعرف');
                   }}
                 >
-                  📋 نسخ المعرف
+                  📋 نسخ
                 </Button>
                 {request.status === 'failed' && (
                   <Button
                     variant="outline"
                     className="flex-1"
                     onClick={async () => {
-                      // Retry failed request
                       try {
-                        await fetch(`/api/admin/videos/${request.id}/retry`, { method: 'POST' });
-                        loadRequests();
+                        const response = await fetch(`/api/admin/videos/${request.id}/retry`, { 
+                          method: 'POST' 
+                        });
+                        if (response.ok) {
+                          alert('تم إعادة محاولة الطلب');
+                          loadRequests();
+                        } else {
+                          alert('فشلت إعادة المحاولة');
+                        }
                       } catch (error) {
                         console.error('Failed to retry:', error);
+                        alert('حدث خطأ في إعادة المحاولة');
                       }
                     }}
                   >
-                    🔄 إعادة محاولة
+                    🔄 إعادة
                   </Button>
                 )}
               </div>
@@ -189,6 +355,107 @@ export default function AdminVideosPage() {
           <li>• في حالة الفشل، يمكن إعادة محاولة الطلب</li>
         </ul>
       </Card>
+
+      {/* Detail Modal */}
+      {detailModal.isOpen && detailModal.video && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-6 p-6">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-2xl font-bold text-brand-gold">تفاصيل الفيديو</h2>
+              <Button
+                variant="outline"
+                onClick={() => setDetailModal({ isOpen: false })}
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-brand-cream/60 text-sm">المعرف</p>
+                <p className="text-brand-cream font-mono break-all">{detailModal.video.id}</p>
+              </div>
+
+              <div>
+                <p className="text-brand-cream/60 text-sm">العنوان</p>
+                <p className="text-brand-cream text-lg font-semibold">{detailModal.video.title}</p>
+              </div>
+
+              <div>
+                <p className="text-brand-cream/60 text-sm">الوصف</p>
+                <p className="text-brand-cream/80">{detailModal.video.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-brand-cream/60 text-sm">الفئة</p>
+                  <p className="text-brand-cream">{detailModal.video.category}</p>
+                </div>
+                <div>
+                  <p className="text-brand-cream/60 text-sm">الحالة</p>
+                  <p className="text-brand-cream">{detailModal.video.status}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-brand-cream/60 text-sm">تاريخ الإنشاء</p>
+                  <p className="text-brand-cream/80 text-sm">
+                    {new Date(detailModal.video.createdAt).toLocaleDateString('ar-SA')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-brand-cream/60 text-sm">آخر تحديث</p>
+                  <p className="text-brand-cream/80 text-sm">
+                    {new Date(detailModal.video.updatedAt).toLocaleDateString('ar-SA')}
+                  </p>
+                </div>
+              </div>
+
+              {detailModal.video.youtubeId && (
+                <div>
+                  <p className="text-brand-cream/60 text-sm">معرف YouTube</p>
+                  <p className="text-red-400 font-mono break-all">{detailModal.video.youtubeId}</p>
+                </div>
+              )}
+
+              {detailModal.video.facebookId && (
+                <div>
+                  <p className="text-brand-cream/60 text-sm">معرف Facebook</p>
+                  <p className="text-blue-400 font-mono break-all">{detailModal.video.facebookId}</p>
+                </div>
+              )}
+
+              <div>
+                <p className="text-brand-cream/60 text-sm">المحتوى</p>
+                <pre className="bg-black/50 p-3 rounded border border-brand-gold/30 text-xs overflow-x-auto text-brand-cream/70">
+                  {detailModal.video.content}
+                </pre>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4 border-t border-brand-gold/30">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  navigator.clipboard.writeText(detailModal.video!.id);
+                  alert('تم نسخ المعرف');
+                }}
+              >
+                📋 نسخ المعرف
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setDetailModal({ isOpen: false })}
+              >
+                إغلاق
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </Container>
   );
 }
