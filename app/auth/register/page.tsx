@@ -15,8 +15,9 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
-  // Only reference NEXT_PUBLIC_* in client components to avoid hydration mismatch.
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  
+  // دمج المتغير البيئي مع القيمة الاحتياطية لضمان ظهور الزر دائماً على المتصفح
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '://googleusercontent.com';
 
   useEffect(() => {
     setIsClient(true);
@@ -139,4 +140,4 @@ export default function Page() {
       </Suspense>
     </Container>
   );
-}
+                                         }
