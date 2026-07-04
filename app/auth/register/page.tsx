@@ -9,15 +9,15 @@ import { registerAction } from '../actions';
 import { GoogleOAuthButton } from '../google-oauth-button';
 import { useSearchParams } from 'next/navigation';
 
+// نقوم بتعريف المتغير الثابت هنا خارج الـ Component تماماً لمنع خطأ الـ Hooks #310
+const GOOGLE_CLIENT_ID_FALLBACK = '://googleusercontent.com';
+
 function RegisterForm() {
   const searchParams = useSearchParams();
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
-  
-  // دمج المتغير البيئي مع القيمة الاحتياطية لضمان ظهور الزر دائماً على المتصفح
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '://googleusercontent.com';
 
   useEffect(() => {
     setIsClient(true);
@@ -51,6 +51,9 @@ function RegisterForm() {
   };
 
   if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
+
+  // جلب المعرف البيئي أو استخدام القيمة الاحتياطية الثابتة
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID_FALLBACK;
 
   return (
     <Card className="mx-auto max-w-md space-y-6 text-right">
@@ -140,4 +143,5 @@ export default function Page() {
       </Suspense>
     </Container>
   );
-                                         }
+    }
+      
