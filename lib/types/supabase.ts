@@ -1,0 +1,2756 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
+  public: {
+    Tables: {
+      ai_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          query: string
+          response: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          query: string
+          response: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          query?: string
+          response?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      article_categories: {
+        Row: {
+          created_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          icon: string | null
+          id: string
+          name_ar: string
+          name_en: string
+          published: boolean | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          name_ar: string
+          name_en: string
+          published?: boolean | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          published?: boolean | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      articles: {
+        Row: {
+          author: string | null
+          category_id: string | null
+          content: string
+          created_at: string | null
+          featured_image_url: string | null
+          id: string
+          metadata: Json | null
+          published: boolean | null
+          searchable: unknown
+          slug: string
+          summary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          author?: string | null
+          category_id?: string | null
+          content: string
+          created_at?: string | null
+          featured_image_url?: string | null
+          id?: string
+          metadata?: Json | null
+          published?: boolean | null
+          searchable?: unknown
+          slug: string
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          author?: string | null
+          category_id?: string | null
+          content?: string
+          created_at?: string | null
+          featured_image_url?: string | null
+          id?: string
+          metadata?: Json | null
+          published?: boolean | null
+          searchable?: unknown
+          slug?: string
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "article_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      battle_events: {
+        Row: {
+          battle_id: string
+          content_ar: string
+          content_en: string | null
+          created_at: string | null
+          event_type: string | null
+          id: string
+          order_num: number | null
+          title_ar: string
+          title_en: string
+          updated_at: string | null
+        }
+        Insert: {
+          battle_id: string
+          content_ar: string
+          content_en?: string | null
+          created_at?: string | null
+          event_type?: string | null
+          id?: string
+          order_num?: number | null
+          title_ar: string
+          title_en: string
+          updated_at?: string | null
+        }
+        Update: {
+          battle_id?: string
+          content_ar?: string
+          content_en?: string | null
+          created_at?: string | null
+          event_type?: string | null
+          id?: string
+          order_num?: number | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_events_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "battles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      battles: {
+        Row: {
+          created_at: string | null
+          date_gregorian: string | null
+          date_hijri: string | null
+          description_ar: string | null
+          description_en: string | null
+          featured_image_url: string | null
+          id: string
+          location_ar: string | null
+          location_en: string | null
+          metadata: Json | null
+          name_ar: string
+          name_en: string
+          order_num: number | null
+          published: boolean | null
+          slug: string
+          thumbnail_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_gregorian?: string | null
+          date_hijri?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          featured_image_url?: string | null
+          id?: string
+          location_ar?: string | null
+          location_en?: string | null
+          metadata?: Json | null
+          name_ar: string
+          name_en: string
+          order_num?: number | null
+          published?: boolean | null
+          slug: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_gregorian?: string | null
+          date_hijri?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          featured_image_url?: string | null
+          id?: string
+          location_ar?: string | null
+          location_en?: string | null
+          metadata?: Json | null
+          name_ar?: string
+          name_en?: string
+          order_num?: number | null
+          published?: boolean | null
+          slug?: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      companion_stories: {
+        Row: {
+          companion_id: string
+          content_ar: string
+          content_en: string | null
+          created_at: string | null
+          id: string
+          order_num: number | null
+          story_type: string | null
+          title_ar: string
+          title_en: string
+          updated_at: string | null
+        }
+        Insert: {
+          companion_id: string
+          content_ar: string
+          content_en?: string | null
+          created_at?: string | null
+          id?: string
+          order_num?: number | null
+          story_type?: string | null
+          title_ar: string
+          title_en: string
+          updated_at?: string | null
+        }
+        Update: {
+          companion_id?: string
+          content_ar?: string
+          content_en?: string | null
+          created_at?: string | null
+          id?: string
+          order_num?: number | null
+          story_type?: string | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companion_stories_companion_id_fkey"
+            columns: ["companion_id"]
+            isOneToOne: false
+            referencedRelation: "companions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companions: {
+        Row: {
+          bio_ar: string | null
+          bio_en: string | null
+          category: string | null
+          created_at: string | null
+          featured_image_url: string | null
+          id: string
+          metadata: Json | null
+          name_ar: string
+          name_en: string
+          order_num: number | null
+          published: boolean | null
+          slug: string
+          thumbnail_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          category?: string | null
+          created_at?: string | null
+          featured_image_url?: string | null
+          id?: string
+          metadata?: Json | null
+          name_ar: string
+          name_en: string
+          order_num?: number | null
+          published?: boolean | null
+          slug: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          category?: string | null
+          created_at?: string | null
+          featured_image_url?: string | null
+          id?: string
+          metadata?: Json | null
+          name_ar?: string
+          name_en?: string
+          order_num?: number | null
+          published?: boolean | null
+          slug?: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      competitions: {
+        Row: {
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          metadata: Json | null
+          prize: string | null
+          published: boolean
+          starts_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          metadata?: Json | null
+          prize?: string | null
+          published?: boolean
+          starts_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          metadata?: Json | null
+          prize?: string | null
+          published?: boolean
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      conquest_events: {
+        Row: {
+          conquest_id: string
+          content_ar: string
+          content_en: string | null
+          created_at: string | null
+          event_type: string | null
+          id: string
+          order_num: number | null
+          title_ar: string
+          title_en: string
+          updated_at: string | null
+        }
+        Insert: {
+          conquest_id: string
+          content_ar: string
+          content_en?: string | null
+          created_at?: string | null
+          event_type?: string | null
+          id?: string
+          order_num?: number | null
+          title_ar: string
+          title_en: string
+          updated_at?: string | null
+        }
+        Update: {
+          conquest_id?: string
+          content_ar?: string
+          content_en?: string | null
+          created_at?: string | null
+          event_type?: string | null
+          id?: string
+          order_num?: number | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conquest_events_conquest_id_fkey"
+            columns: ["conquest_id"]
+            isOneToOne: false
+            referencedRelation: "conquests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conquests: {
+        Row: {
+          created_at: string | null
+          date_gregorian: string | null
+          date_hijri: string | null
+          description_ar: string | null
+          description_en: string | null
+          featured_image_url: string | null
+          id: string
+          leader_ar: string | null
+          leader_en: string | null
+          location_ar: string | null
+          location_en: string | null
+          metadata: Json | null
+          name_ar: string
+          name_en: string
+          order_num: number | null
+          published: boolean | null
+          slug: string
+          thumbnail_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_gregorian?: string | null
+          date_hijri?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          featured_image_url?: string | null
+          id?: string
+          leader_ar?: string | null
+          leader_en?: string | null
+          location_ar?: string | null
+          location_en?: string | null
+          metadata?: Json | null
+          name_ar: string
+          name_en: string
+          order_num?: number | null
+          published?: boolean | null
+          slug: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_gregorian?: string | null
+          date_hijri?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          featured_image_url?: string | null
+          id?: string
+          leader_ar?: string | null
+          leader_en?: string | null
+          location_ar?: string | null
+          location_en?: string | null
+          metadata?: Json | null
+          name_ar?: string
+          name_en?: string
+          order_num?: number | null
+          published?: boolean | null
+          slug?: string
+          thumbnail_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          language: string
+          message: string
+          name: string
+          notificationsent: boolean
+          read: boolean
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          language?: string
+          message: string
+          name: string
+          notificationsent?: boolean
+          read?: boolean
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          language?: string
+          message?: string
+          name?: string
+          notificationsent?: boolean
+          read?: boolean
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dua_categories: {
+        Row: {
+          created_at: string | null
+          icon: string | null
+          id: string
+          name_ar: string
+          name_en: string
+          published: boolean | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name_ar: string
+          name_en: string
+          published?: boolean | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          published?: boolean | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      duas: {
+        Row: {
+          benefits_ar: string | null
+          benefits_en: string | null
+          category_id: string | null
+          created_at: string | null
+          id: string
+          metadata: Json
+          occasion_ar: string | null
+          occasion_en: string | null
+          published: boolean | null
+          slug: string
+          source_ar: string | null
+          source_en: string | null
+          text_ar: string
+          text_en: string | null
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          benefits_ar?: string | null
+          benefits_en?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json
+          occasion_ar?: string | null
+          occasion_en?: string | null
+          published?: boolean | null
+          slug: string
+          source_ar?: string | null
+          source_en?: string | null
+          text_ar: string
+          text_en?: string | null
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          benefits_ar?: string | null
+          benefits_en?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json
+          occasion_ar?: string | null
+          occasion_en?: string | null
+          published?: boolean | null
+          slug?: string
+          source_ar?: string | null
+          source_en?: string | null
+          text_ar?: string
+          text_en?: string | null
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duas_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "dua_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      episodes: {
+        Row: {
+          category: string | null
+          contentar: string
+          contenten: string
+          created_at: string
+          descriptionar: string
+          descriptionen: string
+          id: string
+          keywordsar: string | null
+          keywordsen: string | null
+          published_at: string | null
+          slug: string
+          thumbnailurl: string | null
+          titlear: string
+          titleen: string
+          updated_at: string
+          youtubevideoid: string | null
+        }
+        Insert: {
+          category?: string | null
+          contentar: string
+          contenten: string
+          created_at?: string
+          descriptionar: string
+          descriptionen: string
+          id?: string
+          keywordsar?: string | null
+          keywordsen?: string | null
+          published_at?: string | null
+          slug: string
+          thumbnailurl?: string | null
+          titlear: string
+          titleen: string
+          updated_at?: string
+          youtubevideoid?: string | null
+        }
+        Update: {
+          category?: string | null
+          contentar?: string
+          contenten?: string
+          created_at?: string
+          descriptionar?: string
+          descriptionen?: string
+          id?: string
+          keywordsar?: string | null
+          keywordsen?: string | null
+          published_at?: string | null
+          slug?: string
+          thumbnailurl?: string | null
+          titlear?: string
+          titleen?: string
+          updated_at?: string
+          youtubevideoid?: string | null
+        }
+        Relationships: []
+      }
+      favorite_recitations: {
+        Row: {
+          created_at: string | null
+          id: string
+          reciter_id: string | null
+          surah_id: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reciter_id?: string | null
+          surah_id?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reciter_id?: string | null
+          surah_id?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorite_recitations_reciter_id_fkey"
+            columns: ["reciter_id"]
+            isOneToOne: false
+            referencedRelation: "quran_reciters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorite_surahs: {
+        Row: {
+          created_at: string | null
+          id: string
+          surah_id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          surah_id: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          surah_id?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          item_ref: string
+          item_type: Database["public"]["Enums"]["favorite_item_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_ref: string
+          item_type: Database["public"]["Enums"]["favorite_item_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_ref?: string
+          item_type?: Database["public"]["Enums"]["favorite_item_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_research: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          request_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          request_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_research_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "research_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hadith_books: {
+        Row: {
+          author_ar: string | null
+          author_en: string | null
+          created_at: string
+          hadith_count: number | null
+          id: string
+          name_ar: string
+          name_en: string
+          slug: string
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_ar?: string | null
+          author_en?: string | null
+          created_at?: string
+          hadith_count?: number | null
+          id?: string
+          name_ar: string
+          name_en: string
+          slug: string
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_ar?: string | null
+          author_en?: string | null
+          created_at?: string
+          hadith_count?: number | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          slug?: string
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hadith_explanations: {
+        Row: {
+          author: string | null
+          created_at: string
+          explanation_ar: string
+          explanation_en: string | null
+          hadith_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          created_at?: string
+          explanation_ar: string
+          explanation_en?: string | null
+          hadith_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          created_at?: string
+          explanation_ar?: string
+          explanation_en?: string | null
+          hadith_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hadith_explanations_hadith_id_hadiths_id_fk"
+            columns: ["hadith_id"]
+            isOneToOne: false
+            referencedRelation: "hadiths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hadiths: {
+        Row: {
+          book_id: string
+          chapter: string | null
+          created_at: string
+          grade_ar: string | null
+          grade_en: string | null
+          hadith_number: string
+          id: string
+          narrator_ar: string | null
+          narrator_en: string | null
+          published: boolean
+          ref: string | null
+          text_ar: string
+          text_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          chapter?: string | null
+          created_at?: string
+          grade_ar?: string | null
+          grade_en?: string | null
+          hadith_number: string
+          id?: string
+          narrator_ar?: string | null
+          narrator_en?: string | null
+          published?: boolean
+          ref?: string | null
+          text_ar: string
+          text_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          chapter?: string | null
+          created_at?: string
+          grade_ar?: string | null
+          grade_en?: string | null
+          hadith_number?: string
+          id?: string
+          narrator_ar?: string | null
+          narrator_en?: string | null
+          published?: boolean
+          ref?: string | null
+          text_ar?: string
+          text_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hadiths_book_id_hadith_books_id_fk"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "hadith_books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kids_content: {
+        Row: {
+          age_group: string | null
+          content_ar: string | null
+          created_at: string | null
+          featured_image_url: string | null
+          id: string
+          published: boolean | null
+          slug: string
+          title_ar: string
+          type: string | null
+        }
+        Insert: {
+          age_group?: string | null
+          content_ar?: string | null
+          created_at?: string | null
+          featured_image_url?: string | null
+          id?: string
+          published?: boolean | null
+          slug: string
+          title_ar: string
+          type?: string | null
+        }
+        Update: {
+          age_group?: string | null
+          content_ar?: string | null
+          created_at?: string | null
+          featured_image_url?: string | null
+          id?: string
+          published?: boolean | null
+          slug?: string
+          title_ar?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
+      memorization_attempts: {
+        Row: {
+          attempted_at: string | null
+          ayah_number: number
+          feedback: string | null
+          id: string
+          score: number | null
+          surah_id: number
+          user_id: string | null
+        }
+        Insert: {
+          attempted_at?: string | null
+          ayah_number: number
+          feedback?: string | null
+          id?: string
+          score?: number | null
+          surah_id: number
+          user_id?: string | null
+        }
+        Update: {
+          attempted_at?: string | null
+          ayah_number?: number
+          feedback?: string | null
+          id?: string
+          score?: number | null
+          surah_id?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      memorization_plans: {
+        Row: {
+          cadence: string
+          created_at: string
+          id: string
+          prompt: string | null
+          published: boolean
+          tajweed_focus: string | null
+          target_ref: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cadence?: string
+          created_at?: string
+          id?: string
+          prompt?: string | null
+          published?: boolean
+          tajweed_focus?: string | null
+          target_ref?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cadence?: string
+          created_at?: string
+          id?: string
+          prompt?: string | null
+          published?: boolean
+          tajweed_focus?: string | null
+          target_ref?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      memorization_progress: {
+        Row: {
+          ayah_number: number
+          created_at: string | null
+          id: string
+          last_attempt_at: string | null
+          mastery_level: number | null
+          status: string | null
+          surah_id: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ayah_number: number
+          created_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          mastery_level?: number | null
+          status?: string | null
+          surah_id: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ayah_number?: number
+          created_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          mastery_level?: number | null
+          status?: string | null
+          surah_id?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          title: string
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          title: string
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          title?: string
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string
+          reference_note: string
+          screenshot_url: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          method: string
+          reference_note: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          reference_note?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pinned_messages: {
+        Row: {
+          body: string | null
+          created_at: string
+          end_at: string | null
+          id: string
+          is_active: boolean
+          priority: number
+          start_at: string | null
+          title: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          start_at?: string | null
+          title?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          start_at?: string | null
+          title?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      prayer_locations: {
+        Row: {
+          city: string
+          country: string | null
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          latitude: number | null
+          longitude: number | null
+          timezone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          city: string
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_locations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          notification_time: string
+          prayer_name: string
+          sent_at: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notification_time: string
+          prayer_name: string
+          sent_at?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notification_time?: string
+          prayer_name?: string
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_preferences: {
+        Row: {
+          adhan_enabled: boolean | null
+          adhan_volume: number | null
+          asr_method: string | null
+          calculation_method: string | null
+          created_at: string | null
+          high_latitude_method: string | null
+          id: string
+          madhab: string | null
+          midnight_method: string | null
+          notifications_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          adhan_enabled?: boolean | null
+          adhan_volume?: number | null
+          asr_method?: string | null
+          calculation_method?: string | null
+          created_at?: string | null
+          high_latitude_method?: string | null
+          id?: string
+          madhab?: string | null
+          midnight_method?: string | null
+          notifications_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          adhan_enabled?: boolean | null
+          adhan_volume?: number | null
+          asr_method?: string | null
+          calculation_method?: string | null
+          created_at?: string | null
+          high_latitude_method?: string | null
+          id?: string
+          madhab?: string | null
+          midnight_method?: string | null
+          notifications_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_times_cache: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string | null
+          date: string
+          id: string
+          timings: Json
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date: string
+          id?: string
+          timings: Json
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          timings?: Json
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          locale: string
+          role: Database["public"]["Enums"]["role"]
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          locale?: string
+          role?: Database["public"]["Enums"]["role"]
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          locale?: string
+          role?: Database["public"]["Enums"]["role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      prophet_sections: {
+        Row: {
+          content_ar: string
+          content_en: string | null
+          created_at: string | null
+          id: string
+          order_num: number | null
+          prophet_id: string
+          section_type: string | null
+          title_ar: string
+          title_en: string
+          updated_at: string | null
+        }
+        Insert: {
+          content_ar: string
+          content_en?: string | null
+          created_at?: string | null
+          id?: string
+          order_num?: number | null
+          prophet_id: string
+          section_type?: string | null
+          title_ar: string
+          title_en: string
+          updated_at?: string | null
+        }
+        Update: {
+          content_ar?: string
+          content_en?: string | null
+          created_at?: string | null
+          id?: string
+          order_num?: number | null
+          prophet_id?: string
+          section_type?: string | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prophet_sections_prophet_id_fkey"
+            columns: ["prophet_id"]
+            isOneToOne: false
+            referencedRelation: "prophets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prophets: {
+        Row: {
+          bio_ar: string | null
+          bio_en: string | null
+          birth_place_ar: string | null
+          created_at: string | null
+          death_place_ar: string | null
+          featured_image_url: string | null
+          id: string
+          metadata: Json
+          name_ar: string
+          name_en: string | null
+          order_num: number | null
+          published: boolean | null
+          slug: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          birth_place_ar?: string | null
+          created_at?: string | null
+          death_place_ar?: string | null
+          featured_image_url?: string | null
+          id?: string
+          metadata?: Json
+          name_ar: string
+          name_en?: string | null
+          order_num?: number | null
+          published?: boolean | null
+          slug: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          birth_place_ar?: string | null
+          created_at?: string | null
+          death_place_ar?: string | null
+          featured_image_url?: string | null
+          id?: string
+          metadata?: Json
+          name_ar?: string
+          name_en?: string | null
+          order_num?: number | null
+          published?: boolean | null
+          slug?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quran_audio: {
+        Row: {
+          audio_url: string
+          duration: number | null
+          id: string
+          reciter_id: string
+          surah_id: number
+        }
+        Insert: {
+          audio_url: string
+          duration?: number | null
+          id?: string
+          reciter_id: string
+          surah_id: number
+        }
+        Update: {
+          audio_url?: string
+          duration?: number | null
+          id?: string
+          reciter_id?: string
+          surah_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quran_audio_reciter_id_quran_reciters_id_fk"
+            columns: ["reciter_id"]
+            isOneToOne: false
+            referencedRelation: "quran_reciters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quran_audio_surah_id_quran_surahs_id_fk"
+            columns: ["surah_id"]
+            isOneToOne: false
+            referencedRelation: "quran_surahs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quran_ayahs: {
+        Row: {
+          audio_url: string | null
+          ayah_number: number
+          created_at: string
+          hizb: number | null
+          id: string
+          juz: number | null
+          page: number | null
+          rub: number | null
+          sajda: boolean | null
+          searchable: unknown
+          surah_id: number
+          text_ar: string
+          text_en: string | null
+          text_simple: string | null
+          text_uthmani: string | null
+          updated_at: string
+        }
+        Insert: {
+          audio_url?: string | null
+          ayah_number: number
+          created_at?: string
+          hizb?: number | null
+          id?: string
+          juz?: number | null
+          page?: number | null
+          rub?: number | null
+          sajda?: boolean | null
+          searchable?: unknown
+          surah_id: number
+          text_ar: string
+          text_en?: string | null
+          text_simple?: string | null
+          text_uthmani?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string | null
+          ayah_number?: number
+          created_at?: string
+          hizb?: number | null
+          id?: string
+          juz?: number | null
+          page?: number | null
+          rub?: number | null
+          sajda?: boolean | null
+          searchable?: unknown
+          surah_id?: number
+          text_ar?: string
+          text_en?: string | null
+          text_simple?: string | null
+          text_uthmani?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quran_ayahs_surah_id_quran_surahs_id_fk"
+            columns: ["surah_id"]
+            isOneToOne: false
+            referencedRelation: "quran_surahs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quran_reciters: {
+        Row: {
+          base_url_template: string | null
+          code: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          name_ar: string
+          name_en: string
+          style: string | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_url_template?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name_ar: string
+          name_en: string
+          style?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_url_template?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name_ar?: string
+          name_en?: string
+          style?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quran_surahs: {
+        Row: {
+          ayahs_count: number
+          created_at: string
+          id: number
+          name_ar: string
+          name_en: string
+          name_translation: string | null
+          order: number
+          revelation_place: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          ayahs_count: number
+          created_at?: string
+          id: number
+          name_ar: string
+          name_en: string
+          name_translation?: string | null
+          order: number
+          revelation_place?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          ayahs_count?: number
+          created_at?: string
+          id?: number
+          name_ar?: string
+          name_en?: string
+          name_translation?: string | null
+          order?: number
+          revelation_place?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quran_tafsir: {
+        Row: {
+          author: string | null
+          ayah_number: number
+          created_at: string
+          id: string
+          surah_id: number
+          tafsir_ar: string
+          tafsir_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          ayah_number: number
+          created_at?: string
+          id?: string
+          surah_id: number
+          tafsir_ar: string
+          tafsir_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          ayah_number?: number
+          created_at?: string
+          id?: string
+          surah_id?: number
+          tafsir_ar?: string
+          tafsir_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reading_progress: {
+        Row: {
+          id: string
+          progress_json: Json
+          ref: string
+          scope: Database["public"]["Enums"]["progress_scope"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          progress_json?: Json
+          ref: string
+          scope: Database["public"]["Enums"]["progress_scope"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          progress_json?: Json
+          ref?: string
+          scope?: Database["public"]["Enums"]["progress_scope"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recent_recitations: {
+        Row: {
+          ayah_id: number | null
+          id: string
+          played_at: string | null
+          reciter_id: string | null
+          surah_id: number
+          user_id: string | null
+        }
+        Insert: {
+          ayah_id?: number | null
+          id?: string
+          played_at?: string | null
+          reciter_id?: string | null
+          surah_id: number
+          user_id?: string | null
+        }
+        Update: {
+          ayah_id?: number | null
+          id?: string
+          played_at?: string | null
+          reciter_id?: string | null
+          surah_id?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recent_recitations_reciter_id_fkey"
+            columns: ["reciter_id"]
+            isOneToOne: false
+            referencedRelation: "quran_reciters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reciter_favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          reciter_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reciter_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reciter_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reciter_favorites_reciter_id_fkey"
+            columns: ["reciter_id"]
+            isOneToOne: false
+            referencedRelation: "quran_reciters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reciter_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminders: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          schedule_json: Json
+          type: Database["public"]["Enums"]["reminder_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          schedule_json?: Json
+          type: Database["public"]["Enums"]["reminder_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          schedule_json?: Json
+          type?: Database["public"]["Enums"]["reminder_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      research_requests: {
+        Row: {
+          created_at: string
+          field: string
+          id: string
+          language: string
+          pages: number
+          status: Database["public"]["Enums"]["status"]
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          field: string
+          id?: string
+          language?: string
+          pages?: number
+          status?: Database["public"]["Enums"]["status"]
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          field?: string
+          id?: string
+          language?: string
+          pages?: number
+          status?: Database["public"]["Enums"]["status"]
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_requests_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_stories: {
+        Row: {
+          created_at: string
+          id: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_stories_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_stories_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scholars: {
+        Row: {
+          bio_ar: string | null
+          bio_en: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          name_ar: string
+          name_en: string
+          published: boolean
+          slug: string
+          thumbnail_url: string | null
+          updated_at: string
+          website_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name_ar: string
+          name_en: string
+          published?: boolean
+          slug: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          bio_ar?: string | null
+          bio_en?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name_ar?: string
+          name_en?: string
+          published?: boolean
+          slug?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_public: boolean
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      stories: {
+        Row: {
+          category: Database["public"]["Enums"]["category"]
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          mood: string | null
+          published: boolean | null
+          slug: string
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["category"]
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          mood?: string | null
+          published?: boolean | null
+          slug: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["category"]
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          mood?: string | null
+          published?: boolean | null
+          slug?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_progress: {
+        Row: {
+          completed: boolean
+          id: string
+          progress: number
+          story_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          id?: string
+          progress?: number
+          story_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          id?: string
+          progress?: number
+          story_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_progress_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_progress_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          language: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          updated_at: string
+          verificationtoken: string | null
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          language?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          verificationtoken?: string | null
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          language?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          verificationtoken?: string | null
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          id: string
+          input: string
+          result: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input: string
+          result: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input?: string
+          result?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tawasheeh: {
+        Row: {
+          artist_ar: string | null
+          artist_en: string | null
+          audio_url: string | null
+          category_id: string | null
+          created_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          duration: number | null
+          featured: boolean | null
+          id: string
+          metadata: Json | null
+          published: boolean | null
+          slug: string
+          thumbnail_url: string | null
+          title_ar: string
+          title_en: string
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          artist_ar?: string | null
+          artist_en?: string | null
+          audio_url?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration?: number | null
+          featured?: boolean | null
+          id?: string
+          metadata?: Json | null
+          published?: boolean | null
+          slug: string
+          thumbnail_url?: string | null
+          title_ar: string
+          title_en: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          artist_ar?: string | null
+          artist_en?: string | null
+          audio_url?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration?: number | null
+          featured?: boolean | null
+          id?: string
+          metadata?: Json | null
+          published?: boolean | null
+          slug?: string
+          thumbnail_url?: string | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tawasheeh_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "tawasheeh_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tawasheeh_categories: {
+        Row: {
+          created_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          icon: string | null
+          id: string
+          name_ar: string
+          name_en: string
+          order_num: number | null
+          published: boolean | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          name_ar: string
+          name_en: string
+          order_num?: number | null
+          published?: boolean | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          order_num?: number | null
+          published?: boolean | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tawasheeh_favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          tawasheeh_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          tawasheeh_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          tawasheeh_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tawasheeh_favorites_tawasheeh_id_fkey"
+            columns: ["tawasheeh_id"]
+            isOneToOne: false
+            referencedRelation: "tawasheeh"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tawasheeh_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tawasheeh_playlist_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_num: number | null
+          playlist_id: string
+          tawasheeh_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_num?: number | null
+          playlist_id: string
+          tawasheeh_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_num?: number | null
+          playlist_id?: string
+          tawasheeh_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tawasheeh_playlist_items_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "tawasheeh_playlists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tawasheeh_playlist_items_tawasheeh_id_fkey"
+            columns: ["tawasheeh_id"]
+            isOneToOne: false
+            referencedRelation: "tawasheeh"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tawasheeh_playlists: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tawasheeh_playlists_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_behavior: {
+        Row: {
+          created_at: string
+          id: string
+          interaction: string
+          page: string
+          time_spent: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction: string
+          page: string
+          time_spent?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction?: string
+          page?: string
+          time_spent?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_behavior_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_settings: {
+        Row: {
+          auto_play_next: boolean | null
+          default_reciter_id: string | null
+          font_size: string | null
+          language: string | null
+          quran_font: string | null
+          theme: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_play_next?: boolean | null
+          default_reciter_id?: string | null
+          font_size?: string | null
+          language?: string | null
+          quran_font?: string | null
+          theme?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_play_next?: boolean | null
+          default_reciter_id?: string | null
+          font_size?: string | null
+          language?: string | null
+          quran_font?: string | null
+          theme?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_default_reciter_id_fkey"
+            columns: ["default_reciter_id"]
+            isOneToOne: false
+            referencedRelation: "quran_reciters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          credits: number
+          expires_at: string | null
+          id: string
+          plan: Database["public"]["Enums"]["plan"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          expires_at?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["plan"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          expires_at?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["plan"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_categories: {
+        Row: {
+          created_at: string | null
+          icon: string | null
+          id: string
+          name_ar: string
+          name_en: string
+          published: boolean | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name_ar: string
+          name_en: string
+          published?: boolean | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          published?: boolean | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          duration: number | null
+          id: string
+          published: boolean | null
+          slug: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          views: number | null
+          youtube_id: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          id?: string
+          published?: boolean | null
+          slug: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          views?: number | null
+          youtube_id?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          id?: string
+          published?: boolean | null
+          slug?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          views?: number | null
+          youtube_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "video_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      category: "dark" | "romantic" | "psychological"
+      favorite_item_type: "quran" | "hadith" | "story" | "scholar" | "dua"
+      payment_status: "pending" | "approved" | "rejected"
+      plan: "free" | "pro" | "premium"
+      progress_scope: "quran" | "hadith" | "stories"
+      reminder_type: "prayer" | "quran" | "adhkar" | "fasting" | "zakat"
+      role: "user" | "admin"
+      status: "pending" | "completed" | "failed"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      category: ["dark", "romantic", "psychological"],
+      favorite_item_type: ["quran", "hadith", "story", "scholar", "dua"],
+      payment_status: ["pending", "approved", "rejected"],
+      plan: ["free", "pro", "premium"],
+      progress_scope: ["quran", "hadith", "stories"],
+      reminder_type: ["prayer", "quran", "adhkar", "fasting", "zakat"],
+      role: ["user", "admin"],
+      status: ["pending", "completed", "failed"],
+    },
+  },
+} as const
+
