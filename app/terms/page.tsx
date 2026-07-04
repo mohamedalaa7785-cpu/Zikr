@@ -1,48 +1,48 @@
-import type { Metadata } from "next";
-import { Container } from "@/components/ui/container";
-import { Card } from "@/components/ui/card";
+'use client';
 
-export const metadata: Metadata = {
-  title: "الشروط والأحكام",
-  description: "شروط استخدام منصة ZIKR وحدود المحتوى والخدمات الرقمية المقدمة.",
-};
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
 
 export default function TermsPage() {
   return (
-    <Container className="max-w-4xl space-y-8 py-12">
-      <section className="space-y-4 text-center">
-        <h1 className="text-4xl font-bold text-brand-gold">الشروط والأحكام</h1>
-        <p className="arabic-muted">آخر تحديث: 7 يونيو 2026</p>
-      </section>
+    <Container className="py-12 space-y-8 max-w-4xl">
+      <h1 className="text-4xl font-bold text-brand-gold">الشروط والأحكام</h1>
+      
+      <Card className="space-y-6 p-8">
+        <section className="space-y-3">
+          <h2 className="text-2xl font-bold text-brand-gold">1. قبول الشروط</h2>
+          <p className="leading-8 arabic-muted">
+            باستخدام هذا الموقع، أنت توافق على قبول جميع الشروط والأحكام الواردة هنا.
+          </p>
+        </section>
 
-      <Card className="space-y-4 leading-8">
-        <h2 className="text-2xl font-semibold text-brand-gold">
-          الاستخدام المقبول
-        </h2>
-        <p className="arabic-muted">
-          تُقدم المنصة لأغراض التعلّم والتذكير والانتفاع بالمحتوى الإسلامي. يجب
-          عدم إساءة استخدام الخدمات أو محاولة تعطيلها أو نشر محتوى مخالف أو
-          مضلل.
-        </p>
-      </Card>
+        <section className="space-y-3">
+          <h2 className="text-2xl font-bold text-brand-gold">2. استخدام الموقع</h2>
+          <p className="leading-8 arabic-muted">
+            يجب استخدام الموقع بطريقة قانونية وليس بما يخل بحقوق الآخرين أو يقيد استخدامهم للموقع.
+          </p>
+        </section>
 
-      <Card className="space-y-4 leading-8">
-        <h2 className="text-2xl font-semibold text-brand-gold">
-          المحتوى والمصادر
-        </h2>
-        <p className="arabic-muted">
-          نسعى لتقديم محتوى نافع ودقيق، ومع ذلك قد تعتمد بعض الصفحات على تكاملات
-          خارجية أو بيانات يتم تحديثها دوريًا. عند وجود مسألة شرعية عملية يُرجع
-          إلى أهل العلم الموثوقين.
-        </p>
-      </Card>
+        <section className="space-y-3">
+          <h2 className="text-2xl font-bold text-brand-gold">3. محتوى المستخدم</h2>
+          <p className="leading-8 arabic-muted">
+            أنت تتحمل المسؤولية الكاملة عن أي محتوى تنشره على الموقع ويجب أن يكون متوافقاً مع الشريعة الإسلامية.
+          </p>
+        </section>
 
-      <Card className="space-y-4 leading-8">
-        <h2 className="text-2xl font-semibold text-brand-gold">التغييرات</h2>
-        <p className="arabic-muted">
-          قد يتم تحديث هذه الشروط عند تطوير المنصة أو إضافة ميزات جديدة. استمرار
-          الاستخدام بعد النشر يعني قبول النسخة الأحدث من الشروط.
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-2xl font-bold text-brand-gold">4. المحتوى الإسلامي</h2>
+          <p className="leading-8 arabic-muted">
+            جميع المحتوى الإسلامي على الموقع تم اختياره بعناية من مصادر موثوقة ومعتمدة.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-2xl font-bold text-brand-gold">5. التعديلات</h2>
+          <p className="leading-8 arabic-muted">
+            نحتفظ بالحق في تعديل الشروط والأحكام في أي وقت دون إخطار مسبق.
+          </p>
+        </section>
       </Card>
     </Container>
   );
