@@ -1,21 +1,22 @@
-import { defineConfig } from "drizzle-kit";
+import { defineConfig } from 'drizzle-kit';
 
-// Accept DATABASE_URL or the Vercel Supabase integration's POSTGRES_URL fallback.
+// For Supabase + Drizzle migrations, use the non-pooling (direct) connection URL.
+// Supabase's Vercel integration exposes POSTGRES_URL_NON_POOLING for this purpose.
 const connectionString =
+  process.env.POSTGRES_URL_NON_POOLING ||
   process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL ||
-  process.env.POSTGRES_URL_NON_POOLING;
+  process.env.POSTGRES_URL;
 
 if (!connectionString) {
   throw new Error(
-    "DATABASE_URL (or POSTGRES_URL) is required to run drizzle commands"
+    'A database connection URL is required. Set POSTGRES_URL_NON_POOLING (or DATABASE_URL / POSTGRES_URL).'
   );
 }
 
 export default defineConfig({
-  schema: "./drizzle/schema.ts",
-  out: "./drizzle/migrations",
-  dialect: "postgresql",
+  schema: './drizzle/schema.ts',
+  out: './drizzle/migrations',
+  dialect: 'postgresql',
   dbCredentials: {
     url: connectionString,
   },

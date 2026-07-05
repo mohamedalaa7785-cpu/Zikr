@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getSupabaseUser, supabaseServerAdminRequest } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 export type AdminProfile = {
   id: string;
@@ -9,17 +9,24 @@ export type AdminProfile = {
 };
 
 export async function getCurrentProfile(): Promise<AdminProfile | null> {
-  const user = await getSupabaseUser().catch(() => null);
-  if (!user) return null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
 
-  const profiles = await supabaseServerAdminRequest<AdminProfile[]>(
-    `/rest/v1/profiles?select=id,display_name,role&id=eq.${user.id}&limit=1`,
-    { cache: 'no-store' }
-  ).catch(() => []);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, display_name, role')
+      .eq('id', user.id)
+      .single();
 
-  const profile = profiles[0];
-  if (!profile) return { id: user.id, email: user.email, display_name: null, role: 'user' };
-  return { ...profile, email: user.email };
+    if (!profile) return { id: user.id, email: user.email, display_name: null, role: 'user' };
+    return { ...profile, email: user.email };
+  } catch {
+    return null;
+  }
 }
 
 export async function requireAdmin() {
