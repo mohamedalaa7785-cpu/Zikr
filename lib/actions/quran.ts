@@ -27,7 +27,7 @@ export async function addToQuranFavorites(surahId: number): Promise<{ success: b
       .insert({ user_id: user.id, surah_id: surahId });
 
     if (error) throw error;
-    revalidateTag('quran-favorites');
+    revalidateTag('quran-favorites', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Add quran favorite error:', error);
@@ -60,7 +60,7 @@ export async function removeFromQuranFavorites(surahId: number): Promise<{ succe
       .eq('surah_id', surahId);
 
     if (error) throw error;
-    revalidateTag('quran-favorites');
+    revalidateTag('quran-favorites', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Remove quran favorite error:', error);
@@ -99,7 +99,7 @@ export async function recordQuranRead(
       });
 
     if (error) throw error;
-    revalidateTag('quran-reads');
+    revalidateTag('quran-reads', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Record quran read error:', error);

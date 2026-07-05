@@ -27,7 +27,7 @@ export async function addToStoryFavorites(storyId: string): Promise<{ success: b
       .insert({ user_id: user.id, story_id: storyId });
 
     if (error) throw error;
-    revalidateTag('story-favorites');
+    revalidateTag('story-favorites', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Add story favorite error:', error);
@@ -62,7 +62,7 @@ export async function markStoryAsRead(storyId: string): Promise<{ success: boole
       });
 
     if (error) throw error;
-    revalidateTag('story-reads');
+    revalidateTag('story-reads', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Mark story as read error:', error);
@@ -103,7 +103,7 @@ export async function addStoryRating(
       });
 
     if (error) throw error;
-    revalidateTag('story-ratings');
+    revalidateTag('story-ratings', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Add story rating error:', error);
@@ -142,7 +142,7 @@ export async function saveProphetNote(
       });
 
     if (error) throw error;
-    revalidateTag('prophet-notes');
+    revalidateTag('prophet-notes', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Save prophet note error:', error);

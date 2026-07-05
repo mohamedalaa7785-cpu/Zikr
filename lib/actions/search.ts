@@ -31,7 +31,7 @@ export async function saveSearchQuery(query: string): Promise<{ success: boolean
       });
 
     if (error) throw error;
-    revalidateTag('search-history');
+    revalidateTag('search-history', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Save search query error:', error);
@@ -63,7 +63,7 @@ export async function clearSearchHistory(): Promise<{ success: boolean; error?: 
       .eq('user_id', user.id);
 
     if (error) throw error;
-    revalidateTag('search-history');
+    revalidateTag('search-history', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Clear search history error:', error);

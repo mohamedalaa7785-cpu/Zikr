@@ -35,7 +35,7 @@ export async function updateAppSettings(
       });
 
     if (error) throw error;
-    revalidateTag('app-settings');
+    revalidateTag('app-settings', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Update settings error:', error);

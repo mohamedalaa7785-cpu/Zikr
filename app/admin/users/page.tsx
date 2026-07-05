@@ -4,9 +4,17 @@ import { Container } from '@/components/ui/container';
 import { requireAdmin } from '@/lib/services/admin';
 import { supabaseServerAdminRequest } from '@/lib/supabase/server';
 
-async function getUsers() {
+interface UserProfile {
+  id: string;
+  displayName?: string;
+  email?: string;
+  role?: string;
+  createdAt?: string;
+}
+
+async function getUsers(): Promise<UserProfile[]> {
   try {
-    const users = await supabaseServerAdminRequest('/rest/v1/profiles?select=*', {
+    const users = await supabaseServerAdminRequest<UserProfile[]>('/rest/v1/profiles?select=*', {
       cache: 'no-store',
     });
     return users || [];
@@ -16,9 +24,9 @@ async function getUsers() {
   }
 }
 
-async function getUserStats() {
+async function getUserStats(): Promise<number> {
   try {
-    const stats = await supabaseServerAdminRequest(
+    const stats = await supabaseServerAdminRequest<UserProfile[]>(
       '/rest/v1/profiles?select=id&count=exact',
       { cache: 'no-store' }
     );
@@ -76,7 +84,7 @@ export default async function AdminUsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user: any) => (
+              {users.map((user) => (
                 <tr key={user.id} className='border-b border-brand-gold/10'>
                   <td className='px-4 py-3'>{user.displayName || 'مستخدم'}</td>
                   <td className='px-4 py-3 text-sm text-brand-cream/70'>{user.email || '-'}</td>

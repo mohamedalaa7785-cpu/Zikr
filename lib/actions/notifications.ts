@@ -29,7 +29,7 @@ export async function markNotificationAsRead(notificationId: string): Promise<{ 
       .eq('user_id', user.id);
 
     if (error) throw error;
-    revalidateTag('user-notifications');
+    revalidateTag('user-notifications', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Mark notification as read error:', error);
@@ -62,7 +62,7 @@ export async function deleteNotification(notificationId: string): Promise<{ succ
       .eq('user_id', user.id);
 
     if (error) throw error;
-    revalidateTag('user-notifications');
+    revalidateTag('user-notifications', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Delete notification error:', error);
@@ -95,7 +95,7 @@ export async function markAllAsRead(): Promise<{ success: boolean; error?: strin
       .eq('read', false);
 
     if (error) throw error;
-    revalidateTag('user-notifications');
+    revalidateTag('user-notifications', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Mark all as read error:', error);

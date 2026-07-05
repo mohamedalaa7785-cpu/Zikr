@@ -42,7 +42,7 @@ export async function saveReadingProgress(
       .eq('ref', ref);
 
     if (error) throw error;
-    revalidateTag(`reading-progress-${scope}-${ref}`);
+    revalidateTag(`reading-progress-${scope}-${ref}`, 'hours');
     return { success: true };
   } catch (error) {
     console.error('Save reading progress error:', error);
@@ -84,7 +84,7 @@ export async function addBookmark(
       });
 
     if (error) throw error;
-    revalidateTag('user-bookmarks');
+    revalidateTag('user-bookmarks', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Add bookmark error:', error);
@@ -119,7 +119,7 @@ export async function removeBookmark(id: string): Promise<{ success: boolean; er
       .eq('user_id', user.id);
 
     if (error) throw error;
-    revalidateTag('user-bookmarks');
+    revalidateTag('user-bookmarks', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Remove bookmark error:', error);
