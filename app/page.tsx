@@ -56,11 +56,12 @@ const prayerNames = [
   { key: 'Isha', label: 'العشاء' },
 ] as const;
 
+// Real, verifiable facts only — no invented figures.
 const stats = [
-  { label: 'سور قرآنية', value: '114' },
-  { label: 'أحاديث', value: '10K+' },
-  { label: 'قصص', value: '500+' },
-  { label: 'مستخدمين', value: '50K+' },
+  { label: 'سورة قرآنية', value: '114' },
+  { label: 'آية كريمة', value: '6236' },
+  { label: 'جزءًا', value: '30' },
+  { label: 'نبيًا ورسولًا في القرآن', value: '25' },
 ];
 
 // ─── Helper: determine current/next prayer ────────────────────────────────────
@@ -408,7 +409,7 @@ export default function HomePage() {
                 ابدأ رحلتك الروحانية اليوم
               </h2>
               <p className="text-brand-cream/55 max-w-xl mx-auto text-balance">
-                انضم إلى آلاف المستخدمين الذين يستخدمون ذِكر لتعزيز علاقتهم بالله
+                منصة ذِكر ترافقك في القرآن والأذكار ومواقيت الصلاة لتعزيز علاقتك بالله
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <Button href="/auth/register" className="px-8">

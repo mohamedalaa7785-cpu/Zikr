@@ -13,8 +13,11 @@ export const revalidate = 86400; // 24 hours
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
+// Private, per-user pages must not appear in the public sitemap.
+const PRIVATE_PATHS = new Set(['/profile', '/favorites']);
+
 function siteConfigRoutes() {
-  return appRoutes;
+  return appRoutes.filter((r) => !PRIVATE_PATHS.has(r.path));
 }
 
 function route(path = "", options: Omit<SitemapEntry, "url">): SitemapEntry {

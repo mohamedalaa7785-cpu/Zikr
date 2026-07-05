@@ -17,6 +17,8 @@ export default function PrayerTimesPage() {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time: string; minutesUntil: number } | null>(null);
   const [currentPrayer, setCurrentPrayer] = useState<{ name: string; time: string } | null>(null);
+  const [showCitySearch, setShowCitySearch] = useState(false);
+  const [cityQuery, setCityQuery] = useState('');
 
   // Request geolocation
   const requestLocation = useCallback(async () => {
@@ -119,19 +121,39 @@ export default function PrayerTimesPage() {
       </section>
 
       {/* Location Controls */}
-      <section className="flex gap-4 justify-center flex-wrap">
-        <Button onClick={requestLocation} disabled={loading}>
-          📍 استخدم موقعي الحالي
-        </Button>
-        <Button 
-          onClick={() => {
-            const city = prompt('أدخل اسم المدينة:');
-            if (city) fetchByCity(city);
-          }}
-          variant="secondary"
-        >
-          🔍 ابحث عن مدينة
-        </Button>
+      <section className="space-y-4">
+        <div className="flex gap-4 justify-center flex-wrap">
+          <Button onClick={requestLocation} disabled={loading}>
+            استخدم موقعي الحالي
+          </Button>
+          <Button onClick={() => setShowCitySearch((v) => !v)} variant="secondary">
+            ابحث عن مدينة
+          </Button>
+        </div>
+        {showCitySearch && (
+          <form
+            className="flex gap-2 justify-center max-w-md mx-auto"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (cityQuery.trim()) fetchByCity(cityQuery.trim());
+            }}
+          >
+            <input
+              type="text"
+              value={cityQuery}
+              onChange={(e) => setCityQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault();
+              }}
+              placeholder="أدخل اسم المدينة، مثال: القاهرة"
+              aria-label="اسم المدينة"
+              className="flex-1 rounded-lg border border-brand-gold/30 bg-black/30 px-4 py-2 text-brand-cream placeholder:text-brand-cream/40 focus:border-brand-gold focus:outline-none"
+            />
+            <Button type="submit" disabled={loading || !cityQuery.trim()}>
+              بحث
+            </Button>
+          </form>
+        )}
       </section>
 
       {/* Error Message */}
