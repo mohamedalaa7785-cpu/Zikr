@@ -85,19 +85,20 @@ function getActivePrayer(timings: Record<string, string>, now: Date) {
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [prayerTimes, setPrayerTimes] = useState<PrayerResponse | null>(null);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [activePrayer, setActivePrayer] = useState('');
   const [nextPrayer, setNextPrayer] = useState('');
 
-  // Clock tick
+  // Mount + clock tick — only starts client-side to prevent hydration mismatch
   useEffect(() => {
+    setCurrentTime(new Date());
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
   // Update active/next prayer whenever time or timings change
   useEffect(() => {
-    if (prayerTimes?.timings) {
+    if (prayerTimes?.timings && currentTime) {
       const { active, next } = getActivePrayer(prayerTimes.timings, currentTime);
       setActivePrayer(active);
       setNextPrayer(next);
@@ -121,18 +122,13 @@ export default function HomePage() {
     }
   }, []);
 
-  const timeStr = currentTime.toLocaleTimeString('ar-EG', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const timeStr = currentTime
+    ? currentTime.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : null;
 
-  const dateStr = currentTime.toLocaleDateString('ar-EG', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const dateStr = currentTime
+    ? currentTime.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
 
   return (
     <div className="min-h-screen bg-brand-emeraldDeep text-brand-cream">
@@ -178,10 +174,12 @@ export default function HomePage() {
                   ذِكرٌ
                 </h1>
                 <p className="text-brand-cream/60 text-base md:text-lg">منصتك الروحانية الشاملة</p>
-                <div className="flex flex-col items-center gap-1 mt-3">
-                  <span className="text-3xl font-mono font-bold text-brand-gold tabular-nums">{timeStr}</span>
-                  <span className="text-sm text-brand-cream/50">{dateStr}</span>
-                </div>
+                {timeStr && (
+                  <div className="flex flex-col items-center gap-1 mt-3">
+                    <span className="text-3xl font-mono font-bold text-brand-gold tabular-nums">{timeStr}</span>
+                    <span className="text-sm text-brand-cream/50">{dateStr}</span>
+                  </div>
+                )}
               </div>
 
               {/* Search */}
@@ -304,7 +302,7 @@ export default function HomePage() {
                     <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">اقرأ الآن ←</span>
                   </div>
                   <h3 className="text-lg font-bold text-brand-gold mb-1">القرآن الكريم</h3>
-                  <p className="text-sm text-brand-cream/50 leading-relaxed">اقرأ واستمع إلى القرآن الكريم بأصوات قراء مميزين — 114 سورة</p>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">اقرأ و��ستمع إلى القرآن الكريم بأصوات قراء مميزين — 114 سورة</p>
                 </Link>
 
                 {/* Hadith */}

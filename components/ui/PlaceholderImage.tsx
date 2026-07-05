@@ -18,15 +18,25 @@ interface PlaceholderImageProps {
   src?: string;
   alt: string;
   className?: string;
+  priority?: boolean;
 }
 
-export function PlaceholderImage({ type, src, alt, className }: PlaceholderImageProps) {
+export function PlaceholderImage({ type, src, alt, className, priority = false }: PlaceholderImageProps) {
   const [failed, setFailed] = useState(false);
   const finalSrc = useMemo(() => (failed || !src ? DEFAULT_PLACEHOLDER[type] : src), [failed, src, type]);
 
   return (
     <div className={cn('relative overflow-hidden rounded-xl bg-zinc-900', className)}>
-      <Image src={finalSrc} alt={alt} fill loading='lazy' sizes='100vw' className='object-cover' onError={() => setFailed(true)} />
+      <Image
+        src={finalSrc}
+        alt={alt}
+        fill
+        loading={priority ? 'eager' : 'lazy'}
+        priority={priority}
+        sizes='100vw'
+        className='object-cover'
+        onError={() => setFailed(true)}
+      />
     </div>
   );
 }

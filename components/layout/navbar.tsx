@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/ui/Logo';
 import { logoutAction } from '@/app/auth/actions';
 import { createClient } from '@/lib/supabase/server';
 
@@ -47,9 +46,9 @@ export async function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-brand-gold/15 bg-brand-emeraldDeep/90 backdrop-blur-md">
       <Container className="flex min-h-16 flex-wrap items-center justify-between gap-3 py-2">
-        <Link href="/" className="flex items-center gap-3">
-          <Logo variant="gold" width={108} height={40} />
-          <span className="sr-only">ZIKR | ذِكرٌ</span>
+        <Link href="/" className="flex items-center gap-2 group" aria-label="ZIKR - الرئيسية">
+          <span className="text-2xl font-bold text-brand-gold tracking-tight group-hover:opacity-80 transition-opacity">ذِكرٌ</span>
+          <span className="hidden sm:block text-xs text-brand-gold/40 font-mono tracking-widest pt-1">ZIKR</span>
         </Link>
 
         <nav className="hidden md:flex flex-wrap justify-end gap-x-4 gap-y-2">
