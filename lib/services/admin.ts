@@ -35,3 +35,18 @@ export async function requireAdmin() {
   if (profile.role !== 'admin') redirect('/profile?error=admin_required');
   return profile;
 }
+
+/**
+ * API-route-safe admin guard. Unlike `requireAdmin` (which uses `redirect()`
+ * and is only valid in Server Components / pages), this returns a result
+ * object so API routes can respond with proper 401/403 JSON.
+ */
+export async function requireAdminApi(): Promise<
+  | { ok: true; profile: AdminProfile }
+  | { ok: false; status: 401 | 403; error: string }
+> {
+  const profile = await getCurrentProfile();
+  if (!profile) return { ok: false, status: 401, error: 'Unauthorized' };
+  if (profile.role !== 'admin') return { ok: false, status: 403, error: 'Forbidden' };
+  return { ok: true, profile };
+}

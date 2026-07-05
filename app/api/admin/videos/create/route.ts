@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/services/admin';
+import { requireAdminApi } from '@/lib/services/admin';
 import { createVideoGenerationRequest } from '@/lib/services/video-automation';
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const auth = await requireAdminApi();
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
     
     const body = await request.json();
     const { title, description, category, content } = body;

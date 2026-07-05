@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/services/admin';
+import { requireAdminApi } from '@/lib/services/admin';
 import { getPendingVideoRequests } from '@/lib/services/video-automation';
 
 export async function GET() {
   try {
-    await requireAdmin();
+    const auth = await requireAdminApi();
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
     const requests = await getPendingVideoRequests();
     return NextResponse.json(requests);
   } catch (error) {

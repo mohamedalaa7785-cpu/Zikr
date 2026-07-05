@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export const revalidate = 60; // Cache for 60 seconds
+// Uses request.url and cookies — can never be statically rendered.
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
