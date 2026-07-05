@@ -122,8 +122,9 @@ export default function HomePage() {
     }
   }, []);
 
+  // Use Latin numerals for the clock so it renders correctly in monospace font
   const timeStr = currentTime
-    ? currentTime.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    ? currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
     : null;
 
   const dateStr = currentTime
@@ -234,7 +235,7 @@ export default function HomePage() {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-brand-gold">مواقيت الصلاة</h2>
                 <Link href="/prayer-times" className="text-xs text-brand-gold/60 hover:text-brand-gold transition-colors">
-                  عرض التفاصيل ←
+                  عر�� التفاصيل ←
                 </Link>
               </div>
 
@@ -302,7 +303,7 @@ export default function HomePage() {
                     <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">اقرأ الآن ←</span>
                   </div>
                   <h3 className="text-lg font-bold text-brand-gold mb-1">القرآن الكريم</h3>
-                  <p className="text-sm text-brand-cream/50 leading-relaxed">اقرأ و��ستمع إلى القرآن الكريم بأصوات قراء مميزين — 114 سورة</p>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">اقرأ واستمع إلى القرآن الكريم بأصوات قراء مميزين — 114 سورة</p>
                 </Link>
 
                 {/* Hadith */}
