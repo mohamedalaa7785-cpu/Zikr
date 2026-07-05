@@ -5,7 +5,7 @@ export const revalidate = 3600; // Cache for 1 hour
 
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('tawasheeh_categories')
