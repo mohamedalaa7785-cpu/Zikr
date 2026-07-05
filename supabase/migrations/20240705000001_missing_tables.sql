@@ -62,7 +62,7 @@ CREATE POLICY "search_history: users own their rows"
 CREATE TABLE IF NOT EXISTS public.story_reads (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  story_id    UUID NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
+  story_id    UUID NOT NULL,
   read_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (user_id, story_id)
 );
@@ -80,7 +80,7 @@ CREATE POLICY "story_reads: users own their rows"
 CREATE TABLE IF NOT EXISTS public.story_ratings (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  story_id    UUID NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
+  story_id    UUID NOT NULL,
   rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment     TEXT,
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -100,7 +100,7 @@ CREATE POLICY "story_ratings: users own their rows"
 CREATE TABLE IF NOT EXISTS public.story_favorites (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  story_id    UUID NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
+  story_id    UUID NOT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (user_id, story_id)
 );
@@ -242,3 +242,33 @@ CREATE POLICY "app_settings: users own their rows"
   FOR ALL
   USING  (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 14. Foreign keys to public.stories (added conditionally so this migration is
+--     order-independent: the FK is only created once the stories table exists).
+-- ─────────────────────────────────────────────────────────────────────────────
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'stories'
+  ) THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'story_reads_story_id_fkey') THEN
+      ALTER TABLE public.story_reads
+        ADD CONSTRAINT story_reads_story_id_fkey
+        FOREIGN KEY (story_id) REFERENCES public.stories(id) ON DELETE CASCADE;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'story_ratings_story_id_fkey') THEN
+      ALTER TABLE public.story_ratings
+        ADD CONSTRAINT story_ratings_story_id_fkey
+        FOREIGN KEY (story_id) REFERENCES public.stories(id) ON DELETE CASCADE;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'story_favorites_story_id_fkey') THEN
+      ALTER TABLE public.story_favorites
+        ADD CONSTRAINT story_favorites_story_id_fkey
+        FOREIGN KEY (story_id) REFERENCES public.stories(id) ON DELETE CASCADE;
+    END IF;
+  END IF;
+END $$;
