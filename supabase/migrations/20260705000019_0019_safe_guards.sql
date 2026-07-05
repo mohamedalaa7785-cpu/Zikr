@@ -57,10 +57,31 @@ ALTER TABLE IF EXISTS public.stories ADD COLUMN IF NOT EXISTS summary TEXT;
 ALTER TABLE IF EXISTS public.stories ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
 ALTER TABLE IF EXISTS public.scholars ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
 
--- Add indexes if missing
-CREATE INDEX IF NOT EXISTS idx_quran_audio_surah ON public.quran_audio(surah_id);
-CREATE INDEX IF NOT EXISTS idx_quran_audio_reciter ON public.quran_audio(reciter_id);
-CREATE INDEX IF NOT EXISTS quran_ayahs_search_idx ON public.quran_ayahs USING gin (searchable);
+-- Add indexes if missing (guarded: only if the target table/column exists)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='quran_audio') THEN
+    CREATE INDEX IF NOT EXISTS idx_quran_audio_surah ON public.quran_audio(surah_id);
+    CREATE INDEX IF NOT EXISTS idx_quran_audio_reciter ON public.quran_audio(reciter_id);
+  END IF;
+END$$;
+
+-- Ensure the generated full-text column exists before indexing it. On databases
+-- where quran_ayahs pre-existed without it, the bare CREATE INDEX previously
+-- failed with: column "searchable" does not exist (SQLSTATE 42703).
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='quran_ayahs') THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='quran_ayahs' AND column_name='searchable'
+    ) THEN
+      ALTER TABLE public.quran_ayahs
+        ADD COLUMN searchable tsvector GENERATED ALWAYS AS (to_tsvector('simple', coalesce(text_uthmani,'') || ' ' || coalesce(text_simple,''))) STORED;
+    END IF;
+    CREATE INDEX IF NOT EXISTS quran_ayahs_search_idx ON public.quran_ayahs USING gin (searchable);
+  END IF;
+END$$;
 
 -- Create unique indexes conditionally using plpgsql (some unique constraints were added in multiple migrations)
 DO $$

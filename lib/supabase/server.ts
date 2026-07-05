@@ -1,18 +1,27 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? SUPABASE_ANON_KEY;
+// Lazy accessors — read at call-time, not at module-evaluation time.
+// This prevents build-time / CI errors when env vars are absent.
+function getEnv() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? anonKey;
+  if (!url || !anonKey) {
+    throw new Error('Supabase environment variables are not configured.');
+  }
+  return { url, anonKey, serviceKey: serviceKey! };
+}
 
 /**
  * Do NOT put this client in a global variable.
  * Always create a new client within each function call.
  */
 export async function createClient() {
+  const { url, anonKey } = getEnv();
   const cookieStore = await cookies();
 
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createServerClient(url, anonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -46,23 +55,22 @@ export async function getSupabaseUser() {
 async function restRequest<T>(
   path: string,
   init?: RequestInit,
-  apiKey: string = SUPABASE_ANON_KEY
+  apiKey?: string
 ): Promise<T> {
-  if (!SUPABASE_URL || !apiKey) {
-    throw new Error('Supabase environment variables are not configured.');
-  }
+  const { url, anonKey } = getEnv();
+  const key = apiKey ?? anonKey;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   let res: Response;
   try {
-    res = await fetch(`${SUPABASE_URL}${path}`, {
+    res = await fetch(`${url}${path}`, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
-        apikey: apiKey,
-        Authorization: `Bearer ${apiKey}`,
+        apikey: key,
+        Authorization: `Bearer ${key}`,
         ...(init?.headers || {}),
       },
       cache: init?.cache ?? 'no-store',
@@ -84,11 +92,11 @@ async function restRequest<T>(
 
 /** Authenticated REST request using the anon key. */
 export const supabaseServerAnonRequest = <T>(path: string, init?: RequestInit) =>
-  restRequest<T>(path, init, SUPABASE_ANON_KEY);
+  restRequest<T>(path, init);
 
 /** Authenticated REST request using the service-role key (bypasses RLS). */
 export const supabaseServerAdminRequest = <T>(path: string, init?: RequestInit) =>
-  restRequest<T>(path, init, SUPABASE_SERVICE_KEY);
+  restRequest<T>(path, init, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 /** Legacy: read the access token from the cookie store. */
 export async function getServerSessionToken() {
@@ -99,7 +107,7 @@ export async function getServerSessionToken() {
 /** Legacy: check Supabase connectivity. */
 export async function assertSupabaseConnection() {
   try {
-    await restRequest('/rest/v1/', {}, SUPABASE_ANON_KEY);
+    await restRequest('/rest/v1/');
     return true;
   } catch {
     return false;

@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS public.companion_stories (
   story_en TEXT,
   story_type TEXT, -- conversion, jihad, leadership, etc
   order_index INTEGER,
-  references TEXT,
+  "references" TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   FOREIGN KEY (companion_id) REFERENCES public.companions(id) ON DELETE CASCADE
@@ -305,6 +305,16 @@ CREATE TABLE IF NOT EXISTS public.video_categories (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+-- Guard: several tables here were already created by 0010/0013 WITHOUT the
+-- is_active column (their CREATE TABLE IF NOT EXISTS above is then a no-op),
+-- so the column must be backfilled before policies reference it.
+ALTER TABLE IF EXISTS public.dua_categories ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE IF EXISTS public.article_categories ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE IF EXISTS public.tawasheeh_categories ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE IF EXISTS public.video_categories ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE IF EXISTS public.kids_content ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE IF EXISTS public.tawasheeh ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+
 -- Enable RLS on all new tables
 ALTER TABLE public.quran_audio ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.quran_reciters ENABLE ROW LEVEL SECURITY;
@@ -331,59 +341,89 @@ ALTER TABLE public.video_categories ENABLE ROW LEVEL SECURITY;
 -- RLS Policies (Public read, admin write where needed)
 
 -- quran_audio and reciters: public read only
+DROP POLICY IF EXISTS "allow_public_read" ON public.quran_audio;
 CREATE POLICY "allow_public_read" ON public.quran_audio FOR SELECT USING (true);
+DROP POLICY IF EXISTS "allow_public_read" ON public.quran_reciters;
 CREATE POLICY "allow_public_read" ON public.quran_reciters FOR SELECT USING (true);
 
 -- Categories: public read only
+DROP POLICY IF EXISTS "allow_public_read" ON public.dua_categories;
 CREATE POLICY "allow_public_read" ON public.dua_categories FOR SELECT USING (is_active);
+DROP POLICY IF EXISTS "allow_public_read" ON public.article_categories;
 CREATE POLICY "allow_public_read" ON public.article_categories FOR SELECT USING (is_active);
+DROP POLICY IF EXISTS "allow_public_read" ON public.tawasheeh_categories;
 CREATE POLICY "allow_public_read" ON public.tawasheeh_categories FOR SELECT USING (is_active);
+DROP POLICY IF EXISTS "allow_public_read" ON public.video_categories;
 CREATE POLICY "allow_public_read" ON public.video_categories FOR SELECT USING (is_active);
 
 -- Sections and stories: public read only
+DROP POLICY IF EXISTS "allow_public_read" ON public.prophet_sections;
 CREATE POLICY "allow_public_read" ON public.prophet_sections FOR SELECT USING (true);
+DROP POLICY IF EXISTS "allow_public_read" ON public.companion_stories;
 CREATE POLICY "allow_public_read" ON public.companion_stories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "allow_public_read" ON public.battle_events;
 CREATE POLICY "allow_public_read" ON public.battle_events FOR SELECT USING (true);
+DROP POLICY IF EXISTS "allow_public_read" ON public.conquest_events;
 CREATE POLICY "allow_public_read" ON public.conquest_events FOR SELECT USING (true);
+DROP POLICY IF EXISTS "allow_public_read" ON public.kids_content;
 CREATE POLICY "allow_public_read" ON public.kids_content FOR SELECT USING (is_active);
 
 -- Tawasheeh: public read
+DROP POLICY IF EXISTS "allow_public_read" ON public.tawasheeh;
 CREATE POLICY "allow_public_read" ON public.tawasheeh FOR SELECT USING (is_active);
 
 -- User-specific policies
+DROP POLICY IF EXISTS "allow_user_read_own_locations" ON public.prayer_locations;
 CREATE POLICY "allow_user_read_own_locations" ON public.prayer_locations FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_insert_locations" ON public.prayer_locations;
 CREATE POLICY "allow_user_insert_locations" ON public.prayer_locations FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_update_locations" ON public.prayer_locations;
 CREATE POLICY "allow_user_update_locations" ON public.prayer_locations FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_delete_locations" ON public.prayer_locations;
 CREATE POLICY "allow_user_delete_locations" ON public.prayer_locations FOR DELETE USING (auth.uid() = user_id);
 
+-- NOTE: distinct policy names per command (a single name cannot be reused on
+-- the same table for multiple commands).
+DROP POLICY IF EXISTS "allow_user_manage_preferences" ON public.prayer_preferences;
 CREATE POLICY "allow_user_manage_preferences" ON public.prayer_preferences FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "allow_user_manage_preferences" ON public.prayer_preferences FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "allow_user_manage_preferences" ON public.prayer_preferences FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_insert_preferences" ON public.prayer_preferences;
+CREATE POLICY "allow_user_insert_preferences" ON public.prayer_preferences FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_update_preferences" ON public.prayer_preferences;
+CREATE POLICY "allow_user_update_preferences" ON public.prayer_preferences FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "allow_user_read_own_playlists" ON public.tawasheeh_playlists;
 CREATE POLICY "allow_user_read_own_playlists" ON public.tawasheeh_playlists FOR SELECT USING (auth.uid() = user_id OR is_public);
+DROP POLICY IF EXISTS "allow_user_insert_playlists" ON public.tawasheeh_playlists;
 CREATE POLICY "allow_user_insert_playlists" ON public.tawasheeh_playlists FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_update_playlists" ON public.tawasheeh_playlists;
 CREATE POLICY "allow_user_update_playlists" ON public.tawasheeh_playlists FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "allow_user_manage_favorites" ON public.tawasheeh_favorites;
 CREATE POLICY "allow_user_manage_favorites" ON public.tawasheeh_favorites FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "allow_user_manage_favorites" ON public.tawasheeh_favorites FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "allow_user_manage_favorites" ON public.tawasheeh_favorites FOR DELETE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_insert_favorites" ON public.tawasheeh_favorites;
+CREATE POLICY "allow_user_insert_favorites" ON public.tawasheeh_favorites FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_delete_favorites" ON public.tawasheeh_favorites;
+CREATE POLICY "allow_user_delete_favorites" ON public.tawasheeh_favorites FOR DELETE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "allow_user_view_own_behavior" ON public.user_behavior;
 CREATE POLICY "allow_user_view_own_behavior" ON public.user_behavior FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "allow_user_insert_behavior" ON public.user_behavior;
 CREATE POLICY "allow_user_insert_behavior" ON public.user_behavior FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "allow_user_read_own_subscriptions" ON public.user_subscriptions;
 CREATE POLICY "allow_user_read_own_subscriptions" ON public.user_subscriptions FOR SELECT USING (auth.uid() = user_id);
 
 -- Create indexes for better performance
-CREATE INDEX idx_quran_audio_surah ON public.quran_audio(surah_id);
-CREATE INDEX idx_quran_audio_reciter ON public.quran_audio(reciter_id);
-CREATE INDEX idx_prophet_sections_prophet ON public.prophet_sections(prophet_id);
-CREATE INDEX idx_companion_stories_companion ON public.companion_stories(companion_id);
-CREATE INDEX idx_prayer_locations_user ON public.prayer_locations(user_id);
-CREATE INDEX idx_prayer_preferences_user ON public.prayer_preferences(user_id);
-CREATE INDEX idx_tawasheeh_category ON public.tawasheeh(category_id);
-CREATE INDEX idx_tawasheeh_playlists_user ON public.tawasheeh_playlists(user_id);
-CREATE INDEX idx_tawasheeh_favorites_user ON public.tawasheeh_favorites(user_id);
-CREATE INDEX idx_user_behavior_user ON public.user_behavior(user_id);
-CREATE INDEX idx_user_behavior_created ON public.user_behavior(created_at);
-CREATE INDEX idx_recent_recitations_user ON public.recent_recitations(user_id);
-CREATE INDEX idx_user_subscriptions_user ON public.user_subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_quran_audio_surah ON public.quran_audio(surah_id);
+CREATE INDEX IF NOT EXISTS idx_quran_audio_reciter ON public.quran_audio(reciter_id);
+CREATE INDEX IF NOT EXISTS idx_prophet_sections_prophet ON public.prophet_sections(prophet_id);
+CREATE INDEX IF NOT EXISTS idx_companion_stories_companion ON public.companion_stories(companion_id);
+CREATE INDEX IF NOT EXISTS idx_prayer_locations_user ON public.prayer_locations(user_id);
+CREATE INDEX IF NOT EXISTS idx_prayer_preferences_user ON public.prayer_preferences(user_id);
+CREATE INDEX IF NOT EXISTS idx_tawasheeh_category ON public.tawasheeh(category_id);
+CREATE INDEX IF NOT EXISTS idx_tawasheeh_playlists_user ON public.tawasheeh_playlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_tawasheeh_favorites_user ON public.tawasheeh_favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_behavior_user ON public.user_behavior(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_behavior_created ON public.user_behavior(created_at);
+CREATE INDEX IF NOT EXISTS idx_recent_recitations_user ON public.recent_recitations(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user ON public.user_subscriptions(user_id);

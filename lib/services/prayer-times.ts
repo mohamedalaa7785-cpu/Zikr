@@ -132,24 +132,27 @@ export async function getPrayerTimesByCity(
   date?: string,
   method: number = 4
 ): Promise<PrayerTimesResponse | null> {
+  const cleanCity = city.trim();
+  if (!cleanCity) return null;
+
   try {
-    const params = new URLSearchParams({
-      city,
-      method: method.toString(),
-    });
+    let url: string;
+    const params = new URLSearchParams({ method: method.toString() });
+    if (date) params.append('date', date);
 
-    if (country) {
-      params.append('country', country);
+    if (country?.trim()) {
+      // timingsByCity requires BOTH city and country.
+      params.append('city', cleanCity);
+      params.append('country', country.trim());
+      url = `${ALADHAN_API_BASE}/timingsByCity?${params.toString()}`;
+    } else {
+      // Without a country, use timingsByAddress which geocodes free-form
+      // input and supports Arabic city names (e.g. "القاهرة").
+      params.append('address', cleanCity);
+      url = `${ALADHAN_API_BASE}/timingsByAddress?${params.toString()}`;
     }
 
-    if (date) {
-      params.append('date', date);
-    }
-
-    const { data } = await safeApiFetch<PrayerTimesResponse>(
-      `${ALADHAN_API_BASE}/timingsByCity?${params.toString()}`
-    );
-
+    const { data } = await safeApiFetch<PrayerTimesResponse>(url);
     return data || null;
   } catch (error) {
     console.error('[prayer-times] Failed to fetch prayer times by city:', error);

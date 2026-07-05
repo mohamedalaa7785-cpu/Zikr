@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -30,59 +31,50 @@ interface Dua {
 export default function DuaPage() {
   const [categories, setCategories] = useState<DuaCategory[]>([]);
   const [duas, setDuas] = useState<Dua[]>([]);
-  // Default to 'all' so duas load even when no categories are configured.
   const [selectedCategory, setSelectedCategory] = useState<string | null>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const supabase = createBrowserSupabaseClient();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        setLoading(true);
-        
-        // Fetch categories
-        const categoriesData = await supabase.request<DuaCategory[]>(
-          '/rest/v1/dua_categories?select=*&published=eq.true'
-        );
-
-        if (categoriesData) {
-          setCategories(categoriesData);
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+        const { data } = await supabase
+          .from('dua_categories')
+          .select('*')
+          .eq('published', true);
+        setCategories(data ?? []);
+      } catch {
         setCategories([]);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchData();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
     const fetchDuas = async () => {
       if (!selectedCategory) return;
-
       try {
-        let query = '/rest/v1/duas?select=*&published=eq.true';
+        let query = supabase
+          .from('duas')
+          .select('*')
+          .eq('published', true);
 
         if (selectedCategory !== 'all') {
-          query += `&category_id=eq.${selectedCategory}`;
+          query = query.eq('category_id', selectedCategory);
         }
-
         if (searchQuery) {
-          query += `&title_ar=ilike.%${searchQuery}%`;
+          query = query.ilike('title_ar', `%${searchQuery}%`);
         }
 
-        const data = await supabase.request<Dua[]>(query);
-        setDuas(data || []);
-      } catch (error) {
-        console.error('Error fetching duas:', error);
+        const { data } = await query;
+        setDuas(data ?? []);
+      } catch {
         setDuas([]);
       }
     };
-
     fetchDuas();
   }, [selectedCategory, searchQuery]);
 
@@ -95,7 +87,6 @@ export default function DuaPage() {
         </p>
       </div>
 
-      {/* Search Bar */}
       <div className="flex justify-center">
         <Input
           type="text"
@@ -106,7 +97,6 @@ export default function DuaPage() {
         />
       </div>
 
-      {/* Categories */}
       {!loading && categories.length > 0 && (
         <div className="flex flex-wrap justify-center gap-3">
           <Button
@@ -128,7 +118,6 @@ export default function DuaPage() {
         </div>
       )}
 
-      {/* Duas Grid */}
       {loading ? (
         <div className="text-center py-12">
           <p className="text-brand-cream/70">جاري التحميل...</p>
@@ -152,9 +141,7 @@ export default function DuaPage() {
                   </p>
                 )}
                 {dua.source_ar && (
-                  <p className="text-xs text-brand-cream/60">
-                    المصدر: {dua.source_ar}
-                  </p>
+                  <p className="text-xs text-brand-cream/60">المصدر: {dua.source_ar}</p>
                 )}
               </Card>
             </Link>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/services/admin';
+import { requireAdminApi } from '@/lib/services/admin';
 import { supabaseServerAdminRequest } from '@/lib/supabase/server';
 import type { VideoGenerationRequest } from '@/lib/types/video';
 
@@ -8,7 +8,10 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAdmin();
+    const auth = await requireAdminApi();
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
     const { id } = await context.params;
     
     const result = await supabaseServerAdminRequest<VideoGenerationRequest>(
@@ -38,7 +41,10 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAdmin();
+    const auth = await requireAdminApi();
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
     const { id } = await context.params;
     const body = await request.json();
     

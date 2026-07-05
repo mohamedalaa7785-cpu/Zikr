@@ -99,9 +99,12 @@ create policy "content_admin_write_hadiths" on hadiths for all
 using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'))
 with check (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'));
 
--- Create indexes for full-text search ranking
-create index if not exists quran_ayahs_search_text_idx on quran_ayahs using gin (searchable);
-create index if not exists hadiths_search_text_idx on hadiths using gin (searchable);
+-- Full-text search GIN indexes already exist as quran_ayahs_search_idx and
+-- hadiths_search_idx (created in 0005_phase3_content). The *_search_text_idx
+-- variants were exact duplicates on the same column and have been removed.
+-- Drop them if they were ever created on an existing environment.
+drop index if exists quran_ayahs_search_text_idx;
+drop index if exists hadiths_search_text_idx;
 
 -- Trigger to auto-update updated_at columns
 create or replace function public.update_updated_at_column()

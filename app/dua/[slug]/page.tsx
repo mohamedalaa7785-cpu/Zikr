@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -31,25 +32,24 @@ export default function DuaDetailPage() {
 
   useEffect(() => {
     const fetchDua = async () => {
+      if (!slug) return;
       try {
         setLoading(true);
-        const data = await supabase.request<Dua[]>(
-          `/rest/v1/duas?select=*&slug=eq.${slug}&published=eq.true&limit=1`
-        );
-
-        if (data && data.length > 0) {
-          setDua(data[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching dua:', error);
+        const { data } = await supabase
+          .from('duas')
+          .select('*')
+          .eq('slug', slug)
+          .eq('published', true)
+          .limit(1)
+          .single();
+        setDua(data ?? null);
+      } catch {
+        setDua(null);
       } finally {
         setLoading(false);
       }
     };
-
-    if (slug) {
-      fetchDua();
-    }
+    fetchDua();
   }, [slug]);
 
   const copyToClipboard = () => {
@@ -80,9 +80,7 @@ export default function DuaDetailPage() {
     <Container className="py-12 space-y-8 max-w-2xl">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-brand-gold">{dua.title_ar}</h1>
-        {dua.title_en && (
-          <p className="text-brand-cream/70">{dua.title_en}</p>
-        )}
+        {dua.title_en && <p className="text-brand-cream/70">{dua.title_en}</p>}
       </div>
 
       <Card className="p-8 space-y-6 bg-black/30 border-brand-gold/30">
@@ -91,23 +89,16 @@ export default function DuaDetailPage() {
             {dua.text_ar}
           </p>
           {dua.text_en && (
-            <p className="text-lg text-brand-cream/80 leading-relaxed text-center">
-              {dua.text_en}
-            </p>
+            <p className="text-lg text-brand-cream/80 leading-relaxed text-center">{dua.text_en}</p>
           )}
         </div>
-
         <div className="flex justify-center">
-          <Button
-            onClick={copyToClipboard}
-            variant={copied ? 'primary' : 'outline'}
-          >
-            {copied ? '✓ تم النسخ' : 'نسخ الدعاء'}
+          <Button onClick={copyToClipboard} variant={copied ? 'primary' : 'outline'}>
+            {copied ? 'تم النسخ' : 'نسخ الدعاء'}
           </Button>
         </div>
       </Card>
 
-      {/* Details */}
       <div className="space-y-4">
         {dua.occasion_ar && (
           <Card className="p-4 space-y-2 border-brand-gold/20">
@@ -115,14 +106,12 @@ export default function DuaDetailPage() {
             <p className="text-brand-cream/90">{dua.occasion_ar}</p>
           </Card>
         )}
-
         {dua.source_ar && (
           <Card className="p-4 space-y-2 border-brand-gold/20">
             <h3 className="text-lg font-bold text-brand-gold">المصدر</h3>
             <p className="text-brand-cream/90">{dua.source_ar}</p>
           </Card>
         )}
-
         {dua.benefits_ar && (
           <Card className="p-4 space-y-2 border-brand-gold/20">
             <h3 className="text-lg font-bold text-brand-gold">الفوائد</h3>

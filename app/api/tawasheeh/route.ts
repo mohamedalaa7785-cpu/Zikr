@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export const revalidate = 60; // Cache for 60 seconds
+// Uses request.url and cookies — can never be statically rendered.
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const featured = searchParams.get('featured') === 'true';
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     let query = supabase
       .from('tawasheeh')

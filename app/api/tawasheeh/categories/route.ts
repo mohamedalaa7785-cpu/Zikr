@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export const revalidate = 3600; // Cache for 1 hour
+// Uses cookies via the server Supabase client — can never be statically rendered.
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -17,12 +18,12 @@ interface KidsContent {
 }
 
 const typeLabels: Record<string, string> = {
-  story: '📖 قصة',
-  prayer: '🤲 دعاء',
-  wudu: '💧 الوضوء',
-  quiz: '❓ اختبار',
-  game: '🎮 لعبة',
-  video: '🎬 فيديو',
+  story: 'قصة',
+  prayer: 'دعاء',
+  wudu: 'الوضوء',
+  quiz: 'اختبار',
+  game: 'لعبة',
+  video: 'فيديو',
 };
 
 const ageGroupLabels: Record<string, string> = {
@@ -43,47 +44,39 @@ export default function KidsPage() {
     const fetchContent = async () => {
       try {
         setLoading(true);
-        
-        let query = '/rest/v1/kids_content?select=*&published=eq.true&order=created_at.desc';
+        let query = supabase
+          .from('kids_content')
+          .select('*')
+          .eq('published', true)
+          .order('created_at', { ascending: false });
 
-        if (selectedAgeGroup) {
-          query += `&age_group=eq.${selectedAgeGroup}`;
-        }
+        if (selectedAgeGroup) query = query.eq('age_group', selectedAgeGroup);
+        if (selectedType) query = query.eq('type', selectedType);
 
-        if (selectedType) {
-          query += `&type=eq.${selectedType}`;
-        }
-
-        const data = await supabase.request<KidsContent[]>(query);
-        setContent(data || []);
-      } catch (error) {
-        console.error('Error fetching kids content:', error);
+        const { data } = await query;
+        setContent(data ?? []);
+      } catch {
         setContent([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchContent();
   }, [selectedAgeGroup, selectedType]);
 
   return (
     <Container className="py-12 space-y-8">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold">🌟 قسم الأطفال</h1>
+        <h1 className="text-4xl font-bold text-brand-gold">قسم الأطفال</h1>
         <p className="text-brand-cream/70 max-w-2xl mx-auto">
           محتوى تعليمي وترفيهي آمن ومناسب للأطفال
         </p>
       </div>
 
-      {/* Age Group Filter */}
       <div className="space-y-3">
         <h3 className="text-center text-brand-gold font-bold">اختر فئة العمر:</h3>
         <div className="flex flex-wrap justify-center gap-3">
-          <Button
-            variant={selectedAgeGroup === null ? 'primary' : 'outline'}
-            onClick={() => setSelectedAgeGroup(null)}
-          >
+          <Button variant={!selectedAgeGroup ? 'primary' : 'outline'} onClick={() => setSelectedAgeGroup(null)}>
             الكل
           </Button>
           {Object.entries(ageGroupLabels).map(([key, label]) => (
@@ -98,14 +91,10 @@ export default function KidsPage() {
         </div>
       </div>
 
-      {/* Type Filter */}
       <div className="space-y-3">
         <h3 className="text-center text-brand-gold font-bold">نوع المحتوى:</h3>
         <div className="flex flex-wrap justify-center gap-3">
-          <Button
-            variant={selectedType === null ? 'primary' : 'outline'}
-            onClick={() => setSelectedType(null)}
-          >
+          <Button variant={!selectedType ? 'primary' : 'outline'} onClick={() => setSelectedType(null)}>
             الكل
           </Button>
           {Object.entries(typeLabels).map(([key, label]) => (
@@ -120,7 +109,6 @@ export default function KidsPage() {
         </div>
       </div>
 
-      {/* Content Grid */}
       {loading ? (
         <div className="text-center py-12">
           <p className="text-brand-cream/70">جاري التحميل...</p>
@@ -136,11 +124,7 @@ export default function KidsPage() {
               <Card className="h-full overflow-hidden hover:border-brand-gold/50 transition-colors cursor-pointer flex flex-col">
                 {item.featured_image_url && (
                   <div className="w-full h-40 bg-brand-gold/10 overflow-hidden">
-                    <img
-                      src={item.featured_image_url}
-                      alt={item.title_ar}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform"
-                    />
+                    <img src={item.featured_image_url} alt={item.title_ar} className="w-full h-full object-cover hover:scale-105 transition-transform" />
                   </div>
                 )}
                 <div className="p-4 space-y-3 flex-1 flex flex-col">
@@ -160,9 +144,8 @@ export default function KidsPage() {
         </div>
       )}
 
-      {/* Safety Message */}
       <Card className="p-6 text-center space-y-3 bg-brand-gold/10">
-        <h3 className="text-xl font-bold text-brand-gold">🛡️ محتوى آمن</h3>
+        <h3 className="text-xl font-bold text-brand-gold">محتوى آمن</h3>
         <p className="text-brand-cream/90">
           جميع محتويات قسم الأطفال تم اختيارها بعناية لتكون آمنة وتعليمية ومناسبة لأعمارهم
         </p>

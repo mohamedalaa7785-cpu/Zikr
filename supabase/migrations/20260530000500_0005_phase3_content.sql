@@ -19,7 +19,35 @@ create table if not exists quran_ayahs (
   searchable tsvector generated always as (to_tsvector('simple', coalesce(text_uthmani,'') || ' ' || coalesce(text_simple,''))) stored,
   unique(surah_id, ayah_number)
 );
-create index if not exists quran_ayahs_search_idx on quran_ayahs using gin (searchable);
+-- Guard: if quran_ayahs pre-existed without text_uthmani/text_simple (created
+-- by an older Drizzle schema), the generated column cannot reference them yet.
+-- Only add the column+index once both source columns are present.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'quran_ayahs' AND column_name = 'text_uthmani'
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'quran_ayahs' AND column_name = 'text_simple'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'quran_ayahs' AND column_name = 'searchable'
+    ) THEN
+      ALTER TABLE public.quran_ayahs
+        ADD COLUMN searchable tsvector GENERATED ALWAYS AS (
+          to_tsvector('simple', coalesce(text_uthmani,'') || ' ' || coalesce(text_simple,''))
+        ) STORED;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+      WHERE c.relname = 'quran_ayahs_search_idx' AND n.nspname = 'public'
+    ) THEN
+      CREATE INDEX quran_ayahs_search_idx ON public.quran_ayahs USING gin (searchable);
+    END IF;
+  END IF;
+END $$;
 
 create table if not exists quran_tafsir (
   id uuid primary key default gen_random_uuid(),
@@ -56,7 +84,25 @@ create table if not exists hadiths (
   searchable tsvector generated always as (to_tsvector('simple', coalesce(text_ar,''))) stored,
   unique(book_id, hadith_number)
 );
-create index if not exists hadiths_search_idx on hadiths using gin (searchable);
+-- Guard: ensure generated column and index exist on pre-existing hadiths tables.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'hadiths' AND column_name = 'searchable'
+  ) THEN
+    ALTER TABLE public.hadiths
+      ADD COLUMN searchable tsvector GENERATED ALWAYS AS (
+        to_tsvector('simple', coalesce(text_ar,''))
+      ) STORED;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE c.relname = 'hadiths_search_idx' AND n.nspname = 'public'
+  ) THEN
+    CREATE INDEX hadiths_search_idx ON public.hadiths USING gin (searchable);
+  END IF;
+END $$;
 create table if not exists hadith_explanations (
   id uuid primary key default gen_random_uuid(),
   hadith_id uuid not null references hadiths(id) on delete cascade,
