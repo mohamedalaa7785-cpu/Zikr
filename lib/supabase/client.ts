@@ -1,82 +1,11 @@
-// NOTE: In client components, NEXT_PUBLIC_* vars must be referenced as direct
-// `process.env.NEXT_PUBLIC_X` literals so Next.js can statically inline them into
-// the browser bundle. Reading them indirectly (e.g. via a {...process.env} spread)
-// leaves them undefined in the browser and silently disables the client.
-export function createBrowserSupabaseClient() {
-  try {
-    const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { createBrowserClient } from '@supabase/ssr';
 
-    if (!NEXT_PUBLIC_SUPABASE_URL || !NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      throw new Error(
-        "Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
-      );
-    }
-
-    const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
-      try {
-        const res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}${path}`, {
-          ...init,
-          headers: {
-            "Content-Type": "application/json",
-            apikey: NEXT_PUBLIC_SUPABASE_ANON_KEY,
-            ...(init?.headers || {}),
-          },
-        });
-        if (!res.ok) throw new Error(`Supabase request failed: ${res.status}`);
-        if (res.status === 204) return undefined as T;
-
-        const text = await res.text();
-        if (!text) return undefined as T;
-
-        return JSON.parse(text) as T;
-      } catch (error) {
-        console.error(
-          "[supabase:client] Request failed:",
-          error instanceof Error ? error.message : "unknown error"
-        );
-        throw error;
-      }
-    };
-
-    const healthcheck = () => request<Record<string, unknown>>("/rest/v1/");
-
-    const signInWithOAuth = async ({
-      provider,
-      options,
-    }: {
-      provider: "google";
-      options?: { redirectTo?: string };
-    }) => {
-      const redirectTo = options?.redirectTo;
-      const params = new URLSearchParams({ provider });
-      if (redirectTo) params.set("redirect_to", redirectTo);
-      window.location.href = `${NEXT_PUBLIC_SUPABASE_URL}/auth/v1/authorize?${params.toString()}`;
-      return { data: null, error: null };
-    };
-
-    return { request, healthcheck, auth: { signInWithOAuth } };
-  } catch {
-    // Return a stub client that throws errors on use. This keeps build-time prerendering quiet
-    // when deployment providers inject Supabase variables only at runtime.
-    return {
-      request: async () => {
-        throw new Error(
-          "Supabase client not initialized. Environment variables are missing."
-        );
-      },
-      healthcheck: async () => {
-        throw new Error(
-          "Supabase client not initialized. Environment variables are missing."
-        );
-      },
-      auth: {
-        signInWithOAuth: async () => {
-          throw new Error(
-            "Supabase client not initialized. Environment variables are missing."
-          );
-        },
-      },
-    };
-  }
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 }
+
+// Compatibility alias — older files import this name
+export const createBrowserSupabaseClient = createClient;

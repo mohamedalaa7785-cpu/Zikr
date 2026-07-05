@@ -1,32 +1,55 @@
-import { cookies } from "next/headers";
-import { getPublicEnv, getServerEnv } from "@/lib/env";
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
-export async function getServerSessionToken() {
-  const store = await cookies();
-  let token = store.get("sb_access_token")?.value;
-  const refreshToken = store.get("sb_refresh_token")?.value;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? SUPABASE_ANON_KEY;
 
-  // If token is missing but refresh token exists, we could try to refresh it here
-  // However, in Next.js Server Components, we cannot set cookies easily during a GET request
-  // So we rely on the client or middleware to handle refreshing if needed.
-  // For now, we just return what we have.
-  return token ?? null;
+/**
+ * Do NOT put this client in a global variable.
+ * Always create a new client within each function call.
+ */
+export async function createClient() {
+  const cookieStore = await cookies();
+
+  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {
+          // Called from a Server Component — safe to ignore if proxy handles refresh.
+        }
+      },
+    },
+  });
 }
 
-async function serverRequest<T>(
+/** Convenience: get the currently authenticated user (server-side). */
+export async function getSupabaseUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+}
+
+// ─── Legacy REST compatibility helpers ───────────────────────────────────────
+// These wrap the Supabase REST API directly, used by older services that
+// have not yet been migrated to the supabase-js client.
+
+async function restRequest<T>(
   path: string,
   init?: RequestInit,
-  useServiceRole = false
+  apiKey: string = SUPABASE_ANON_KEY
 ): Promise<T> {
-  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } =
-    getPublicEnv();
-  const service = getServerEnv().SUPABASE_SERVICE_ROLE_KEY;
-  const key = useServiceRole ? service : NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!NEXT_PUBLIC_SUPABASE_URL || !key) {
-    throw new Error(
-      "Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and appropriate API keys."
-    );
+  if (!SUPABASE_URL || !apiKey) {
+    throw new Error('Supabase environment variables are not configured.');
   }
 
   const controller = new AbortController();
@@ -34,15 +57,15 @@ async function serverRequest<T>(
 
   let res: Response;
   try {
-    res = await fetch(`${NEXT_PUBLIC_SUPABASE_URL}${path}`, {
+    res = await fetch(`${SUPABASE_URL}${path}`, {
       ...init,
       headers: {
-        "Content-Type": "application/json",
-        apikey: key,
-        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        apikey: apiKey,
+        Authorization: `Bearer ${apiKey}`,
         ...(init?.headers || {}),
       },
-      cache: init?.cache ?? "no-store",
+      cache: init?.cache ?? 'no-store',
       signal: init?.signal ?? controller.signal,
     });
   } finally {
@@ -50,55 +73,35 @@ async function serverRequest<T>(
   }
 
   if (!res.ok) {
-    const body = await res.text();
-    const errorMsg = `Supabase server request failed: ${res.status} ${body}`;
-    console.error("[supabase:server]", errorMsg);
-    throw new Error(errorMsg);
+    const body = await res.text().catch(() => '');
+    throw new Error(`Supabase REST ${res.status}: ${body}`);
   }
   if (res.status === 204) return undefined as T;
-
   const text = await res.text();
   if (!text) return undefined as T;
-
   return JSON.parse(text) as T;
 }
 
-export const supabaseServerAnonRequest = <T>(
-  path: string,
-  init?: RequestInit
-) => serverRequest<T>(path, init, false);
-export const supabaseServerAdminRequest = <T>(
-  path: string,
-  init?: RequestInit
-) => serverRequest<T>(path, init, true);
+/** Authenticated REST request using the anon key. */
+export const supabaseServerAnonRequest = <T>(path: string, init?: RequestInit) =>
+  restRequest<T>(path, init, SUPABASE_ANON_KEY);
 
-export async function getSupabaseUser() {
-  const token = await getServerSessionToken();
-  if (!token) return null;
+/** Authenticated REST request using the service-role key (bypasses RLS). */
+export const supabaseServerAdminRequest = <T>(path: string, init?: RequestInit) =>
+  restRequest<T>(path, init, SUPABASE_SERVICE_KEY);
 
-  type AuthUserResponse = { id: string; email?: string };
-  return serverRequest<AuthUserResponse>(
-    "/auth/v1/user",
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-    false
-  );
+/** Legacy: read the access token from the cookie store. */
+export async function getServerSessionToken() {
+  const store = await cookies();
+  return store.get('sb-access-token')?.value ?? store.get('sb_access_token')?.value ?? null;
 }
 
+/** Legacy: check Supabase connectivity. */
 export async function assertSupabaseConnection() {
   try {
-    const status = await supabaseServerAnonRequest<{ version: string }>(
-      "/rest/v1/"
-    );
-    return Boolean(status);
-  } catch (error) {
-    console.error(
-      "[supabase:server] Connection check failed:",
-      error instanceof Error ? error.message : "unknown error"
-    );
+    await restRequest('/rest/v1/', {}, SUPABASE_ANON_KEY);
+    return true;
+  } catch {
     return false;
   }
 }

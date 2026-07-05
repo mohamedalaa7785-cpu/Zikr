@@ -8,39 +8,53 @@ import { Container } from '@/components/ui/container';
 import { getPrayerTimesByCoordinates } from '@/lib/services/prayer';
 import type { PrayerResponse } from '@/lib/types/prayer';
 
+// ─── Navigation categories ────────────────────────────────────────────────────
 const categories = [
-  { icon: '📖', label: 'القرآن', href: '/quran' },
-  { icon: '📜', label: 'الحديث', href: '/hadith' },
-  { icon: '🎬', label: 'القصص', href: '/stories' },
-  { icon: '🤲', label: 'الأذكار', href: '/adhkar' },
-  { icon: '🙏', label: 'الأدعية', href: '/dua' },
-  { icon: '📰', label: 'المقالات', href: '/articles' },
-  { icon: '🎥', label: 'الفيديوهات', href: '/videos' },
-  { icon: '🌟', label: 'قسم الأطفال', href: '/kids' },
-  { icon: '👳', label: 'قصص الأنبياء', href: '/prophets' },
-  { icon: '💚', label: 'الروحاني', href: '/spiritual-ai' },
-  { icon: '✨', label: 'الشعر', href: '/poetry' },
-  { icon: '🎓', label: 'العلماء', href: '/scholars' },
-  { icon: '🏆', label: 'الحفظ', href: '/memorization' },
+  { label: 'القرآن الكريم', href: '/quran', icon: '📖', color: 'from-emerald-900/60 to-emerald-800/30' },
+  { label: 'الأحاديث', href: '/hadith', icon: '📜', color: 'from-amber-900/60 to-amber-800/30' },
+  { label: 'قصص الأنبياء', href: '/prophets', icon: '✨', color: 'from-sky-900/60 to-sky-800/30' },
+  { label: 'الصحابة', href: '/companions', icon: '🌟', color: 'from-rose-900/60 to-rose-800/30' },
+  { label: 'الأذكار', href: '/adhkar', icon: '🤲', color: 'from-violet-900/60 to-violet-800/30' },
+  { label: 'الأدعية', href: '/dua', icon: '🙏', color: 'from-teal-900/60 to-teal-800/30' },
+  { label: 'المقالات', href: '/articles', icon: '📰', color: 'from-indigo-900/60 to-indigo-800/30' },
+  { label: 'الفيديوهات', href: '/videos', icon: '🎬', color: 'from-red-900/60 to-red-800/30' },
+  { label: 'قسم الأطفال', href: '/kids', icon: '🌈', color: 'from-pink-900/60 to-pink-800/30' },
+  { label: 'الروحاني', href: '/spiritual-ai', icon: '💚', color: 'from-green-900/60 to-green-800/30' },
+  { label: 'الشعر', href: '/poetry', icon: '🪶', color: 'from-orange-900/60 to-orange-800/30' },
+  { label: 'العلماء', href: '/scholars', icon: '🎓', color: 'from-cyan-900/60 to-cyan-800/30' },
+  { label: 'الحفظ', href: '/memorization', icon: '🏆', color: 'from-yellow-900/60 to-yellow-800/30' },
+  { label: 'الصلاة', href: '/prayer', icon: '🕌', color: 'from-lime-900/60 to-lime-800/30' },
+  { label: 'القبلة', href: '/qibla', icon: '🧭', color: 'from-fuchsia-900/60 to-fuchsia-800/30' },
+  { label: 'الغزوات', href: '/battles', icon: '⚔️', color: 'from-stone-900/60 to-stone-800/30' },
 ];
 
-const stories = [
-  { id: 1, title: 'قصة الصحابي الجليل', category: 'تاريخ إسلامي', image: '🌟' },
-  { id: 2, title: 'درس من حياة الرسول', category: 'السيرة النبوية', image: '🌙' },
-  { id: 3, title: 'معجزات القرآن', category: 'إعجاز قرآني', image: '✨' },
-  { id: 4, title: 'حكايات من التاريخ', category: 'تراث إسلامي', image: '📚' },
-  { id: 5, title: 'دروس روحانية', category: 'تطوير ذاتي', image: '💎' },
-  { id: 6, title: 'قصص ملهمة', category: 'إلهام ديني', image: '🌺' },
+const sidebarLinks = [
+  { href: '/quran', label: 'القرآن الكريم' },
+  { href: '/hadith', label: 'الأحاديث' },
+  { href: '/prophets', label: 'قصص الأنبياء' },
+  { href: '/companions', label: 'الصحابة' },
+  { href: '/adhkar', label: 'الأذكار' },
+  { href: '/dua', label: 'الأدعية' },
+  { href: '/prayer-times', label: 'مواقيت الصلاة' },
+  { href: '/qibla', label: 'القبلة' },
+  { href: '/articles', label: 'المقالات' },
+  { href: '/videos', label: 'الفيديوهات' },
+  { href: '/kids', label: 'قسم الأطفال' },
+  { href: '/scholars', label: 'العلماء' },
+  { href: '/memorization', label: 'الحفظ' },
+  { href: '/spiritual-ai', label: 'الرفيق الروحاني' },
+  { href: '/poetry', label: 'الشعر' },
+  { href: '/search', label: 'البحث' },
 ];
 
-const videos = [
-  { id: 1, title: 'تلاوة مميزة', duration: '15:30', views: '2.5K' },
-  { id: 2, title: 'شرح سورة الملك', duration: '22:15', views: '1.8K' },
-  { id: 3, title: 'أحكام التجويد', duration: '18:45', views: '3.2K' },
-  { id: 4, title: 'قصة مؤثرة', duration: '12:20', views: '4.1K' },
-  { id: 5, title: 'درس قيم', duration: '25:00', views: '2.9K' },
-  { id: 6, title: 'محاضرة إسلامية', duration: '35:10', views: '5.6K' },
-];
+const prayerNames = [
+  { key: 'Fajr', label: 'الفجر' },
+  { key: 'Sunrise', label: 'الشروق' },
+  { key: 'Dhuhr', label: 'الظهر' },
+  { key: 'Asr', label: 'العصر' },
+  { key: 'Maghrib', label: 'المغرب' },
+  { key: 'Isha', label: 'العشاء' },
+] as const;
 
 const stats = [
   { label: 'سور قرآنية', value: '114' },
@@ -49,295 +63,360 @@ const stats = [
   { label: 'مستخدمين', value: '50K+' },
 ];
 
+// ─── Helper: determine current/next prayer ────────────────────────────────────
+function getActivePrayer(timings: Record<string, string>, now: Date) {
+  const toMinutes = (t: string) => {
+    const [h, m] = t.replace(/\s*(AM|PM)/i, '').split(':').map(Number);
+    return h * 60 + m;
+  };
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const keys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  let active = '';
+  for (let i = keys.length - 1; i >= 0; i--) {
+    if (cur >= toMinutes(timings[keys[i]])) {
+      active = keys[i];
+      break;
+    }
+  }
+  const nextIdx = (keys.indexOf(active) + 1) % keys.length;
+  return { active, next: keys[nextIdx] };
+}
+
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [prayerTimes, setPrayerTimes] = useState<PrayerResponse | null>(null);
-  const [currentTime, setCurrentTime] = useState<string>('');
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [activePrayer, setActivePrayer] = useState('');
+  const [nextPrayer, setNextPrayer] = useState('');
 
-  // Update current time
+  // Mount + clock tick — only starts client-side to prevent hydration mismatch
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
+    setCurrentTime(new Date());
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch prayer times on mount
+  // Update active/next prayer whenever time or timings change
   useEffect(() => {
-    const fetchPrayerTimes = async () => {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            try {
-              const times = await getPrayerTimesByCoordinates(latitude, longitude);
-              if (times) {
-                setPrayerTimes(times);
-              }
-            } catch (err) {
-              console.error('Failed to fetch prayer times:', err);
-            }
-          },
-          (err) => {
-            console.warn('Geolocation error:', err);
-          }
-        );
-      }
-    };
+    if (prayerTimes?.timings && currentTime) {
+      const { active, next } = getActivePrayer(prayerTimes.timings, currentTime);
+      setActivePrayer(active);
+      setNextPrayer(next);
+    }
+  }, [currentTime, prayerTimes]);
 
-    fetchPrayerTimes();
+  // Fetch prayer times
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async ({ coords: { latitude, longitude } }) => {
+          try {
+            const times = await getPrayerTimesByCoordinates(latitude, longitude);
+            if (times) setPrayerTimes(times);
+          } catch {
+            // silent fail
+          }
+        },
+        () => {}
+      );
+    }
   }, []);
 
+  // Use Latin numerals for the clock so it renders correctly in monospace font
+  const timeStr = currentTime
+    ? currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+    : null;
+
+  const dateStr = currentTime
+    ? currentTime.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
+
   return (
-    <div className='min-h-screen bg-brand-emeraldDeep text-brand-cream'>
-      {/* Main Dashboard Layout */}
-      <div className='flex'>
-        {/* Right Sidebar Navigation */}
-        <aside className='hidden lg:flex w-64 flex-col border-l border-brand-gold/20 bg-brand-emeraldDeep/50 p-6 space-y-8 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto'>
-          <div className='space-y-4'>
-            <h3 className='text-sm font-bold text-brand-gold uppercase tracking-wider'>التنقل السريع</h3>
-            <nav className='space-y-2'>
-              {categories.map((cat) => (
+    <div className="min-h-screen bg-brand-emeraldDeep text-brand-cream">
+      <div className="flex min-h-screen">
+
+        {/* ── Right Sidebar ─────────────────────────────────────────── */}
+        <aside className="hidden xl:flex w-56 flex-col gap-6 border-l border-brand-gold/15 bg-black/25 p-5 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto shrink-0">
+          <div>
+            <p className="text-[10px] font-bold tracking-widest text-brand-gold/60 uppercase mb-3">الأقسام</p>
+            <nav className="flex flex-col gap-0.5">
+              {sidebarLinks.map((link) => (
                 <Link
-                  key={cat.href}
-                  href={cat.href}
-                  className='flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-brand-cream hover:bg-brand-gold/10 hover:text-brand-gold transition-colors'
+                  key={link.href}
+                  href={link.href}
+                  className="px-3 py-2 rounded-lg text-sm text-brand-cream/70 hover:text-brand-gold hover:bg-brand-gold/8 transition-all duration-150"
                 >
-                  <span className='text-lg'>{cat.icon}</span>
-                  <span>{cat.label}</span>
+                  {link.label}
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Daily Quote Widget */}
-          <Card className='border-brand-gold/20 bg-black/20 p-4 space-y-3'>
-            <h4 className='text-xs font-bold text-brand-gold uppercase'>الآية اليومية</h4>
-            <p className='text-sm leading-relaxed text-brand-cream/80'>
+          {/* Daily verse widget */}
+          <div className="rounded-xl border border-brand-gold/20 bg-black/30 p-4 space-y-2">
+            <p className="text-[10px] font-bold tracking-widest text-brand-gold/60 uppercase">الآية اليومية</p>
+            <p className="text-sm leading-relaxed text-brand-cream/80 font-arabic">
               "وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ"
             </p>
-            <p className='text-xs text-brand-gold/60'>البقرة - 216</p>
-          </Card>
-
-          {/* Prayer Times Widget */}
-          <Card className='border-brand-gold/20 bg-black/20 p-4 space-y-3'>
-            <h4 className='text-xs font-bold text-brand-gold uppercase'>أوقات الصلاة</h4>
-            {prayerTimes ? (
-              <div className='space-y-2 text-xs'>
-                <div className='flex justify-between'>
-                  <span>الفجر</span>
-                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Fajr}</span>
-                </div>
-                <div className='flex justify-between'>
-                  <span>الظهر</span>
-                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Dhuhr}</span>
-                </div>
-                <div className='flex justify-between'>
-                  <span>العصر</span>
-                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Asr}</span>
-                </div>
-                <div className='flex justify-between'>
-                  <span>المغرب</span>
-                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Maghrib}</span>
-                </div>
-                <div className='flex justify-between'>
-                  <span>العشاء</span>
-                  <span className='text-brand-gold font-bold'>{prayerTimes.timings.Isha}</span>
-                </div>
-              </div>
-            ) : (
-              <p className='text-xs text-brand-cream/60'>جاري تحميل المواقيت...</p>
-            )}
-            <Link href='/prayer' className='text-xs text-brand-gold hover:underline mt-2 block'>
-              عرض التفاصيل →
-            </Link>
-          </Card>
-
-          {/* Supplications Widget */}
-          <Card className='border-brand-gold/20 bg-black/20 p-4 space-y-3'>
-            <h4 className='text-xs font-bold text-brand-gold uppercase'>دعاء اليوم</h4>
-            <p className='text-xs leading-relaxed text-brand-cream/80'>
-              "اللهم اجعل لنا من كل خير نصيباً"
-            </p>
-          </Card>
+            <p className="text-xs text-brand-gold/50">البقرة - 216</p>
+          </div>
         </aside>
 
-        {/* Main Content Area */}
-        <main className='flex-1'>
-          {/* Hero Banner with Search */}
-          <section className='relative border-b border-brand-gold/20 bg-gradient-to-b from-brand-emeraldDeep to-brand-emeraldDeep/80 px-4 py-12 md:py-20'>
-            <Container className='space-y-8'>
-              {/* Title */}
-              <div className='text-center space-y-3'>
-                <h1 className='text-4xl md:text-5xl font-bold text-brand-gold'>ذِكرٌ</h1>
-                <p className='text-brand-cream/80 text-lg'>منصتك الروحانية الشاملة</p>
-                {currentTime && (
-                  <p className='text-sm text-brand-gold'>{currentTime}</p>
+        {/* ── Main Content ───────────────────────────────────────────── */}
+        <main className="flex-1 overflow-x-hidden">
+
+          {/* Hero ─────────────────────────────────────────────────────── */}
+          <section className="relative border-b border-brand-gold/15 bg-gradient-to-b from-brand-emeraldDeep via-[#071f16] to-black/40 px-4 pt-10 pb-12">
+            <Container className="space-y-8">
+
+              {/* Title + time */}
+              <div className="text-center space-y-2">
+                <h1 className="text-5xl md:text-6xl font-bold text-brand-gold tracking-tight text-shadow-gold">
+                  ذِكرٌ
+                </h1>
+                <p className="text-brand-cream/60 text-base md:text-lg">منصتك الروحانية الشاملة</p>
+                {timeStr && (
+                  <div className="flex flex-col items-center gap-1 mt-3">
+                    <span className="text-3xl font-mono font-bold text-brand-gold tabular-nums">{timeStr}</span>
+                    <span className="text-sm text-brand-cream/50">{dateStr}</span>
+                  </div>
                 )}
               </div>
 
-              {/* Search Bar */}
-              <div className='max-w-2xl mx-auto'>
-                <div className='relative'>
+              {/* Search */}
+              <div className="max-w-xl mx-auto">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchQuery.trim()) {
+                      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+                    }
+                  }}
+                  className="relative"
+                >
                   <input
-                    type='text'
-                    placeholder='ابحث عن آية أو حديث أو قصة...'
+                    type="text"
+                    placeholder="ابحث عن آية أو حديث أو قصة..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className='w-full px-6 py-4 rounded-xl border border-brand-gold/30 bg-black/20 text-brand-cream placeholder:text-brand-cream/40 focus:border-brand-gold focus:outline-none focus:ring-2 focus:ring-brand-gold/20'
+                    className="w-full px-5 py-3.5 pr-12 rounded-xl border border-brand-gold/25 bg-black/30 text-brand-cream placeholder:text-brand-cream/35 focus:border-brand-gold/60 focus:outline-none focus:ring-2 focus:ring-brand-gold/15 text-sm"
                   />
-                  <button className='absolute left-4 top-1/2 -translate-y-1/2 text-brand-gold hover:text-brand-goldSoft'>
-                    🔍
+                  <button
+                    type="submit"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-gold/70 hover:text-brand-gold transition-colors"
+                    aria-label="بحث"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                    </svg>
                   </button>
-                </div>
+                </form>
               </div>
 
-              {/* Category Grid */}
-              <div className='grid grid-cols-4 md:grid-cols-8 gap-3'>
+              {/* Category bento grid */}
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5">
                 {categories.map((cat) => (
                   <Link
                     key={cat.href}
                     href={cat.href}
-                    className='flex flex-col items-center justify-center p-3 rounded-lg border border-brand-gold/20 bg-black/20 hover:bg-brand-gold/10 hover:border-brand-gold/50 transition-all'
+                    className={`group flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border border-brand-gold/15 bg-gradient-to-br ${cat.color} hover:border-brand-gold/40 hover:scale-105 transition-all duration-200`}
                   >
-                    <span className='text-2xl mb-1'>{cat.icon}</span>
-                    <span className='text-xs text-center text-brand-cream/70 hover:text-brand-gold'>{cat.label}</span>
+                    <span className="text-xl group-hover:scale-110 transition-transform">{cat.icon}</span>
+                    <span className="text-[10px] text-center text-brand-cream/65 group-hover:text-brand-gold leading-tight">{cat.label}</span>
                   </Link>
                 ))}
               </div>
             </Container>
           </section>
 
-          {/* Featured Prayer Times Section */}
-          <section className='border-b border-brand-gold/20 px-4 py-12 bg-gradient-to-r from-brand-gold/5 to-brand-emerald/5'>
-            <Container className='space-y-6'>
-              <div className='flex items-center justify-between'>
-                <h2 className='text-2xl font-bold text-brand-gold'>مواقيت الصلاة</h2>
-                <Link href='/prayer' className='text-sm text-brand-gold hover:text-brand-goldSoft'>
-                  عرض التفاصيل →
+          {/* Prayer Times ────────────────────────────────────────────── */}
+          <section className="border-b border-brand-gold/15 px-4 py-10">
+            <Container className="space-y-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-brand-gold">مواقيت الصلاة</h2>
+                <Link href="/prayer-times" className="text-xs text-brand-gold/60 hover:text-brand-gold transition-colors">
+                  عر�� التفاصيل ←
                 </Link>
               </div>
+
               {prayerTimes ? (
-                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'>
-                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
-                    <p className='text-xs text-brand-gold/70 mb-2'>الفجر</p>
-                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Fajr}</p>
-                  </Card>
-                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
-                    <p className='text-xs text-brand-gold/70 mb-2'>الشروق</p>
-                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Sunrise}</p>
-                  </Card>
-                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
-                    <p className='text-xs text-brand-gold/70 mb-2'>الظهر</p>
-                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Dhuhr}</p>
-                  </Card>
-                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
-                    <p className='text-xs text-brand-gold/70 mb-2'>العصر</p>
-                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Asr}</p>
-                  </Card>
-                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
-                    <p className='text-xs text-brand-gold/70 mb-2'>المغرب</p>
-                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Maghrib}</p>
-                  </Card>
-                  <Card className='text-center p-4 border-brand-gold/20 hover:border-brand-gold/50 transition-all'>
-                    <p className='text-xs text-brand-gold/70 mb-2'>العشاء</p>
-                    <p className='text-2xl font-bold text-brand-cream'>{prayerTimes.timings.Isha}</p>
-                  </Card>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                  {prayerNames.map(({ key, label }) => {
+                    const isActive = activePrayer === key;
+                    const isNext = nextPrayer === key;
+                    return (
+                      <div
+                        key={key}
+                        className={`rounded-xl border p-3 text-center transition-all duration-300 ${
+                          isActive
+                            ? 'border-brand-gold bg-brand-gold/15 shadow-lg shadow-brand-gold/10'
+                            : isNext
+                            ? 'border-brand-gold/40 bg-brand-gold/5'
+                            : 'border-brand-gold/10 bg-black/20 hover:border-brand-gold/25'
+                        }`}
+                      >
+                        <p className="text-[10px] text-brand-gold/60 mb-1.5">{label}</p>
+                        <p className="text-base font-bold text-brand-cream tabular-nums">
+                          {(prayerTimes.timings as Record<string, string>)[key]?.replace(/\s*(AM|PM)/i, '') ?? '--:--'}
+                        </p>
+                        {isActive && (
+                          <span className="mt-1 inline-block text-[9px] text-brand-gold font-semibold tracking-wider uppercase">الآن</span>
+                        )}
+                        {isNext && !isActive && (
+                          <span className="mt-1 inline-block text-[9px] text-brand-gold/60 font-semibold tracking-wider uppercase">القادمة</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
-                <Card className='text-center py-8'>
-                  <p className='text-brand-gold'>جاري تحميل مواقيت الصلاة...</p>
-                </Card>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                  {prayerNames.map(({ label }) => (
+                    <div key={label} className="rounded-xl border border-brand-gold/10 bg-black/20 p-3 text-center animate-pulse">
+                      <p className="text-[10px] text-brand-gold/40 mb-1.5">{label}</p>
+                      <div className="h-5 w-14 bg-brand-gold/10 rounded mx-auto" />
+                    </div>
+                  ))}
+                </div>
               )}
+
+              <div className="flex gap-3">
+                <Button href="/prayer-times" variant="secondary" className="text-sm">
+                  مواقيت الصلاة التفصيلية
+                </Button>
+                <Button href="/qibla" variant="ghost" className="text-sm">
+                  اتجاه القبلة
+                </Button>
+              </div>
             </Container>
           </section>
 
-          {/* Quran Section */}
-          <section className='border-b border-brand-gold/20 px-4 py-12'>
-            <Container className='space-y-6'>
-              <div className='flex items-center justify-between'>
-                <h2 className='text-2xl font-bold text-brand-gold'>📖 القرآن الكريم</h2>
-                <Link href='/quran' className='text-sm text-brand-gold hover:text-brand-goldSoft'>
-                  عرض الكل →
+          {/* Quick-access featured cards ─────────────────────────────── */}
+          <section className="border-b border-brand-gold/15 px-4 py-10">
+            <Container className="space-y-5">
+              <h2 className="text-xl font-bold text-brand-gold">الأقسام الرئيسية</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Quran */}
+                <Link href="/quran" className="group block rounded-2xl border border-brand-gold/15 bg-gradient-to-br from-emerald-950/60 to-black/40 p-6 hover:border-brand-gold/40 transition-all duration-200 hover:shadow-lg hover:shadow-brand-gold/5">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">📖</span>
+                    <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">اقرأ الآن ←</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-gold mb-1">القرآن الكريم</h3>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">اقرأ واستمع إلى القرآن الكريم بأصوات قراء مميزين — 114 سورة</p>
+                </Link>
+
+                {/* Hadith */}
+                <Link href="/hadith" className="group block rounded-2xl border border-brand-gold/15 bg-gradient-to-br from-amber-950/60 to-black/40 p-6 hover:border-brand-gold/40 transition-all duration-200 hover:shadow-lg hover:shadow-brand-gold/5">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">📜</span>
+                    <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">تصفح ←</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-gold mb-1">الحديث الشريف</h3>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">مجموعة شاملة من الأحاديث النبوية الصحيحة والموثقة</p>
+                </Link>
+
+                {/* Stories */}
+                <Link href="/stories" className="group block rounded-2xl border border-brand-gold/15 bg-gradient-to-br from-sky-950/60 to-black/40 p-6 hover:border-brand-gold/40 transition-all duration-200 hover:shadow-lg hover:shadow-brand-gold/5">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">🌙</span>
+                    <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">اكتشف ←</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-gold mb-1">القصص الإسلامية</h3>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">قصص ملهمة من التاريخ الإسلامي وسير الأنبياء والصحابة</p>
+                </Link>
+
+                {/* Adhkar */}
+                <Link href="/adhkar" className="group block rounded-2xl border border-brand-gold/15 bg-gradient-to-br from-violet-950/60 to-black/40 p-6 hover:border-brand-gold/40 transition-all duration-200 hover:shadow-lg hover:shadow-brand-gold/5">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">🤲</span>
+                    <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">ابدأ ←</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-gold mb-1">الأذكار اليومية</h3>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">أذكار الصباح والمساء وتسابيح يومية لتقوية الروح</p>
+                </Link>
+
+                {/* Duas */}
+                <Link href="/dua" className="group block rounded-2xl border border-brand-gold/15 bg-gradient-to-br from-teal-950/60 to-black/40 p-6 hover:border-brand-gold/40 transition-all duration-200 hover:shadow-lg hover:shadow-brand-gold/5">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">🙏</span>
+                    <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">تصفح ←</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-gold mb-1">الأدعية المأثورة</h3>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">مجموعة من الأدعية النبوية لمختلف المناسبات والأوقات</p>
+                </Link>
+
+                {/* Spiritual AI */}
+                <Link href="/spiritual-ai" className="group block rounded-2xl border border-brand-gold/15 bg-gradient-to-br from-green-950/60 to-black/40 p-6 hover:border-brand-gold/40 transition-all duration-200 hover:shadow-lg hover:shadow-brand-gold/5">
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">💚</span>
+                    <span className="text-xs text-brand-gold/40 group-hover:text-brand-gold transition-colors">تحدث ←</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-gold mb-1">الرفيق الروحاني</h3>
+                  <p className="text-sm text-brand-cream/50 leading-relaxed">مساعد ذكي للإجابة على أسئلتك الدينية والروحانية</p>
                 </Link>
               </div>
-              <p className='text-brand-cream/70'>اقرأ واستمع إلى القرآن الكريم بأصوات قراء مميزين</p>
-              <Button href='/quran' variant='secondary'>ابدأ القراءة</Button>
             </Container>
           </section>
 
-          {/* Stories Section */}
-          <section className='border-b border-brand-gold/20 px-4 py-12'>
-            <Container className='space-y-6'>
-              <div className='flex items-center justify-between'>
-                <h2 className='text-2xl font-bold text-brand-gold'>القصص والمحتوى</h2>
-                <Link href='/stories' className='text-sm text-brand-gold hover:text-brand-goldSoft'>
-                  عرض الكل →
-                </Link>
-              </div>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {stories.map((story) => (
-                  <Card
-                    key={story.id}
-                    className='border-brand-gold/20 bg-black/20 overflow-hidden hover:border-brand-gold/50 transition-all cursor-pointer group'
+          {/* More sections row ───────────────────────────────────────── */}
+          <section className="border-b border-brand-gold/15 px-4 py-10">
+            <Container className="space-y-5">
+              <h2 className="text-xl font-bold text-brand-gold">المزيد من المحتوى</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { href: '/prophets', label: 'قصص الأنبياء', icon: '✨' },
+                  { href: '/companions', label: 'الصحابة', icon: '🌟' },
+                  { href: '/scholars', label: 'العلماء', icon: '🎓' },
+                  { href: '/kids', label: 'قسم الأطفال', icon: '🌈' },
+                  { href: '/memorization', label: 'حفظ القرآن', icon: '🏆' },
+                  { href: '/poetry', label: 'الشعر الإسلامي', icon: '🪶' },
+                  { href: '/videos', label: 'الفيديوهات', icon: '🎬' },
+                  { href: '/battles', label: 'الغزوات والفتوحات', icon: '⚔️' },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-3 p-4 rounded-xl border border-brand-gold/10 bg-black/20 hover:border-brand-gold/30 hover:bg-brand-gold/5 transition-all duration-200"
                   >
-                    <div className='h-32 bg-gradient-to-br from-brand-gold/20 to-brand-emerald/20 flex items-center justify-center text-5xl group-hover:scale-110 transition-transform'>
-                      {story.image}
-                    </div>
-                    <div className='p-4 space-y-2'>
-                      <p className='text-xs text-brand-gold/70'>{story.category}</p>
-                      <h3 className='font-semibold text-brand-cream'>{story.title}</h3>
-                    </div>
-                  </Card>
+                    <span className="text-xl shrink-0">{item.icon}</span>
+                    <span className="text-sm text-brand-cream/70 hover:text-brand-gold">{item.label}</span>
+                  </Link>
                 ))}
               </div>
             </Container>
           </section>
 
-          {/* Videos Section */}
-          <section className='border-b border-brand-gold/20 px-4 py-12'>
-            <Container className='space-y-6'>
-              <div className='flex items-center justify-between'>
-                <h2 className='text-2xl font-bold text-brand-gold'>الفيديوهات المميزة</h2>
-                <Link href='/youtube' className='text-sm text-brand-gold hover:text-brand-goldSoft'>
-                  عرض الكل →
-                </Link>
-              </div>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {videos.map((video) => (
-                  <Card
-                    key={video.id}
-                    className='border-brand-gold/20 bg-black/20 overflow-hidden hover:border-brand-gold/50 transition-all cursor-pointer group'
-                  >
-                    <div className='relative h-40 bg-gradient-to-br from-brand-gold/20 to-brand-emerald/20 flex items-center justify-center'>
-                      <div className='text-5xl group-hover:scale-110 transition-transform'>▶</div>
-                      <div className='absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded text-xs text-brand-cream'>
-                        {video.duration}
-                      </div>
-                    </div>
-                    <div className='p-4 space-y-2'>
-                      <h3 className='font-semibold text-brand-cream'>{video.title}</h3>
-                      <p className='text-xs text-brand-gold/60'>{video.views} مشاهدة</p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </Container>
-          </section>
-
-          {/* Statistics Footer Bar */}
-          <section className='border-t border-brand-gold/20 bg-black/30 px-4 py-8'>
+          {/* Stats bar ──────────────────────────────────────────────── */}
+          <section className="border-b border-brand-gold/15 bg-black/30 px-4 py-10">
             <Container>
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 {stats.map((stat) => (
-                  <div key={stat.label} className='text-center space-y-2'>
-                    <div className='text-3xl md:text-4xl font-bold text-brand-gold'>{stat.value}</div>
-                    <p className='text-sm text-brand-cream/70'>{stat.label}</p>
+                  <div key={stat.label} className="space-y-1">
+                    <div className="text-3xl md:text-4xl font-bold text-brand-gold">{stat.value}</div>
+                    <p className="text-sm text-brand-cream/50">{stat.label}</p>
                   </div>
                 ))}
+              </div>
+            </Container>
+          </section>
+
+          {/* CTA ─────────────────────────────────────────────────────── */}
+          <section className="px-4 py-14">
+            <Container className="text-center space-y-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-brand-gold text-balance">
+                ابدأ رحلتك الروحانية اليوم
+              </h2>
+              <p className="text-brand-cream/55 max-w-xl mx-auto text-balance">
+                انضم إلى آلاف المستخدمين الذين يستخدمون ذِكر لتعزيز علاقتهم بالله
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button href="/auth/register" className="px-8">
+                  إنشاء حساب مجاني
+                </Button>
+                <Button href="/quran" variant="secondary" className="px-8">
+                  ابدأ بالقرآن
+                </Button>
               </div>
             </Container>
           </section>

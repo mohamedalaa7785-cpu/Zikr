@@ -1,9 +1,24 @@
 import type { Metadata } from 'next';
+import { Noto_Naskh_Arabic, Amiri } from 'next/font/google';
 import './globals.css';
 import { SiteShell } from '@/components/layout/site-shell';
 import { defaultOgImage, siteConfig } from '@/lib/site';
 import { Analytics } from '@/components/layout/analytics';
 import { ServiceWorkerRegister } from '@/components/layout/service-worker-register';
+
+const notoNaskhArabic = Noto_Naskh_Arabic({
+  subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-noto-arabic',
+  display: 'swap',
+});
+
+const amiri = Amiri({
+  subsets: ['arabic'],
+  weight: ['400', '700'],
+  variable: '--font-amiri',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -34,7 +49,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='ar' dir={siteConfig.dir}>
+    <html lang='ar' dir={siteConfig.dir} className={`${notoNaskhArabic.variable} ${amiri.variable}`}>
       <head>
         <meta name='theme-color' content='#0A2A1E' />
         <meta name='mobile-web-app-capable' content='yes' />

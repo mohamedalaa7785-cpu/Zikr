@@ -1,87 +1,89 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/ui/Logo';
 import { logoutAction } from '@/app/auth/actions';
-import { getSiteSetting } from '@/lib/services/site-content';
-import { getCurrentProfile } from '@/lib/services/admin';
+import { createClient } from '@/lib/supabase/server';
 
 const links = [
   { href: '/quran', label: 'القرآن' },
-  { href: '/reciters', label: 'القراء' },
-  { href: '/radio', label: 'الإذاعة' },
   { href: '/hadith', label: 'الأحاديث' },
   { href: '/stories', label: 'القصص' },
-  { href: '/scholars', label: 'العلماء' },
-  { href: '/prophets', label: 'الأنبياء' },
-  { href: '/companions', label: 'الصحابة' },
-  { href: '/battles', label: 'الغزوات' },
-  { href: '/conquests', label: 'الفتوحات' },
-  { href: '/prayer', label: 'الصلاة' },
-  { href: '/qibla', label: 'القبلة' },
   { href: '/adhkar', label: 'الأذكار' },
   { href: '/dua', label: 'الأدعية' },
-  { href: '/memorization', label: 'الحفظ' },
-  { href: '/spiritual-ai', label: 'الرفيق الروحاني' },
-  { href: '/poetry', label: 'الشعر' },
-  { href: '/youtube', label: 'يوتيوب' },
-  { href: '/competitions', label: 'مسابقات' },
-  { href: '/favorites', label: 'المفضلة' },
+  { href: '/prayer-times', label: 'الصلاة' },
+  { href: '/qibla', label: 'القبلة' },
+  { href: '/prophets', label: 'الأنبياء' },
+  { href: '/companions', label: 'الصحابة' },
+  { href: '/scholars', label: 'العلماء' },
+  { href: '/spiritual-ai', label: 'الروحاني' },
+  { href: '/kids', label: 'الأطفال' },
   { href: '/search', label: 'بحث' },
 ];
 
 export async function Navbar() {
-  const token = (await cookies()).get('sb_access_token')?.value;
-  let profile = null;
+  let user = null;
   let isAdmin = false;
-  let homepage = null;
-  
+
   try {
-    profile = token ? await getCurrentProfile() : null;
-    isAdmin = profile?.role === 'admin';
-    homepage = await getSiteSetting('homepage');
-  } catch (error) {
-    // Log error but don't crash navbar
-    console.error('[navbar] Error loading user profile or site settings:', error instanceof Error ? error.message : 'unknown error');
-    // Continue with defaults
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+    user = authUser;
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      isAdmin = profile?.role === 'admin';
+    }
+  } catch {
+    // Continue with unauthenticated state
   }
 
   return (
-    <header className='sticky top-0 z-40 border-b border-brand-gold/20 bg-brand-emeraldDeep/85 backdrop-blur'>
-      <Container className='flex min-h-16 flex-wrap items-center justify-between gap-3 py-2'>
-        <Link href='/' className='flex items-center gap-3'>
-          <Logo variant='gold' width={108} height={40} srcOverride={homepage?.logoUrl} />
-          <span className='sr-only'>ZIKR | ذِكرٌ</span>
+    <header className="sticky top-0 z-40 border-b border-brand-gold/15 bg-brand-emeraldDeep/90 backdrop-blur-md">
+      <Container className="flex min-h-16 flex-wrap items-center justify-between gap-3 py-2">
+        <Link href="/" className="flex items-center gap-2 group" aria-label="ZIKR - الرئيسية">
+          <span className="text-2xl font-bold text-brand-gold tracking-tight group-hover:opacity-80 transition-opacity">ذِكرٌ</span>
+          <span className="hidden sm:block text-xs text-brand-gold/40 font-mono tracking-widest pt-1">ZIKR</span>
         </Link>
 
-        <nav className='flex flex-wrap justify-end gap-x-4 gap-y-2'>
+        <nav className="hidden md:flex flex-wrap justify-end gap-x-4 gap-y-2">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className='text-sm text-brand-cream hover:text-brand-gold'>
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm text-brand-cream/70 hover:text-brand-gold transition-colors"
+            >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div>
-          {token ? (
-            <div className='flex items-center gap-2'>
-              <Button variant='ghost' href='/profile'>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <Button variant="ghost" href="/profile" className="text-sm">
                 الملف الشخصي
               </Button>
               {isAdmin && (
-                <Button variant='ghost' href='/admin'>
+                <Button variant="ghost" href="/admin" className="text-sm">
                   الأدمن
                 </Button>
               )}
               <form action={logoutAction}>
-                <Button variant='secondary' type='submit'>
+                <Button variant="secondary" type="submit" className="text-sm">
                   خروج
                 </Button>
               </form>
-            </div>
+            </>
           ) : (
-            <Button href='/auth/login'>تسجيل الدخول</Button>
+            <Button href="/auth/login" className="text-sm">
+              تسجيل الدخول
+            </Button>
           )}
         </div>
       </Container>
