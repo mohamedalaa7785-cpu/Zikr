@@ -36,7 +36,7 @@ export async function addFavorite(
       });
 
     if (error) throw error;
-    revalidateTag('user-favorites');
+    revalidateTag('user-favorites', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Add favorite error:', error);
@@ -75,7 +75,7 @@ export async function removeFavorite(
       .eq('item_ref', itemRef);
 
     if (error) throw error;
-    revalidateTag('user-favorites');
+    revalidateTag('user-favorites', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Remove favorite error:', error);
@@ -109,7 +109,7 @@ export async function clearFavorites(): Promise<{ success: boolean; error?: stri
       .eq('user_id', user.id);
 
     if (error) throw error;
-    revalidateTag('user-favorites');
+    revalidateTag('user-favorites', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Clear favorites error:', error);

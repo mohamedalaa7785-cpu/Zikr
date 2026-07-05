@@ -80,7 +80,7 @@ export default function ContentPage() {
         {(['all', 'published', 'draft'] as const).map((status) => (
           <Button
             key={status}
-            variant={filter === status ? 'default' : 'outline'}
+            variant={filter === status ? 'primary' : 'outline'}
             onClick={() => setFilter(status)}
           >
             {status === 'all' && 'الكل'}

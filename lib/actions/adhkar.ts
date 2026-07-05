@@ -31,7 +31,7 @@ export async function completeAdhkar(adhkarId: string): Promise<{ success: boole
       });
 
     if (error) throw error;
-    revalidateTag('adhkar-completions');
+    revalidateTag('adhkar-completions', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Complete adhkar error:', error);
@@ -66,7 +66,7 @@ export async function trackAdhkarStreak(): Promise<{ success: boolean; error?: s
       });
 
     if (error) throw error;
-    revalidateTag('adhkar-streaks');
+    revalidateTag('adhkar-streaks', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Track streak error:', error);

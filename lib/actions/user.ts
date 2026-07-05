@@ -37,7 +37,7 @@ export async function updateProfile(
       .eq('id', user.id);
 
     if (error) throw error;
-    revalidateTag('user-profile');
+    revalidateTag('user-profile', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Update profile error:', error);
@@ -87,7 +87,7 @@ export async function uploadAvatar(formData: FormData): Promise<{ success: boole
       .eq('id', user.id);
 
     if (updateError) throw updateError;
-    revalidateTag('user-profile');
+    revalidateTag('user-profile', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Upload avatar error:', error);
@@ -129,7 +129,7 @@ export async function updateNotificationSettings(
       .eq('user_id', user.id);
 
     if (error) throw error;
-    revalidateTag('notification-settings');
+    revalidateTag('notification-settings', 'hours');
     return { success: true };
   } catch (error) {
     console.error('Update notification settings error:', error);
