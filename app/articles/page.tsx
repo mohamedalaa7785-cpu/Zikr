@@ -31,59 +31,51 @@ interface Article {
 export default function ArticlesPage() {
   const [categories, setCategories] = useState<ArticleCategory[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  // Default to 'all' so articles load even when no categories are configured.
   const [selectedCategory, setSelectedCategory] = useState<string | null>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const supabase = createBrowserSupabaseClient();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        setLoading(true);
-        
-        // Fetch categories
-        const categoriesData = await supabase.request<ArticleCategory[]>(
-          '/rest/v1/article_categories?select=*&published=eq.true'
-        );
-
-        if (categoriesData) {
-          setCategories(categoriesData);
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+        const { data } = await supabase
+          .from('article_categories')
+          .select('*')
+          .eq('published', true);
+        setCategories(data ?? []);
+      } catch {
         setCategories([]);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchData();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
     const fetchArticles = async () => {
       if (!selectedCategory) return;
-
       try {
-        let query = '/rest/v1/articles?select=*&published=eq.true&order=created_at.desc';
+        let query = supabase
+          .from('articles')
+          .select('*')
+          .eq('published', true)
+          .order('created_at', { ascending: false });
 
         if (selectedCategory !== 'all') {
-          query += `&category_id=eq.${selectedCategory}`;
+          query = query.eq('category_id', selectedCategory);
         }
-
         if (searchQuery) {
-          query += `&title=ilike.%${searchQuery}%`;
+          query = query.ilike('title', `%${searchQuery}%`);
         }
 
-        const data = await supabase.request<Article[]>(query);
-        setArticles(data || []);
-      } catch (error) {
-        console.error('Error fetching articles:', error);
+        const { data } = await query;
+        setArticles(data ?? []);
+      } catch {
         setArticles([]);
       }
     };
-
     fetchArticles();
   }, [selectedCategory, searchQuery]);
 
@@ -96,7 +88,6 @@ export default function ArticlesPage() {
         </p>
       </div>
 
-      {/* Search Bar */}
       <div className="flex justify-center">
         <Input
           type="text"
@@ -107,7 +98,6 @@ export default function ArticlesPage() {
         />
       </div>
 
-      {/* Categories */}
       {!loading && categories.length > 0 && (
         <div className="flex flex-wrap justify-center gap-3">
           <Button
@@ -129,7 +119,6 @@ export default function ArticlesPage() {
         </div>
       )}
 
-      {/* Articles Grid */}
       {loading ? (
         <div className="text-center py-12">
           <p className="text-brand-cream/70">جاري التحميل...</p>
@@ -154,13 +143,11 @@ export default function ArticlesPage() {
                 )}
                 <h3 className="text-xl font-bold text-brand-gold">{article.title}</h3>
                 {article.summary && (
-                  <p className="text-brand-cream/80 line-clamp-2 flex-1">
-                    {article.summary}
-                  </p>
+                  <p className="text-brand-cream/80 line-clamp-2 flex-1">{article.summary}</p>
                 )}
                 <div className="flex justify-between items-center text-xs text-brand-cream/60 pt-4 border-t border-brand-gold/20">
                   {article.author && <span>{article.author}</span>}
-                  <span>👁 {article.views}</span>
+                  <span>{article.views} مشاهدة</span>
                 </div>
               </Card>
             </Link>

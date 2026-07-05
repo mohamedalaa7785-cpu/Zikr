@@ -29,23 +29,24 @@ export default function ProphetsPage() {
     const fetchProphets = async () => {
       try {
         setLoading(true);
-        
-        let query = '/rest/v1/prophets?select=*&published=eq.true&order=order_num.asc';
+        let query = supabase
+          .from('prophets')
+          .select('*')
+          .eq('published', true)
+          .order('order_num', { ascending: true });
 
         if (searchQuery) {
-          query += `&name_ar=ilike.%${searchQuery}%`;
+          query = query.ilike('name_ar', `%${searchQuery}%`);
         }
 
-        const data = await supabase.request<Prophet[]>(query);
-        setProphets(data || []);
-      } catch (error) {
-        console.error('Error fetching prophets:', error);
+        const { data } = await query;
+        setProphets(data ?? []);
+      } catch {
         setProphets([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchProphets();
   }, [searchQuery]);
 
@@ -58,7 +59,6 @@ export default function ProphetsPage() {
         </p>
       </div>
 
-      {/* Search Bar */}
       <div className="flex justify-center">
         <Input
           type="text"
@@ -69,7 +69,6 @@ export default function ProphetsPage() {
         />
       </div>
 
-      {/* Prophets Grid */}
       {loading ? (
         <div className="text-center py-12">
           <p className="text-brand-cream/70">جاري التحميل...</p>
@@ -93,18 +92,14 @@ export default function ProphetsPage() {
                   </div>
                 ) : (
                   <div className="w-full h-48 bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex items-center justify-center">
-                    <span className="text-6xl">👳</span>
+                    <span className="text-brand-gold/40 text-6xl font-arabic">ع</span>
                   </div>
                 )}
                 <div className="p-6 space-y-3 flex-1 flex flex-col">
                   <h3 className="text-2xl font-bold text-brand-gold">{prophet.name_ar}</h3>
-                  {prophet.name_en && (
-                    <p className="text-sm text-brand-cream/70">{prophet.name_en}</p>
-                  )}
+                  {prophet.name_en && <p className="text-sm text-brand-cream/70">{prophet.name_en}</p>}
                   {prophet.bio_ar && (
-                    <p className="text-brand-cream/80 line-clamp-3 flex-1">
-                      {prophet.bio_ar}
-                    </p>
+                    <p className="text-brand-cream/80 line-clamp-3 flex-1">{prophet.bio_ar}</p>
                   )}
                 </div>
               </Card>
@@ -113,9 +108,8 @@ export default function ProphetsPage() {
         </div>
       )}
 
-      {/* Islamic Message */}
       <Card className="p-6 text-center space-y-3 bg-brand-gold/10">
-        <h3 className="text-xl font-bold text-brand-gold">🕌 الأنبياء والرسل</h3>
+        <h3 className="text-xl font-bold text-brand-gold">الأنبياء والرسل</h3>
         <p className="text-brand-cream/90 font-arabic text-lg leading-relaxed">
           قال تعالى: &quot;تِلْكَ الرُّسُلُ فَضَّلْنَا بَعْضَهُمْ عَلَىٰ بَعْضٍ مِّنْهُم مَّن كَلَّمَ اللَّهُ وَرَفَعَ بَعْضَهُمْ دَرَجَاتٍ&quot;
         </p>
