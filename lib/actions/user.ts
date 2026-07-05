@@ -30,7 +30,7 @@ export async function updateProfile(
     const { error } = await supabase
       .from('profiles')
       .update({
-        displayName,
+        display_name: displayName,
         locale,
         updated_at: new Date().toISOString(),
       })
@@ -83,7 +83,7 @@ export async function uploadAvatar(formData: FormData): Promise<{ success: boole
 
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ avatarUrl: publicUrl })
+      .update({ avatar_url: publicUrl })
       .eq('id', user.id);
 
     if (updateError) throw updateError;
