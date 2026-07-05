@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';

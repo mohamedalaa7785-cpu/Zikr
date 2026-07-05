@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 import { Container } from '@/components/ui/container';
