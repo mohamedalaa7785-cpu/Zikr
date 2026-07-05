@@ -2,6 +2,7 @@ import {
   boolean,
   integer,
   jsonb,
+  numeric,
   smallint,
   pgEnum,
   pgTable,
@@ -387,6 +388,18 @@ export const quranReciters = pgTable("quran_reciters", {
 });
 
 // Hadith content (public read, admin write)
+export const quranAudio = pgTable("quran_audio", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  surahId: integer("surah_id")
+    .notNull()
+    .references(() => quranSurahs.id),
+  reciterId: uuid("reciter_id")
+    .notNull()
+    .references(() => quranReciters.id),
+  audioUrl: text("audio_url").notNull(),
+  duration: integer("duration"),
+});
+
 export const hadithBooks = pgTable("hadith_books", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
@@ -702,9 +715,71 @@ export const articles = pgTable("articles", {
   content: text("content").notNull(),
   summary: text("summary"),
   author: text("author"),
+  tags: text("tags").array().default([]),
   featuredImageUrl: text("featured_image_url"),
   published: boolean("published").notNull().default(true),
   views: integer("views").notNull().default(0),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const videoCategories = pgTable("video_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  descriptionAr: text("description_ar"),
+  descriptionEn: text("description_en"),
+  icon: text("icon"),
+  published: boolean("published").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const videos = pgTable("videos", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  categoryId: uuid("category_id").references(() => videoCategories.id, {
+    onDelete: "cascade",
+  }),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  youtubeId: text("youtube_id"),
+  thumbnailUrl: text("thumbnail_url"),
+  duration: integer("duration"),
+  views: integer("views").notNull().default(0),
+  published: boolean("published").notNull().default(true),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const kidsContent = pgTable("kids_content", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  titleAr: text("title_ar").notNull(),
+  titleEn: text("title_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  type: text("type").notNull(),
+  contentAr: text("content_ar"),
+  contentEn: text("content_en"),
+  ageGroup: text("age_group").notNull(),
+  featuredImageUrl: text("featured_image_url"),
+  videoUrl: text("video_url"),
+  quizData: jsonb("quiz_data"),
+  published: boolean("published").notNull().default(true),
   metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -752,4 +827,405 @@ export const companionStories = pgTable("companion_stories", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+});
+
+export const battles = pgTable("battles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  descriptionAr: text("description_ar"),
+  descriptionEn: text("description_en"),
+  dateHijri: text("date_hijri"),
+  dateGregorian: text("date_gregorian"),
+  locationAr: text("location_ar"),
+  locationEn: text("location_en"),
+  thumbnailUrl: text("thumbnail_url"),
+  featuredImageUrl: text("featured_image_url"),
+  orderNum: integer("order_num"),
+  published: boolean("published").notNull().default(true),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const battleEvents = pgTable("battle_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  battleId: uuid("battle_id")
+    .notNull()
+    .references(() => battles.id, { onDelete: "cascade" }),
+  titleAr: text("title_ar").notNull(),
+  titleEn: text("title_en").notNull(),
+  contentAr: text("content_ar").notNull(),
+  contentEn: text("content_en"),
+  eventType: text("event_type"),
+  orderNum: integer("order_num"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const conquests = pgTable("conquests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  descriptionAr: text("description_ar"),
+  descriptionEn: text("description_en"),
+  dateHijri: text("date_hijri"),
+  dateGregorian: text("date_gregorian"),
+  locationAr: text("location_ar"),
+  locationEn: text("location_en"),
+  leaderAr: text("leader_ar"),
+  leaderEn: text("leader_en"),
+  thumbnailUrl: text("thumbnail_url"),
+  featuredImageUrl: text("featured_image_url"),
+  orderNum: integer("order_num"),
+  published: boolean("published").notNull().default(true),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const conquestEvents = pgTable("conquest_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  conquestId: uuid("conquest_id")
+    .notNull()
+    .references(() => conquests.id, { onDelete: "cascade" }),
+  titleAr: text("title_ar").notNull(),
+  titleEn: text("title_en").notNull(),
+  contentAr: text("content_ar").notNull(),
+  contentEn: text("content_en"),
+  eventType: text("event_type"),
+  orderNum: integer("order_num"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const prayerLocations = pgTable("prayer_locations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  city: text("city").notNull(),
+  country: text("country"),
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
+  timezone: text("timezone"),
+  isDefault: boolean("is_default").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const prayerPreferences = pgTable("prayer_preferences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .unique()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  calculationMethod: text("calculation_method").default("umm-al-qura"),
+  madhab: text("madhab").default("shafi"),
+  highLatitudeMethod: text("high_latitude_method").default("middle-of-night"),
+  asrMethod: text("asr_method").default("shafi"),
+  midnightMethod: text("midnight_method").default("standard"),
+  notificationsEnabled: boolean("notifications_enabled")
+    .notNull()
+    .default(true),
+  adhanEnabled: boolean("adhan_enabled").notNull().default(true),
+  adhanVolume: integer("adhan_volume").notNull().default(70),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const prayerNotifications = pgTable("prayer_notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  prayerName: text("prayer_name").notNull(),
+  notificationTime: timestamp("notification_time", {
+    withTimezone: true,
+  }).notNull(),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  status: text("status").default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const tawasheehCategories = pgTable("tawasheeh_categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  descriptionAr: text("description_ar"),
+  descriptionEn: text("description_en"),
+  icon: text("icon"),
+  orderNum: integer("order_num"),
+  published: boolean("published").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const tawasheeh = pgTable("tawasheeh", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  titleAr: text("title_ar").notNull(),
+  titleEn: text("title_en").notNull(),
+  slug: text("slug").notNull().unique(),
+  descriptionAr: text("description_ar"),
+  descriptionEn: text("description_en"),
+  artistAr: text("artist_ar"),
+  artistEn: text("artist_en"),
+  categoryId: uuid("category_id").references(() => tawasheehCategories.id, {
+    onDelete: "set null",
+  }),
+  audioUrl: text("audio_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  duration: integer("duration"),
+  views: integer("views").notNull().default(0),
+  published: boolean("published").notNull().default(true),
+  featured: boolean("featured").notNull().default(false),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const tawasheehFavorites = pgTable("tawasheeh_favorites", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  tawasheehId: uuid("tawasheeh_id")
+    .notNull()
+    .references(() => tawasheeh.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const tawasheehPlaylists = pgTable("tawasheeh_playlists", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  isPublic: boolean("is_public").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const tawasheehPlaylistItems = pgTable("tawasheeh_playlist_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  playlistId: uuid("playlist_id")
+    .notNull()
+    .references(() => tawasheehPlaylists.id, { onDelete: "cascade" }),
+  tawasheehId: uuid("tawasheeh_id")
+    .notNull()
+    .references(() => tawasheeh.id, { onDelete: "cascade" }),
+  orderNum: integer("order_num"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const reciterFavorites = pgTable("reciter_favorites", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  reciterId: uuid("reciter_id")
+    .notNull()
+    .references(() => quranReciters.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const recentRecitations = pgTable("recent_recitations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  reciterId: uuid("reciter_id")
+    .notNull()
+    .references(() => quranReciters.id, { onDelete: "cascade" }),
+  surahId: integer("surah_id").notNull(),
+  ayahNumber: integer("ayah_number"),
+  playedAt: timestamp("played_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  durationListened: integer("duration_listened"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const videoGenerationRequests = pgTable("video_generation_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  content: jsonb("content").notNull(),
+  duration: integer("duration"),
+  thumbnailUrl: text("thumbnail_url"),
+  status: text("status").notNull().default("pending"),
+  youtubeId: text("youtube_id"),
+  facebookId: text("facebook_id"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const videoPublishingConfig = pgTable("video_publishing_config", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  youtubeEnabled: boolean("youtube_enabled").notNull().default(false),
+  youtubeChannelId: text("youtube_channel_id"),
+  facebookEnabled: boolean("facebook_enabled").notNull().default(false),
+  facebookPageId: text("facebook_page_id"),
+  autoPublish: boolean("auto_publish").notNull().default(false),
+  publishSchedule: text("publish_schedule"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const legacyUsers = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  openId: text("openId").unique(),
+  name: text("name"),
+  email: text("email").unique(),
+  loginMethod: text("loginMethod"),
+  role: roleEnum("role").notNull().default("user"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  lastSignedIn: timestamp("last_signed_in").defaultNow().notNull(),
+});
+
+export const contacts = pgTable("contacts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  language: text("language").notNull().default("en"),
+  read: boolean("read").notNull().default(false),
+  notificationSent: boolean("notificationSent").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const episodes = pgTable("episodes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  slug: text("slug").notNull().unique(),
+  titleEn: text("titleEn").notNull(),
+  titleAr: text("titleAr").notNull(),
+  descriptionEn: text("descriptionEn").notNull(),
+  descriptionAr: text("descriptionAr").notNull(),
+  contentEn: text("contentEn").notNull(),
+  contentAr: text("contentAr").notNull(),
+  keywordsEn: text("keywordsEn"),
+  keywordsAr: text("keywordsAr"),
+  category: text("category"),
+  thumbnailUrl: text("thumbnailUrl"),
+  youtubeVideoId: text("youtubeVideoId"),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const savedStories = pgTable("saved_stories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => legacyUsers.id),
+  storyId: uuid("story_id")
+    .notNull()
+    .references(() => stories.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const storyProgress = pgTable("story_progress", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => legacyUsers.id),
+  storyId: uuid("story_id")
+    .notNull()
+    .references(() => stories.id),
+  progress: integer("progress").notNull().default(0),
+  completed: boolean("completed").notNull().default(false),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: text("email").notNull().unique(),
+  language: text("language").notNull().default("en"),
+  verified: boolean("verified").notNull().default(false),
+  verificationToken: text("verificationToken"),
+  subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const tasks = pgTable("tasks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => legacyUsers.id),
+  input: text("input").notNull(),
+  result: text("result").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userBehavior = pgTable("user_behavior", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => legacyUsers.id),
+  page: text("page").notNull(),
+  timeSpent: integer("time_spent").notNull().default(0),
+  interaction: text("interaction").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
