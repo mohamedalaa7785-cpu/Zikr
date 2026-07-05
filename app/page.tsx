@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { getPrayerTimesByCoordinates } from '@/lib/services/prayer';
-import type { PrayerResponse } from '@/lib/types/prayer';
+import type { PrayerResponse, PrayerTimes } from '@/lib/types/prayer';
 
 // ─── Navigation categories ────────────────────────────────────────────────────
 const categories = [
@@ -64,21 +64,21 @@ const stats = [
 ];
 
 // ─── Helper: determine current/next prayer ────────────────────────────────────
-function getActivePrayer(timings: Record<string, string>, now: Date) {
+function getActivePrayer(timings: PrayerTimes, now: Date) {
   const toMinutes = (t: string) => {
     const [h, m] = t.replace(/\s*(AM|PM)/i, '').split(':').map(Number);
     return h * 60 + m;
   };
   const cur = now.getHours() * 60 + now.getMinutes();
-  const keys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-  let active = '';
+  const keys: Array<'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha'> = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  let active: (typeof keys)[number] | '' = '';
   for (let i = keys.length - 1; i >= 0; i--) {
     if (cur >= toMinutes(timings[keys[i]])) {
       active = keys[i];
       break;
     }
   }
-  const nextIdx = (keys.indexOf(active) + 1) % keys.length;
+  const nextIdx = (keys.indexOf(active as (typeof keys)[number]) + 1) % keys.length;
   return { active, next: keys[nextIdx] };
 }
 
@@ -257,7 +257,7 @@ export default function HomePage() {
                       >
                         <p className="text-[10px] text-brand-gold/60 mb-1.5">{label}</p>
                         <p className="text-base font-bold text-brand-cream tabular-nums">
-                          {(prayerTimes.timings as Record<string, string>)[key]?.replace(/\s*(AM|PM)/i, '') ?? '--:--'}
+                          {prayerTimes.timings[key]?.replace(/\s*(AM|PM)/i, '') ?? '--:--'}
                         </p>
                         {isActive && (
                           <span className="mt-1 inline-block text-[9px] text-brand-gold font-semibold tracking-wider uppercase">الآن</span>

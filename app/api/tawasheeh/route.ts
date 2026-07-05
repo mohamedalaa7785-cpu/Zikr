@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const featured = searchParams.get('featured') === 'true';
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     let query = supabase
       .from('tawasheeh')
