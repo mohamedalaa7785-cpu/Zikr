@@ -19,6 +19,10 @@ create table if not exists quran_ayahs (
   searchable tsvector generated always as (to_tsvector('simple', coalesce(text_uthmani,'') || ' ' || coalesce(text_simple,''))) stored,
   unique(surah_id, ayah_number)
 );
+-- Guard: if quran_ayahs pre-existed (created by an older schema without the
+-- generated column), CREATE TABLE IF NOT EXISTS above is a no-op, so the
+-- searchable column must be ensured before the GIN index references it.
+alter table quran_ayahs add column if not exists searchable tsvector generated always as (to_tsvector('simple', coalesce(text_uthmani,'') || ' ' || coalesce(text_simple,''))) stored;
 create index if not exists quran_ayahs_search_idx on quran_ayahs using gin (searchable);
 
 create table if not exists quran_tafsir (
@@ -56,6 +60,8 @@ create table if not exists hadiths (
   searchable tsvector generated always as (to_tsvector('simple', coalesce(text_ar,''))) stored,
   unique(book_id, hadith_number)
 );
+-- Guard: ensure the generated column exists on pre-existing hadiths tables.
+alter table hadiths add column if not exists searchable tsvector generated always as (to_tsvector('simple', coalesce(text_ar,''))) stored;
 create index if not exists hadiths_search_idx on hadiths using gin (searchable);
 create table if not exists hadith_explanations (
   id uuid primary key default gen_random_uuid(),

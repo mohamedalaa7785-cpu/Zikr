@@ -1,12 +1,15 @@
--- Enable RLS on all tables
-ALTER TABLE public.generated_research ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.quran_audio ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.research_requests ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_behavior ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+-- Enable RLS on all tables. Guarded with IF EXISTS: several of these legacy
+-- tables (users, payments, subscriptions, tasks, user_behavior, quran_audio,
+-- generated_research, research_requests) were dropped in 0002_noisy_nocturne
+-- and only some are recreated later (quran_audio returns in 0018).
+ALTER TABLE IF EXISTS public.generated_research ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.quran_audio ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.research_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.user_behavior ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.users ENABLE ROW LEVEL SECURITY;
 
 -- Basic RLS Policies for Profiles
 DO $$ 

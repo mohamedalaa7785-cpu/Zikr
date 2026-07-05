@@ -35,6 +35,8 @@ create table if not exists duas (
   updated_at timestamp with time zone default now()
 );
 
+-- Guard: ensure the generated column exists on pre-existing duas tables.
+alter table duas add column if not exists searchable tsvector generated always as (to_tsvector('simple', coalesce(title_ar,'') || ' ' || coalesce(text_ar,''))) stored;
 create index if not exists duas_search_idx on duas using gin (searchable);
 create index if not exists duas_category_idx on duas(category_id);
 
@@ -70,6 +72,8 @@ create table if not exists articles (
   updated_at timestamp with time zone default now()
 );
 
+-- Guard: ensure the generated column exists on pre-existing articles tables.
+alter table articles add column if not exists searchable tsvector generated always as (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(content,''))) stored;
 create index if not exists articles_search_idx on articles using gin (searchable);
 create index if not exists articles_category_idx on articles(category_id);
 create index if not exists articles_slug_idx on articles(slug);
