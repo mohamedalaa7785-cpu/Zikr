@@ -1,5 +1,23 @@
 'use server';
 
+/**
+ * @openapi
+ * POST /spiritual-ai/search (Server Action: searchSpiritualContent)
+ *
+ * Summary: Search spiritual content by feeling
+ * Description: Detects feeling from user text, returns relevant Quran verses, hadiths, dhikr, and AI-generated advice using Google Gemini.
+ * Tags: AI, Spiritual
+ * Auth: None
+ *
+ * Request:
+ *   - feeling: string (required) - User's feeling text (Arabic)
+ *
+ * Response:
+ *   - feeling: string - Detected feeling
+ *   - responses: SpiritualResponse[] - Array of { type, content, source, reference }
+ *   - aiAdvice: string (optional) - AI-generated advice
+ *   - error: string (optional) - Error message
+ */
 import { generateGeminiText } from '@/lib/services/gemini-client';
 import { searchQuran } from '@/lib/services/quran';
 
@@ -36,7 +54,7 @@ const HADITH_THEMES: Record<string, string[]> = {
   ],
   غضب: [
     'وَالْكَاظِمِينَ الْغَيْظَ وَالْعَافِينَ عَنِ النَّاسِ',
-    'لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ',
+    'لَيْسَ الشَّدِيدُ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضْبِ',
   ],
   شكر: [
     'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ',

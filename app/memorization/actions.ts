@@ -1,5 +1,22 @@
 'use server';
 
+/**
+ * @openapi
+ * POST /memorization/evaluate (Server Action: evaluateMemorizationAction)
+ *
+ * Summary: Evaluate Quran recitation via AI
+ * Description: Uses Google Gemini to evaluate a Quran recitation recording. Returns feedback on memorization quality, tajweed rules, overall score (0-100), and review advice in Arabic.
+ * Tags: AI, Memorization
+ * Auth: None
+ *
+ * Request (FormData):
+ *   - target: string (optional) - Target passage reference
+ *   - expectedText: string (optional) - Expected Quran text
+ *   - audio: File (optional) - Audio recording (webm/wav)
+ *
+ * Response:
+ *   - string: AI-generated evaluation in Arabic
+ */
 import { generateGeminiFromAudio, generateGeminiText } from '@/lib/services/gemini-client';
 
 export async function evaluateMemorizationAction(formData: FormData) {

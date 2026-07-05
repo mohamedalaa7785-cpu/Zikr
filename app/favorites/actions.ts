@@ -1,5 +1,28 @@
 "use server";
 
+/**
+ * @openapi
+ * POST /favorites/add (Server Action: addFavorite)
+ * Summary: Add item to favorites
+ * Tags: Favorites
+ * Auth: Required
+ * Request: itemRef (string), itemType (FavoriteItemType, default: quran)
+ * Response: { success: true } | { error: string }
+ *
+ * DELETE /favorites/remove (Server Action: removeFavorite)
+ * Summary: Remove item from favorites
+ * Tags: Favorites
+ * Auth: Required
+ * Request: itemRef (string), itemType (FavoriteItemType, default: quran)
+ * Response: { success: true } | { error: string }
+ *
+ * GET /favorites/check (Server Action: isFavorite)
+ * Summary: Check if item is favorited
+ * Tags: Favorites
+ * Auth: Required
+ * Request: itemRef (string), itemType (FavoriteItemType, default: quran)
+ * Response: boolean
+ */
 import { revalidatePath } from "next/cache";
 import {
   getServerSessionToken,

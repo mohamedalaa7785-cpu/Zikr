@@ -1,5 +1,37 @@
 'use server';
 
+/**
+ * @openapi
+ * POST /admin/site-setting (Server Action: saveSiteSettingAction)
+ * Summary: Save site settings (upsert by key)
+ * Tags: Admin
+ * Auth: Required (admin role)
+ * Request (FormData): key, title, body, imageUrl, logoUrl, youtubeChannelUrl, pinnedMessage
+ *
+ * POST /admin/story (Server Action: saveStoryAction)
+ * Summary: Create or update a story (upsert by slug)
+ * Tags: Admin
+ * Auth: Required (admin role)
+ * Request (FormData): title, slug, content, category, mood, published, coverImage
+ *
+ * POST /admin/competition (Server Action: saveCompetitionAction)
+ * Summary: Create a competition
+ * Tags: Admin
+ * Auth: Required (admin role)
+ * Request (FormData): title, description, prize, startsAt, endsAt, published, imageUrl, rules
+ *
+ * POST /admin/pinned-message (Server Action: savePinnedMessageAction)
+ * Summary: Create a pinned message
+ * Tags: Admin
+ * Auth: Required (admin role)
+ * Request (FormData): title, body, ctaLabel, ctaHref, published
+ *
+ * POST /admin/memorization-plan (Server Action: saveMemorizationPlanAction)
+ * Summary: Create a memorization plan
+ * Tags: Admin
+ * Auth: Required (admin role)
+ * Request (FormData): title, cadence, targetRef, prompt, tajweedFocus, published
+ */
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/services/admin';
 import { supabaseServerAdminRequest } from '@/lib/supabase/server';
