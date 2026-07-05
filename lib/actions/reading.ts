@@ -34,7 +34,7 @@ export async function saveReadingProgress(
         user_id: user.id,
         scope,
         ref,
-        progressJson: progress,
+        progress_json: progress,
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', user.id)
