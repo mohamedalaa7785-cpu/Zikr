@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
-import { getPrayerTimesByCoordinates } from '@/lib/services/prayer';
-import type { PrayerResponse, PrayerTimes } from '@/lib/types/prayer';
+import { getPrayerTimes } from '@/lib/services/prayer-times';
+import type { PrayerTimes } from '@/lib/types/prayer';
 
 // ─── Navigation categories ────────────────────────────────────────────────────
 const categories = [
@@ -85,7 +85,7 @@ function getActivePrayer(timings: PrayerTimes, now: Date) {
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [prayerTimes, setPrayerTimes] = useState<PrayerResponse | null>(null);
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [activePrayer, setActivePrayer] = useState('');
   const [nextPrayer, setNextPrayer] = useState('');
@@ -99,8 +99,8 @@ export default function HomePage() {
 
   // Update active/next prayer whenever time or timings change
   useEffect(() => {
-    if (prayerTimes?.timings && currentTime) {
-      const { active, next } = getActivePrayer(prayerTimes.timings, currentTime);
+    if (prayerTimes && currentTime) {
+      const { active, next } = getActivePrayer(prayerTimes, currentTime);
       setActivePrayer(active);
       setNextPrayer(next);
     }
@@ -112,8 +112,8 @@ export default function HomePage() {
       navigator.geolocation.getCurrentPosition(
         async ({ coords: { latitude, longitude } }) => {
           try {
-            const times = await getPrayerTimesByCoordinates(latitude, longitude);
-            if (times) setPrayerTimes(times);
+            const res = await getPrayerTimes(latitude, longitude);
+            if (res?.data?.timings) setPrayerTimes(res.data.timings as PrayerTimes);
           } catch {
             // silent fail
           }
@@ -258,7 +258,7 @@ export default function HomePage() {
                       >
                         <p className="text-[10px] text-brand-gold/60 mb-1.5">{label}</p>
                         <p className="text-base font-bold text-brand-cream tabular-nums">
-                          {prayerTimes.timings[key]?.replace(/\s*(AM|PM)/i, '') ?? '--:--'}
+                          {prayerTimes[key]?.replace(/\s*(AM|PM)/i, '') ?? '--:--'}
                         </p>
                         {isActive && (
                           <span className="mt-1 inline-block text-[9px] text-brand-gold font-semibold tracking-wider uppercase">الآن</span>

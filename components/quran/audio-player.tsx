@@ -208,7 +208,16 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
     }
   };
 
-  if (!reciter) return null;
+  if (!isClient) return null;
+
+  if (!reciter) {
+    return (
+      <div className="rounded-xl border border-brand-gold/20 bg-black/20 p-4 animate-pulse">
+        <div className="h-4 w-24 rounded bg-brand-gold/10 mb-3" />
+        <div className="h-10 w-full rounded-lg bg-brand-gold/10" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 rounded-xl border border-brand-gold/30 bg-black/20 p-4">

@@ -221,5 +221,26 @@ export async function searchQuran(
 }
 
 export async function getReciters(): Promise<Reciter[]> {
+  try {
+    // Try DB via Supabase REST (array response, works client + server)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (supabaseUrl && supabaseKey) {
+      const { data: rows } = await safeApiFetch<DbReciter[]>(
+        `${supabaseUrl}/rest/v1/quran_reciters?select=id,code,name_ar,name_en,base_url_template&order=name_en.asc`,
+        {
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+      if (Array.isArray(rows) && rows.length > 0) {
+        return rows.map(mapDbReciter);
+      }
+    }
+  } catch {
+    // fall through to static fallback
+  }
   return fallbackReciters;
 }
