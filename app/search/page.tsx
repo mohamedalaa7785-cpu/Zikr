@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useState, useTransition } from 'react';
-import { surahs, adhkar } from '@/lib/data/content';
+import { surahs, hadiths, prophets } from '@/lib/data/content';
+import type { Surah, Hadith, Prophet } from '@/lib/data/content';
 
 type Result = {
-  type: 'surah' | 'dhikr';
+  type: 'surah' | 'hadith' | 'prophet';
   labelAr: string;
   title: string;
   subtitle: string;
@@ -22,9 +23,9 @@ function runSearch(query: string): Result[] {
   const q = query.trim().toLowerCase();
 
   const surahResults: Result[] = surahs
-    .filter((s) => s.nameAr.includes(q) || s.nameEn.toLowerCase().includes(q))
+    .filter((s: Surah) => s.nameAr.includes(q) || s.nameEn.toLowerCase().includes(q))
     .slice(0, 5)
-    .map((s) => ({
+    .map((s: Surah) => ({
       type: 'surah',
       labelAr: 'سورة',
       title: s.nameAr,
@@ -32,26 +33,43 @@ function runSearch(query: string): Result[] {
       href: `/quran/${s.id}`,
     }));
 
-  const dhikrResults: Result[] = adhkar
+  const hadithResults: Result[] = hadiths
     .filter(
-      (d) =>
-        d.titleAr.includes(q) ||
-        d.category.includes(q) ||
-        d.text.includes(q),
+      (d: Hadith) =>
+        d.textAr.includes(q) ||
+        d.narrator.includes(q) ||
+        d.chapter.includes(q),
     )
-    .slice(0, 5)
-    .map((d) => ({
-      type: 'dhikr',
-      labelAr: 'ذكر',
-      title: d.titleAr,
-      subtitle: d.category,
-      href: `/adhkar/${d.id}`,
+    .slice(0, 4)
+    .map((d: Hadith) => ({
+      type: 'hadith',
+      labelAr: 'حديث',
+      title: d.textAr.slice(0, 60) + '...',
+      subtitle: `${d.narrator} — ${d.grade}`,
+      href: `/hadith/${d.bookId}`,
     }));
 
-  return [...surahResults, ...dhikrResults];
+  const prophetResults: Result[] = prophets
+    .filter((p: Prophet) => p.nameAr.includes(q) || (p.nameEn ?? '').toLowerCase().includes(q))
+    .slice(0, 3)
+    .map((p: Prophet) => ({
+      type: 'prophet',
+      labelAr: 'نبي',
+      title: p.nameAr,
+      subtitle: p.nameEn ?? '',
+      href: `/prophets/${p.slug}`,
+    }));
+
+  return [...surahResults, ...hadithResults, ...prophetResults];
 }
 
-const SUGGESTIONS = ['الفاتحة', 'الكهف', 'صباح', 'مساء', 'سفر'];
+const LABEL_MAP: Record<Result['type'], string> = {
+  surah: 'سورة',
+  hadith: 'حديث',
+  prophet: 'نبي',
+};
+
+const SUGGESTIONS = ['الفاتحة', 'الكهف', 'موسى', 'إبراهيم', 'الرحمن'];
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -79,14 +97,14 @@ export default function SearchPage() {
       <section className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-brand-gold">بحث شامل</h1>
         <p className="max-w-2xl mx-auto text-lg leading-8 arabic-muted">
-          ابحث في السور القرآنية والأذكار
+          ابحث في السور القرآنية والأحاديث والأنبياء
         </p>
       </section>
 
       <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl mx-auto">
         <Input
           type="text"
-          placeholder="اكتب اسم سورة أو ذكر..."
+          placeholder="اكتب اسم سورة، نبي، أو جزء من حديث..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
