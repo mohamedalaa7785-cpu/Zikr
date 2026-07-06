@@ -9,19 +9,25 @@ import { loginAction } from '../actions';
 import { GoogleOAuthButton } from '../google-oauth-button';
 import { useSearchParams } from 'next/navigation';
 
+const MESSAGE_MAP: Record<string, string> = {
+  check_email: 'تم التسجيل! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
+  reset_sent: 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.',
+  auth_callback_failed: 'فشل تسجيل الدخول عبر OAuth. حاول مرة أخرى.',
+};
+
 function LoginForm() {
   const searchParams = useSearchParams();
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
-  // Initialize client state and handle error param in same effect
   useEffect(() => {
     setIsClient(true);
     const errorParam = searchParams.get('error');
-    if (errorParam) {
-      setError(decodeURIComponent(errorParam));
-    }
+    const msgParam = searchParams.get('message');
+    if (errorParam) setError(decodeURIComponent(errorParam));
+    if (msgParam) setMessage(MESSAGE_MAP[msgParam] ?? decodeURIComponent(msgParam));
   }, [searchParams]);
 
   if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
@@ -43,6 +49,12 @@ function LoginForm() {
         <h1 className="text-3xl font-bold text-brand-gold">تسجيل الدخول</h1>
         <p className="text-sm arabic-muted">مرحباً بك في ذِكر - منصتك الروحانية</p>
       </div>
+
+      {message && (
+        <div className="rounded-lg bg-brand-gold/10 border border-brand-gold/30 p-4 text-center">
+          <p className="text-sm text-brand-gold font-medium">{message}</p>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-center">

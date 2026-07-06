@@ -20,40 +20,47 @@ export default function PrayerTimesPage() {
   const [showCitySearch, setShowCitySearch] = useState(false);
   const [cityQuery, setCityQuery] = useState('');
 
-  // Request geolocation
+  // Cairo fallback coords (used when geo is denied or unavailable)
+  const CAIRO = { lat: 30.0444, lon: 31.2357, city: 'القاهرة (افتراضي)' };
+
+  const loadForCoords = useCallback(async (lat: number, lon: number, city: string) => {
+    setCurrentLocation({ lat, lon, city });
+    try {
+      const data = await getPrayerTimes(lat, lon);
+      if (data) {
+        setPrayerData(data);
+      } else {
+        setError('فشل في جلب مواقيت الصلاة');
+      }
+    } catch {
+      setError('حدث خطأ في جلب البيانات');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Request geolocation — falls back to Cairo on denial
   const requestLocation = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setCurrentLocation({ lat: latitude, lon: longitude, city: 'موقعك الحالي' });
-
-          try {
-            const data = await getPrayerTimes(latitude, longitude);
-            if (data) {
-              setPrayerData(data);
-            } else {
-              setError('فشل في جلب مواقيت الصلاة');
-            }
-          } catch {
-            setError('حدث خطأ في جلب البيانات');
-          } finally {
-            setLoading(false);
-          }
-        },
-        () => {
-          setError('يرجى السماح بالوصول إلى موقعك');
-          setLoading(false);
-        }
-      );
-    } else {
-      setError('المتصفح لا يدعم الموقع الجغرافي');
-      setLoading(false);
+    if (!('geolocation' in navigator)) {
+      await loadForCoords(CAIRO.lat, CAIRO.lon, CAIRO.city);
+      return;
     }
-  }, []);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        await loadForCoords(latitude, longitude, 'موقعك الحالي');
+      },
+      async () => {
+        // Geo denied — silently fall back to Cairo
+        await loadForCoords(CAIRO.lat, CAIRO.lon, CAIRO.city);
+      },
+      { timeout: 8000 }
+    );
+  }, [loadForCoords]);
 
   // Fetch prayer times by city
   const fetchByCity = useCallback(async (city: string) => {
@@ -156,10 +163,13 @@ export default function PrayerTimesPage() {
         )}
       </section>
 
-      {/* Error Message */}
+      {/* Error Message (API errors only — geo denial falls back to Cairo silently) */}
       {error && (
-        <Card className="bg-red-900/20 border-red-500/50 text-red-200 p-4">
-          {error}
+        <Card className="border-red-500/30 bg-red-900/10 p-4 text-center space-y-2">
+          <p className="text-red-300 text-sm">{error}</p>
+          <Button variant="secondary" onClick={requestLocation}>
+            إعادة المحاولة
+          </Button>
         </Card>
       )}
 
