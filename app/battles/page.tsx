@@ -6,22 +6,26 @@ import { Card } from '@/components/ui/card';
 type Battle = {
   id: string;
   name_ar: string;
-  hijri_year: string | null;
+  name_en?: string;
+  date_hijri: string | null;
+  date_gregorian: string | null;
   location_ar: string | null;
-  commander_ar: string | null;
-  army_size: string | null;
-  result_ar: string | null;
+  location_en?: string | null;
   description_ar: string | null;
+  description_en?: string | null;
+  thumbnail_url: string | null;
+  featured_image_url: string | null;
 };
 
 export default async function BattlesPage() {
   let battles: Battle[] = [];
   try {
     const data = await supabaseServerAnonRequest<Battle[]>(
-      '/rest/v1/battles?select=id,name_ar,hijri_year,location_ar,commander_ar,army_size,result_ar,description_ar&published=eq.true&order=hijri_year.asc'
+      '/rest/v1/battles?select=id,name_ar,name_en,date_hijri,date_gregorian,location_ar,location_en,description_ar,description_en,thumbnail_url,featured_image_url&published=eq.true&order=order_num.asc'
     );
     battles = data || [];
-  } catch {
+  } catch (error) {
+    console.error('Failed to fetch battles:', error);
     battles = [];
   }
 
@@ -41,13 +45,10 @@ export default async function BattlesPage() {
               <div className='text-3xl'>⚔️</div>
               <div>
                 <h2 className='text-lg text-brand-gold'>{b.name_ar}</h2>
-                {b.hijri_year && <p className='text-xs text-emerald-200'>{b.hijri_year}</p>}
+                {b.date_hijri && <p className='text-xs text-emerald-200'>{b.date_hijri}</p>}
               </div>
             </div>
             {b.location_ar && <p className='text-sm arabic-muted'>المكان: {b.location_ar}</p>}
-            {b.commander_ar && <p className='text-sm arabic-muted'>القائد: {b.commander_ar}</p>}
-            {b.army_size && <p className='text-sm arabic-muted'>الجيش: {b.army_size}</p>}
-            {b.result_ar && <p className='text-sm text-brand-gold'>النتيجة: {b.result_ar}</p>}
             {b.description_ar && <p className='text-sm leading-7 arabic-muted line-clamp-3'>{b.description_ar}</p>}
           </Card>
         ))}
