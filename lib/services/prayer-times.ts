@@ -238,6 +238,12 @@ export function getCurrentPrayer(
 }
 
 /**
+ * Alias for getPrayerTimes — kept for backwards compatibility with callers
+ * that used the old prayer.ts service name.
+ */
+export const getPrayerTimesByCoordinates = getPrayerTimes;
+
+/**
  * Format time string (HH:MM) to readable format
  */
 export function formatPrayerTime(timeStr: string): string {

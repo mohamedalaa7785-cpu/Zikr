@@ -13,6 +13,7 @@ const MESSAGE_MAP: Record<string, string> = {
   check_email: 'تم التسجيل! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
   reset_sent: 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.',
   auth_callback_failed: 'فشل تسجيل الدخول عبر OAuth. حاول مرة أخرى.',
+  password_updated: 'تم تحديث كلمة المرور بنجاح. يمكنك الدخول الآن.',
 };
 
 function LoginForm() {

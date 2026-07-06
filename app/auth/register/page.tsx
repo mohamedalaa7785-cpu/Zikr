@@ -9,8 +9,8 @@ import { registerAction } from '../actions';
 import { GoogleOAuthButton } from '../google-oauth-button';
 import { useSearchParams } from 'next/navigation';
 
-// نقوم بتعريف المتغير الثابت هنا خارج الـ Component تماماً لمنع خطأ الـ Hooks #310
-const GOOGLE_CLIENT_ID_FALLBACK = '://googleusercontent.com';
+// Whether Google OAuth is configured (NEXT_PUBLIC_GOOGLE_CLIENT_ID must be a real value)
+const GOOGLE_OAUTH_ENABLED = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
 function RegisterForm() {
   const searchParams = useSearchParams();
@@ -52,8 +52,7 @@ function RegisterForm() {
 
   if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
 
-  // جلب المعرف البيئي أو استخدام القيمة الاحتياطية الثابتة
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID_FALLBACK;
+  const googleClientId = GOOGLE_OAUTH_ENABLED;
 
   return (
     <Card className="mx-auto max-w-md space-y-6 text-right">
@@ -143,5 +142,5 @@ export default function Page() {
       </Suspense>
     </Container>
   );
-    }
-      
+}
+
