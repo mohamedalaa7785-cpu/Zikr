@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -57,9 +58,11 @@ export default function TafsirPage() {
                 <span className="text-brand-cream">{book.era}</span>
               </p>
             </div>
-            <Button href={`/tafsir/${book.name.toLowerCase().replace(/\s+/g, '-')}`} variant="secondary" className="w-full">
-              اقرأ التفسير
-            </Button>
+            <Link href={`/quran`} className="block">
+              <Button variant="secondary" className="w-full" asChild={false}>
+                اقرأ في القرآن
+              </Button>
+            </Link>
           </Card>
         ))}
       </section>

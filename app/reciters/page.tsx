@@ -1,28 +1,20 @@
 'use client';
 
+import { useState } from 'react';
+import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SectionHeader } from '@/components/ui/section-header';
-import { useState } from 'react';
+import { reciters } from '@/lib/data/content';
 
 export default function RecitersPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const reciters = [
-    { name: 'عبد الرحمن السديس', country: 'السعودية', type: 'تجويد' },
-    { name: 'محمود خليل الحصري', country: 'مصر', type: 'مرتل' },
-    { name: 'عبد الباسط عبد الصمد', country: 'مصر', type: 'معلم' },
-    { name: 'محمد صديق المنشاوي', country: 'مصر', type: 'مرتل' },
-    { name: 'سعد الغامدي', country: 'السعودية', type: 'تجويد' },
-    { name: 'أحمد العجمي', country: 'الكويت', type: 'تجويد' },
-    { name: 'إبراهيم الأخضر', country: 'ليبيا', type: 'تجويد' },
-    { name: 'يوسف القرضاوي', country: 'قطر', type: 'تعليمي' },
-  ];
-
-  const filtered = reciters.filter(r =>
-    r.name.includes(searchQuery) || r.country.includes(searchQuery)
+  const filtered = reciters.filter(
+    (r) =>
+      r.nameAr.includes(searchQuery) ||
+      r.nameEn.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -41,26 +33,48 @@ export default function RecitersPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1"
+          dir="rtl"
         />
-        <Button variant="primary">بحث</Button>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((reciter, idx) => (
-          <Card key={idx} className="p-6 space-y-4 text-center hover:border-brand-gold/50 cursor-pointer transition-all">
-            <div className="text-5xl">🎤</div>
-            <div>
-              <h3 className="text-lg font-bold text-brand-gold">{reciter.name}</h3>
-              <p className="text-sm text-brand-cream/60">{reciter.country}</p>
-              <span className="inline-block text-xs bg-brand-gold/10 text-brand-gold px-2 py-1 rounded mt-2">
-                {reciter.type}
-              </span>
+        {filtered.map((reciter) => (
+          <Card
+            key={reciter.id}
+            className="p-6 space-y-4 text-center hover:border-brand-gold/50 transition-all"
+          >
+            <div
+              className="w-14 h-14 rounded-full bg-brand-gold/10 border border-brand-gold/20 mx-auto flex items-center justify-center"
+              aria-hidden="true"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="w-7 h-7 text-brand-gold/60"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+              </svg>
             </div>
-            <Button href={`/reciters/${reciter.name.toLowerCase().replace(/\s+/g, '-')}`} variant="secondary" className="w-full">
-              استمع
-            </Button>
+            <div>
+              <h3 className="text-lg font-bold text-brand-gold">{reciter.nameAr}</h3>
+              <p className="text-sm text-brand-cream/60">{reciter.nameEn}</p>
+            </div>
+            <Link href={`/reciters/${reciter.id}`}>
+              <Button variant="secondary" className="w-full">
+                استمع للتلاوات
+              </Button>
+            </Link>
           </Card>
         ))}
+        {filtered.length === 0 && (
+          <div className="col-span-full text-center py-8 arabic-muted">
+            لم يتم العثور على قارئ بهذا الاسم.
+          </div>
+        )}
       </section>
     </Container>
   );
