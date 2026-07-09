@@ -3,6 +3,7 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/app/auth/actions';
 import { createClient } from '@/lib/supabase/server';
+import { MobileNav } from './mobile-nav';
 
 const links = [
   { href: '/quran', label: 'القرآن' },
@@ -64,6 +65,7 @@ export async function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <MobileNav />
           {user ? (
             <>
               <Button variant="ghost" href="/profile" className="text-sm">

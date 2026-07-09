@@ -1,159 +1,231 @@
-'use client';
-export const dynamic = 'force-dynamic';
-
-import { useState, useEffect } from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { SectionHeader } from '@/components/ui/section-header';
+import { Badge } from '@/components/ui/badge';
+import { createClient } from '@/lib/supabase/server';
 
-interface ArticleCategory {
-  id: string;
-  name_ar: string;
-  name_en: string;
-  slug: string;
-  icon?: string;
-}
+export const metadata: Metadata = {
+  title: 'المقالات الإسلامية',
+  description: 'مقالات قيمة عن الإسلام والعقيدة والتطبيق العملي من منصة ذِكر.',
+};
+
+export const revalidate = 1800;
 
 interface Article {
   id: string;
   title: string;
   slug: string;
-  summary?: string;
-  author?: string;
-  featured_image_url?: string;
+  summary?: string | null;
+  author?: string | null;
+  featured_image_url?: string | null;
   views: number;
   created_at: string;
+  category_id?: string | null;
 }
 
-export default function ArticlesPage() {
-  const [categories, setCategories] = useState<ArticleCategory[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  const supabase = createBrowserSupabaseClient();
+interface ArticleCategory {
+  id: string;
+  name_ar: string;
+  slug: string;
+  icon?: string | null;
+}
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await supabase
-          .from('article_categories')
-          .select('*')
-          .eq('published', true);
-        setCategories(data ?? []);
-      } catch {
-        setCategories([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
+const staticArticles: Article[] = [
+  {
+    id: '1',
+    title: 'أهمية الصلاة في حياة المسلم',
+    slug: 'importance-of-prayer',
+    summary: 'الصلاة عماد الدين وركن الإسلام الثاني، وهي الصلة التي تربط العبد بربه خمس مرات في اليوم والليلة.',
+    author: 'فريق ذِكر',
+    featured_image_url: null,
+    views: 0,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '2',
+    title: 'فضل قراءة القرآن الكريم',
+    slug: 'virtues-of-quran',
+    summary: 'القرآن الكريم كلام الله المنزل على نبيه محمد صلى الله عليه وسلم، وقراءته عبادة عظيمة ومنهل للهداية والنور.',
+    author: 'فريق ذِكر',
+    featured_image_url: null,
+    views: 0,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '3',
+    title: 'الأخلاق الإسلامية وأثرها في المجتمع',
+    slug: 'islamic-ethics',
+    summary: 'الأخلاق الحميدة من صميم الإسلام، فقد بعث النبي صلى الله عليه وسلم ليتمم مكارم الأخلاق.',
+    author: 'فريق ذِكر',
+    featured_image_url: null,
+    views: 0,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '4',
+    title: 'الذكر وأثره في تحقيق الطمأنينة',
+    slug: 'dhikr-and-tranquility',
+    summary: 'ألا بذكر الله تطمئن القلوب، وفي هذا المقال نستعرض فضل الذكر وأنواعه وآثاره الروحانية.',
+    author: 'فريق ذِكر',
+    featured_image_url: null,
+    views: 0,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '5',
+    title: 'فضل الاستغفار والتوبة إلى الله',
+    slug: 'istighfar-and-tawbah',
+    summary: 'التوبة باب مفتوح لكل مذنب، والاستغفار مفتاح الرزق والبركة والفرج في الضيق.',
+    author: 'فريق ذِكر',
+    featured_image_url: null,
+    views: 0,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '6',
+    title: 'صلة الرحم وأثرها في بركة العمر',
+    slug: 'silat-al-rahim',
+    summary: 'أمر الله بصلة الرحم وحذر من قطعها، وفي هذا المقال نستعرض فضل صلة الأرحام وآثارها الإيجابية.',
+    author: 'فريق ذِكر',
+    featured_image_url: null,
+    views: 0,
+    created_at: new Date().toISOString(),
+  },
+];
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      if (!selectedCategory) return;
-      try {
-        let query = supabase
-          .from('articles')
-          .select('*')
-          .eq('published', true)
-          .order('created_at', { ascending: false });
+const staticCategories: ArticleCategory[] = [
+  { id: 'aqeedah', name_ar: 'العقيدة', slug: 'aqeedah', icon: null },
+  { id: 'fiqh', name_ar: 'الفقه', slug: 'fiqh', icon: null },
+  { id: 'tazkiyah', name_ar: 'التزكية', slug: 'tazkiyah', icon: null },
+  { id: 'history', name_ar: 'التاريخ', slug: 'history', icon: null },
+];
 
-        if (selectedCategory !== 'all') {
-          query = query.eq('category_id', selectedCategory);
-        }
-        if (searchQuery) {
-          query = query.ilike('title', `%${searchQuery}%`);
-        }
+export default async function ArticlesPage() {
+  let articles: Article[] = [];
+  let categories: ArticleCategory[] = [];
 
-        const { data } = await query;
-        setArticles(data ?? []);
-      } catch {
-        setArticles([]);
-      }
-    };
-    fetchArticles();
-  }, [selectedCategory, searchQuery]);
+  try {
+    const supabase = await createClient();
+    const [articlesRes, categoriesRes] = await Promise.all([
+      supabase
+        .from('articles')
+        .select('id, title, slug, summary, author, featured_image_url, views, created_at, category_id')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(24),
+      supabase
+        .from('article_categories')
+        .select('id, name_ar, slug, icon')
+        .eq('published', true)
+        .order('order_num', { ascending: true }),
+    ]);
+    articles = articlesRes.data ?? [];
+    categories = categoriesRes.data ?? [];
+  } catch {
+    // Fall through to static content
+  }
+
+  const showStatic = articles.length === 0;
+  const displayArticles = showStatic ? staticArticles : articles;
+  const displayCategories = showStatic ? staticCategories : categories;
 
   return (
-    <Container className="py-12 space-y-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold">المقالات الإسلامية</h1>
-        <p className="text-brand-cream/70 max-w-2xl mx-auto">
+    <Container className="py-12 space-y-10">
+      {/* Hero */}
+      <section className="text-center space-y-4">
+        <h1 className="text-4xl font-bold text-brand-gold text-balance">المقالات الإسلامية</h1>
+        <p className="max-w-2xl mx-auto text-lg leading-8 arabic-muted text-pretty">
           مقالات قيمة عن الإسلام والعقيدة والتطبيق العملي
         </p>
-      </div>
+      </section>
 
-      <div className="flex justify-center">
-        <Input
-          type="text"
-          placeholder="ابحث عن مقالة..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-md"
-        />
-      </div>
-
-      {!loading && categories.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button
-            variant={selectedCategory === 'all' ? 'primary' : 'outline'}
-            onClick={() => setSelectedCategory('all')}
-          >
-            الكل
-          </Button>
-          {categories.map((cat) => (
-            <Button
+      {/* Category Chips */}
+      {displayCategories.length > 0 && (
+        <section className="flex flex-wrap justify-center gap-3">
+          {displayCategories.map((cat) => (
+            <span
               key={cat.id}
-              variant={selectedCategory === cat.id ? 'primary' : 'outline'}
-              onClick={() => setSelectedCategory(cat.id)}
+              className="rounded-full border border-brand-gold/30 px-4 py-1.5 text-sm text-brand-cream/70 hover:border-brand-gold hover:text-brand-gold transition-colors cursor-pointer"
             >
-              {cat.icon && <span className="mr-2">{cat.icon}</span>}
+              {cat.icon && <span className="mr-1">{cat.icon}</span>}
               {cat.name_ar}
-            </Button>
+            </span>
           ))}
-        </div>
+        </section>
       )}
 
-      {loading ? (
-        <div className="text-center py-12">
-          <p className="text-brand-cream/70">جاري التحميل...</p>
-        </div>
-      ) : articles.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-brand-cream/70">لا توجد مقالات في هذه الفئة</p>
-        </div>
-      ) : (
+      {/* Articles Grid */}
+      <section className="space-y-6">
+        <SectionHeader
+          title="المقالات المنشورة"
+          subtitle={`${displayArticles.length} مقالة`}
+        />
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <Link key={article.id} href={`/articles/${article.slug}`}>
-              <Card className="h-full p-6 space-y-4 hover:border-brand-gold/50 transition-colors cursor-pointer flex flex-col">
-                {article.featured_image_url && (
-                  <div className="w-full h-40 bg-brand-gold/10 rounded-lg overflow-hidden">
+          {displayArticles.map((article) => (
+            <Link key={article.id} href={showStatic ? '/articles' : `/articles/${article.slug}`}>
+              <Card className="h-full flex flex-col hover:border-brand-gold/50 transition-colors cursor-pointer">
+                {article.featured_image_url ? (
+                  <div className="w-full h-40 bg-brand-gold/10 rounded-t-xl overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={article.featured_image_url}
                       alt={article.title}
                       className="w-full h-full object-cover"
                     />
                   </div>
+                ) : (
+                  <div className="w-full h-40 bg-gradient-to-br from-brand-gold/10 to-brand-emerald/10 rounded-t-xl flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-brand-gold/30">
+                      <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
+                    </svg>
+                  </div>
                 )}
-                <h3 className="text-xl font-bold text-brand-gold">{article.title}</h3>
-                {article.summary && (
-                  <p className="text-brand-cream/80 line-clamp-2 flex-1">{article.summary}</p>
-                )}
-                <div className="flex justify-between items-center text-xs text-brand-cream/60 pt-4 border-t border-brand-gold/20">
-                  {article.author && <span>{article.author}</span>}
-                  <span>{article.views} مشاهدة</span>
+                <div className="p-5 space-y-3 flex-1 flex flex-col">
+                  <h3 className="text-lg font-bold text-brand-gold leading-snug">{article.title}</h3>
+                  {article.summary && (
+                    <p className="text-brand-cream/70 text-sm leading-relaxed line-clamp-3 flex-1">
+                      {article.summary}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-xs text-brand-cream/50 pt-3 border-t border-brand-gold/10">
+                    {article.author && <span>{article.author}</span>}
+                    {article.views > 0 && (
+                      <Badge variant="outline" className="text-[10px]">{article.views.toLocaleString('ar-EG')} مشاهدة</Badge>
+                    )}
+                  </div>
                 </div>
               </Card>
             </Link>
           ))}
         </div>
-      )}
+      </section>
+
+      {/* CTA */}
+      <section>
+        <Card className="p-8 text-center space-y-4 bg-brand-gold/5">
+          <h2 className="text-2xl font-bold text-brand-gold">ابق على تواصل مع المحتوى</h2>
+          <p className="max-w-xl mx-auto arabic-muted leading-7">
+            سجّل الدخول لحفظ المقالات المفضلة ومتابعة آخر المنشورات
+          </p>
+          <div className="flex justify-center gap-3">
+            <Link
+              href="/auth/login"
+              className="rounded-lg bg-brand-gold px-6 py-2.5 text-sm font-semibold text-brand-emeraldDeep hover:bg-brand-goldSoft transition-colors"
+            >
+              تسجيل الدخول
+            </Link>
+            <Link
+              href="/search"
+              className="rounded-lg border border-brand-gold/30 px-6 py-2.5 text-sm text-brand-cream/70 hover:border-brand-gold hover:text-brand-gold transition-colors"
+            >
+              البحث في المحتوى
+            </Link>
+          </div>
+        </Card>
+      </section>
     </Container>
   );
 }

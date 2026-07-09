@@ -1,146 +1,150 @@
-'use client';
+export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import type { Metadata } from 'next';
+import { Container } from '@/components/ui/container';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { SectionHeader } from '@/components/ui/section-header';
+import { requireAdmin } from '@/lib/services/admin';
+import { createClient } from '@/lib/supabase/server';
+
+export const metadata: Metadata = {
+  title: 'إدارة المحتوى | الأدمن',
+};
 
 interface ContentItem {
   id: string;
   title: string;
-  type: 'story' | 'article' | 'hadith' | 'dua';
-  status: 'published' | 'draft' | 'archived';
+  published: boolean;
   views: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  type: string;
 }
 
-export default function ContentPage() {
-  const [content, setContent] = useState<ContentItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
+async function getRecentContent(): Promise<ContentItem[]> {
+  try {
+    const supabase = await createClient();
 
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/admin/content');
-        if (!response.ok) throw new Error('Failed to fetch content');
-        
-        const data = await response.json();
-        setContent(data);
-      } catch (error) {
-        console.error('Content fetch error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const [storiesRes, articlesRes] = await Promise.all([
+      supabase
+        .from('stories')
+        .select('id, title, published, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10),
+      supabase
+        .from('articles')
+        .select('id, title, published, views, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10),
+    ]);
 
-    fetchContent();
-  }, []);
+    const stories: ContentItem[] = (storiesRes.data ?? []).map((s) => ({
+      id: s.id,
+      title: s.title,
+      published: s.published ?? false,
+      views: 0,
+      created_at: s.created_at,
+      type: 'قصة',
+    }));
 
-  const filteredContent = content.filter((item) => {
-    if (filter === 'all') return true;
-    return item.status === filter;
-  });
+    const articles: ContentItem[] = (articlesRes.data ?? []).map((a) => ({
+      id: a.id,
+      title: a.title,
+      published: a.published ?? false,
+      views: a.views ?? 0,
+      created_at: a.created_at,
+      type: 'مقالة',
+    }));
 
-  const getStatusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      published: 'bg-green-100 text-green-800',
-      draft: 'bg-yellow-100 text-yellow-800',
-      archived: 'bg-gray-100 text-gray-800',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getTypeBadge = (type: string) => {
-    const colors: Record<string, string> = {
-      story: 'bg-blue-100 text-blue-800',
-      article: 'bg-purple-100 text-purple-800',
-      hadith: 'bg-orange-100 text-orange-800',
-      dua: 'bg-pink-100 text-pink-800',
-    };
-    return colors[type] || 'bg-gray-100 text-gray-800';
-  };
-
-  if (loading) {
-    return <div className="p-8">جاري تحميل المحتوى...</div>;
+    return [...articles, ...stories].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+  } catch {
+    return [];
   }
+}
+
+export default async function ContentPage() {
+  await requireAdmin();
+  const content = await getRecentContent();
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">إدارة المحتوى</h1>
-          <p className="text-gray-600">إدارة جميع محتويات التطبيق</p>
-        </div>
-        <Button>إضافة محتوى جديد</Button>
+    <Container className="py-10 space-y-10 text-right">
+      <section className="space-y-2">
+        <h1 className="text-3xl font-bold text-brand-gold">إدارة المحتوى</h1>
+        <p className="arabic-muted leading-7">عرض وإدارة جميع محتويات المنصة</p>
+      </section>
+
+      <div className="flex gap-3">
+        <a
+          href="/admin"
+          className="rounded-lg border border-brand-gold/30 px-4 py-2 text-sm text-brand-cream/70 hover:border-brand-gold hover:text-brand-gold transition-colors"
+        >
+          إضافة قصة
+        </a>
+        <a
+          href="/admin"
+          className="rounded-lg border border-brand-gold/30 px-4 py-2 text-sm text-brand-cream/70 hover:border-brand-gold hover:text-brand-gold transition-colors"
+        >
+          إضافة إعدادات
+        </a>
       </div>
 
-      <div className="flex gap-2">
-        {(['all', 'published', 'draft'] as const).map((status) => (
-          <Button
-            key={status}
-            variant={filter === status ? 'primary' : 'outline'}
-            onClick={() => setFilter(status)}
-          >
-            {status === 'all' && 'الكل'}
-            {status === 'published' && 'منشور'}
-            {status === 'draft' && 'مسودة'}
-          </Button>
-        ))}
-      </div>
+      <section className="space-y-4">
+        <SectionHeader
+          title="أحدث المحتوى"
+          subtitle={`${content.length} عنصر`}
+        />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>المحتوى ({filteredContent.length})</CardTitle>
-          <CardDescription>جميع محتويات التطبيق والحالة</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-right py-3 px-4 font-semibold">العنوان</th>
-                  <th className="text-right py-3 px-4 font-semibold">النوع</th>
-                  <th className="text-right py-3 px-4 font-semibold">الحالة</th>
-                  <th className="text-right py-3 px-4 font-semibold">المشاهدات</th>
-                  <th className="text-right py-3 px-4 font-semibold">التاريخ</th>
-                  <th className="text-right py-3 px-4 font-semibold">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredContent.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4">{item.title}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getTypeBadge(item.type)}`}>
-                        {item.type}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(item.status)}`}>
-                        {item.status === 'published' && 'منشور'}
-                        {item.status === 'draft' && 'مسودة'}
-                        {item.status === 'archived' && 'أرشيف'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{item.views.toLocaleString('ar-SA')}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
-                      {new Date(item.updatedAt).toLocaleDateString('ar-SA')}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">تعديل</Button>
-                        <Button variant="outline" size="sm">حذف</Button>
-                      </div>
-                    </td>
+        {content.length === 0 ? (
+          <Card className="p-8 text-center">
+            <p className="arabic-muted">لا يوجد محتوى بعد. ابدأ بإضافة قصص أو مقالات من لوحة التحكم الرئيسية.</p>
+          </Card>
+        ) : (
+          <Card className="overflow-hidden p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-right">
+                <thead>
+                  <tr className="border-b border-brand-gold/15 bg-black/20">
+                    <th className="px-5 py-3 text-brand-gold/70 font-semibold">العنوان</th>
+                    <th className="px-5 py-3 text-brand-gold/70 font-semibold w-24">النوع</th>
+                    <th className="px-5 py-3 text-brand-gold/70 font-semibold w-24">الحالة</th>
+                    <th className="px-5 py-3 text-brand-gold/70 font-semibold w-28">المشاهدات</th>
+                    <th className="px-5 py-3 text-brand-gold/70 font-semibold w-36">التاريخ</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                </thead>
+                <tbody>
+                  {content.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="border-b border-brand-gold/8 hover:bg-brand-gold/5 transition-colors"
+                    >
+                      <td className="px-5 py-3 text-brand-cream/80 font-medium">{item.title}</td>
+                      <td className="px-5 py-3">
+                        <Badge variant="outline" className="text-xs">{item.type}</Badge>
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge
+                          variant={item.published ? 'secondary' : 'outline'}
+                          className={item.published ? 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10' : 'text-amber-300 border-amber-500/30 bg-amber-500/10'}
+                        >
+                          {item.published ? 'منشور' : 'مسودة'}
+                        </Badge>
+                      </td>
+                      <td className="px-5 py-3 text-brand-cream/50 tabular-nums">
+                        {item.views > 0 ? item.views.toLocaleString('ar-EG') : '—'}
+                      </td>
+                      <td className="px-5 py-3 text-brand-cream/50 text-xs">
+                        {new Date(item.created_at).toLocaleDateString('ar-SA')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
+      </section>
+    </Container>
   );
 }
