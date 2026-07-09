@@ -1,34 +1,62 @@
 import { z } from "zod";
 
 export const envSchema = z.object({
+  // PostgreSQL Database
+  POSTGRES_URL: z.string().optional().or(z.literal("")),
+  POSTGRES_PRISMA_URL: z.string().optional().or(z.literal("")),
+  POSTGRES_URL_NON_POOLING: z.string().optional().or(z.literal("")),
+  POSTGRES_USER: z.string().optional(),
+  POSTGRES_HOST: z.string().optional(),
+  POSTGRES_PASSWORD: z.string().optional(),
+  POSTGRES_DATABASE: z.string().optional(),
+
+  // Supabase
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional().or(z.literal("")),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_URL: z.string().url().optional().or(z.literal("")),
   SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
   SUPABASE_SECRET_KEY: z.string().optional(),
-  NEXT_PUBLIC_SITE_URL: z.string().url().optional().or(z.literal("")),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
-  DATABASE_URL: z.string().url().optional().or(z.literal("")),
-  POSTGRES_URL: z.string().url().optional().or(z.literal("")),
-  POSTGRES_PRISMA_URL: z.string().url().optional().or(z.literal("")),
-  POSTGRES_URL_NON_POOLING: z.string().url().optional().or(z.literal("")),
+  SUPABASE_JWT_SECRET: z.string().optional(),
+
+  // Database
+  DATABASE_URL: z.string().optional().or(z.literal("")),
+
+  // Site Configuration
+  NEXT_PUBLIC_SITE_URL: z.string().url().optional().or(z.literal("")),
   AUTH_CALLBACK_URL: z.string().url().optional().or(z.literal("")),
-  GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().optional(),
-  AWS_S3_ACCESS_KEY_ID: z.string().optional(),
-  AWS_S3_SECRET_ACCESS_KEY: z.string().optional(),
-  AWS_S3_BUCKET_NAME: z.string().optional(),
-  AWS_S3_REGION: z.string().optional(),
-  QURAN_API_BASE_URL: z.string().url().optional(),
-  QURAN_AUDIO_CDN_URL: z.string().url().optional(),
-  HADITH_API_BASE_URL: z.string().url().optional(),
+
+  // YouTube Integration
+  YOUTUBE_REFRESH_TOKEN: z.string().optional(),
   YOUTUBE_API_KEY: z.string().optional(),
   YOUTUBE_CHANNEL_ID: z.string().optional(),
-  YOUTUBE_PLAYLIST_ID: z.string().optional(),
+
+  // Google OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().optional(),
+
+  // Facebook Integration
+  FACEBOOK_APP_ID: z.string().optional(),
+  FACEBOOK_APP_SECRET: z.string().optional(),
+  FACEBOOK_PAGE_ACCESS_TOKEN: z.string().optional(),
+  FACEBOOK_PAGE_ID: z.string().optional(),
+
+  // Quran & Islamic Content APIs
+  NEXT_PUBLIC_QURAN_API: z.string().optional(),
+  NEXT_PUBLIC_MP3QURAN_API: z.string().url().optional(),
+  NEXT_PUBLIC_QURAN_FOUNDATION_API: z.string().url().optional(),
+  NEXT_PUBLIC_HADITH_API: z.string().optional(),
+  NEXT_PUBLIC_TAFSIR_API: z.string().url().optional(),
+  NEXT_PUBLIC_AZKAR_API: z.string().url().optional(),
+  HADITH_API_BASE_URL: z.string().optional(),
+  QURAN_API_BASE_URL: z.string().optional(),
+  QURAN_AUDIO_CDN_URL: z.string().optional(),
+
+  // Gemini AI
+  GEMINI_MODEL: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
