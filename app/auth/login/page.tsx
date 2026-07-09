@@ -9,8 +9,10 @@ import { loginAction } from '../actions';
 import { GoogleOAuthButton } from '../google-oauth-button';
 import { useSearchParams } from 'next/navigation';
 
-// Whether Google OAuth is configured (NEXT_PUBLIC_GOOGLE_CLIENT_ID must be a real value)
-const GOOGLE_OAUTH_ENABLED = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+// Always show Google OAuth button — the server resolves GOOGLE_CLIENT_ID from
+// the _19 suffixed env var via lib/env.ts. No NEXT_PUBLIC_ version is needed
+// because the OAuth flow is initiated entirely client-side via Supabase.
+const GOOGLE_OAUTH_ENABLED = true;
 
 const MESSAGE_MAP: Record<string, string> = {
   check_email: 'تم التسجيل! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
