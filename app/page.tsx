@@ -26,6 +26,13 @@ const categories = [
   { label: 'مواقيت الصلاة', href: '/prayer-times', color: 'from-lime-900/60 to-lime-800/30' },
   { label: 'القبلة', href: '/qibla', color: 'from-fuchsia-900/60 to-fuchsia-800/30' },
   { label: 'الغزوات', href: '/battles', color: 'from-stone-900/60 to-stone-800/30' },
+  { label: 'الفتوحات', href: '/conquests', color: 'from-amber-900/60 to-amber-800/30' },
+  { label: 'المداحون', href: '/tawasheeh', color: 'from-purple-900/60 to-purple-800/30' },
+  { label: 'القراء', href: '/reciters', color: 'from-emerald-800/60 to-emerald-700/30' },
+  { label: 'إذاعة القرآن', href: '/radio', color: 'from-blue-900/60 to-blue-800/30' },
+  { label: 'عداد التسبيح', href: '/tasbeeh', color: 'from-rose-900/60 to-rose-800/30' },
+  { label: 'قناة يوتيوب', href: '/youtube', color: 'from-red-900/60 to-red-800/30' },
+  { label: 'الفيديوهات', href: '/videos', color: 'from-neutral-900/60 to-neutral-800/30' },
 ];
 
 const sidebarLinks = [
@@ -44,6 +51,14 @@ const sidebarLinks = [
   { href: '/memorization', label: 'الحفظ' },
   { href: '/spiritual-ai', label: 'الرفيق الروحاني' },
   { href: '/poetry', label: 'الشعر' },
+  { href: '/battles', label: 'الغزوات' },
+  { href: '/conquests', label: 'الفتوحات' },
+  { href: '/tawasheeh', label: 'المداحون' },
+  { href: '/reciters', label: 'القراء' },
+  { href: '/radio', label: 'إذاعة القرآن' },
+  { href: '/tasbeeh', label: 'عداد التسبيح' },
+  { href: '/youtube', label: 'قناة يوتيوب' },
+  { href: '/videos', label: 'الفيديوهات' },
   { href: '/search', label: 'البحث' },
 ];
 

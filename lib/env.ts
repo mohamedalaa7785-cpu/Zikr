@@ -15,6 +15,13 @@ const rawEnv: Record<string, string | undefined> = {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY,
+  // Support numbered suffixed env vars (e.g. YOUTUBE_API_KEY_20) as fallback
+  YOUTUBE_API_KEY:
+    process.env.YOUTUBE_API_KEY ||
+    process.env.YOUTUBE_API_KEY_20,
+  YOUTUBE_CHANNEL_ID:
+    process.env.YOUTUBE_CHANNEL_ID ||
+    process.env.YOUTUBE_CHANNEL_ID_20,
 };
 
 const validatedEnv = validateEnv(rawEnv);
