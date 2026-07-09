@@ -32,16 +32,31 @@ export const envSchema = z.object({
   YOUTUBE_API_KEY: z.string().optional(),
   YOUTUBE_CHANNEL_ID: z.string().optional(),
 
-  // Google OAuth
+  // Google OAuth & Services
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_SHEETS_API_KEY: z.string().optional(),
+  GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
 
   // Facebook Integration
   FACEBOOK_APP_ID: z.string().optional(),
   FACEBOOK_APP_SECRET: z.string().optional(),
   FACEBOOK_PAGE_ACCESS_TOKEN: z.string().optional(),
   FACEBOOK_PAGE_ID: z.string().optional(),
+
+  // HeyGen Video Generation
+  HEYGEN_API_KEY: z.string().optional(),
+  HEYGEN_AVATAR_ID: z.string().optional(),
+
+  // Email Service
+  SENDGRID_API_KEY: z.string().optional(),
+  SENDGRID_FROM_EMAIL: z.string().optional(),
+
+  // Stripe (Optional Payments)
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
 
   // Quran & Islamic Content APIs
   NEXT_PUBLIC_QURAN_API: z.string().optional(),

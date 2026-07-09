@@ -50,7 +50,10 @@ export interface Video {
 export async function getArticleCategories(): Promise<ArticleCategory[]> {
   const rows = await supabaseServerAdminRequest<any[]>(
     '/rest/v1/article_categories?select=id,name_ar,name_en,slug,icon&published=eq.true&order=name_ar.asc'
-  ).catch(() => []);
+  ).catch((error) => {
+    console.error('[content] Failed to fetch article categories:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -70,7 +73,10 @@ export async function getArticles(categoryId?: string, limit = 20): Promise<Arti
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<any[]>(query).catch(() => []);
+  const rows = await supabaseServerAdminRequest<any[]>(query).catch((error) => {
+    console.error('[content] Failed to fetch articles:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -115,7 +121,10 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 export async function getVideoCategories(): Promise<VideoCategory[]> {
   const rows = await supabaseServerAdminRequest<any[]>(
     '/rest/v1/video_categories?select=id,name_ar,name_en,slug,icon&published=eq.true&order=name_ar.asc'
-  ).catch(() => []);
+  ).catch((error) => {
+    console.error('[content] Failed to fetch video categories:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -135,7 +144,10 @@ export async function getVideos(categoryId?: string, limit = 20): Promise<Video[
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<any[]>(query).catch(() => []);
+  const rows = await supabaseServerAdminRequest<any[]>(query).catch((error) => {
+    console.error('[content] Failed to fetch videos:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -203,7 +215,10 @@ export interface Dua {
 export async function getDuaCategories(): Promise<DuaCategory[]> {
   const rows = await supabaseServerAdminRequest<any[]>(
     '/rest/v1/dua_categories?select=id,name_ar,name_en,slug,icon&published=eq.true&order=name_ar.asc'
-  ).catch(() => []);
+  ).catch((error) => {
+    console.error('[content] Failed to fetch dua categories:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -223,7 +238,10 @@ export async function getDuas(categoryId?: string, limit = 50): Promise<Dua[]> {
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<any[]>(query).catch(() => []);
+  const rows = await supabaseServerAdminRequest<any[]>(query).catch((error) => {
+    console.error('[content] Failed to fetch duas:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -278,7 +296,10 @@ export interface Prophet {
 export async function getProphets(limit = 50): Promise<Prophet[]> {
   const rows = await supabaseServerAdminRequest<any[]>(
     '/rest/v1/prophets?select=*&published=eq.true&order=order_num.asc'
-  ).catch(() => []);
+  ).catch((error) => {
+    console.error('[content] Failed to fetch prophets:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -328,7 +349,10 @@ export interface ProphetSection {
 export async function getProphetSections(prophetId: string): Promise<ProphetSection[]> {
   const rows = await supabaseServerAdminRequest<any[]>(
     `/rest/v1/prophet_sections?select=*&prophet_id=eq.${prophetId}&order=order_num.asc`
-  ).catch(() => []);
+  ).catch((error) => {
+    console.error('[content] Failed to fetch prophet sections for', prophetId, ':', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
@@ -369,7 +393,10 @@ export async function getKidsContent(ageGroup?: string, type?: string, limit = 5
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<any[]>(query).catch(() => []);
+  const rows = await supabaseServerAdminRequest<any[]>(query).catch((error) => {
+    console.error('[content] Failed to fetch kids content:', error);
+    return [];
+  });
   
   return rows.map(r => ({
     id: r.id,
