@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Sun, Moon, BedDouble, Sunrise, BookOpen, type LucideIcon } from 'lucide-react';
 
-const adhkarData = {
+const adhkarData: Record<string, { title: string; icon: LucideIcon; items: { text: string; count: number; reward: string }[] }> = {
   morning: {
     title: 'أذكار الصباح',
-    icon: '🌅',
+    icon: Sun,
     items: [
       { text: 'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ', count: 1, reward: 'من قالها حين يصبح فقد شكر يومه' },
       { text: 'اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ', count: 1, reward: '' },
@@ -21,7 +22,7 @@ const adhkarData = {
   },
   evening: {
     title: 'أذكار المساء',
-    icon: '🌙',
+    icon: Moon,
     items: [
       { text: 'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ', count: 1, reward: '' },
       { text: 'اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ', count: 1, reward: '' },
@@ -32,7 +33,7 @@ const adhkarData = {
   },
   sleep: {
     title: 'أذكار النوم',
-    icon: '🛏️',
+    icon: BedDouble,
     items: [
       { text: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا', count: 1, reward: '' },
       { text: 'اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ', count: 3, reward: '' },
@@ -43,7 +44,7 @@ const adhkarData = {
   },
   wakeup: {
     title: 'أذكار الاستيقاظ',
-    icon: '☀️',
+    icon: Sunrise,
     items: [
       { text: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ', count: 1, reward: '' },
       { text: 'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ', count: 1, reward: 'غفرت ذنوبه وإن كانت مثل زبد البحر' },
@@ -51,7 +52,7 @@ const adhkarData = {
   },
   afterPrayer: {
     title: 'أذكار بعد الصلاة',
-    icon: '🕌',
+    icon: BookOpen,
     items: [
       { text: 'أَسْتَغْفِرُ اللَّهَ', count: 3, reward: '' },
       { text: 'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ', count: 1, reward: '' },
@@ -111,7 +112,7 @@ export default function AdhkarPage() {
             onClick={() => setSelectedCategory(key)}
             className="flex items-center gap-2"
           >
-            <span>{adhkarData[key].icon}</span>
+            {(() => { const Icon = adhkarData[key].icon; return <Icon className="h-4 w-4" />; })()}
             <span>{adhkarData[key].title}</span>
           </Button>
         ))}

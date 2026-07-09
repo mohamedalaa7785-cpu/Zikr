@@ -82,14 +82,18 @@ export const metadata = {
 };
 
 export default async function KidsPage() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('kids_content')
-    .select('*')
-    .eq('published', true)
-    .order('created_at', { ascending: false });
-
-  const content: KidsContent[] = data && data.length > 0 ? data : STATIC_CONTENT;
+  let content: KidsContent[] = STATIC_CONTENT;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('kids_content')
+      .select('*')
+      .eq('published', true)
+      .order('created_at', { ascending: false });
+    if (data && data.length > 0) content = data;
+  } catch {
+    // fall through to static content
+  }
 
   const byAgeGroup = (age: string) => content.filter((c) => c.age_group === age);
 

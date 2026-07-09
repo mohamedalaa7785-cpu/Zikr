@@ -1,6 +1,7 @@
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Mail, MessageCircle, Globe } from 'lucide-react';
 
 export default function ContactPage() {
   return (
@@ -17,21 +18,21 @@ export default function ContactPage() {
           <h2 className='text-xl text-brand-gold'>معلومات التواصل</h2>
           <div className='space-y-3 text-sm'>
             <div className='flex items-center gap-3'>
-              <span className='text-xl'>📧</span>
+              <Mail className='h-5 w-5 text-brand-gold/70 shrink-0' />
               <div>
                 <p className='arabic-muted'>البريد الإلكتروني</p>
                 <p className='text-brand-gold'>info@zikr.app</p>
               </div>
             </div>
             <div className='flex items-center gap-3'>
-              <span className='text-xl'>📱</span>
+              <MessageCircle className='h-5 w-5 text-brand-gold/70 shrink-0' />
               <div>
                 <p className='arabic-muted'>تطبيق تيليجرام</p>
                 <p className='text-brand-gold'>@zikr_app</p>
               </div>
             </div>
             <div className='flex items-center gap-3'>
-              <span className='text-xl'>🌐</span>
+              <Globe className='h-5 w-5 text-brand-gold/70 shrink-0' />
               <div>
                 <p className='arabic-muted'>الموقع الإلكتروني</p>
                 <p className='text-brand-gold'>zikr.app</p>

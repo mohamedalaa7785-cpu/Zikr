@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
+import { Swords } from 'lucide-react';
 
 type Battle = {
   id: string;
@@ -42,7 +43,7 @@ export default async function BattlesPage() {
         {battles.map((b) => (
           <Card key={b.id} className='space-y-3'>
             <div className='flex items-center gap-3'>
-              <div className='text-3xl'>⚔️</div>
+              <Swords className='h-6 w-6 text-brand-gold/70 shrink-0' />
               <div>
                 <h2 className='text-lg text-brand-gold'>{b.name_ar}</h2>
                 {b.date_hijri && <p className='text-xs text-emerald-200'>{b.date_hijri}</p>}

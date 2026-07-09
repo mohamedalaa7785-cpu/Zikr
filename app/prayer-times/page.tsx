@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
+import { Sunrise, Sun, Cloud, Sunset, Moon, type LucideIcon } from 'lucide-react';
 import { getPrayerTimes, getPrayerTimesByCity, getNextPrayer, getCurrentPrayer, getPrayerNameAr, formatPrayerTime } from '@/lib/services/prayer-times';
 import type { PrayerTimesResponse } from '@/lib/services/prayer-times';
 
@@ -106,12 +107,12 @@ export default function PrayerTimesPage() {
   const meta = prayerData?.data?.meta;
   const date = prayerData?.data?.date;
 
-  const prayersList = timings ? [
-    { name: 'Fajr', nameAr: 'الفجر', time: timings.Fajr, icon: '🌅' },
-    { name: 'Dhuhr', nameAr: 'الظهر', time: timings.Dhuhr, icon: '☀️' },
-    { name: 'Asr', nameAr: 'العصر', time: timings.Asr, icon: '🌤️' },
-    { name: 'Maghrib', nameAr: 'المغرب', time: timings.Maghrib, icon: '🌅' },
-    { name: 'Isha', nameAr: 'العشاء', time: timings.Isha, icon: '🌙' },
+  const prayersList: Array<{ name: string; nameAr: string; time: string; icon: LucideIcon }> = timings ? [
+    { name: 'Fajr', nameAr: 'الفجر', time: timings.Fajr, icon: Sunrise },
+    { name: 'Dhuhr', nameAr: 'الظهر', time: timings.Dhuhr, icon: Sun },
+    { name: 'Asr', nameAr: 'العصر', time: timings.Asr, icon: Cloud },
+    { name: 'Maghrib', nameAr: 'المغرب', time: timings.Maghrib, icon: Sunset },
+    { name: 'Isha', nameAr: 'العشاء', time: timings.Isha, icon: Moon },
   ] : [];
 
   return (
@@ -217,7 +218,7 @@ export default function PrayerTimesPage() {
                       : 'hover:border-brand-gold/30'
                   }`}
                 >
-                  <div className="text-4xl">{prayer.icon}</div>
+                  <prayer.icon className="h-8 w-8 text-brand-gold/80 mx-auto" />
                   <h3 className="text-xl font-bold text-brand-gold">{prayer.nameAr}</h3>
                   <p className="text-sm text-brand-cream/60">{prayer.name}</p>
                   <Badge variant="secondary" className="justify-center">
