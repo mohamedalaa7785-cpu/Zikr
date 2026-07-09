@@ -15,7 +15,7 @@ export async function GET(
     const { id } = await context.params;
     
     const result = await supabaseServerAdminRequest<VideoGenerationRequest>(
-      `/rest/v1/videos?id=eq.${id}&limit=1`
+      `/rest/v1/video_generation_requests?id=eq.${id}&limit=1`
     );
     
     if (!result || (Array.isArray(result) && result.length === 0)) {
@@ -68,7 +68,7 @@ export async function PATCH(
     if (errorDetails !== undefined) updateData.error_details = errorDetails;
     
     await supabaseServerAdminRequest(
-      `/rest/v1/videos?id=eq.${id}`,
+      `/rest/v1/video_generation_requests?id=eq.${id}`,
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

@@ -255,23 +255,23 @@ export default function AdminVideosPage() {
                   <p className="text-brand-cream/80 text-sm">{request.description}</p>
                   <div className="flex gap-4 text-sm text-brand-cream/60">
                     <span>📁 {request.category}</span>
-                    <span>📅 {new Date(request.createdAt).toLocaleDateString('ar-SA')}</span>
+                    <span>📅 {new Date(request.created_at).toLocaleDateString('ar-SA')}</span>
                   </div>
                 </div>
               </div>
 
               {/* Status Details */}
               <div className="grid grid-cols-2 gap-4 text-sm">
-                {request.youtubeId && (
+                {request.youtube_id && (
                   <div className="p-3 bg-red-500/10 rounded border border-red-500/30">
                     <p className="text-red-400 font-medium">YouTube</p>
-                    <p className="text-red-300/70 text-xs break-all">{request.youtubeId}</p>
+                    <p className="text-red-300/70 text-xs break-all">{request.youtube_id}</p>
                   </div>
                 )}
-                {request.facebookId && (
+                {request.facebook_id && (
                   <div className="p-3 bg-blue-500/10 rounded border border-blue-500/30">
                     <p className="text-blue-400 font-medium">Facebook</p>
-                    <p className="text-blue-300/70 text-xs break-all">{request.facebookId}</p>
+                    <p className="text-blue-300/70 text-xs break-all">{request.facebook_id}</p>
                   </div>
                 )}
               </div>
@@ -401,35 +401,47 @@ export default function AdminVideosPage() {
                 <div>
                   <p className="text-brand-cream/60 text-sm">تاريخ الإنشاء</p>
                   <p className="text-brand-cream/80 text-sm">
-                    {new Date(detailModal.video.createdAt).toLocaleDateString('ar-SA')}
+                    {new Date(detailModal.video.created_at).toLocaleDateString('ar-SA')}
                   </p>
                 </div>
                 <div>
                   <p className="text-brand-cream/60 text-sm">آخر تحديث</p>
                   <p className="text-brand-cream/80 text-sm">
-                    {new Date(detailModal.video.updatedAt).toLocaleDateString('ar-SA')}
+                    {new Date(detailModal.video.updated_at).toLocaleDateString('ar-SA')}
                   </p>
                 </div>
               </div>
 
-              {detailModal.video.youtubeId && (
+              {detailModal.video.youtube_id && (
                 <div>
                   <p className="text-brand-cream/60 text-sm">معرف YouTube</p>
-                  <p className="text-red-400 font-mono break-all">{detailModal.video.youtubeId}</p>
+                  <p className="text-red-400 font-mono break-all">{detailModal.video.youtube_id}</p>
                 </div>
               )}
 
-              {detailModal.video.facebookId && (
+              {detailModal.video.facebook_id && (
                 <div>
                   <p className="text-brand-cream/60 text-sm">معرف Facebook</p>
-                  <p className="text-blue-400 font-mono break-all">{detailModal.video.facebookId}</p>
+                  <p className="text-blue-400 font-mono break-all">{detailModal.video.facebook_id}</p>
+                </div>
+              )}
+
+              {detailModal.video.error_message && (
+                <div>
+                  <p className="text-brand-cream/60 text-sm">رسالة الخطأ</p>
+                  <p className="text-red-400 text-sm">{detailModal.video.error_message}</p>
+                  {detailModal.video.error_details && (
+                    <p className="text-red-300/70 text-xs break-all">{detailModal.video.error_details}</p>
+                  )}
                 </div>
               )}
 
               <div>
                 <p className="text-brand-cream/60 text-sm">المحتوى</p>
                 <pre className="bg-black/50 p-3 rounded border border-brand-gold/30 text-xs overflow-x-auto text-brand-cream/70">
-                  {detailModal.video.content}
+                  {typeof detailModal.video.content === 'string'
+                    ? detailModal.video.content
+                    : JSON.stringify(detailModal.video.content, null, 2)}
                 </pre>
               </div>
             </div>

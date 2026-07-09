@@ -13,21 +13,33 @@ export async function createVideoGenerationRequest(data: {
   content: string;
 }): Promise<VideoGenerationRequest | null> {
   try {
-    const result = await supabaseServerAdminRequest<VideoGenerationRequest>(
-      '/rest/v1/videos',
+    // content column is jsonb — parse string input so it is stored as JSON
+    let content: unknown = data.content;
+    if (typeof content === 'string') {
+      try {
+        content = JSON.parse(content);
+      } catch {
+        content = { text: data.content };
+      }
+    }
+    const result = await supabaseServerAdminRequest<VideoGenerationRequest[]>(
+      '/rest/v1/video_generation_requests',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation',
+        },
         body: JSON.stringify({
           title: data.title,
           description: data.description,
           category: data.category,
-          content: data.content,
+          content,
           status: 'pending',
         }),
       }
     );
-    return result || null;
+    return (Array.isArray(result) ? result[0] : result) || null;
   } catch (error) {
     console.error('[video-automation] Failed to create video request:', error);
     return null;
@@ -40,11 +52,26 @@ export async function createVideoGenerationRequest(data: {
 export async function getPendingVideoRequests(): Promise<VideoGenerationRequest[]> {
   try {
     const results = await supabaseServerAdminRequest<VideoGenerationRequest[]>(
-      '/rest/v1/videos?status=eq.pending&limit=100'
+      '/rest/v1/video_generation_requests?status=eq.pending&order=created_at.desc&limit=100'
     );
     return results || [];
   } catch (error) {
     console.error('[video-automation] Failed to fetch pending requests:', error);
+    return [];
+  }
+}
+
+/**
+ * Get all video requests (any status) for the admin dashboard
+ */
+export async function getAllVideoRequests(): Promise<VideoGenerationRequest[]> {
+  try {
+    const results = await supabaseServerAdminRequest<VideoGenerationRequest[]>(
+      '/rest/v1/video_generation_requests?order=created_at.desc&limit=200'
+    );
+    return results || [];
+  } catch (error) {
+    console.error('[video-automation] Failed to fetch video requests:', error);
     return [];
   }
 }
@@ -58,12 +85,12 @@ export async function updateVideoRequestStatus(
   metadata?: { youtubeId?: string; facebookId?: string }
 ): Promise<boolean> {
   try {
-    const body: Record<string, unknown> = { status };
-    if (metadata?.youtubeId) body.youtubeId = metadata.youtubeId;
-    if (metadata?.facebookId) body.facebookId = metadata.facebookId;
+    const body: Record<string, unknown> = { status, updated_at: new Date().toISOString() };
+    if (metadata?.youtubeId) body.youtube_id = metadata.youtubeId;
+    if (metadata?.facebookId) body.facebook_id = metadata.facebookId;
 
     await supabaseServerAdminRequest(
-      `/rest/v1/videos?id=eq.${videoId}`,
+      `/rest/v1/video_generation_requests?id=eq.${videoId}`,
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -83,7 +110,7 @@ export async function updateVideoRequestStatus(
 export function generateYoutubeMetadata(request: VideoGenerationRequest) {
   return {
     title: request.title,
-    description: request.description,
+    description: request.description ?? '',
     tags: ['islamic', 'quran', 'hadith', 'dua', 'adhkar'],
     categoryId: '27', // Education
   };
@@ -95,7 +122,7 @@ export function generateYoutubeMetadata(request: VideoGenerationRequest) {
 export function generateFacebookMetadata(request: VideoGenerationRequest) {
   return {
     title: request.title,
-    description: request.description,
+    description: request.description ?? '',
     tags: ['islamic', 'quran', 'hadith', 'dua', 'adhkar'],
   };
 }
@@ -236,7 +263,7 @@ export async function generateVideoWithHeyGen(
             },
             voice: {
               type: 'text',
-              input_text: request.description,
+              input_text: request.description ?? request.title,
               voice_id: process.env.HEYGEN_VOICE_ID || 'default',
             },
           },
@@ -280,7 +307,7 @@ export async function processVideoGenerationRequest(
       await updateVideoRequestStatus(request.id, 'failed');
       // Update with error details
       await supabaseServerAdminRequest(
-        `/rest/v1/videos?id=eq.${request.id}`,
+        `/rest/v1/video_generation_requests?id=eq.${request.id}`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -329,7 +356,7 @@ export async function processVideoGenerationRequest(
     await updateVideoRequestStatus(request.id, 'failed');
     // Update with error details
     await supabaseServerAdminRequest(
-      `/rest/v1/videos?id=eq.${request.id}`,
+      `/rest/v1/video_generation_requests?id=eq.${request.id}`,
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdminApi } from '@/lib/services/admin';
-import { getPendingVideoRequests } from '@/lib/services/video-automation';
+import { getAllVideoRequests } from '@/lib/services/video-automation';
 
 export async function GET() {
   try {
@@ -8,7 +8,7 @@ export async function GET() {
     if (!auth.ok) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
-    const requests = await getPendingVideoRequests();
+    const requests = await getAllVideoRequests();
     return NextResponse.json(requests);
   } catch (error) {
     console.error('[api] Failed to fetch video requests:', error);

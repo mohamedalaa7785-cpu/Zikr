@@ -98,6 +98,37 @@ export const supabaseServerAnonRequest = <T>(path: string, init?: RequestInit) =
 export const supabaseServerAdminRequest = <T>(path: string, init?: RequestInit) =>
   restRequest<T>(path, init, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+/**
+ * Exact row count of a table (service-role, bypasses RLS).
+ * Uses a HEAD request with `Prefer: count=exact` and parses the Content-Range header.
+ */
+export async function supabaseServerAdminCount(table: string): Promise<number> {
+  const { url, anonKey } = getEnv();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? anonKey;
+  try {
+    const res = await fetch(`${url}/rest/v1/${table}?select=id`, {
+      method: 'HEAD',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        Prefer: 'count=exact',
+      },
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      console.error(`[supabase] Count failed for ${table}: HTTP ${res.status}`);
+      return 0;
+    }
+    // Content-Range: 0-24/3573 → total after the slash
+    const range = res.headers.get('content-range') ?? '';
+    const total = Number(range.split('/')[1]);
+    return Number.isFinite(total) ? total : 0;
+  } catch (error) {
+    console.error(`[supabase] Count failed for ${table}:`, error);
+    return 0;
+  }
+}
+
 /** Legacy: read the access token from the cookie store. */
 export async function getServerSessionToken() {
   const store = await cookies();
