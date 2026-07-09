@@ -1,12 +1,9 @@
-'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 interface KidsContent {
   id: string;
@@ -33,121 +30,124 @@ const ageGroupLabels: Record<string, string> = {
   '13-15': '13-15 سنة',
 };
 
-export default function KidsPage() {
-  const [content, setContent] = useState<KidsContent[]>([]);
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const supabase = createBrowserSupabaseClient();
+// Static fallback content shown when DB is empty
+const STATIC_CONTENT: KidsContent[] = [
+  {
+    id: 'story-ibrahim',
+    title_ar: 'قصة سيدنا إبراهيم عليه السلام',
+    slug: 'story-ibrahim',
+    type: 'story',
+    age_group: '6-8',
+  },
+  {
+    id: 'story-yunus',
+    title_ar: 'قصة سيدنا يونس عليه السلام',
+    slug: 'story-yunus',
+    type: 'story',
+    age_group: '6-8',
+  },
+  {
+    id: 'prayer-before-sleep',
+    title_ar: 'دعاء النوم للأطفال',
+    slug: 'prayer-before-sleep',
+    type: 'prayer',
+    age_group: '3-5',
+  },
+  {
+    id: 'wudu-steps',
+    title_ar: 'خطوات الوضوء',
+    slug: 'wudu-steps',
+    type: 'wudu',
+    age_group: '6-8',
+  },
+  {
+    id: 'quiz-pillars',
+    title_ar: 'اختبار أركان الإسلام',
+    slug: 'quiz-pillars',
+    type: 'quiz',
+    age_group: '9-12',
+  },
+  {
+    id: 'story-musa',
+    title_ar: 'قصة سيدنا موسى عليه السلام',
+    slug: 'story-musa',
+    type: 'story',
+    age_group: '9-12',
+  },
+];
 
-  useEffect(() => {
-    const fetchContent = async () => {
-      try {
-        setLoading(true);
-        let query = supabase
-          .from('kids_content')
-          .select('*')
-          .eq('published', true)
-          .order('created_at', { ascending: false });
+export const metadata = {
+  title: 'قسم الأطفال | ذكر',
+  description: 'محتوى إسلامي تعليمي وترفيهي آمن ومناسب للأطفال',
+};
 
-        if (selectedAgeGroup) query = query.eq('age_group', selectedAgeGroup);
-        if (selectedType) query = query.eq('type', selectedType);
+export default async function KidsPage() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('kids_content')
+    .select('*')
+    .eq('published', true)
+    .order('created_at', { ascending: false });
 
-        const { data } = await query;
-        setContent(data ?? []);
-      } catch {
-        setContent([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchContent();
-  }, [selectedAgeGroup, selectedType]);
+  const content: KidsContent[] = data && data.length > 0 ? data : STATIC_CONTENT;
+
+  const byAgeGroup = (age: string) => content.filter((c) => c.age_group === age);
 
   return (
-    <Container className="py-12 space-y-8">
-      <div className="text-center space-y-4">
+    <Container className="py-12 space-y-12">
+      <section className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-brand-gold">قسم الأطفال</h1>
-        <p className="text-brand-cream/70 max-w-2xl mx-auto">
-          محتوى تعليمي وترفيهي آمن ومناسب للأطفال
+        <p className="text-brand-cream/70 max-w-2xl mx-auto text-lg leading-relaxed">
+          محتوى تعليمي وترفيهي آمن ومناسب للأطفال المسلمين
         </p>
-      </div>
+      </section>
 
-      <div className="space-y-3">
-        <h3 className="text-center text-brand-gold font-bold">اختر فئة العمر:</h3>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button variant={!selectedAgeGroup ? 'primary' : 'outline'} onClick={() => setSelectedAgeGroup(null)}>
-            الكل
-          </Button>
-          {Object.entries(ageGroupLabels).map(([key, label]) => (
-            <Button
-              key={key}
-              variant={selectedAgeGroup === key ? 'primary' : 'outline'}
-              onClick={() => setSelectedAgeGroup(key)}
-            >
+      {Object.entries(ageGroupLabels).map(([age, label]) => {
+        const items = byAgeGroup(age);
+        if (items.length === 0) return null;
+        return (
+          <section key={age} className="space-y-6">
+            <h2 className="text-2xl font-bold text-brand-gold border-b border-brand-gold/20 pb-3">
               {label}
-            </Button>
-          ))}
-        </div>
-      </div>
+            </h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((item) => (
+                <Link key={item.id} href={`/kids/${item.slug}`}>
+                  <Card className="h-full overflow-hidden hover:border-brand-gold/50 transition-colors cursor-pointer flex flex-col">
+                    {item.featured_image_url && (
+                      <div className="w-full h-40 bg-brand-gold/10 overflow-hidden">
+                        <img
+                          src={item.featured_image_url}
+                          alt={item.title_ar}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    )}
+                    <div className="p-4 space-y-3 flex-1 flex flex-col">
+                      <h3 className="text-lg font-bold text-brand-gold leading-relaxed">
+                        {item.title_ar}
+                      </h3>
+                      <div className="flex gap-2 flex-wrap mt-auto">
+                        <span className="px-2 py-1 bg-brand-gold/20 text-brand-gold rounded text-xs font-medium">
+                          {typeLabels[item.type] ?? item.type}
+                        </span>
+                        <span className="px-2 py-1 bg-brand-emerald/20 text-brand-emerald rounded text-xs font-medium">
+                          {label}
+                        </span>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
-      <div className="space-y-3">
-        <h3 className="text-center text-brand-gold font-bold">نوع المحتوى:</h3>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button variant={!selectedType ? 'primary' : 'outline'} onClick={() => setSelectedType(null)}>
-            الكل
-          </Button>
-          {Object.entries(typeLabels).map(([key, label]) => (
-            <Button
-              key={key}
-              variant={selectedType === key ? 'primary' : 'outline'}
-              onClick={() => setSelectedType(key)}
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-12">
-          <p className="text-brand-cream/70">جاري التحميل...</p>
-        </div>
-      ) : content.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-brand-cream/70">لا يوجد محتوى متاح حالياً</p>
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {content.map((item) => (
-            <Link key={item.id} href={`/kids/${item.slug}`}>
-              <Card className="h-full overflow-hidden hover:border-brand-gold/50 transition-colors cursor-pointer flex flex-col">
-                {item.featured_image_url && (
-                  <div className="w-full h-40 bg-brand-gold/10 overflow-hidden">
-                    <img src={item.featured_image_url} alt={item.title_ar} className="w-full h-full object-cover hover:scale-105 transition-transform" />
-                  </div>
-                )}
-                <div className="p-4 space-y-3 flex-1 flex flex-col">
-                  <h3 className="text-lg font-bold text-brand-gold">{item.title_ar}</h3>
-                  <div className="flex gap-2 flex-wrap">
-                    <span className="px-2 py-1 bg-brand-gold/20 text-brand-gold rounded text-xs">
-                      {typeLabels[item.type]}
-                    </span>
-                    <span className="px-2 py-1 bg-brand-emerald/20 text-brand-emerald rounded text-xs">
-                      {ageGroupLabels[item.age_group]}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      <Card className="p-6 text-center space-y-3 bg-brand-gold/10">
-        <h3 className="text-xl font-bold text-brand-gold">محتوى آمن</h3>
-        <p className="text-brand-cream/90">
-          جميع محتويات قسم الأطفال تم اختيارها بعناية لتكون آمنة وتعليمية ومناسبة لأعمارهم
+      <Card className="p-6 text-center space-y-3 bg-brand-gold/10 border-brand-gold/30">
+        <h3 className="text-xl font-bold text-brand-gold">محتوى آمن ومعتمد</h3>
+        <p className="text-brand-cream/80 leading-relaxed">
+          جميع محتويات قسم الأطفال تم اختيارها بعناية لتكون آمنة ومفيدة ومناسبة لكل مرحلة عمرية
         </p>
       </Card>
     </Container>

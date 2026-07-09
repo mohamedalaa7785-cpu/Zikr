@@ -75,7 +75,7 @@ export default function TasbeehPage() {
   return (
     <Container className="py-12 space-y-12">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold">📿 عداد التسبيح</h1>
+        <h1 className="text-4xl font-bold text-brand-gold">عداد التسبيح</h1>
         <p className="text-brand-cream/70 max-w-2xl mx-auto">
           احسب أذكارك وتسبيحاتك بسهولة
         </p>
@@ -123,7 +123,6 @@ export default function TasbeehPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
-                  {item.icon && <span className="text-2xl">{item.icon}</span>}
                   <div>
                     <h3 className="text-lg font-bold text-brand-gold">{item.nameAr}</h3>
                     <p className="text-sm text-brand-cream/60">{item.name}</p>
@@ -169,8 +168,8 @@ export default function TasbeehPage() {
 
             {/* Completion Message */}
             {isTargetReached(item) && (
-              <div className="p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-center text-green-400">
-                ✅ تم إكمال العد!
+              <div className="p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-center text-green-400 font-bold">
+                تم إكمال العد
               </div>
             )}
           </Card>
@@ -214,10 +213,10 @@ export default function TasbeehPage() {
 
       {/* Tips */}
       <Card className="p-6 bg-brand-gold/10 border-brand-gold/30 space-y-3">
-        <h3 className="text-lg font-bold text-brand-gold">💡 نصائح</h3>
+        <h3 className="text-lg font-bold text-brand-gold">نصائح</h3>
         <ul className="space-y-2 text-brand-cream/80 text-sm">
           <li>• استخدم هذا العداد لتتبع أذكارك اليومية</li>
-          <li>• يتم حفظ عددك تلقائياً في متصفحك</li>
+          <li>• ��تم حفظ عددك تلقائياً في متصفحك</li>
           <li>• يمكنك إعادة تعيين العد في أي وقت</li>
           <li>• استمر في الأذكار بنية صادقة وقلب خاشع</li>
         </ul>
