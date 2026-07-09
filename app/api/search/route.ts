@@ -27,31 +27,31 @@ export async function GET(request: NextRequest) {
     const [quranResults, hadithResults, duaResults, storyResults] = await Promise.all([
       supabase
         .from('quran_surahs')
-        .select('id, name_ar as title, "quran" as type')
+        .select('id, title:name_ar')
         .ilike('name_ar', searchTerm)
         .limit(5),
       supabase
         .from('hadiths')
-        .select('id, text_ar as title, "hadith" as type')
+        .select('id, title:text_ar')
         .ilike('text_ar', searchTerm)
         .limit(5),
       supabase
         .from('duas')
-        .select('id, title_ar as title, "dua" as type')
+        .select('id, title:title_ar')
         .ilike('title_ar', searchTerm)
         .limit(5),
       supabase
         .from('stories')
-        .select('id, title, "story" as type')
+        .select('id, title')
         .ilike('title', searchTerm)
         .limit(5),
     ]);
 
     const results = [
-      ...(quranResults.data || []),
-      ...(hadithResults.data || []),
-      ...(duaResults.data || []),
-      ...(storyResults.data || []),
+      ...(quranResults.data || []).map((r) => ({ ...r, type: 'quran' })),
+      ...(hadithResults.data || []).map((r) => ({ ...r, type: 'hadith' })),
+      ...(duaResults.data || []).map((r) => ({ ...r, type: 'dua' })),
+      ...(storyResults.data || []).map((r) => ({ ...r, type: 'story' })),
     ];
 
     return NextResponse.json(results);
