@@ -12,7 +12,6 @@ export interface TasbeehItem {
   count: number;
   targetCount?: number;
   category: 'morning' | 'evening' | 'prayer' | 'custom';
-  icon?: string;
 }
 
 export interface TasbeehSession {
@@ -34,7 +33,6 @@ export const DEFAULT_TASBEEH_ITEMS: TasbeehItem[] = [
     count: 0,
     targetCount: 33,
     category: 'prayer',
-    icon: '✨',
   },
   {
     id: 'alhamdulillah',
@@ -45,7 +43,6 @@ export const DEFAULT_TASBEEH_ITEMS: TasbeehItem[] = [
     count: 0,
     targetCount: 33,
     category: 'prayer',
-    icon: '🙏',
   },
   {
     id: 'allahu-akbar',
@@ -56,7 +53,6 @@ export const DEFAULT_TASBEEH_ITEMS: TasbeehItem[] = [
     count: 0,
     targetCount: 33,
     category: 'prayer',
-    icon: '👑',
   },
   {
     id: 'la-ilaha-illallah',
@@ -67,7 +63,6 @@ export const DEFAULT_TASBEEH_ITEMS: TasbeehItem[] = [
     count: 0,
     targetCount: 1,
     category: 'prayer',
-    icon: '☪️',
   },
   {
     id: 'astaghfirullah',
@@ -78,7 +73,6 @@ export const DEFAULT_TASBEEH_ITEMS: TasbeehItem[] = [
     count: 0,
     targetCount: 100,
     category: 'morning',
-    icon: '🤲',
   },
 ];
 
@@ -93,7 +87,6 @@ export const MORNING_ADHKAR: TasbeehItem[] = [
     count: 0,
     targetCount: 1,
     category: 'morning',
-    icon: '📖',
   },
   {
     id: 'morning-2',
@@ -104,7 +97,6 @@ export const MORNING_ADHKAR: TasbeehItem[] = [
     count: 0,
     targetCount: 100,
     category: 'morning',
-    icon: '✨',
   },
   {
     id: 'morning-3',
@@ -115,7 +107,6 @@ export const MORNING_ADHKAR: TasbeehItem[] = [
     count: 0,
     targetCount: 3,
     category: 'morning',
-    icon: '🛡️',
   },
 ];
 
@@ -130,7 +121,6 @@ export const EVENING_ADHKAR: TasbeehItem[] = [
     count: 0,
     targetCount: 1,
     category: 'evening',
-    icon: '📖',
   },
   {
     id: 'evening-2',
@@ -141,7 +131,6 @@ export const EVENING_ADHKAR: TasbeehItem[] = [
     count: 0,
     targetCount: 100,
     category: 'evening',
-    icon: '✨',
   },
   {
     id: 'evening-3',
@@ -152,7 +141,6 @@ export const EVENING_ADHKAR: TasbeehItem[] = [
     count: 0,
     targetCount: 1,
     category: 'evening',
-    icon: '🌙',
   },
 ];
 
