@@ -4,14 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { requireAdmin } from '@/lib/services/admin';
 import { runApiHealthChecks } from '@/lib/services/api-health';
-import { supabaseServerAdminRequest } from '@/lib/supabase/server';
+import { supabaseServerAdminCount } from '@/lib/supabase/server';
 import { saveCompetitionAction, saveMemorizationPlanAction, savePinnedMessageAction, saveSiteSettingAction, saveStoryAction } from './actions';
 
-type CountRow = { count: number };
-
 async function countTable(table: string) {
-  const rows = await supabaseServerAdminRequest<CountRow[]>(`/rest/v1/${table}?select=count`, { cache: 'no-store' }).catch(() => []);
-  return rows.length;
+  return supabaseServerAdminCount(table);
 }
 
 function Field(props: { name: string; label: string; type?: string; required?: boolean; placeholder?: string; textarea?: boolean; defaultValue?: string }) {

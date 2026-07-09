@@ -4,6 +4,16 @@ import postgres from 'postgres';
 import { getScriptEnv } from '../lib/env';
 
 const { DATABASE_URL } = getScriptEnv();
+
+// Guard: ensure DATABASE_URL is set before proceeding
+if (!DATABASE_URL) {
+  console.error('[audit-db] ERROR: DATABASE_URL environment variable is not set.');
+  console.error('[audit-db] This script requires a valid Postgres connection URL.');
+  console.error('[audit-db] Ensure .env.local or deployment env vars include DATABASE_URL.');
+  process.exitCode = 1;
+  process.exit(1);
+}
+
 const sql = postgres(DATABASE_URL, { prepare: false });
 
 type Row = Record<string, unknown>;

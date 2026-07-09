@@ -9,7 +9,7 @@ export const siteConfig = {
   keywords: ['قرآن', 'حديث', 'أذكار', 'إسلام', 'صلاة', 'قصص الأنبياء', 'ذكر', 'ZIKR'],
 };
 
-export const defaultOgImage = '/branding/logo-gold.webp';
+export const defaultOgImage = '/branding/logo-gold.png';
 
 export const staticRoutes = [
   '/',

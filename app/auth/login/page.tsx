@@ -9,6 +9,9 @@ import { loginAction } from '../actions';
 import { GoogleOAuthButton } from '../google-oauth-button';
 import { useSearchParams } from 'next/navigation';
 
+// Whether Google OAuth is configured (NEXT_PUBLIC_GOOGLE_CLIENT_ID must be a real value)
+const GOOGLE_OAUTH_ENABLED = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+
 const MESSAGE_MAP: Record<string, string> = {
   check_email: 'تم التسجيل! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
   reset_sent: 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.',
@@ -105,16 +108,20 @@ function LoginForm() {
         </Button>
       </form>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-brand-gold/20"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-brand-emeraldDeep px-4 arabic-muted">أو</span>
-        </div>
-      </div>
+      {GOOGLE_OAUTH_ENABLED && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-brand-gold/20"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-brand-emeraldDeep px-4 arabic-muted">أو</span>
+            </div>
+          </div>
 
-      <GoogleOAuthButton next={searchParams.get('next') || undefined} label="المتابعة باستخدام Google" />
+          <GoogleOAuthButton next={searchParams.get('next') || undefined} label="المتابعة باستخدام Google" />
+        </>
+      )}
 
       <p className="text-center text-sm arabic-muted">
         ليس لديك حساب؟{' '}
