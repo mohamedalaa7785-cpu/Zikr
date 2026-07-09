@@ -1,27 +1,163 @@
 import { envSchema, validateEnv } from "./env-validation";
 
-// Vercel Supabase integration exposes POSTGRES_URL but the app expects DATABASE_URL.
-// Fall back transparently so drizzle-kit and server actions both work.
+// ─── Numbered-suffix env var resolution ──────────────────────────────────────
+// Vercel integrations expose vars as NAME_19, NAME_22, etc. when multiple
+// projects share the same account. We resolve them here so the rest of the
+// app always sees bare names.
+// Priority: bare name → _19 suffix → _20 suffix → _22 suffix
+
+function r(...keys: Array<string | undefined>): string | undefined {
+  return keys.find((v) => v !== undefined && v !== "");
+}
+
+const e = process.env;
+
 const rawEnv: Record<string, string | undefined> = {
-  ...process.env,
-  DATABASE_URL:
-    process.env.DATABASE_URL ||
-    process.env.POSTGRES_URL ||
-    process.env.POSTGRES_URL_NON_POOLING ||
-    process.env.POSTGRES_PRISMA_URL,
-  NEXT_PUBLIC_SUPABASE_URL:
-    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY:
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY,
-  // Support numbered suffixed env vars (e.g. YOUTUBE_API_KEY_20) as fallback
-  YOUTUBE_API_KEY:
-    process.env.YOUTUBE_API_KEY ||
-    process.env.YOUTUBE_API_KEY_20,
-  YOUTUBE_CHANNEL_ID:
-    process.env.YOUTUBE_CHANNEL_ID ||
-    process.env.YOUTUBE_CHANNEL_ID_20,
+  ...e,
+
+  // ── PostgreSQL / Database ──────────────────────────────────────────────────
+  POSTGRES_URL: r(e.POSTGRES_URL, e.POSTGRES_URL_19),
+  POSTGRES_PRISMA_URL: r(e.POSTGRES_PRISMA_URL, e.POSTGRES_PRISMA_URL_19),
+  POSTGRES_URL_NON_POOLING: r(
+    e.POSTGRES_URL_NON_POOLING,
+    e.POSTGRES_URL_NON_POOLING_19
+  ),
+  POSTGRES_USER: r(e.POSTGRES_USER, e.POSTGRES_USER_19),
+  POSTGRES_HOST: r(e.POSTGRES_HOST, e.POSTGRES_HOST_19),
+  POSTGRES_PASSWORD: r(e.POSTGRES_PASSWORD, e.POSTGRES_PASSWORD_19),
+  POSTGRES_DATABASE: r(
+    e.POSTGRES_DATABASE,
+    e.POSTGRES_DATABASE_19,
+    // fallback to user name (common in Supabase)
+    e.POSTGRES_USER_19
+  ),
+
+  // ── DATABASE_URL ──────────────────────────────────────────────────────────
+  DATABASE_URL: r(
+    e.DATABASE_URL,
+    e.POSTGRES_URL,
+    e.POSTGRES_URL_19,
+    e.POSTGRES_URL_NON_POOLING,
+    e.POSTGRES_URL_NON_POOLING_19,
+    e.POSTGRES_PRISMA_URL,
+    e.POSTGRES_PRISMA_URL_19
+  ),
+
+  // ── Supabase ──────────────────────────────────────────────────────────────
+  NEXT_PUBLIC_SUPABASE_URL: r(
+    e.NEXT_PUBLIC_SUPABASE_URL,
+    e.SUPABASE_URL,
+    e.SUPABASE_URL_19
+  ),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: r(
+    e.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    e.SUPABASE_ANON_KEY,
+    e.SUPABASE_ANON_KEY_19,
+    e.SUPABASE_PUBLISHABLE_KEY,
+    e.SUPABASE_PUBLISHABLE_KEY_19
+  ),
+  SUPABASE_URL: r(e.SUPABASE_URL, e.SUPABASE_URL_19),
+  SUPABASE_ANON_KEY: r(
+    e.SUPABASE_ANON_KEY,
+    e.SUPABASE_ANON_KEY_19,
+    e.SUPABASE_PUBLISHABLE_KEY_19
+  ),
+  SUPABASE_SERVICE_ROLE_KEY: r(
+    e.SUPABASE_SERVICE_ROLE_KEY,
+    e.SUPABASE_SERVICE_ROLE_KEY_19
+  ),
+  SUPABASE_JWT_SECRET: r(e.SUPABASE_JWT_SECRET, e.SUPABASE_JWT_SECRET_19),
+  SUPABASE_SECRET_KEY: r(e.SUPABASE_SECRET_KEY, e.SUPABASE_SECRET_KEY_19),
+  SUPABASE_PUBLISHABLE_KEY: r(
+    e.SUPABASE_PUBLISHABLE_KEY,
+    e.SUPABASE_PUBLISHABLE_KEY_19
+  ),
+
+  // ── Site / Auth ───────────────────────────────────────────────────────────
+  // NEXT_PUBLIC_SITE_URL: use the known production URL when the env var is empty
+  NEXT_PUBLIC_SITE_URL: r(
+    e.NEXT_PUBLIC_SITE_URL,
+    e.NEXT_PUBLIC_SITE_URL_19,
+    "https://zikrmediaofficial.vercel.app"
+  ),
+  // AUTH_CALLBACK_URL should point to our app's /auth/callback, not Supabase's
+  AUTH_CALLBACK_URL: r(
+    e.AUTH_CALLBACK_URL,
+    // If the _19 value is Supabase's own endpoint, skip it and use the app URL
+    e.AUTH_CALLBACK_URL_19?.includes("supabase.co/auth/v1/callback")
+      ? undefined
+      : e.AUTH_CALLBACK_URL_19,
+    `${r(e.NEXT_PUBLIC_SITE_URL, "https://zikrmediaofficial.vercel.app")}/auth/callback`
+  ),
+
+  // ── Google OAuth ──────────────────────────────────────────────────────────
+  GOOGLE_CLIENT_ID: r(e.GOOGLE_CLIENT_ID, e.GOOGLE_CLIENT_ID_19),
+  GOOGLE_CLIENT_SECRET: r(e.GOOGLE_CLIENT_SECRET, e.GOOGLE_CLIENT_SECRET_19),
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: r(
+    e.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    e.GOOGLE_CLIENT_ID,
+    e.GOOGLE_CLIENT_ID_19
+  ),
+
+  // ── YouTube ───────────────────────────────────────────────────────────────
+  YOUTUBE_API_KEY: r(
+    e.YOUTUBE_API_KEY,
+    e.YOUTUBE_API_KEY_22,
+    e.YOUTUBE_API_KEY_20,
+    e.YOUTUBE_API_KEY_19
+  ),
+  YOUTUBE_CHANNEL_ID: r(
+    e.YOUTUBE_CHANNEL_ID,
+    e.YOUTUBE_CHANNEL_ID_22,
+    e.YOUTUBE_CHANNEL_ID_20,
+    e.YOUTUBE_CHANNEL_ID_19
+  ),
+  YOUTUBE_REFRESH_TOKEN: r(
+    e.YOUTUBE_REFRESH_TOKEN,
+    e.YOUTUBE_REFRESH_TOKEN_19
+  ),
+
+  // ── Gemini AI ─────────────────────────────────────────────────────────────
+  GEMINI_API_KEY: r(e.GEMINI_API_KEY, e.GEMINI_API_KEY_19),
+  GEMINI_MODEL: r(e.GEMINI_MODEL, e.GEMINI_MODEL_19, "gemini-2.5-flash"),
+
+  // ── Quran / Islamic content APIs ──────────────────────────────────────────
+  QURAN_API_BASE_URL: r(
+    e.QURAN_API_BASE_URL,
+    e.QURAN_API_BASE_URL_19,
+    e.NEXT_PUBLIC_QURAN_API
+  ),
+  QURAN_AUDIO_CDN_URL: r(
+    e.QURAN_AUDIO_CDN_URL,
+    e.QURAN_AUDIO_CDN_URL_19,
+    "https://cdn.islamic.network/quran/audio"
+  ),
+  HADITH_API_BASE_URL: r(
+    e.HADITH_API_BASE_URL,
+    e.HADITH_API_BASE_URL_19,
+    e.NEXT_PUBLIC_HADITH_API
+  ),
+  NEXT_PUBLIC_QURAN_API: r(
+    e.NEXT_PUBLIC_QURAN_API,
+    e.QURAN_API_BASE_URL_19,
+    e.QURAN_API_BASE_URL,
+    "https://api.alquran.cloud/v1"
+  ),
+  NEXT_PUBLIC_HADITH_API: r(
+    e.NEXT_PUBLIC_HADITH_API,
+    e.HADITH_API_BASE_URL_19,
+    e.HADITH_API_BASE_URL,
+    "https://hadithapi.com/api"
+  ),
+
+  // ── Facebook ──────────────────────────────────────────────────────────────
+  FACEBOOK_APP_ID: r(e.FACEBOOK_APP_ID, "1547748713614342"),
+  FACEBOOK_APP_SECRET: r(e.FACEBOOK_APP_SECRET, e.FACEBOOK_APP_SECRET_19),
+  FACEBOOK_PAGE_ACCESS_TOKEN: r(
+    e.FACEBOOK_PAGE_ACCESS_TOKEN,
+    e.FACEBOOK_PAGE_ACCESS_TOKEN_19
+  ),
+  FACEBOOK_PAGE_ID: r(e.FACEBOOK_PAGE_ID, "993431613855177"),
 };
 
 const validatedEnv = validateEnv(rawEnv);
@@ -45,9 +181,13 @@ export function getServerEnv() {
     AUTH_CALLBACK_URL: validatedEnv.AUTH_CALLBACK_URL || "",
     GEMINI_API_KEY: validatedEnv.GEMINI_API_KEY || "",
     GEMINI_MODEL: validatedEnv.GEMINI_MODEL || "gemini-2.5-flash",
-    QURAN_API_BASE_URL: validatedEnv.QURAN_API_BASE_URL || "",
-    QURAN_AUDIO_CDN_URL: validatedEnv.QURAN_AUDIO_CDN_URL || "",
-    HADITH_API_BASE_URL: validatedEnv.HADITH_API_BASE_URL || "",
+    QURAN_API_BASE_URL:
+      validatedEnv.QURAN_API_BASE_URL || "https://api.alquran.cloud/v1",
+    QURAN_AUDIO_CDN_URL:
+      validatedEnv.QURAN_AUDIO_CDN_URL ||
+      "https://cdn.islamic.network/quran/audio",
+    HADITH_API_BASE_URL:
+      validatedEnv.HADITH_API_BASE_URL || "https://hadithapi.com/api",
     YOUTUBE_API_KEY: validatedEnv.YOUTUBE_API_KEY || "",
     YOUTUBE_CHANNEL_ID: validatedEnv.YOUTUBE_CHANNEL_ID || "",
     YOUTUBE_REFRESH_TOKEN: validatedEnv.YOUTUBE_REFRESH_TOKEN || "",
@@ -85,13 +225,11 @@ export function getEnvAudit() {
       "NEXT_PUBLIC_SITE_URL",
       "SUPABASE_SERVICE_ROLE_KEY",
       "DATABASE_URL",
-      "POSTGRES_URL",
-      "POSTGRES_URL_NON_POOLING",
-      "POSTGRES_PRISMA_URL",
       "AUTH_CALLBACK_URL",
       "GEMINI_API_KEY",
       "GEMINI_MODEL",
       "YOUTUBE_API_KEY",
+      "YOUTUBE_CHANNEL_ID",
       "YOUTUBE_REFRESH_TOKEN",
       "GOOGLE_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",
