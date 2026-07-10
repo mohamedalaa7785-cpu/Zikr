@@ -50,6 +50,7 @@ export const statusEnum = pgEnum("status", ["pending", "completed", "failed"]);
 // User-owned tables
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(),
+  email: text("email"),
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
   locale: text("locale").notNull().default("ar"),
