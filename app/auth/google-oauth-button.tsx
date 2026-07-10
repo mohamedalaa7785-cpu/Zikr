@@ -27,10 +27,14 @@ export function GoogleOAuthButton({
           ? next
           : '/profile';
 
-      const redirectUri = buildOAuthRedirectUri(
-        process.env.NEXT_PUBLIC_SITE_URL || window.location.origin,
-        safeNext
-      );
+      // Always prefer the configured NEXT_PUBLIC_SITE_URL so the redirect
+      // matches the allowed callback URLs registered in Supabase/Google Cloud.
+      // Fall back to window.location.origin only in local dev.
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        (typeof window !== "undefined" ? window.location.origin : "");
+
+      const redirectUri = buildOAuthRedirectUri(siteUrl, safeNext);
 
       const client = createBrowserSupabaseClient();
 

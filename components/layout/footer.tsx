@@ -1,6 +1,7 @@
 import { Container } from '@/components/ui/container';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { BookOpen, Scroll, Star } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -11,9 +12,9 @@ export function Footer() {
           <h3 className='text-2xl font-bold text-brand-gold'>ZIKR | ذِكرٌ</h3>
           <p className='text-sm leading-relaxed text-brand-cream/60'>منصة روحانية شاملة تهدف لربط المسلم بكتاب الله وسنة رسوله ﷺ عبر تجربة تقنية حديثة، فاخرة، وميسرة للجميع.</p>
           <div className="flex gap-4 pt-2">
-            <span className="text-2xl grayscale hover:grayscale-0 cursor-pointer transition-all">🕌</span>
-            <span className="text-2xl grayscale hover:grayscale-0 cursor-pointer transition-all">📜</span>
-            <span className="text-2xl grayscale hover:grayscale-0 cursor-pointer transition-all">✨</span>
+            <BookOpen className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
+            <Scroll className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
+            <Star className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
           </div>
         </div>
         

@@ -9,8 +9,8 @@ import { registerAction } from '../actions';
 import { GoogleOAuthButton } from '../google-oauth-button';
 import { useSearchParams } from 'next/navigation';
 
-// Whether Google OAuth is configured (NEXT_PUBLIC_GOOGLE_CLIENT_ID must be a real value)
-const GOOGLE_OAUTH_ENABLED = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+// Always show Google OAuth — GOOGLE_CLIENT_ID is resolved server-side via lib/env.ts.
+const GOOGLE_OAUTH_ENABLED = true;
 
 function RegisterForm() {
   const searchParams = useSearchParams();
@@ -52,7 +52,7 @@ function RegisterForm() {
 
   if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
 
-  const googleClientId = GOOGLE_OAUTH_ENABLED;
+
 
   return (
     <Card className="mx-auto max-w-md space-y-6 text-right">
@@ -116,13 +116,7 @@ function RegisterForm() {
         </div>
       </div>
 
-      {googleClientId ? (
-        <GoogleOAuthButton next={searchParams.get('next') || undefined} label="إنشاء حساب عبر Google" />
-      ) : (
-        <p className="text-center text-xs italic text-brand-gold/50">
-          التسجيل عبر Google غير متوفر حالياً
-        </p>
-      )}
+      <GoogleOAuthButton next={searchParams.get('next') || undefined} label="إنشاء حساب عبر Google" />
 
       <p className="text-center text-sm arabic-muted">
         لديك حساب بالفعل؟{' '}

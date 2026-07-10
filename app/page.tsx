@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
-import { getPrayerTimes } from '@/lib/services/prayer-times';
+import { getPrayerTimes, getPrayerTimesByCity } from '@/lib/services/prayer-times';
 import type { PrayerTimes } from '@/lib/types/prayer';
 
 // ─── Navigation categories ────────────────────────────────────────────────────
@@ -26,6 +26,12 @@ const categories = [
   { label: 'مواقيت الصلاة', href: '/prayer-times', color: 'from-lime-900/60 to-lime-800/30' },
   { label: 'القبلة', href: '/qibla', color: 'from-fuchsia-900/60 to-fuchsia-800/30' },
   { label: 'الغزوات', href: '/battles', color: 'from-stone-900/60 to-stone-800/30' },
+  { label: 'الفتوحات', href: '/conquests', color: 'from-amber-900/60 to-amber-800/30' },
+  { label: 'المداحون', href: '/tawasheeh', color: 'from-purple-900/60 to-purple-800/30' },
+  { label: 'القراء', href: '/reciters', color: 'from-emerald-800/60 to-emerald-700/30' },
+  { label: 'إذاعة القرآن', href: '/radio', color: 'from-blue-900/60 to-blue-800/30' },
+  { label: 'عداد التسبيح', href: '/tasbeeh', color: 'from-rose-900/60 to-rose-800/30' },
+  { label: 'قناة يوتيوب', href: '/youtube', color: 'from-neutral-900/60 to-neutral-800/30' },
 ];
 
 const sidebarLinks = [
@@ -44,6 +50,13 @@ const sidebarLinks = [
   { href: '/memorization', label: 'الحفظ' },
   { href: '/spiritual-ai', label: 'الرفيق الروحاني' },
   { href: '/poetry', label: 'الشعر' },
+  { href: '/battles', label: 'الغزوات' },
+  { href: '/conquests', label: 'الفتوحات' },
+  { href: '/tawasheeh', label: 'المداحون' },
+  { href: '/reciters', label: 'القراء' },
+  { href: '/radio', label: 'إذاعة القرآن' },
+  { href: '/tasbeeh', label: 'عداد التسبيح' },
+  { href: '/youtube', label: 'قناة يوتيوب' },
   { href: '/search', label: 'البحث' },
 ];
 
@@ -92,6 +105,9 @@ export default function HomePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
+  const [prayerCity, setPrayerCity] = useState('Cairo');
+  const [cityInput, setCityInput] = useState('');
+  const [loadingPrayer, setLoadingPrayer] = useState(false);
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [activePrayer, setActivePrayer] = useState('');
   const [nextPrayer, setNextPrayer] = useState('');
@@ -110,18 +126,47 @@ export default function HomePage() {
     }
   }, [currentTime, prayerTimes]);
 
+  // Fetch prayer times: try geolocation first, fall back to city name
+  const fetchPrayerByCity = useCallback(async (city: string) => {
+    setLoadingPrayer(true);
+    try {
+      const res = await getPrayerTimesByCity(city, 'Egypt');
+      if (res?.data?.timings) {
+        setPrayerTimes(res.data.timings as PrayerTimes);
+      }
+    } catch { /* silent */ } finally {
+      setLoadingPrayer(false);
+    }
+  }, []);
+
   useEffect(() => {
-    if (!('geolocation' in navigator)) return;
+    if (!('geolocation' in navigator)) {
+      fetchPrayerByCity(prayerCity);
+      return;
+    }
+    setLoadingPrayer(true);
     navigator.geolocation.getCurrentPosition(
       async ({ coords: { latitude, longitude } }) => {
         try {
           const res = await getPrayerTimes(latitude, longitude);
-          if (res?.data?.timings) setPrayerTimes(res.data.timings as PrayerTimes);
-        } catch { /* silent fail */ }
+          if (res?.data?.timings) {
+            setPrayerTimes(res.data.timings as PrayerTimes);
+          } else {
+            await fetchPrayerByCity(prayerCity);
+          }
+        } catch {
+          await fetchPrayerByCity(prayerCity);
+        } finally {
+          setLoadingPrayer(false);
+        }
       },
-      () => {}
+      async () => {
+        // Permission denied or unavailable — use city fallback
+        await fetchPrayerByCity(prayerCity);
+      },
+      { timeout: 6000 }
     );
-  }, []);
+  }, [prayerCity, fetchPrayerByCity]);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -234,14 +279,42 @@ export default function HomePage() {
           {/* Prayer Times */}
           <section className="border-b border-brand-gold/15 px-4 py-10" aria-labelledby="prayer-times-heading">
             <Container className="space-y-5">
-              <div className="flex items-center justify-between">
-                <h2 id="prayer-times-heading" className="text-xl font-bold text-brand-gold">مواقيت الصلاة</h2>
-                <Link href="/prayer-times" className="text-xs text-brand-gold/60 hover:text-brand-gold transition-colors">
-                  عرض التفاصيل
-                </Link>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h2 id="prayer-times-heading" className="text-xl font-bold text-brand-gold">مواقيت الصلاة</h2>
+                  <p className="text-xs text-brand-cream/40 mt-0.5">{prayerCity}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const val = cityInput.trim();
+                      if (val) { setPrayerCity(val); setCityInput(''); }
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={cityInput}
+                      onChange={(e) => setCityInput(e.target.value)}
+                      placeholder="غيّر المدينة..."
+                      className="px-3 py-1.5 rounded-lg border border-brand-gold/20 bg-black/30 text-brand-cream text-xs placeholder:text-brand-cream/30 focus:outline-none focus:border-brand-gold/50 w-32"
+                      aria-label="اسم المدينة"
+                    />
+                    <button
+                      type="submit"
+                      className="px-3 py-1.5 rounded-lg border border-brand-gold/30 text-brand-gold text-xs hover:border-brand-gold/60 transition-colors"
+                    >
+                      بحث
+                    </button>
+                  </form>
+                  <Link href="/prayer-times" className="text-xs text-brand-gold/60 hover:text-brand-gold transition-colors whitespace-nowrap">
+                    التفاصيل
+                  </Link>
+                </div>
               </div>
 
-              {prayerTimes ? (
+              {prayerTimes && !loadingPrayer ? (
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                   {prayerNames.map(({ key, label }) => {
                     const isActive = activePrayer === key;

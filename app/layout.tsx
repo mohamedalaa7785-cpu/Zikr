@@ -49,7 +49,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='ar' dir={siteConfig.dir} className={`${notoNaskhArabic.variable} ${amiri.variable}`}>
+      <html lang='ar' dir={siteConfig.dir} className={`${notoNaskhArabic.variable} ${amiri.variable} bg-black`}>
       <head>
         <meta name='theme-color' content='#0A2A1E' />
         <meta name='mobile-web-app-capable' content='yes' />
