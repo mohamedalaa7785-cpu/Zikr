@@ -10,7 +10,7 @@ interface KidsContent {
   id: string;
   title_ar: string;
   slug: string;
-  type: 'story' | 'prayer' | 'wudu' | 'quiz' | 'game' | 'video';
+  type: 'story' | 'prayer' | 'wudu' | 'quiz' | 'game' | 'video' | 'memorize';
   age_group: '3-5' | '6-8' | '9-12' | '13-15';
   featured_image_url?: string;
 }
@@ -22,6 +22,7 @@ const typeLabels: Record<string, string> = {
   quiz: 'اختبار',
   game: 'لعبة',
   video: 'فيديو',
+  memorize: 'حفظ',
 };
 
 const ageGroupLabels: Record<string, string> = {

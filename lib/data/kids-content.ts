@@ -13,7 +13,7 @@ export interface KidsItem {
   title_ar: string;
   title_en: string;
   slug: string;
-  type: 'story' | 'prayer' | 'wudu' | 'quiz' | 'game' | 'video';
+  type: 'story' | 'prayer' | 'wudu' | 'quiz' | 'game' | 'video' | 'memorize';
   age_group: '3-5' | '6-8' | '9-12' | '13-15';
   content_ar?: string;
   quiz_data?: { questions: KidsQuizQuestion[] };
@@ -137,7 +137,7 @@ export const kidsContent: KidsItem[] = [
 ولا تنسَ أن:
 - تنام على جانبك الأيمن
 - تقرأ آية الكرسي
-- تقرأ سورة الإخلاص والفلق والناس ثلا�� مرات
+- تقرأ سورة الإخلاص والفلق والناس ثلا���� مرات
 - تنفض فراشك قبل النوم
 
 وعندما تستيقظ في الصباح قل:
@@ -573,7 +573,7 @@ export const kidsContent: KidsItem[] = [
     title_ar: 'خطة حفظ سورة الفاتحة',
     title_en: 'Memorize Al-Fatiha Plan',
     slug: 'memorize-fatiha',
-    type: 'story',
+    type: 'memorize',
     age_group: '3-5',
     content_ar: `سورة الفاتحة هي أم القرآن، نقرأها في كل ركعة من الصلاة!
 
@@ -601,7 +601,7 @@ export const kidsContent: KidsItem[] = [
     title_ar: 'خطة حفظ المعوذات والإخلاص',
     title_en: 'Memorize Last 3 Surahs',
     slug: 'memorize-ikhlas-falaq-nas',
-    type: 'story',
+    type: 'memorize',
     age_group: '6-8',
     content_ar: `سور الإخلاص والفلق والناس نقرأها في الصلاة وقبل النوم، تعال نحفظها!
 

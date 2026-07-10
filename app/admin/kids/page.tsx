@@ -15,6 +15,7 @@ const typeLabels: Record<string, string> = {
   quiz: 'اختبار',
   game: 'لعبة',
   video: 'فيديو',
+  memorize: 'حفظ',
 };
 
 const ageGroupLabels: Record<string, string> = {
