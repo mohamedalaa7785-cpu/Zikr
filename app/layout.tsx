@@ -79,15 +79,12 @@ const jsonLd = {
   ],
 };
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
       <html lang='ar' dir={siteConfig.dir} data-scroll-behavior='smooth' className={`${notoNaskhArabic.variable} ${amiri.variable} bg-black`} suppressHydrationWarning>
       <head>
-        <script
-          type='application/ld+json'
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          suppressHydrationWarning
-        />
         <meta name='theme-color' content='#0A2A1E' />
         <meta name='mobile-web-app-capable' content='yes' />
         <meta name='apple-mobile-web-app-capable' content='yes' />
@@ -95,20 +92,32 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name='apple-mobile-web-app-title' content={siteConfig.shortName} />
         <link rel='apple-touch-icon' href='/icons/icon-192.svg' />
         <link rel='manifest' href='/manifest.webmanifest' />
-        {/* AdSense: must be a plain <script> — next/script adds data-nscript which AdSense rejects */}
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-          crossOrigin="anonymous"
-        />
-        {/* Google Funding Choices (consent management) */}
-        <script
-          async
-          src="https://fundingchoicesmessages.google.com/i/fundingchoicesmessages.js"
-        />
+        {/* Ad scripts are production-only: preview/dev domains are not authorized
+            for AdSense and the scripts throw opaque cross-origin "Script error."s.
+            They must be plain <script> tags — next/script adds data-nscript which AdSense rejects */}
+        {isProduction && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+              crossOrigin='anonymous'
+            />
+            {/* Google Funding Choices (consent management) */}
+            <script
+              async
+              src='https://fundingchoicesmessages.google.com/i/fundingchoicesmessages.js'
+            />
+          </>
+        )}
       </head>
       <body className='font-arabic antialiased'>
+        {/* JSON-LD lives in <body> so head scripts injected at runtime (AdSense)
+            cannot shift its position and break React hydration matching */}
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <SiteShell>{children}</SiteShell>
         <Analytics />
         <ServiceWorkerRegister />
