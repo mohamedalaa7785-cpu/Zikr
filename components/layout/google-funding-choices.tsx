@@ -1,5 +1,3 @@
-'use client';
-
 import Script from 'next/script';
 
 /**
@@ -13,7 +11,7 @@ export function GoogleFundingChoices() {
     <Script
       async
       src="https://fundingchoicesmessages.google.com/i/fundingchoicesmessages.js"
-      strategy="afterInteractive"
+      strategy="lazyOnload"
     />
   );
 }
