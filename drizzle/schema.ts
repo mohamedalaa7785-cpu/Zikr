@@ -1135,12 +1135,29 @@ export const videoGenerationRequests = pgTable("video_generation_requests", {
   status: text("status").notNull().default("pending"),
   youtubeId: text("youtube_id"),
   facebookId: text("facebook_id"),
+  videoUrl: text("video_url"),
   errorMessage: text("error_message"),
   errorDetails: text("error_details"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const videoPublishLog = pgTable("video_publish_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  videoId: uuid("video_id").references(() => videoGenerationRequests.id, {
+    onDelete: "set null",
+  }),
+  youtubeId: text("youtube_id"),
+  facebookId: text("facebook_id"),
+  status: text("status").notNull().default("success"),
+  publishedAt: timestamp("published_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });

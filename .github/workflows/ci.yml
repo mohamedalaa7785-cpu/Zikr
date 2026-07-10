@@ -1,17 +1,19 @@
 name: CI
 
 on:
-  # NOTE: GitHub Actions are paused — account billing issue must be resolved first.
-  # CI runs locally (pnpm check && pnpm build) with zero errors.
-  # Re-enable pull_request trigger after billing is resolved.
   push:
     branches:
-      - main
-      - master
-      - production-recovery-plan
+      - Zikr
+  pull_request:
+    branches:
+      - Zikr
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
@@ -20,8 +22,8 @@ jobs:
     env:
       NEXT_PUBLIC_SITE_URL: https://zikr.app
       AUTH_CALLBACK_URL: https://zikr.app/auth/callback
-      NEXT_PUBLIC_SITE_NAME: زكر
-      # Supabase — public-safe stubs; real values come from Vercel env.
+      NEXT_PUBLIC_SITE_NAME: ذكر
+      # Supabase — build-time stubs; real values come from Vercel env at deploy.
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-role-key' }}
