@@ -13,6 +13,7 @@ export interface VideoGenerationRequest {
   status: 'pending' | 'processing' | 'completed' | 'failed';
   youtube_id?: string | null;
   facebook_id?: string | null;
+  video_url?: string | null;
   error_message?: string | null;
   error_details?: string | null;
   created_at: string;
