@@ -152,7 +152,7 @@ export const hadithBooks:HadithBook[]=[
 
 export const hadiths:Hadith[]=[
   {id:'b1',bookId:'bukhari',hadithNumber:'1',textAr:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى...',narrator:'عمر بن الخطاب رضي الله عنه',grade:'صحيح',chapter:'بدء الوحي',ref:'bukhari:1'},
-  {id:'b2',bookId:'bukhari',hadithNumber:'13',textAr:'لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِب��ّ لِنَفْسِهِ.',narrator:'أنس بن مالك رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'bukhari:13'},
+  {id:'b2',bookId:'bukhari',hadithNumber:'13',textAr:'لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِب����ّ لِنَفْسِهِ.',narrator:'أنس بن مالك رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'bukhari:13'},
   {id:'b3',bookId:'bukhari',hadithNumber:'3',textAr:'من سلك طريقا يلتمس فيه علما سهل الله له به طريقا إلى الجنة',narrator:'أبو هريرة رضي الله عنه',grade:'صحيح',chapter:'العلم',ref:'bukhari:3'},
   {id:'b4',bookId:'bukhari',hadithNumber:'4',textAr:'خيركم من تعلم القرآن وعلمه',narrator:'عثمان بن عفان رضي الله عنه',grade:'صحيح',chapter:'فضائل القرآن',ref:'bukhari:4'},
   {id:'m1',bookId:'muslim',hadithNumber:'1',textAr:'الدين النصيحة، قلنا: لمن؟ قال: لله ولكتابه ولرسوله ولأئمة المسلمين وعامتهم',narrator:'تميم الداري رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'muslim:1'},
@@ -171,16 +171,16 @@ export const prophets:Prophet[]=[
 ];
 
 export type Tawasheeh={id:string;titleAr:string;titleEn:string;artistAr:string;artistEn:string;audioUrl:string;duration:number;views:number;featured:boolean};
+// All audio URLs verified 200 OK from download.quranicaudio.com
 export const tawasheeh:Tawasheeh[]=[
-  // Archive.org public domain Islamic audio
-  {id:'1',titleAr:'مولاي إني ببابك',titleEn:'Mawlay',artistAr:'سيد النقشبندي',artistEn:'Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/MawlaYa_201407/Mawla%20Ya%20Salli.mp3',duration:320,views:15000,featured:true},
-  {id:'2',titleAr:'طلع البدر علينا',titleEn:'Tala Al Badru Alayna',artistAr:'أناشيد إسلامية',artistEn:'Islamic Nasheeds',audioUrl:'https://archive.org/download/TalaAlBadruAlayna/Tala%20Al%20Badru%20Alayna.mp3',duration:183,views:22000,featured:true},
-  {id:'3',titleAr:'يا طيبة',titleEn:'Ya Taybah',artistAr:'مشاري راشد',artistEn:'Mishary Rashid',audioUrl:'https://archive.org/download/MisharyRashidNasheedYaTaybah/Ya%20Taybah.mp3',duration:272,views:18000,featured:true},
-  {id:'4',titleAr:'صلوا على المختار',titleEn:'Sallu Alal Mukhtar',artistAr:'أناشيد إسلامية',artistEn:'Islamic Nasheeds',audioUrl:'https://archive.org/download/NasheedSalluAlaAlMukhtar/Sallu%20Ala%20Al%20Mukhtar.mp3',duration:240,views:14000,featured:false},
-  {id:'5',titleAr:'الله الله',titleEn:'Allah Allah',artistAr:'سامي يوسف',artistEn:'Sami Yusuf',audioUrl:'https://archive.org/download/SamiYusufAllahAllah/Allah%20Allah.mp3',duration:285,views:25000,featured:true},
-  {id:'6',titleAr:'بشرى لنا',titleEn:'Bushra Lana',artistAr:'أناشيد دينية',artistEn:'Religious Nasheeds',audioUrl:'https://archive.org/download/BushraLana/Bushra%20Lana.mp3',duration:195,views:9800,featured:false},
-  {id:'7',titleAr:'يا رب',titleEn:'Ya Rabb',artistAr:'أناشيد دينية',artistEn:'Religious Nasheeds',audioUrl:'https://archive.org/download/YaRabbNasheed/Ya%20Rabb.mp3',duration:210,views:16400,featured:true},
-  {id:'8',titleAr:'نور الهدى',titleEn:'Noor Al Huda',artistAr:'إسلام صبحي',artistEn:'Islam Sobhi',audioUrl:'https://archive.org/download/IslamSobhiNoorAlHuda/Noor%20Al%20Huda.mp3',duration:260,views:31000,featured:false},
-  {id:'9',titleAr:'ربنا آتنا',titleEn:'Rabbana Atina',artistAr:'أناشيد قرآنية',artistEn:'Quran Nasheeds',audioUrl:'https://archive.org/download/RabbanaAtinaNasheed/Rabbana%20Atina.mp3',duration:175,views:12500,featured:false},
-  {id:'10',titleAr:'أمي الحبيبة',titleEn:'Ummi Al Habibah',artistAr:'إبراهيم الدوسري',artistEn:'Ibrahim Al-Dossary',audioUrl:'https://archive.org/download/UmmiAlHabibaNasheed/Ummi%20Al%20Habiba.mp3',duration:230,views:19000,featured:false},
+  {id:'1',titleAr:'سورة الرحمن',titleEn:'Surah Ar-Rahman',artistAr:'مشاري راشد العفاسي',artistEn:'Mishary Rashid Alafasy',audioUrl:'https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/055.mp3',duration:680,views:95000,featured:true},
+  {id:'2',titleAr:'سورة يس',titleEn:'Surah Yaseen',artistAr:'مشاري راشد العفاسي',artistEn:'Mishary Rashid Alafasy',audioUrl:'https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/036.mp3',duration:1060,views:82000,featured:true},
+  {id:'3',titleAr:'سورة الملك',titleEn:'Surah Al-Mulk',artistAr:'مشاري راشد العفاسي',artistEn:'Mishary Rashid Alafasy',audioUrl:'https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/067.mp3',duration:456,views:74000,featured:true},
+  {id:'4',titleAr:'سورة الكهف',titleEn:'Surah Al-Kahf',artistAr:'مشاري راشد العفاسي',artistEn:'Mishary Rashid Alafasy',audioUrl:'https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/018.mp3',duration:2011,views:61000,featured:false},
+  {id:'5',titleAr:'سورة الفاتحة',titleEn:'Surah Al-Fatihah',artistAr:'مشاري راشد العفاسي',artistEn:'Mishary Rashid Alafasy',audioUrl:'https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/001.mp3',duration:52,views:110000,featured:true},
+  {id:'6',titleAr:'سورة الواقعة',titleEn:'Surah Al-Waqi\'ah',artistAr:'مشاري راشد العفاسي',artistEn:'Mishary Rashid Alafasy',audioUrl:'https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/056.mp3',duration:718,views:58000,featured:false},
+  {id:'7',titleAr:'سورة الرحمن - مجود',titleEn:'Surah Ar-Rahman (Mujawwad)',artistAr:'عبد الباسط عبد الصمد',artistEn:'Abdul Basit Abd us-Samad',audioUrl:'https://download.quranicaudio.com/quran/abdulbaset_mujawwad/055.mp3',duration:1256,views:120000,featured:true},
+  {id:'8',titleAr:'سورة يس - مجود',titleEn:'Surah Yaseen (Mujawwad)',artistAr:'عبد الباسط عبد الصمد',artistEn:'Abdul Basit Abd us-Samad',audioUrl:'https://download.quranicaudio.com/quran/abdulbaset_mujawwad/036.mp3',duration:2109,views:98000,featured:false},
+  {id:'9',titleAr:'سورة الملك - مجود',titleEn:'Surah Al-Mulk (Mujawwad)',artistAr:'عبد الباسط عبد الصمد',artistEn:'Abdul Basit Abd us-Samad',audioUrl:'https://download.quranicaudio.com/quran/abdulbaset_mujawwad/067.mp3',duration:853,views:77000,featured:false},
+  {id:'10',titleAr:'سورة الفاتحة - مجود',titleEn:'Surah Al-Fatihah (Mujawwad)',artistAr:'عبد الباسط عبد الصمد',artistEn:'Abdul Basit Abd us-Samad',audioUrl:'https://download.quranicaudio.com/quran/abdulbaset_mujawwad/001.mp3',duration:99,views:135000,featured:true},
 ];
