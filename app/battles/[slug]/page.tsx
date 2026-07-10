@@ -213,7 +213,7 @@ export default async function BattleDetailPage({ params }: { params: Promise<{ s
               const typeLabel = event.event_type ? eventTypeLabel[event.event_type] : null;
               const colorClass = event.event_type ? (eventTypeColor[event.event_type] ?? 'border-brand-gold/10 bg-black/20') : 'border-brand-gold/10 bg-black/20';
               return (
-                <Card key={event.id ?? i} className={`p-8 space-y-4 ${colorClass}`}>
+                <Card key={(event as { id?: string }).id ?? i} className={`p-8 space-y-4 ${colorClass}`}>
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 shrink-0 rounded-full bg-brand-gold/10 border border-brand-gold/20 flex items-center justify-center text-xs text-brand-gold font-bold">
                       {i + 1}

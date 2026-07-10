@@ -30,6 +30,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               { href: '/admin/videos', label: 'الفيديوهات' },
               { href: '/admin/analytics', label: 'التحليلات' },
               { href: '/admin/kids', label: 'الأطفال' },
+              { href: '/admin/prophets', label: 'الأنبياء' },
+              { href: '/admin/battles', label: 'الغزوات' },
             ].map((item) => (
               <Link
                 key={item.href}
