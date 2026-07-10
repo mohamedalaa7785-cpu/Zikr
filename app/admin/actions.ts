@@ -128,20 +128,94 @@ export async function savePinnedMessageAction(formData: FormData) {
   const body = String(formData.get('body') ?? '').trim();
   if (!body) throw new Error('نص الرسالة المثبتة مطلوب.');
 
+  const priorityRaw = Number(value(formData, 'priority') ?? '0');
+
   await supabaseServerAdminRequest('/rest/v1/pinned_messages', {
     method: 'POST',
     headers: { Prefer: 'return=minimal' },
     body: JSON.stringify({
       title: value(formData, 'title') ?? 'رسالة مثبتة',
       body,
-      cta_label: value(formData, 'ctaLabel'),
-      cta_href: value(formData, 'ctaHref'),
-      published: bool(formData, 'published'),
+      type: value(formData, 'type') ?? 'info',
+      priority: Number.isFinite(priorityRaw) ? priorityRaw : 0,
+      is_active: bool(formData, 'published'),
     }),
   });
 
   revalidatePath('/admin');
   revalidatePath('/');
+}
+
+// ─── User role management ────────────────────────────────────────────────────
+export async function updateUserRoleAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const userId = String(formData.get('userId') ?? '').trim();
+  const role = String(formData.get('role') ?? '').trim();
+
+  if (!userId) throw new Error('معرّف المستخدم مطلوب.');
+  if (role !== 'admin' && role !== 'user') throw new Error('الدور غير صالح.');
+  if (userId === admin.id && role !== 'admin') {
+    throw new Error('لا يمكنك إزالة صلاحية الأدمن عن نفسك.');
+  }
+
+  await supabaseServerAdminRequest(`/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({ role, updated_at: new Date().toISOString() }),
+  });
+
+  revalidatePath('/admin/users');
+}
+
+// ─── Content management (delete / toggle publish) ────────────────────────────
+const MANAGED_TABLES = {
+  stories: { publishColumn: 'published', paths: ['/stories', '/admin/content'] },
+  articles: { publishColumn: 'published', paths: ['/articles', '/admin/content'] },
+  competitions: { publishColumn: 'published', paths: ['/competitions', '/admin'] },
+  memorization_plans: { publishColumn: 'published', paths: ['/memorization', '/admin'] },
+  pinned_messages: { publishColumn: 'is_active', paths: ['/', '/admin'] },
+} as const;
+
+type ManagedTable = keyof typeof MANAGED_TABLES;
+
+function assertManagedTable(table: string): asserts table is ManagedTable {
+  if (!(table in MANAGED_TABLES)) throw new Error('جدول غير مسموح بإدارته.');
+}
+
+export async function deleteContentAction(formData: FormData) {
+  await requireAdmin();
+  const table = String(formData.get('table') ?? '').trim();
+  const id = String(formData.get('id') ?? '').trim();
+  assertManagedTable(table);
+  if (!id) throw new Error('المعرّف مطلوب.');
+
+  await supabaseServerAdminRequest(`/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Prefer: 'return=minimal' },
+  });
+
+  revalidatePath('/admin');
+  for (const path of MANAGED_TABLES[table].paths) revalidatePath(path);
+}
+
+export async function togglePublishAction(formData: FormData) {
+  await requireAdmin();
+  const table = String(formData.get('table') ?? '').trim();
+  const id = String(formData.get('id') ?? '').trim();
+  const next = formData.get('next') === 'true';
+  assertManagedTable(table);
+  if (!id) throw new Error('المعرّف مطلوب.');
+
+  const column = MANAGED_TABLES[table].publishColumn;
+
+  await supabaseServerAdminRequest(`/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({ [column]: next, updated_at: new Date().toISOString() }),
+  });
+
+  revalidatePath('/admin');
+  for (const path of MANAGED_TABLES[table].paths) revalidatePath(path);
 }
 
 export async function saveMemorizationPlanAction(formData: FormData) {

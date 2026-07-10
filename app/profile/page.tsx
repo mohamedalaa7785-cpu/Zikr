@@ -23,6 +23,32 @@ type ReadingProgress = {
   updated_at: string;
 };
 
+const typeLabels: Record<string, string> = {
+  quran: 'القرآن',
+  hadith: 'الحديث',
+  story: 'القصص',
+  scholar: 'العلماء',
+  dua: 'الأدعية',
+  article: 'المقالات',
+  video: 'الفيديوهات',
+  poetry: 'الشعر',
+};
+
+const scopeLabels: Record<string, string> = {
+  quran: 'القرآن',
+  hadith: 'الحديث',
+  stories: 'القصص',
+};
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return '—';
+  return new Date(value).toLocaleDateString('ar-SA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 export default async function ProfilePage() {
   const supabase = await createClient();
   const {
@@ -31,89 +57,162 @@ export default async function ProfilePage() {
 
   if (!user) redirect('/auth/login?next=/profile');
 
-  // Fetch profile row (may not exist yet for new OAuth users)
-  const { data: profileRows } = await supabase
-    .from('profiles')
-    .select('display_name, avatar_url')
-    .eq('id', user.id)
-    .limit(1);
+  const [profileRes, favoritesRes, favCountRes, progressRes, progressCountRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('display_name, avatar_url, role, created_at')
+      .eq('id', user.id)
+      .limit(1),
+    supabase
+      .from('favorites')
+      .select('id, item_type, item_ref, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('favorites')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id),
+    supabase
+      .from('reading_progress')
+      .select('id, scope, ref, progress_json, updated_at')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('reading_progress')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id),
+  ]);
 
-  const profile = profileRows?.[0] ?? null;
+  const profile = profileRes.data?.[0] ?? null;
+  const favList: Favorite[] = favoritesRes.data ?? [];
+  const progressList: ReadingProgress[] = progressRes.data ?? [];
+  const favCount = favCountRes.count ?? favList.length;
+  const progressCount = progressCountRes.count ?? progressList.length;
 
-  // Favorites
-  const { data: favorites } = await supabase
-    .from('favorites')
-    .select('id, item_type, item_ref, created_at')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(20);
-
-  // Reading progress
-  const { data: readingProgress } = await supabase
-    .from('reading_progress')
-    .select('id, scope, ref, progress_json, updated_at')
-    .eq('user_id', user.id)
-    .order('updated_at', { ascending: false })
-    .limit(20);
-
-  const favList: Favorite[] = favorites ?? [];
-  const progressList: ReadingProgress[] = readingProgress ?? [];
-
-  const typeLabels: Record<string, string> = {
-    quran: 'القرآن',
-    hadith: 'الحديث',
-    story: 'القصص',
-    scholar: 'العلماء',
-    dua: 'الأدعية',
-    article: 'المقالات',
-    video: 'الفيديوهات',
-    poetry: 'الشعر',
+  const isAdmin = profile?.role === 'admin';
+  const memberSince = profile?.created_at ?? user.created_at;
+  const lastSignIn = user.last_sign_in_at;
+  const emailVerified = Boolean(user.email_confirmed_at);
+  const provider = user.app_metadata?.provider ?? 'email';
+  const providerLabels: Record<string, string> = {
+    email: 'البريد الإلكتروني',
+    google: 'جوجل',
+    facebook: 'فيسبوك',
+    github: 'جيت هاب',
   };
 
-  const scopeLabels: Record<string, string> = {
-    quran: 'القرآن',
-    hadith: 'الحديث',
-    stories: 'القصص',
-  };
+  // Distinct favorite categories for the stats row
+  const favTypes = new Set(favList.map((f) => f.item_type));
 
   return (
     <Container className="py-16 space-y-6">
-      {/* Profile card */}
-      <Card className="space-y-4">
-        <h1 className="text-2xl text-brand-gold">الملف الشخصي</h1>
-        <p className="arabic-muted">البريد: {user.email ?? 'غير متاح'}</p>
+      {/* Header card: identity + account details */}
+      <Card className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-2xl text-brand-gold">الملف الشخصي</h1>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="rounded-full border border-brand-gold/40 bg-brand-gold/10 px-3 py-1 text-xs font-semibold text-brand-gold transition-colors hover:bg-brand-gold/20"
+              >
+                لوحة التحكم
+              </Link>
+            )}
+            <span
+              className={
+                isAdmin
+                  ? 'rounded-full bg-brand-gold/20 px-3 py-1 text-xs font-semibold text-brand-gold'
+                  : 'rounded-full bg-black/25 px-3 py-1 text-xs text-brand-cream/70 ring-1 ring-brand-gold/20'
+              }
+            >
+              {isAdmin ? 'أدمن' : 'مستخدم'}
+            </span>
+          </div>
+        </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-5">
           {profile?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={profile.avatar_url}
               alt="صورة المستخدم"
-              className="h-16 w-16 rounded-full object-cover ring-1 ring-brand-gold/30"
+              className="h-20 w-20 rounded-full object-cover ring-2 ring-brand-gold/30"
             />
           ) : (
             <div
-              className="h-16 w-16 rounded-full bg-black/20 ring-1 ring-brand-gold/30 flex items-center justify-center text-2xl text-brand-gold/50"
+              className="flex h-20 w-20 items-center justify-center rounded-full bg-black/20 text-3xl text-brand-gold/50 ring-2 ring-brand-gold/30"
               aria-label="صورة افتراضية"
             >
-              {(user.email?.[0] ?? 'م').toUpperCase()}
+              {(profile?.display_name?.[0] ?? user.email?.[0] ?? 'م').toUpperCase()}
             </div>
           )}
-          <p className="arabic-muted text-sm">
-            {profile?.display_name ?? 'لم يتم إعداد الاسم بعد.'}
-          </p>
+          <div className="space-y-1">
+            <p className="text-lg font-semibold text-brand-cream">
+              {profile?.display_name ?? 'لم يتم إعداد الاسم بعد'}
+            </p>
+            <p className="text-sm arabic-muted">{user.email ?? 'البريد غير متاح'}</p>
+            <p className="text-xs arabic-muted">
+              {emailVerified ? 'البريد الإلكتروني مُوثّق' : 'البريد الإلكتروني غير مُوثّق بعد'}
+              {' · '}
+              تسجيل الدخول عبر {providerLabels[provider] ?? provider}
+            </p>
+          </div>
         </div>
 
-        <form action={updateProfileAction} className="space-y-3 max-w-md">
-          <label className="block text-sm arabic-muted" htmlFor="displayName">
-            الاسم المعروض
-          </label>
-          <input
-            id="displayName"
-            name="displayName"
-            defaultValue={profile?.display_name ?? ''}
-            className="w-full rounded-lg bg-black/20 border border-brand-gold/20 p-2 text-brand-cream focus:border-brand-gold focus:outline-none"
-          />
+        {/* Account details grid */}
+        <div className="grid gap-3 rounded-xl bg-black/15 p-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p className="arabic-muted text-xs">عضو منذ</p>
+            <p className="text-brand-cream/90">{formatDate(memberSince)}</p>
+          </div>
+          <div>
+            <p className="arabic-muted text-xs">آخر تسجيل دخول</p>
+            <p className="text-brand-cream/90">{formatDate(lastSignIn)}</p>
+          </div>
+          <div>
+            <p className="arabic-muted text-xs">عناصر المفضلة</p>
+            <p className="text-brand-cream/90 tabular-nums">{favCount.toLocaleString('ar-EG')}</p>
+          </div>
+          <div>
+            <p className="arabic-muted text-xs">سجلات القراءة</p>
+            <p className="text-brand-cream/90 tabular-nums">{progressCount.toLocaleString('ar-EG')}</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Edit profile */}
+      <Card className="space-y-4">
+        <h2 className="text-xl text-brand-gold">تعديل البيانات</h2>
+        <form action={updateProfileAction} className="max-w-md space-y-4">
+          <div className="space-y-1">
+            <label className="block text-sm arabic-muted" htmlFor="displayName">
+              الاسم المعروض
+            </label>
+            <input
+              id="displayName"
+              name="displayName"
+              defaultValue={profile?.display_name ?? ''}
+              placeholder="اكتب اسمك"
+              className="w-full rounded-lg border border-brand-gold/20 bg-black/20 p-2 text-brand-cream focus:border-brand-gold focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-sm arabic-muted" htmlFor="avatarUrl">
+              رابط الصورة الشخصية
+            </label>
+            <input
+              id="avatarUrl"
+              name="avatarUrl"
+              type="url"
+              dir="ltr"
+              defaultValue={profile?.avatar_url ?? ''}
+              placeholder="https://..."
+              className="w-full rounded-lg border border-brand-gold/20 bg-black/20 p-2 text-left text-brand-cream focus:border-brand-gold focus:outline-none"
+            />
+          </div>
           <Button type="submit">حفظ التغييرات</Button>
         </form>
 
@@ -124,69 +223,106 @@ export default async function ProfilePage() {
         </form>
       </Card>
 
-      {/* Favorites */}
-      <Card className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl text-brand-gold">المفضلة</h2>
-          {favList.length > 0 && (
-            <Link href="/favorites" className="text-sm text-brand-gold/70 hover:text-brand-gold transition-colors">
-              عرض الكل
-            </Link>
-          )}
-        </div>
-        {favList.length === 0 ? (
-          <p className="arabic-muted">
-            لم تقم بحفظ أي عناصر بعد. تصفح المحتوى وأضف ما يعجبك إلى المفضلة.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {favList.map((fav) => (
-              <div
-                key={fav.id}
-                className="flex items-center justify-between rounded-lg bg-black/20 p-3"
-              >
-                <div>
-                  <span className="text-brand-gold text-xs px-2 py-0.5 rounded-full bg-brand-gold/10">
-                    {typeLabels[fav.item_type] ?? fav.item_type}
-                  </span>
-                  <p className="mt-1 text-brand-cream/90 text-sm">{fav.item_ref}</p>
-                </div>
-                <span className="text-xs arabic-muted">
-                  {new Date(fav.created_at).toLocaleDateString('ar-SA')}
-                </span>
-              </div>
-            ))}
+      {/* Activity summary */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Favorites */}
+        <Card className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl text-brand-gold">المفضلة</h2>
+            {favCount > 0 && (
+              <Link href="/favorites" className="text-sm text-brand-gold/70 transition-colors hover:text-brand-gold">
+                عرض الكل ({favCount.toLocaleString('ar-EG')})
+              </Link>
+            )}
           </div>
-        )}
-      </Card>
+          {favTypes.size > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {[...favTypes].map((t) => (
+                <span key={t} className="rounded-full bg-brand-gold/10 px-2 py-0.5 text-xs text-brand-gold">
+                  {typeLabels[t] ?? t}
+                </span>
+              ))}
+            </div>
+          )}
+          {favList.length === 0 ? (
+            <p className="arabic-muted">
+              لم تقم بحفظ أي عناصر بعد. تصفح المحتوى وأضف ما يعجبك إلى المفضلة.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {favList.map((fav) => (
+                <div
+                  key={fav.id}
+                  className="flex items-center justify-between rounded-lg bg-black/20 p-3"
+                >
+                  <div>
+                    <span className="rounded-full bg-brand-gold/10 px-2 py-0.5 text-xs text-brand-gold">
+                      {typeLabels[fav.item_type] ?? fav.item_type}
+                    </span>
+                    <p className="mt-1 text-sm text-brand-cream/90">{fav.item_ref}</p>
+                  </div>
+                  <span className="text-xs arabic-muted">{formatDate(fav.created_at)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
 
-      {/* Reading progress */}
-      <Card className="space-y-4">
-        <h2 className="text-xl text-brand-gold">التقدم في القراءة</h2>
-        {progressList.length === 0 ? (
-          <p className="arabic-muted">
-            لم تبدأ أي قراءة بعد.{' '}
-            <Link href="/quran" className="text-brand-gold hover:underline">
-              ابدأ بتصفح القرآن
-            </Link>{' '}
-            لتتبع تقدمك.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {progressList.map((rp) => (
-              <div key={rp.id} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
+        {/* Reading progress */}
+        <Card className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl text-brand-gold">التقدم في القراءة</h2>
+            {progressCount > 0 && (
+              <span className="text-sm arabic-muted">
+                {progressCount.toLocaleString('ar-EG')} سجل
+              </span>
+            )}
+          </div>
+          {progressList.length === 0 ? (
+            <p className="arabic-muted">
+              لم تبدأ أي قراءة بعد.{' '}
+              <Link href="/quran" className="text-brand-gold hover:underline">
+                ابدأ بتصفح القرآن
+              </Link>{' '}
+              لتتبع تقدمك.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {progressList.map((rp) => (
+                <div
+                  key={rp.id}
+                  className="flex items-center justify-between rounded-lg bg-black/20 p-3 text-sm"
+                >
                   <span className="text-brand-cream/90">
                     {scopeLabels[rp.scope] ?? rp.scope} — {rp.ref}
                   </span>
-                  <span className="text-xs arabic-muted">
-                    {new Date(rp.updated_at).toLocaleDateString('ar-SA')}
-                  </span>
+                  <span className="text-xs arabic-muted">{formatDate(rp.updated_at)}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Quick links */}
+      <Card className="space-y-4">
+        <h2 className="text-xl text-brand-gold">روابط سريعة</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { href: '/memorization', label: 'خطط الحفظ' },
+            { href: '/tasbeeh', label: 'المسبحة الإلكترونية' },
+            { href: '/prayer-times', label: 'مواقيت الصلاة' },
+            { href: '/competitions', label: 'المسابقات' },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="rounded-xl border border-brand-gold/20 bg-black/15 p-4 text-center text-sm text-brand-cream/80 transition-colors hover:border-brand-gold/50 hover:text-brand-gold"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
       </Card>
     </Container>
   );

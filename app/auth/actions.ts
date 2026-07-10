@@ -70,6 +70,7 @@ export async function logoutAction() {
 // ─── Update profile ───────────────────────────────────────────────────────────
 export async function updateProfileAction(formData: FormData) {
   const displayName = String(formData.get('displayName') || '').trim();
+  const avatarUrl = String(formData.get('avatarUrl') || '').trim();
 
   const supabase = await createClient();
   const {
@@ -78,11 +79,15 @@ export async function updateProfileAction(formData: FormData) {
 
   if (!user) redirect('/auth/login');
 
+  // Only allow http(s) URLs for the avatar to avoid javascript:/data: injection
+  const safeAvatarUrl = /^https?:\/\//i.test(avatarUrl) ? avatarUrl : null;
+
   await supabase
     .from('profiles')
     .upsert({
       id: user.id,
       display_name: displayName || null,
+      avatar_url: safeAvatarUrl,
       updated_at: new Date().toISOString(),
     });
 

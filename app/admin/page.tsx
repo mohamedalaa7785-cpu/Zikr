@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
@@ -41,6 +42,25 @@ export default async function AdminPage() {
       <Card><p className='text-sm arabic-muted'>القصص</p><strong className='text-3xl text-brand-gold'>{storiesCount}</strong></Card>
       <Card><p className='text-sm arabic-muted'>المسابقات</p><strong className='text-3xl text-brand-gold'>{competitionsCount}</strong></Card>
       <Card><p className='text-sm arabic-muted'>صلاحيتك</p><strong className='text-3xl text-brand-gold'>Admin</strong></Card>
+    </section>
+
+    <section className='grid gap-4 md:grid-cols-4'>
+      <Link href='/admin/content' className='rounded-xl border border-brand-gold/20 bg-black/15 p-4 transition-colors hover:border-brand-gold/50'>
+        <h3 className='font-semibold text-brand-gold'>إدارة المحتوى</h3>
+        <p className='mt-1 text-sm arabic-muted'>نشر وإخفاء وحذف القصص والمقالات والمسابقات</p>
+      </Link>
+      <Link href='/admin/users' className='rounded-xl border border-brand-gold/20 bg-black/15 p-4 transition-colors hover:border-brand-gold/50'>
+        <h3 className='font-semibold text-brand-gold'>إدارة المستخدمين</h3>
+        <p className='mt-1 text-sm arabic-muted'>الأدوار والصلاحيات وقائمة الحسابات</p>
+      </Link>
+      <Link href='/admin/videos' className='rounded-xl border border-brand-gold/20 bg-black/15 p-4 transition-colors hover:border-brand-gold/50'>
+        <h3 className='font-semibold text-brand-gold'>إدارة الفيديوهات</h3>
+        <p className='mt-1 text-sm arabic-muted'>توليد الفيديوهات والنشر التلقائي</p>
+      </Link>
+      <Link href='/admin/analytics' className='rounded-xl border border-brand-gold/20 bg-black/15 p-4 transition-colors hover:border-brand-gold/50'>
+        <h3 className='font-semibold text-brand-gold'>التحليلات</h3>
+        <p className='mt-1 text-sm arabic-muted'>إحصائيات المحتوى والمستخدمين</p>
+      </Link>
     </section>
 
     <Card className='space-y-4'>
@@ -105,8 +125,8 @@ export default async function AdminPage() {
         <form action={savePinnedMessageAction} className='space-y-3'>
           <Field name='title' label='العنوان' defaultValue='تنبيه مهم' />
           <Field name='body' label='نص الرسالة' required textarea />
-          <Field name='ctaLabel' label='نص الزر' />
-          <Field name='ctaHref' label='رابط الزر' />
+          <Field name='type' label='النوع' placeholder='info / warning / announcement' defaultValue='info' />
+          <Field name='priority' label='الأولوية (الأعلى يظهر أولًا)' type='number' defaultValue='0' />
           <Published />
           <Button type='submit'>تثبيت الرسالة</Button>
         </form>
