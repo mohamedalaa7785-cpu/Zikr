@@ -7,10 +7,8 @@ const sql = postgres(process.env.DATABASE_URL!);
 
 async function main() {
   try {
-    console.log('Aligning schema with canonical column names...');
 
     // Quran Surahs
-    console.log('Updating quran_surahs...');
     await sql.unsafe(`
       DO $$ 
       BEGIN
@@ -24,7 +22,6 @@ async function main() {
     `);
 
     // Quran Ayahs
-    console.log('Updating quran_ayahs...');
     await sql.unsafe(`
       DO $$ 
       BEGIN
@@ -41,7 +38,6 @@ async function main() {
     `);
 
     // Quran Tafsir
-    console.log('Updating quran_tafsir...');
     await sql.unsafe(`
       DO $$ 
       BEGIN
@@ -58,7 +54,6 @@ async function main() {
     `);
 
     // Hadith Books
-    console.log('Updating hadith_books...');
     await sql.unsafe(`
       DO $$ 
       BEGIN
@@ -78,7 +73,6 @@ async function main() {
     `);
 
     // Hadiths
-    console.log('Updating hadiths...');
     await sql.unsafe(`
       DO $$ 
       BEGIN
@@ -109,7 +103,6 @@ async function main() {
       END $$;
     `);
 
-    console.log('Schema alignment completed successfully.');
     process.exit(0);
   } catch (error) {
     console.error('Error aligning schema:', error);

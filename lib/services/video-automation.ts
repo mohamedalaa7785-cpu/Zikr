@@ -281,7 +281,6 @@ export async function generateVideoWithHeyGen(
     const data = await response.json();
     const videoUrl = data.video_url || `https://example.com/videos/${request.id}.mp4`;
     
-    console.log('[video-automation] Generated video with HeyGen:', videoUrl);
     return { videoUrl };
   } catch (error) {
     console.error('[video-automation] Failed to generate video with HeyGen:', error);
@@ -348,6 +347,21 @@ export async function processVideoGenerationRequest(
       youtubeId: youtubeId || undefined,
       facebookId: facebookId || undefined,
     });
+    
+    // Log successful publishing
+    if (youtubeId || facebookId) {
+      await supabaseServerAdminRequest('/rest/v1/video_publish_log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          video_id: request.id,
+          youtube_id: youtubeId,
+          facebook_id: facebookId,
+          status: 'success',
+          published_at: new Date().toISOString()
+        })
+      });
+    }
     
     return true;
   } catch (error) {
@@ -417,7 +431,6 @@ export async function publishToYoutube(
     const data = await response.json();
     const youtubeId = data.id;
     
-    console.log('[video-automation] Published to YouTube:', youtubeId);
     return youtubeId;
   } catch (error) {
     console.error('[video-automation] Failed to publish to YouTube:', error);
@@ -467,7 +480,6 @@ export async function publishToFacebook(
     const data = await response.json();
     const facebookId = data.id;
     
-    console.log('[video-automation] Published to Facebook:', facebookId);
     return facebookId;
   } catch (error) {
     console.error('[video-automation] Failed to publish to Facebook:', error);

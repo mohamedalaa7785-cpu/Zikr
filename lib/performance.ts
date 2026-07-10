@@ -114,7 +114,6 @@ export async function measurePerformance<T>(
   try {
     const result = await fn();
     const end = performance.now();
-    console.log(`[performance] ${name}: ${(end - start).toFixed(2)}ms`);
     return result;
   } catch (error) {
     const end = performance.now();

@@ -19,7 +19,6 @@ export function ServiceWorkerRegister() {
           updateViaCache: 'none'
         });
 
-        console.log('[PWA] Service Worker registered successfully', registration);
 
         // Check for updates periodically
         setInterval(() => {
@@ -34,7 +33,6 @@ export function ServiceWorkerRegister() {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // New service worker is ready
-              console.log('[PWA] New service worker available');
               // Notify user about update (optional)
               // You can show a toast or notification here
             }
