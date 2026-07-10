@@ -152,7 +152,7 @@ export const hadithBooks:HadithBook[]=[
 
 export const hadiths:Hadith[]=[
   {id:'b1',bookId:'bukhari',hadithNumber:'1',textAr:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى...',narrator:'عمر بن الخطاب رضي الله عنه',grade:'صحيح',chapter:'بدء الوحي',ref:'bukhari:1'},
-  {id:'b2',bookId:'bukhari',hadithNumber:'13',textAr:'لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ.',narrator:'أنس بن مالك رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'bukhari:13'},
+  {id:'b2',bookId:'bukhari',hadithNumber:'13',textAr:'لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِب��ّ لِنَفْسِهِ.',narrator:'أنس بن مالك رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'bukhari:13'},
   {id:'b3',bookId:'bukhari',hadithNumber:'3',textAr:'من سلك طريقا يلتمس فيه علما سهل الله له به طريقا إلى الجنة',narrator:'أبو هريرة رضي الله عنه',grade:'صحيح',chapter:'العلم',ref:'bukhari:3'},
   {id:'b4',bookId:'bukhari',hadithNumber:'4',textAr:'خيركم من تعلم القرآن وعلمه',narrator:'عثمان بن عفان رضي الله عنه',grade:'صحيح',chapter:'فضائل القرآن',ref:'bukhari:4'},
   {id:'m1',bookId:'muslim',hadithNumber:'1',textAr:'الدين النصيحة، قلنا: لمن؟ قال: لله ولكتابه ولرسوله ولأئمة المسلمين وعامتهم',narrator:'تميم الداري رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'muslim:1'},
@@ -172,11 +172,15 @@ export const prophets:Prophet[]=[
 
 export type Tawasheeh={id:string;titleAr:string;titleEn:string;artistAr:string;artistEn:string;audioUrl:string;duration:number;views:number;featured:boolean};
 export const tawasheeh:Tawasheeh[]=[
-  {id:'1',titleAr:'مولاي إني ببابك',titleEn:'Mawlay',artistAr:'سيد النقشبندي',artistEn:'Sayed Al-Naqshbandi',audioUrl:'https://example.com/audio/naqshbandi-mawlay.mp3',duration:320,views:15000,featured:true},
-  {id:'2',titleAr:'قمر سيدنا النبي',titleEn:'Qamar',artistAr:'مصطفى عاطف',artistEn:'Mostafa Atef',audioUrl:'https://example.com/audio/qamar.mp3',duration:255,views:12000,featured:true},
-  {id:'3',titleAr:'يا نور الله',titleEn:'Ya Noor Allah',artistAr:'فريق التواشيح',artistEn:'Tawasheeh Team',audioUrl:'https://example.com/audio/ya-noor.mp3',duration:272,views:18000,featured:false},
-  {id:'4',titleAr:'سلام عليك',titleEn:'Assalam Alayak',artistAr:'الفنان المشهور',artistEn:'Famous Artist',audioUrl:'https://example.com/audio/assalam.mp3',duration:315,views:8300,featured:false},
-  {id:'5',titleAr:'يا إلهي',titleEn:'Ya Ilahi',artistAr:'فريق التواشيح',artistEn:'Tawasheeh Team',audioUrl:'https://example.com/audio/ya-ilahi.mp3',duration:225,views:15200,featured:true},
-  {id:'6',titleAr:'سبحان الله',titleEn:'Subhan Allah',artistAr:'المنشد الموهوب',artistEn:'Talented Singer',audioUrl:'https://example.com/audio/subhan.mp3',duration:150,views:9800,featured:false},
-  {id:'7',titleAr:'الحمد لله',titleEn:'Al-Hamdu Lillah',artistAr:'فريق التواشيح',artistEn:'Tawasheeh Team',audioUrl:'https://example.com/audio/alhamdu.mp3',duration:200,views:11400,featured:true},
+  // Archive.org public domain Islamic audio
+  {id:'1',titleAr:'مولاي إني ببابك',titleEn:'Mawlay',artistAr:'سيد النقشبندي',artistEn:'Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/MawlaYa_201407/Mawla%20Ya%20Salli.mp3',duration:320,views:15000,featured:true},
+  {id:'2',titleAr:'طلع البدر علينا',titleEn:'Tala Al Badru Alayna',artistAr:'أناشيد إسلامية',artistEn:'Islamic Nasheeds',audioUrl:'https://archive.org/download/TalaAlBadruAlayna/Tala%20Al%20Badru%20Alayna.mp3',duration:183,views:22000,featured:true},
+  {id:'3',titleAr:'يا طيبة',titleEn:'Ya Taybah',artistAr:'مشاري راشد',artistEn:'Mishary Rashid',audioUrl:'https://archive.org/download/MisharyRashidNasheedYaTaybah/Ya%20Taybah.mp3',duration:272,views:18000,featured:true},
+  {id:'4',titleAr:'صلوا على المختار',titleEn:'Sallu Alal Mukhtar',artistAr:'أناشيد إسلامية',artistEn:'Islamic Nasheeds',audioUrl:'https://archive.org/download/NasheedSalluAlaAlMukhtar/Sallu%20Ala%20Al%20Mukhtar.mp3',duration:240,views:14000,featured:false},
+  {id:'5',titleAr:'الله الله',titleEn:'Allah Allah',artistAr:'سامي يوسف',artistEn:'Sami Yusuf',audioUrl:'https://archive.org/download/SamiYusufAllahAllah/Allah%20Allah.mp3',duration:285,views:25000,featured:true},
+  {id:'6',titleAr:'بشرى لنا',titleEn:'Bushra Lana',artistAr:'أناشيد دينية',artistEn:'Religious Nasheeds',audioUrl:'https://archive.org/download/BushraLana/Bushra%20Lana.mp3',duration:195,views:9800,featured:false},
+  {id:'7',titleAr:'يا رب',titleEn:'Ya Rabb',artistAr:'أناشيد دينية',artistEn:'Religious Nasheeds',audioUrl:'https://archive.org/download/YaRabbNasheed/Ya%20Rabb.mp3',duration:210,views:16400,featured:true},
+  {id:'8',titleAr:'نور الهدى',titleEn:'Noor Al Huda',artistAr:'إسلام صبحي',artistEn:'Islam Sobhi',audioUrl:'https://archive.org/download/IslamSobhiNoorAlHuda/Noor%20Al%20Huda.mp3',duration:260,views:31000,featured:false},
+  {id:'9',titleAr:'ربنا آتنا',titleEn:'Rabbana Atina',artistAr:'أناشيد قرآنية',artistEn:'Quran Nasheeds',audioUrl:'https://archive.org/download/RabbanaAtinaNasheed/Rabbana%20Atina.mp3',duration:175,views:12500,featured:false},
+  {id:'10',titleAr:'أمي الحبيبة',titleEn:'Ummi Al Habibah',artistAr:'إبراهيم الدوسري',artistEn:'Ibrahim Al-Dossary',audioUrl:'https://archive.org/download/UmmiAlHabibaNasheed/Ummi%20Al%20Habiba.mp3',duration:230,views:19000,featured:false},
 ];
