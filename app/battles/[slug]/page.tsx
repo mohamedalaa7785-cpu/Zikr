@@ -18,6 +18,27 @@ type Battle = {
   published: boolean;
 };
 
+import { pageMetadata } from '@/lib/site';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  let battle: Battle | null = null;
+  try {
+    const data = await supabaseServerAnonRequest<Battle[]>(
+      `/rest/v1/battles?select=name_ar,description_ar&slug=eq.${slug}&published=eq.true`
+    );
+    battle = data && data.length > 0 ? data[0] : null;
+  } catch {
+    battle = null;
+  }
+  return pageMetadata({
+    title: battle?.name_ar ?? 'غزوة',
+    description: battle?.description_ar?.slice(0, 160) ?? 'تفاصيل الغزوة: التاريخ والموقع والأحداث.',
+    path: `/battles/${slug}`,
+  });
+}
+
 export default async function BattleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   let battle: Battle | null = null;

@@ -2,6 +2,13 @@ import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, MessageCircle, Globe } from 'lucide-react';
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = pageMetadata({
+  title: 'تواصل معنا',
+  description: 'تواصل مع فريق منصة ZIKR للاستفسارات والاقتراحات عبر البريد الإلكتروني وقنوات التواصل الاجتماعي.',
+  path: '/contact',
+});
 
 export default function ContactPage() {
   return (

@@ -6,8 +6,16 @@ import { SurahSearch } from '@/components/quran/surah-search';
 import { Suspense } from 'react';
 import { SurahSkeleton } from '@/components/quran/surah-skeleton';
 
+import { pageMetadata } from '@/lib/site';
+
 // إجبار الصفحة على الرندرة الديناميكية لمنع أخطاء الـ Build مع الـ no-store fetch
 export const dynamic = 'force-dynamic';
+
+export const metadata = pageMetadata({
+  title: 'القرآن الكريم',
+  description: 'اقرأ واستمع إلى القرآن الكريم كاملاً: 114 سورة مع التفسير والتلاوات الصوتية بأصوات كبار القراء.',
+  path: '/quran',
+});
 
 async function QuranContent() {
   try {

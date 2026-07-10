@@ -8,6 +8,14 @@ import { getMemorizationProgress } from './actions';
 
 export const dynamic = 'force-dynamic';
 
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = pageMetadata({
+  title: 'حفظ القرآن',
+  description: 'خطط عملية لحفظ القرآن الكريم ومراجعته مع متابعة التقدم والتسجيل الصوتي للتسميع.',
+  path: '/memorization',
+});
+
 const plans = [
   { title: 'ورد يومي للحفظ', cadence: 'يومي', target: '5 آيات أو نصف صفحة', tajweed: 'تصحيح المخارج والمدود قبل الانتقال.' },
   { title: 'مراجعة أسبوعين', cadence: 'كل أسبوعين', target: 'مراجعة ما سبق + اختبار أكمل', tajweed: 'تسجيل صوتي ومراجعة الغنة والقلقلة.' },

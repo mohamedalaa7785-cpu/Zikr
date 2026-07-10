@@ -7,6 +7,14 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = pageMetadata({
+  title: 'المفضلة',
+  description: 'قائمة المحتوى المفضل لديك في منصة ZIKR.',
+  path: '/favorites',
+  noindex: true,
+});
 
 type Favorite = {
   id: string;

@@ -3,6 +3,13 @@ import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Castle } from 'lucide-react';
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = pageMetadata({
+  title: 'الفتوحات الإسلامية',
+  description: 'استكشف الفتوحات الإسلامية الكبرى وقادتها وتواريخها ومواقعها عبر التاريخ الإسلامي.',
+  path: '/conquests',
+});
 
 type Conquest = {
   id: string;

@@ -7,7 +7,43 @@ export const siteConfig = {
   dir: 'rtl' as const,
 };
 
-export const defaultOgImage = '/icons/icon-512.svg';
+export const defaultOgImage = '/og-image.png';
+
+import type { Metadata } from 'next';
+
+/**
+ * Build consistent page metadata with canonical URL, Open Graph, and Twitter cards.
+ * Use for every public page to avoid inheriting the root canonical.
+ */
+export function pageMetadata(opts: {
+  title: string;
+  description: string;
+  path: string;
+  noindex?: boolean;
+}): Metadata {
+  const { title, description, path, noindex } = opts;
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    ...(noindex ? { robots: { index: false, follow: false } } : {}),
+    openGraph: {
+      title,
+      description,
+      url: path,
+      type: 'website',
+      locale: siteConfig.locale,
+      siteName: siteConfig.shortName,
+      images: [{ url: defaultOgImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [defaultOgImage],
+    },
+  };
+}
 
 export type AppRoute = {
   path: string;

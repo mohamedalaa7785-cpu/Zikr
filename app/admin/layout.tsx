@@ -5,6 +5,7 @@ import { Container } from '@/components/ui/container';
 export const metadata: Metadata = {
   title: 'لوحة التحكم | ذِكرٌ',
   description: 'لوحة تحكم الأدمن لإدارة الموقع بالكامل',
+  robots: { index: false, follow: false },
 };
 
 const NAV_ITEMS = [
