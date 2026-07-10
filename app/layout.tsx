@@ -5,6 +5,7 @@ import { SiteShell } from '@/components/layout/site-shell';
 import { defaultOgImage, siteConfig } from '@/lib/site';
 import { Analytics } from '@/components/layout/analytics';
 import { ServiceWorkerRegister } from '@/components/layout/service-worker-register';
+import { AdSense } from '@/components/layout/adsense';
 
 const notoNaskhArabic = Noto_Naskh_Arabic({
   subsets: ['arabic'],
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-      <html lang='ar' dir={siteConfig.dir} className={`${notoNaskhArabic.variable} ${amiri.variable} bg-black`}>
+      <html lang='ar' dir={siteConfig.dir} data-scroll-behavior='smooth' className={`${notoNaskhArabic.variable} ${amiri.variable} bg-black`}>
       <head>
         <meta name='theme-color' content='#0A2A1E' />
         <meta name='mobile-web-app-capable' content='yes' />
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteShell>{children}</SiteShell>
         <Analytics />
         <ServiceWorkerRegister />
+        <AdSense />
       </body>
     </html>
   );

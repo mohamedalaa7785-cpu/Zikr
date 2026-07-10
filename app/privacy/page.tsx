@@ -40,12 +40,51 @@ export default function PrivacyPage() {
 
       <Card className="space-y-4 leading-8">
         <h2 className="text-2xl font-semibold text-brand-gold">
+          الإعلانات وشركاء الطرف الثالث
+        </h2>
+        <p className="arabic-muted">
+          قد تعرض المنصة إعلانات مقدمة من Google AdSense أو شركاء إعلانيين
+          آخرين. يستخدم موردو الطرف الثالث، بما في ذلك Google، ملفات تعريف
+          الارتباط لعرض الإعلانات بناءً على زياراتك السابقة لهذا الموقع أو
+          لمواقع أخرى على الإنترنت.
+        </p>
+        <p className="arabic-muted">
+          يتيح استخدام Google لملفات تعريف الارتباط الإعلانية (DART cookies)
+          لها ولشركائها عرض إعلانات لمستخدمينا استناداً إلى زيارتهم لموقعنا
+          و/أو مواقع أخرى على الإنترنت. يمكنك إلغاء الاشتراك في الإعلانات
+          المخصصة من خلال زيارة{" "}
+          <a
+            href="https://www.google.com/settings/ads"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-gold underline"
+          >
+            إعدادات إعلانات Google
+          </a>
+          .
+        </p>
+      </Card>
+
+      <Card className="space-y-4 leading-8">
+        <h2 className="text-2xl font-semibold text-brand-gold">
+          خصوصية الأطفال
+        </h2>
+        <p className="arabic-muted">
+          قسم الأطفال في المنصة مخصص للمحتوى التعليمي فقط ولا يجمع أي بيانات
+          شخصية من الأطفال. لا نطلب من الأطفال تسجيل الدخول أو تقديم أي
+          معلومات شخصية للوصول إلى المحتوى التعليمي.
+        </p>
+      </Card>
+
+      <Card className="space-y-4 leading-8">
+        <h2 className="text-2xl font-semibold text-brand-gold">
           حقوق المستخدم
         </h2>
         <p className="arabic-muted">
           يمكنك تسجيل الخروج في أي وقت. عند الحاجة إلى حذف بيانات الحساب أو
           مراجعتها يجب التواصل مع فريق تشغيل المنصة وفق قنوات الدعم المعتمدة عند
-          النشر.
+          النشر. يمكنك أيضاً تعطيل ملفات تعريف الارتباط من إعدادات متصفحك،
+          علماً بأن ذلك قد يؤثر على بعض ميزات الموقع.
         </p>
       </Card>
     </Container>

@@ -1,5 +1,5 @@
 // Service Worker for Zikr PWA
-const CACHE_NAME = 'zikr-v1';
+const CACHE_NAME = 'zikr-v2';
 const STATIC_ASSETS = [
   '/',
   '/offline.html',
@@ -45,6 +45,17 @@ self.addEventListener('fetch', (event) => {
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
+    return;
+  }
+
+  // Skip cross-origin requests entirely (external CDNs, audio/video streams, APIs).
+  // Intercepting them breaks media range requests ("URL safety check" errors).
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Skip audio/video requests - media elements need native range request handling
+  if (request.destination === 'audio' || request.destination === 'video') {
     return;
   }
 

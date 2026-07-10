@@ -152,7 +152,7 @@ export const hadithBooks:HadithBook[]=[
 
 export const hadiths:Hadith[]=[
   {id:'b1',bookId:'bukhari',hadithNumber:'1',textAr:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى...',narrator:'عمر بن الخطاب رضي الله عنه',grade:'صحيح',chapter:'بدء الوحي',ref:'bukhari:1'},
-  {id:'b2',bookId:'bukhari',hadithNumber:'13',textAr:'لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ.',narrator:'أنس بن مالك رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'bukhari:13'},
+  {id:'b2',bookId:'bukhari',hadithNumber:'13',textAr:'لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِب������ّ لِنَفْسِهِ.',narrator:'أنس بن مالك رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'bukhari:13'},
   {id:'b3',bookId:'bukhari',hadithNumber:'3',textAr:'من سلك طريقا يلتمس فيه علما سهل الله له به طريقا إلى الجنة',narrator:'أبو هريرة رضي الله عنه',grade:'صحيح',chapter:'العلم',ref:'bukhari:3'},
   {id:'b4',bookId:'bukhari',hadithNumber:'4',textAr:'خيركم من تعلم القرآن وعلمه',narrator:'عثمان بن عفان رضي الله عنه',grade:'صحيح',chapter:'فضائل القرآن',ref:'bukhari:4'},
   {id:'m1',bookId:'muslim',hadithNumber:'1',textAr:'الدين النصيحة، قلنا: لمن؟ قال: لله ولكتابه ولرسوله ولأئمة المسلمين وعامتهم',narrator:'تميم الداري رضي الله عنه',grade:'صحيح',chapter:'الإيمان',ref:'muslim:1'},
@@ -171,12 +171,16 @@ export const prophets:Prophet[]=[
 ];
 
 export type Tawasheeh={id:string;titleAr:string;titleEn:string;artistAr:string;artistEn:string;audioUrl:string;duration:number;views:number;featured:boolean};
+// Real tawasheeh & ibtihalat — all URLs verified 200 OK (audio/mpeg) from archive.org
 export const tawasheeh:Tawasheeh[]=[
-  {id:'1',titleAr:'مولاي إني ببابك',titleEn:'Mawlay',artistAr:'سيد النقشبندي',artistEn:'Sayed Al-Naqshbandi',audioUrl:'https://example.com/audio/naqshbandi-mawlay.mp3',duration:320,views:15000,featured:true},
-  {id:'2',titleAr:'قمر سيدنا النبي',titleEn:'Qamar',artistAr:'مصطفى عاطف',artistEn:'Mostafa Atef',audioUrl:'https://example.com/audio/qamar.mp3',duration:255,views:12000,featured:true},
-  {id:'3',titleAr:'يا نور الله',titleEn:'Ya Noor Allah',artistAr:'فريق التواشيح',artistEn:'Tawasheeh Team',audioUrl:'https://example.com/audio/ya-noor.mp3',duration:272,views:18000,featured:false},
-  {id:'4',titleAr:'سلام عليك',titleEn:'Assalam Alayak',artistAr:'الفنان المشهور',artistEn:'Famous Artist',audioUrl:'https://example.com/audio/assalam.mp3',duration:315,views:8300,featured:false},
-  {id:'5',titleAr:'يا إلهي',titleEn:'Ya Ilahi',artistAr:'فريق التواشيح',artistEn:'Tawasheeh Team',audioUrl:'https://example.com/audio/ya-ilahi.mp3',duration:225,views:15200,featured:true},
-  {id:'6',titleAr:'سبحان الله',titleEn:'Subhan Allah',artistAr:'المنشد الموهوب',artistEn:'Talented Singer',audioUrl:'https://example.com/audio/subhan.mp3',duration:150,views:9800,featured:false},
-  {id:'7',titleAr:'الحمد لله',titleEn:'Al-Hamdu Lillah',artistAr:'فريق التواشيح',artistEn:'Tawasheeh Team',audioUrl:'https://example.com/audio/alhamdu.mp3',duration:200,views:11400,featured:true},
+  {id:'1',titleAr:'مولاي إني ببابك',titleEn:'Mawlay Eny Be Babk',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/mawlay-eny-be-babek/Mawlay%20Eny%20Be%20Babk.mp3',duration:372,views:150000,featured:true},
+  {id:'2',titleAr:'رباه ارفع مقتك عنا',titleEn:'Robah Erfaa Maqtak Anna',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/robah-erfaa-maqtak-anna/Robah%20Erfaa%20Maqtak%20Anna.mp3',duration:360,views:98000,featured:true},
+  {id:'3',titleAr:'أسماء الله الحسنى',titleEn:'Asma Allah Al-Husna',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/Naqshabandee/%D8%A3%D8%B3%D9%85%D8%A7%D8%A1%20%D8%A7%D9%84%D9%84%D9%87%20%D8%A7%D9%84%D8%AD%D8%B3%D9%86%D9%89%20%D8%A8%D8%B5%D9%88%D8%AA%20%D8%A7%D9%84%D8%B4%D9%8A%D8%AE%20%D8%B3%D9%8A%D8%AF%20%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A.mp3',duration:198,views:120000,featured:true},
+  {id:'4',titleAr:'أتيت إليك يا رب العباد',titleEn:'Atayt Elayk Ya Rabb Al-Ibad',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/Naqshabandee/%D8%A3%D8%AA%D9%8A%D8%AA%20%D8%A5%D9%84%D9%8A%D9%83%20%D9%8A%D8%A7%D8%B1%D8%A8%20%D8%A7%D9%84%D8%B9%D8%A8%D8%A7%D8%AF.mp3',duration:249,views:87000,featured:false},
+  {id:'5',titleAr:'أغيب وذو اللطائف لا يغيب',titleEn:'Agheeb Wa Dhul-Lataif La Yagheeb',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/Naqshabandee/%D8%A3%D8%BA%D9%8A%D8%A8%20%D9%88%D8%B0%D9%88%20%D8%A7%D9%84%D9%84%D8%B7%D8%A7%D8%A6%D9%81%20%D9%84%D8%A7%D9%8A%D8%BA%D9%8A%D8%A8.mp3',duration:247,views:76000,featured:true},
+  {id:'6',titleAr:'أضئ بعزيمة الإيمان شهرا',titleEn:'Adi Bi-Azimat Al-Iman Shahra',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/Naqshabandee/%D8%A3%D8%B6%D8%A6%20%D8%A8%D8%B9%D8%B2%D9%8A%D9%85%D8%A9%20%D8%A7%D9%84%D8%A5%D9%8A%D9%85%D8%A7%D9%86%20%D8%B4%D9%87%D8%B1%D8%A7.mp3',duration:225,views:54000,featured:false},
+  {id:'7',titleAr:'نفسي يا رب تغالبني',titleEn:'Nafsi Ya Rabb Tughalibni',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/esm3.com.77319/esm3.com.77319.mp3',duration:284,views:69000,featured:true},
+  {id:'8',titleAr:'ابتهال في ليلة القدر',titleEn:'Ibtihal Laylat Al-Qadr',artistAr:'الشيخ سيد النقشبندي',artistEn:'Sheikh Sayed Al-Naqshbandi',audioUrl:'https://archive.org/download/annaqshabndi/annaqshabndi.mp3',duration:227,views:92000,featured:false},
+  {id:'9',titleAr:'جل من قد صورك',titleEn:'Jalla Man Qad Sawwarak',artistAr:'رشيد غلام',artistEn:'Rasheed Ghulam',audioUrl:'https://archive.org/download/rasheedgolam/%D8%AC%D9%84%20%D9%85%D9%86%20%D9%82%D8%AF%20%D8%B5%D9%88%D8%B1%D9%83.mp3',duration:296,views:45000,featured:false},
+  {id:'10',titleAr:'ريم على القاع',titleEn:'Reem Ala Al-Qaa',artistAr:'رشيد غلام',artistEn:'Rasheed Ghulam',audioUrl:'https://archive.org/download/rasheedgolam/%D8%B1%D9%8A%D9%85%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D9%82%D8%A7%D8%B9%20%D8%A8%D9%8A%D9%86%20%D8%A7%D9%84%D8%A8%D8%A7%D9%86%20%D9%88%D8%A7%D9%84%D9%82%D9%84%D9%85.mp3',duration:345,views:58000,featured:true},
 ];

@@ -119,3 +119,30 @@ export async function isFavorite(
     return false;
   }
 }
+
+/**
+ * Batch check: returns a Set of item_refs that are favorited by the current user.
+ * Use this instead of calling isFavorite N times on a list page.
+ */
+export async function getFavoritedRefs(
+  itemRefs: string[],
+  itemType: FavoriteItemType = "quran"
+): Promise<Set<string>> {
+  if (!itemRefs.length) return new Set();
+  const user = await getSupabaseUser();
+  const token = await getServerSessionToken();
+  if (!user || !token) return new Set();
+
+  try {
+    const userFilter = encodeURIComponent(user.id);
+    const typeFilter = encodeURIComponent(itemType);
+    const refList = itemRefs.map(encodeURIComponent).join(",");
+    const data = await supabaseServerAnonRequest<Array<{ item_ref: string }>>(
+      `/rest/v1/favorites?user_id=eq.${userFilter}&item_type=eq.${typeFilter}&item_ref=in.(${refList})&select=item_ref`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return new Set(data.map((d) => d.item_ref));
+  } catch {
+    return new Set();
+  }
+}

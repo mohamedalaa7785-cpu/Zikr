@@ -1,147 +1,195 @@
+'use server';
+
 import { generateText, streamText } from 'ai';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory, type GenerationConfig } from '@google/generative-ai';
 
 /**
- * Text generation client.
- *
- * Preference order:
- *   1. Vercel AI Gateway (zero-config for Google models when AI_GATEWAY_API_KEY
- *      or Vercel OIDC is present). This is the default and most reliable path.
- *   2. Direct Google Generative AI SDK, only if a valid GEMINI_API_KEY is set.
- *
- * All functions return `null` (or yield nothing) on failure so callers can fall
- * back to their own static content gracefully.
+ * Gemini client with:
+ * 1. Vercel AI Gateway (uses AI_GATEWAY_API_KEY, zero-config for Google models)
+ * 2. Direct Google SDK with round-robin key rotation across all 19 keys
  */
 
-// Gateway model id. GEMINI_MODEL may hold a bare id like "gemini-2.5-flash";
-// normalize it to the "google/..." form the gateway expects.
+// ── AI Gateway ───────────────────────────────────────────────────────────────
 function getGatewayModelId(): string {
   const raw = (process.env.GEMINI_MODEL ?? 'gemini-2.5-flash').trim();
   if (raw.includes('/')) return raw;
-  // Map legacy/unsupported ids to a current gateway model.
   if (raw.startsWith('gemini-1.5')) return 'google/gemini-2.5-flash';
   return `google/${raw}`;
 }
 
 function gatewayAvailable(): boolean {
   return Boolean(
-    (process.env.AI_GATEWAY_API_KEY && process.env.AI_GATEWAY_API_KEY.trim()) ||
-      (process.env.VERCEL_OIDC_TOKEN && process.env.VERCEL_OIDC_TOKEN.trim())
+    (process.env.AI_GATEWAY_API_KEY?.trim()) ||
+    (process.env.VERCEL_OIDC_TOKEN?.trim())
   );
 }
 
-// ── Direct Google SDK (fallback) ────────────────────────────────────────────
-const DIRECT_MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
-let cachedClient: GoogleGenerativeAI | null = null;
+// ── Direct SDK with key rotation ─────────────────────────────────────────────
+// Discover every available Gemini key once: GEMINI_API_KEY plus GEMINI_API_KEY_1..30.
+// The project provides GEMINI_API_KEY_2 .. GEMINI_API_KEY_19, but this also picks
+// up a plain GEMINI_API_KEY or GEMINI_API_KEY_1 if they are ever added.
+let cachedKeys: string[] | null = null;
+let keyIndex = 0;
 
-function getDirectApiKey(): string | null {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key || !key.trim()) return null;
+function getAvailableKeys(): string[] {
+  if (cachedKeys) return cachedKeys;
+  const keys: string[] = [];
+  const plain = process.env.GEMINI_API_KEY?.trim();
+  if (plain) keys.push(plain);
+  for (let i = 1; i <= 30; i++) {
+    const key = process.env[`GEMINI_API_KEY_${i}`]?.trim();
+    if (key) keys.push(key);
+  }
+  cachedKeys = keys;
+  return keys;
+}
+
+function getNextApiKey(): string | null {
+  const keys = getAvailableKeys();
+  if (keys.length === 0) return null;
+  const key = keys[keyIndex % keys.length];
+  keyIndex = (keyIndex + 1) % keys.length;
   return key;
 }
 
-function getDirectClient(): GoogleGenerativeAI | null {
-  const key = getDirectApiKey();
-  if (!key) return null;
-  if (!cachedClient) cachedClient = new GoogleGenerativeAI(key);
-  return cachedClient;
+function getDirectModel(key: string): string {
+  return process.env.GEMINI_MODEL?.replace(/^google\//, '') ?? 'gemini-2.5-flash';
 }
 
+// BLOCK_ONLY_HIGH exists at runtime but some TS type versions omit it — cast
+const BLOCK_ONLY_HIGH = 'BLOCK_ONLY_HIGH' as unknown as HarmBlockThreshold;
+
 const safetySettings = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,       threshold: BLOCK_ONLY_HIGH },
   { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: BLOCK_ONLY_HIGH },
 ];
 
-const directGenerationConfig: GenerationConfig = {
-  temperature: 0.4,
+const generationConfig: GenerationConfig = {
+  temperature: 0.5,
   topP: 0.9,
-  topK: 32,
-  maxOutputTokens: 1000,
+  topK: 40,
+  maxOutputTokens: 1500,
 };
 
-// ── Public API ────────────────────────────────────────────────────────────
-export async function generateGeminiText(prompt: string): Promise<string | null> {
-  // 1. Prefer the AI Gateway.
+async function callDirectSdk(prompt: string, maxOutputTokens = 1500): Promise<string | null> {
+  // Try up to 3 keys on rate-limit errors
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const key = getNextApiKey();
+    if (!key) break;
+    try {
+      const client = new GoogleGenerativeAI(key);
+      const modelId = getDirectModel(key);
+      const model = client.getGenerativeModel({
+        model: modelId,
+        safetySettings,
+        generationConfig: { ...generationConfig, maxOutputTokens },
+      });
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().trim();
+      if (text) return text;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Rotate key on rate-limit or quota errors
+      if (msg.includes('429') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
+        console.error(`[gemini] Key ${attempt + 1} quota exceeded, rotating...`);
+        continue;
+      }
+      console.error('[gemini] Direct SDK error:', msg);
+      break;
+    }
+  }
+  return null;
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+export async function generateGeminiText(prompt: string, maxTokens = 1500): Promise<string | null> {
+  // 1. Vercel AI Gateway
   if (gatewayAvailable()) {
     try {
       const { text } = await generateText({
         model: getGatewayModelId(),
         prompt,
-        temperature: 0.4,
-        maxOutputTokens: 1000,
+        temperature: 0.5,
+        maxOutputTokens: maxTokens,
       });
-      const trimmed = text.trim();
+      const trimmed = text?.trim();
       if (trimmed) return trimmed;
-    } catch (error) {
-      console.error('[ai-service] Gateway generation failed, trying direct SDK:', error);
+    } catch (err) {
+      console.error('[gemini] Gateway failed, falling back to direct SDK:', err instanceof Error ? err.message : err);
     }
   }
-
-  // 2. Fall back to the direct Google SDK if a valid key exists.
-  const client = getDirectClient();
-  if (!client) return null;
-
-  try {
-    const model = client.getGenerativeModel({ model: DIRECT_MODEL, safetySettings, generationConfig: directGenerationConfig });
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim() || null;
-  } catch (error) {
-    console.error('[ai-service] Direct SDK generation failed:', error);
-    return null;
-  }
+  // 2. Direct SDK with rotation
+  return callDirectSdk(prompt, maxTokens);
 }
 
 export async function* streamGeminiText(prompt: string): AsyncGenerator<string, void, unknown> {
-  // 1. Prefer the AI Gateway.
   if (gatewayAvailable()) {
     try {
       const result = streamText({
         model: getGatewayModelId(),
         prompt,
-        temperature: 0.4,
-        maxOutputTokens: 1000,
+        temperature: 0.5,
+        maxOutputTokens: 1500,
       });
       for await (const chunk of result.textStream) {
         if (chunk) yield chunk;
       }
       return;
-    } catch (error) {
-      console.error('[ai-service] Gateway streaming failed, trying direct SDK:', error);
+    } catch (err) {
+      console.error('[gemini] Gateway stream failed, falling back:', err instanceof Error ? err.message : err);
     }
   }
 
-  // 2. Fall back to the direct Google SDK.
-  const client = getDirectClient();
-  if (!client) return;
-
+  const key = getNextApiKey();
+  if (!key) return;
   try {
-    const model = client.getGenerativeModel({ model: DIRECT_MODEL, safetySettings, generationConfig: directGenerationConfig });
+    const client = new GoogleGenerativeAI(key);
+    const model = client.getGenerativeModel({
+      model: getDirectModel(key),
+      safetySettings,
+      generationConfig,
+    });
     const streamResult = await model.generateContentStream(prompt);
     for await (const chunk of streamResult.stream) {
       const text = chunk.text();
       if (text) yield text;
     }
-  } catch (error) {
-    console.error('[ai-service] Direct SDK streaming failed:', error);
+  } catch (err) {
+    console.error('[gemini] Direct stream failed:', err instanceof Error ? err.message : err);
   }
 }
 
-export async function generateGeminiFromAudio(prompt: string, audio: { data: string; mimeType: string }): Promise<string | null> {
-  // Audio transcription requires the direct Google SDK (inline audio data).
-  const client = getDirectClient();
-  if (!client) return null;
-
-  try {
-    const model = client.getGenerativeModel({ model: DIRECT_MODEL, safetySettings, generationConfig: directGenerationConfig });
-    const result = await model.generateContent([
-      prompt,
-      { inlineData: { data: audio.data, mimeType: audio.mimeType } },
-    ] as never);
-    return result.response.text().trim() || null;
-  } catch (error) {
-    console.error('[ai-service] Failed to generate text from audio:', error);
-    return null;
+export async function generateGeminiFromAudio(
+  prompt: string,
+  audio: { data: string; mimeType: string },
+): Promise<string | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const key = getNextApiKey();
+    if (!key) break;
+    try {
+      const client = new GoogleGenerativeAI(key);
+      const model = client.getGenerativeModel({
+        model: getDirectModel(key),
+        safetySettings,
+        generationConfig: { ...generationConfig, maxOutputTokens: 2000 },
+      });
+      const result = await model.generateContent([
+        prompt,
+        { inlineData: { data: audio.data, mimeType: audio.mimeType } },
+      ] as never);
+      const text = result.response.text().trim();
+      if (text) return text;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('429') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
+        console.error(`[gemini] Audio key ${attempt + 1} quota exceeded, rotating...`);
+        continue;
+      }
+      console.error('[gemini] Audio generation failed:', msg);
+      break;
+    }
   }
+  return null;
 }

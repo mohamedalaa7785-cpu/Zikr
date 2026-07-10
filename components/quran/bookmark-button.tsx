@@ -12,14 +12,17 @@ import { toast } from "sonner";
 type BookmarkButtonProps = {
   keyRef: string;
   itemType?: FavoriteItemType;
+  /** Pre-fetched value from server to avoid an extra round-trip per item */
+  initialSaved?: boolean;
 };
 
 export function BookmarkButton({
   keyRef,
   itemType = "quran",
+  initialSaved,
 }: BookmarkButtonProps) {
   const [isClient, setIsClient] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(initialSaved ?? false);
   const [isPending, startTransition] = useTransition();
 
   // Hydration guard
@@ -29,8 +32,10 @@ export function BookmarkButton({
 
   useEffect(() => {
     if (!isClient) return;
+    // Skip the network call if the parent already provided the initial value
+    if (initialSaved !== undefined) return;
     isFavorite(keyRef, itemType).then(setSaved);
-  }, [keyRef, itemType, isClient]);
+  }, [keyRef, itemType, isClient, initialSaved]);
 
   const toggle = () => {
     startTransition(async () => {

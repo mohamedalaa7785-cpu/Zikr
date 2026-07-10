@@ -17,6 +17,8 @@ function formatDuration(seconds: number): string {
 export default function TawasheehPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const filtered = tawasheeh.filter(
@@ -30,12 +32,26 @@ export default function TawasheehPage() {
   const currentTrack = tawasheeh.find((t) => t.id === currentId) ?? null;
 
   const handlePlay = (id: string) => {
+    setAudioError(null);
     if (currentId === id) {
-      audioRef.current?.pause();
-      setCurrentId(null);
+      if (isPlaying) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current?.play().catch(() => setAudioError('تعذّر تشغيل المقطع'));
+        setIsPlaying(true);
+      }
     } else {
       setCurrentId(id);
+      setIsPlaying(true);
     }
+  };
+
+  const handleStop = () => {
+    audioRef.current?.pause();
+    setCurrentId(null);
+    setIsPlaying(false);
+    setAudioError(null);
   };
 
   return (
@@ -58,23 +74,33 @@ export default function TawasheehPage() {
             </div>
             <Button
               variant="ghost"
-              onClick={() => setCurrentId(null)}
+              onClick={handleStop}
               aria-label="إيقاف التشغيل"
             >
               إيقاف
             </Button>
           </div>
+          {audioError && (
+            <p className="text-xs text-red-400 text-center py-1">{audioError} — الرابط غير متاح حالياً</p>
+          )}
           <audio
             ref={audioRef}
-            key={currentTrack.audioUrl}
+            key={currentTrack.id}
+            src={currentTrack.audioUrl}
             controls
             autoPlay
+            preload="auto"
             className="w-full"
             aria-label={`تشغيل ${currentTrack.titleAr}`}
-            onError={() => setCurrentId(null)}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => { setIsPlaying(false); setCurrentId(null); }}
+            onError={() => {
+              setIsPlaying(false);
+              setAudioError('تعذّر تحميل المقطع الصوتي');
+            }}
           >
-            <source src={currentTrack.audioUrl} type="audio/mpeg" />
-            المتصفح لا يدعم تشغيل الصوت.
+            متصفحك لا يدعم تشغيل الصوت.
           </audio>
         </Card>
       )}
@@ -108,7 +134,7 @@ export default function TawasheehPage() {
                   className="w-full"
                   onClick={() => handlePlay(track.id)}
                 >
-                  {currentId === track.id ? 'جاري التشغيل...' : 'استمع'}
+                  {currentId === track.id && isPlaying ? 'إيقاف مؤقت' : currentId === track.id ? 'استئناف' : 'استمع'}
                 </Button>
               </Card>
             ))}
@@ -146,7 +172,7 @@ export default function TawasheehPage() {
               <button
                 onClick={() => handlePlay(track.id)}
                 className="w-10 h-10 shrink-0 rounded-full border border-brand-gold/30 flex items-center justify-center text-brand-gold hover:bg-brand-gold/10 transition-colors"
-                aria-label={currentId === track.id ? 'إيقاف' : `تشغيل ${track.titleAr}`}
+                aria-label={currentId === track.id && isPlaying ? 'إيقاف مؤقت' : currentId === track.id ? 'استئناف' : `تشغيل ${track.titleAr}`}
               >
                 {currentId === track.id ? (
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">

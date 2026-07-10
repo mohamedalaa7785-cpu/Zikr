@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Coordinates {
   latitude: number;
@@ -16,21 +16,45 @@ interface UseGeolocationReturn {
   clearLocation: () => void;
 }
 
+function messageForError(err: GeolocationPositionError): string {
+  switch (err.code) {
+    case err.PERMISSION_DENIED:
+      return 'تم رفض إذن الموقع. فعّل الوصول للموقع من إعدادات المتصفح لعرض مواقيت الصلاة بدقة.';
+    case err.POSITION_UNAVAILABLE:
+      return 'تعذّر تحديد موقعك حاليًا. تأكد من تفعيل خدمة الموقع (GPS).';
+    case err.TIMEOUT:
+      return 'انتهت مهلة تحديد الموقع. حاول مرة أخرى.';
+    default:
+      return err.message || 'حدث خطأ أثناء تحديد الموقع.';
+  }
+}
+
 export function useGeolocation(): UseGeolocationReturn {
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const watchIdRef = useRef<number | null>(null);
+
+  const stopWatching = useCallback(() => {
+    if (watchIdRef.current !== null && 'geolocation' in navigator) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  }, []);
 
   const requestLocation = useCallback(() => {
     if (!('geolocation' in navigator)) {
-      setError(new Error('Geolocation not supported'));
+      setError(new Error('المتصفح لا يدعم تحديد الموقع.'));
       return;
     }
+
+    // Clear any previous watcher before starting a new one
+    stopWatching();
 
     setLoading(true);
     setError(null);
 
-    navigator.geolocation.watchPosition(
+    watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         setCoordinates({
           latitude: position.coords.latitude,
@@ -40,17 +64,22 @@ export function useGeolocation(): UseGeolocationReturn {
         setLoading(false);
       },
       (err) => {
-        setError(new Error(err.message));
+        setError(new Error(messageForError(err)));
         setLoading(false);
+        stopWatching();
       },
-      { enableHighAccuracy: true, maximumAge: 0 }
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 20000 }
     );
-  }, []);
+  }, [stopWatching]);
 
   const clearLocation = useCallback(() => {
+    stopWatching();
     setCoordinates(null);
     setError(null);
-  }, []);
+  }, [stopWatching]);
+
+  // Clean up the watcher when the component using this hook unmounts
+  useEffect(() => stopWatching, [stopWatching]);
 
   return {
     coordinates,

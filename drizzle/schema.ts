@@ -50,6 +50,7 @@ export const statusEnum = pgEnum("status", ["pending", "completed", "failed"]);
 // User-owned tables
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(),
+  email: text("email"),
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
   locale: text("locale").notNull().default("ar"),
@@ -603,6 +604,27 @@ export const memorizationPlans = pgTable("memorization_plans", {
     .notNull(),
 });
 
+// User memorization progress (user-owned)
+export const memorizationProgress = pgTable(
+  "memorization_progress",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull(),
+    surahNumber: integer("surah_number").notNull(),
+    surahName: text("surah_name").notNull(),
+    totalAyahs: integer("total_ayahs").notNull(),
+    memorizedAyahs: integer("memorized_ayahs").notNull().default(0),
+    lastReviewedAt: timestamp("last_reviewed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  t => ({ uniq: unique("memorization_progress_user_surah").on(t.userId, t.surahNumber) })
+);
+
 // Prophets (public read, admin write)
 export const prophets = pgTable("prophets", {
   id: uuid("id").primaryKey(),
@@ -653,6 +675,7 @@ export const duaCategories = pgTable("dua_categories", {
   slug: text("slug").notNull().unique(),
   icon: text("icon"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -697,6 +720,7 @@ export const articleCategories = pgTable("article_categories", {
   descriptionEn: text("description_en"),
   icon: text("icon"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -737,6 +761,7 @@ export const videoCategories = pgTable("video_categories", {
   descriptionEn: text("description_en"),
   icon: text("icon"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -780,6 +805,7 @@ export const kidsContent = pgTable("kids_content", {
   videoUrl: text("video_url"),
   quizData: jsonb("quiz_data"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -986,6 +1012,7 @@ export const tawasheehCategories = pgTable("tawasheeh_categories", {
   icon: text("icon"),
   orderNum: integer("order_num"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -1012,6 +1039,7 @@ export const tawasheeh = pgTable("tawasheeh", {
   views: integer("views").notNull().default(0),
   published: boolean("published").notNull().default(true),
   featured: boolean("featured").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
   metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

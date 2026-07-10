@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const { data: surahs, error } = await supabase
       .from('quran_surahs')
       .select('*')
-      .order('order', { ascending: true });
+      .order('id', { ascending: true }); // id = surah number; "order" is a reserved word in PostgREST
 
     if (error) throw error;
     return NextResponse.json(surahs || []);
