@@ -27,7 +27,19 @@ export default function manifest(): MetadataRoute.Manifest {
         type: 'image/svg+xml',
         purpose: 'any'
       },
+      {
+        src: '/icons/icon-512.svg',
+        sizes: '512x512',
+        type: 'image/svg+xml',
+        purpose: 'maskable',
+      },
     ],
-    categories: ['lifestyle', 'reference'],
+    categories: ['lifestyle', 'reference', 'education'],
+    shortcuts: [
+      { name: 'القرآن الكريم', short_name: 'القرآن', url: '/quran' },
+      { name: 'مواقيت الصلاة', short_name: 'الصلاة', url: '/prayer-times' },
+      { name: 'الأذكار', short_name: 'الأذكار', url: '/adhkar' },
+      { name: 'الورد اليومي', short_name: 'الورد', url: '/wird' },
+    ],
   };
 }

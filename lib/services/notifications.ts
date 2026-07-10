@@ -71,6 +71,28 @@ export function showPrayerNotification(prayerNameAr: string): void {
   }
 }
 
+/** Show a browser notification reminding the user their zakat is due. */
+export function showZakatNotification(daysLeft: number): void {
+  if (typeof window === 'undefined') return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+
+  const body =
+    daysLeft > 0
+      ? `اقترب موعد إخراج زكاتك — تبقّى ${daysLeft} يوماً`
+      : 'حان موعد إخراج زكاتك — لا تنسَ أداءها';
+
+  try {
+    new Notification('تذكير الزكاة', {
+      body,
+      icon: '/icons/icon-192.svg',
+      tag: 'zakat-reminder',
+    });
+  } catch {
+    // ignore
+  }
+}
+
 /** Show a browser notification for the Salawat reminder. */
 export function showSalawatNotification(): void {
   if (typeof window === 'undefined') return;

@@ -297,8 +297,18 @@ export default function SettingsPage() {
         </div>
 
         <p className="text-xs text-brand-cream/40">
-          الصفحات الرئيسية (القرآن، الأذكار، الصلاة، الأدعية، التسبيح) محفوظة للعمل بدون إنترنت.
+          الصفحات الرئيسية (القرآن، الأذكار، الصلاة، الأدعية، التسبيح، الورد، الزكاة) تُحفظ تلقائيًا عند
+          زيارتها لتعمل بدون إنترنت. ثبّت التطبيق على شاشتك الرئيسية لتجربة أقرب لتطبيقات الموبايل.
         </p>
+
+        <div className="flex flex-wrap gap-2">
+          <Button variant="ghost" href="/wird" className="text-sm">
+            الورد وختم القرآن
+          </Button>
+          <Button variant="ghost" href="/zakat" className="text-sm">
+            الزكاة والتذكير
+          </Button>
+        </div>
 
         <Button variant="secondary" onClick={handleSkipWaiting} className="w-full text-sm">
           تحديث البيانات المخزنة
