@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { logoutAction, updateProfileAction } from '@/app/auth/actions';
+import { AvatarUpload } from '@/components/profile/avatar-upload';
 import Link from 'next/link';
 
 type Favorite = {
@@ -134,21 +135,11 @@ export default async function ProfilePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-5">
-          {profile?.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt="صورة المستخدم"
-              className="h-20 w-20 rounded-full object-cover ring-2 ring-brand-gold/30"
-            />
-          ) : (
-            <div
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-black/20 text-3xl text-brand-gold/50 ring-2 ring-brand-gold/30"
-              aria-label="صورة افتراضية"
-            >
-              {(profile?.display_name?.[0] ?? user.email?.[0] ?? 'م').toUpperCase()}
-            </div>
-          )}
+          <AvatarUpload
+            currentAvatarUrl={profile?.avatar_url ?? null}
+            displayName={profile?.display_name ?? null}
+            email={user.email ?? null}
+          />
           <div className="space-y-1">
             <p className="text-lg font-semibold text-brand-cream">
               {profile?.display_name ?? 'لم يتم إعداد الاسم بعد'}
@@ -199,20 +190,7 @@ export default async function ProfilePage() {
               className="w-full rounded-lg border border-brand-gold/20 bg-black/20 p-2 text-brand-cream focus:border-brand-gold focus:outline-none"
             />
           </div>
-          <div className="space-y-1">
-            <label className="block text-sm arabic-muted" htmlFor="avatarUrl">
-              رابط الصورة الشخصية
-            </label>
-            <input
-              id="avatarUrl"
-              name="avatarUrl"
-              type="url"
-              dir="ltr"
-              defaultValue={profile?.avatar_url ?? ''}
-              placeholder="https://..."
-              className="w-full rounded-lg border border-brand-gold/20 bg-black/20 p-2 text-left text-brand-cream focus:border-brand-gold focus:outline-none"
-            />
-          </div>
+
           <Button type="submit">حفظ التغييرات</Button>
         </form>
 
