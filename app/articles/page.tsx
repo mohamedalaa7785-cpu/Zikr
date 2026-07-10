@@ -121,7 +121,7 @@ export default async function ArticlesPage() {
         .from('article_categories')
         .select('id, name_ar, slug, icon')
         .eq('published', true)
-        .order('order_num', { ascending: true }),
+        .order('order_index', { ascending: true, nullsFirst: false }),
     ]);
     articles = articlesRes.data ?? [];
     categories = categoriesRes.data ?? [];

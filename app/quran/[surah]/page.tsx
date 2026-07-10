@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { getSurahById } from '@/lib/services/quran';
 import { getSurahFromDb } from '@/lib/services/quran-server';
+import { getFavoritedRefs } from '@/app/favorites/actions';
 import { Badge } from '@/components/ui/badge';
 
 export const revalidate = 3600; // Surah page cache
@@ -49,6 +50,10 @@ export default async function SurahPage({ params }: { params: Promise<{ surah: s
 
   if (!result) return notFound();
 
+  // Batch-fetch all favorite states for this page in one query
+  const allRefs = result.ayahs.map((a) => `quran:${result!.surah.number}:${a.numberInSurah}`);
+  const favoritedRefs = await getFavoritedRefs(allRefs, 'quran');
+
   return (
     <Container className='space-y-6 py-12'>
       <nav className='arabic-muted text-sm'>
@@ -83,7 +88,10 @@ export default async function SurahPage({ params }: { params: Promise<{ surah: s
                 </div>
                 
                 <div className="flex items-center gap-4 pt-4 border-t border-muted">
-                  <BookmarkButton keyRef={`quran:${result.surah.number}:${ayah.numberInSurah}`} />
+                  <BookmarkButton
+                    keyRef={`quran:${result.surah.number}:${ayah.numberInSurah}`}
+                    initialSaved={favoritedRefs.has(`quran:${result.surah.number}:${ayah.numberInSurah}`)}
+                  />
                   <Link 
                     className='text-sm text-brand-gold hover:underline' 
                     href={`/quran/${result.surah.number}/${ayah.numberInSurah}`}

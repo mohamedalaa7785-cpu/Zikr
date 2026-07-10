@@ -21,26 +21,25 @@ interface Prophet {
   name_en: string | null;
   slug: string;
   bio_ar: string | null;
-  quran_mentions?: number | null;
-  era?: string | null;
+  quran_mentions?: number | null; // local static data only — not in DB schema
 }
 
 const staticProphets: Prophet[] = [
-  { id: '1', name_ar: 'آدم عليه السلام', name_en: 'Adam', slug: 'adam', bio_ar: 'أبو البشر وأول الأنبياء، خلقه الله بيده ونفخ فيه الروح وعلّمه الأسماء كلها.', quran_mentions: 25, era: null },
-  { id: '2', name_ar: 'نوح عليه السلام', name_en: 'Noah', slug: 'nuh', bio_ar: 'نبي الله ورسوله الذي دعا قومه ألف سنة إلا خمسين عاماً، وبنى السفينة بأمر الله لإنجاء المؤمنين.', quran_mentions: 43, era: null },
-  { id: '3', name_ar: 'إبراهيم عليه السلام', name_en: 'Ibrahim', slug: 'ibrahim', bio_ar: 'خليل الله ومحطّم الأصنام، بنى الكعبة المشرفة مع ابنه إسماعيل، وهو أبو الأنبياء.', quran_mentions: 69, era: null },
-  { id: '4', name_ar: 'إسماعيل عليه السلام', name_en: 'Ismail', slug: 'ismail', bio_ar: 'ابن إبراهيم عليه السلام ومن بنى معه الكعبة المشرفة، صاحب قصة الفداء العظيم.', quran_mentions: 12, era: null },
-  { id: '5', name_ar: 'إسحاق عليه السلام', name_en: 'Isaac', slug: 'ishaq', bio_ar: 'ابن إبراهيم من زوجته سارة، بشّر به الملائكة إبراهيم، وهو جد أنبياء بني إسرائيل.', quran_mentions: 17, era: null },
-  { id: '6', name_ar: 'يوسف عليه السلام', name_en: 'Joseph', slug: 'yusuf', bio_ar: 'نبي الله الذي كانت قصته أحسن القصص كما وصفها القرآن. صبر على إخوته وعزيمة مصر والسجن.', quran_mentions: 27, era: null },
-  { id: '7', name_ar: 'موسى عليه السلام', name_en: 'Moses', slug: 'musa', bio_ar: 'أكثر الأنبياء ذكراً في القرآن الكريم، كلّمه الله تكليماً، أنقذ بني إسرائيل من فرعون وفرق البحر.', quran_mentions: 136, era: null },
-  { id: '8', name_ar: 'هارون عليه السلام', name_en: 'Aaron', slug: 'harun', bio_ar: 'أخو موسى عليه السلام ووزيره، أرسلهما الله معاً إلى فرعون.', quran_mentions: 20, era: null },
-  { id: '9', name_ar: 'داود عليه السلام', name_en: 'David', slug: 'dawud', bio_ar: 'نبي وملك آتاه الله الزبور، أوتي صوتاً جميلاً تسبح معه الجبال والطير.', quran_mentions: 16, era: null },
-  { id: '10', name_ar: 'سليمان عليه السلام', name_en: 'Solomon', slug: 'sulayman', bio_ar: 'ابن داود عليه السلام، آتاه الله ملكاً لم يؤت أحداً من بعده، وسخّر له الريح والجن والطير.', quran_mentions: 17, era: null },
-  { id: '11', name_ar: 'عيسى عليه السلام', name_en: 'Jesus', slug: 'isa', bio_ar: 'روح الله وكلمته، وُلد من غير أب، وأيّده الله بالمعجزات. رفعه الله إليه وسينزل آخر الزمان.', quran_mentions: 25, era: null },
-  { id: '12', name_ar: 'محمد صلى الله عليه وسلم', name_en: 'Muhammad', slug: 'muhammad', bio_ar: 'خاتم الأنبياء والمرسلين، أفضل خلق الله، بعثه الله رحمة للعالمين بالإسلام خاتم الأديان.', quran_mentions: 4, era: null },
-  { id: '13', name_ar: 'يونس عليه السلام', name_en: 'Jonah', slug: 'yunus', bio_ar: 'صاحب الحوت، ابتلع الحوت وبقي في بطنه ثم نجاه الله بدعائه في الظلمات الثلاث.', quran_mentions: 4, era: null },
-  { id: '14', name_ar: 'أيوب عليه السلام', name_en: 'Job', slug: 'ayyub', bio_ar: 'ضرب القرآن به المثل في الصبر على البلاء، ابتُلي بالمرض الشديد فصبر حتى فرّج الله عنه.', quran_mentions: 4, era: null },
-  { id: '15', name_ar: 'إدريس عليه السلام', name_en: 'Enoch', slug: 'idris', bio_ar: 'أول من كتب بالقلم، رفعه الله مكاناً علياً.', quran_mentions: 2, era: null },
+  { id: '1',  name_ar: 'آدم عليه السلام',           name_en: 'Adam',     slug: 'adam',     bio_ar: 'أبو البشر وأول الأنبياء، خلقه الله بيده ونفخ فيه الروح وعلّمه الأسماء كلها.',                                                                       quran_mentions: 25 },
+  { id: '2',  name_ar: 'نوح عليه السلام',           name_en: 'Noah',     slug: 'nuh',      bio_ar: 'نبي الله ورسوله الذي دعا قومه ألف سنة إلا خمسين عاماً، وبنى السفينة بأمر الله لإنجاء المؤمنين.',                                                      quran_mentions: 43 },
+  { id: '3',  name_ar: 'إبراهيم عليه السلام',       name_en: 'Ibrahim',  slug: 'ibrahim',  bio_ar: 'خليل الله ومحطّم الأصنام، بنى الكعبة المشرفة مع ابنه إسماعيل، وهو أبو الأنبياء.',                                                                      quran_mentions: 69 },
+  { id: '4',  name_ar: 'إسماعيل عليه السلام',       name_en: 'Ismail',   slug: 'ismail',   bio_ar: 'ابن إبراهيم عليه السلام ومن بنى معه الكعبة المشرفة، صاحب قصة الفداء العظيم.',                                                                           quran_mentions: 12 },
+  { id: '5',  name_ar: 'إسحاق عليه السلام',         name_en: 'Isaac',    slug: 'ishaq',    bio_ar: 'ابن إبراهيم من زوجته سارة، بشّر به الملائكة إبراهيم، وهو جد أنبياء بني إسرائيل.',                                                                       quran_mentions: 17 },
+  { id: '6',  name_ar: 'يوسف عليه السلام',          name_en: 'Joseph',   slug: 'yusuf',    bio_ar: 'نبي الله الذي كانت قصته أحسن القصص كما وصفها القرآن. صبر على إخوته وعزيمة مصر والسجن.',                                                                quran_mentions: 27 },
+  { id: '7',  name_ar: 'موسى عليه السلام',          name_en: 'Moses',    slug: 'musa',     bio_ar: 'أكثر الأنبياء ذكراً في القرآن الكريم، كلّمه الله تكليماً، أنقذ بني إسرائيل من فرعون وفرق البحر.',                                                     quran_mentions: 136 },
+  { id: '8',  name_ar: 'هارون عليه السلام',         name_en: 'Aaron',    slug: 'harun',    bio_ar: 'أخو موسى عليه السلام ووزيره، أرسلهما الله معاً إلى فرعون.',                                                                                             quran_mentions: 20 },
+  { id: '9',  name_ar: 'داود عليه السلام',          name_en: 'David',    slug: 'dawud',    bio_ar: 'نبي وملك آتاه الله الزبور، أوتي صوتاً جميلاً تسبح معه الجبال والطير.',                                                                                  quran_mentions: 16 },
+  { id: '10', name_ar: 'سليمان عليه السلام',        name_en: 'Solomon',  slug: 'sulayman', bio_ar: 'ابن داود عليه السلام، آتاه الله ملكاً لم يؤت أحداً من بعده، وسخّر له الريح والجن والطير.',                                                             quran_mentions: 17 },
+  { id: '11', name_ar: 'عيسى عليه السلام',          name_en: 'Jesus',    slug: 'isa',      bio_ar: 'روح الله وكلمته، وُلد من غير أب، وأيّده الله بالمعجزات. رفعه الله إليه وسينزل آخر الزمان.',                                                            quran_mentions: 25 },
+  { id: '12', name_ar: 'محمد صلى الله عليه وسلم',  name_en: 'Muhammad', slug: 'muhammad', bio_ar: 'خاتم الأنبياء والمرسلين، أفضل خلق الله، بعثه الله رحمة للعالمين بالإسلام خاتم الأديان.',                                                               quran_mentions: 4  },
+  { id: '13', name_ar: 'يونس عليه السلام',          name_en: 'Jonah',    slug: 'yunus',    bio_ar: 'صاحب الحوت، ابتلع الحوت وبقي في بطنه ثم نجاه الله بدعائه في الظلمات الثلاث.',                                                                          quran_mentions: 4  },
+  { id: '14', name_ar: 'أيوب عليه السلام',          name_en: 'Job',      slug: 'ayyub',    bio_ar: 'ضرب القرآن به المثل في الصبر على البلاء، ابتُلي بالمرض الشديد فصبر حتى فرّج الله عنه.',                                                                quran_mentions: 4  },
+  { id: '15', name_ar: 'إدريس عليه السلام',         name_en: 'Enoch',    slug: 'idris',    bio_ar: 'أول من كتب بالقلم، رفعه الله مكاناً علياً.',                                                                                                              quran_mentions: 2  },
 ];
 
 export default async function ProphetsPage() {
@@ -48,12 +47,13 @@ export default async function ProphetsPage() {
 
   try {
     const supabase = await createClient();
+    // quran_mentions and era are not in the DB schema — select only real columns
     const { data } = await supabase
       .from('prophets')
-      .select('id, name_ar, name_en, slug, bio_ar, quran_mentions, era')
+      .select('id, name_ar, name_en, slug, bio_ar, order_num')
       .eq('published', true)
       .order('order_num', { ascending: true });
-    prophets = data ?? [];
+    prophets = (data ?? []).map((r) => ({ ...r, quran_mentions: null }));
   } catch {
     // Fall through to static content
   }
