@@ -1,198 +1,214 @@
 'use client';
 
 import { Container } from '@/components/ui/container';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { searchSpiritualContent, type AISearchResult } from './actions';
+import { sendChatMessage, type ChatResult } from './actions';
 
-const EXAMPLE_QUESTIONS = [
-  'أشعر بالحزن والضيق هذه الأيام',
-  'عندي قلق وتوتر من المستقبل',
-  'أذنبت وأريد أن أتوب إلى الله',
-  'عندي ضيق في الرزق وديون',
-  'أحتاج للصبر على ابتلاء أصابني',
-  'الحمد لله أشعر بالسعادة والامتنان',
+const QUICK_PROMPTS = [
+  'أشعر بالحزن والضيق هذه الأيام ولا أعرف ماذا أفعل',
+  'ما حكم الإسلام في الربا والقروض البنكية بالفائدة؟',
+  'عندي قلق شديد من المستقبل وأفكاري لا تهدأ',
+  'أذنبت كثيرًا وأريد التوبة، كيف أبدأ؟',
+  'أحتاج أدعية وأذكار لتيسير الرزق',
+  'ما حكم الغيبة والنميمة في الإسلام؟',
 ];
 
-const TYPE_LABELS: Record<string, string> = {
-  quran: 'من القرآن الكريم',
-  hadith: 'حديث / آية',
-  dhikr: 'ذكر',
-  advice: 'نصيحة',
-  poem: 'شعر',
+const TYPE_BADGE: Record<string, { label: string; color: string }> = {
+  fatwa:    { label: 'فتوى شرعية',      color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+  spiritual:{ label: 'إرشاد روحاني',    color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+  dhikr:    { label: 'أذكار ودعاء',     color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
+  general:  { label: 'معلومة إسلامية',  color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
 };
 
-const FEELING_LABELS: Record<string, string> = {
-  حزن: 'الحزن',
-  قلق: 'القلق',
-  فرح: 'الفرح',
-  خوف: 'الخوف',
-  غضب: 'الغضب',
-  شكر: 'الشكر',
-  صبر: 'الصبر',
-  ذنب: 'التوبة',
-  رزق: 'الرزق',
-  زواج: 'الزواج',
-  عام: 'عام',
-};
-
-type ChatEntry = {
-  question: string;
-  result: AISearchResult;
+type Message = {
+  role: 'user' | 'assistant';
+  content: string;
+  result?: ChatResult;
 };
 
 export default function SpiritualAIPage() {
-  const [question, setQuestion] = useState('');
-  const [history, setHistory] = useState<ChatEntry[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput]       = useState('');
   const [isPending, startTransition] = useTransition();
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const bottomRef  = useRef<HTMLDivElement>(null);
+  const inputRef   = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (history.length > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
-  }, [history.length, isPending]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, isPending]);
 
-  const handleAsk = (value?: string) => {
-    const text = (value ?? question).trim();
-    if (!text || isPending) return;
-    setQuestion('');
+  const handleSend = (text?: string) => {
+    const value = (text ?? input).trim();
+    if (!value || isPending) return;
+    setInput('');
+
+    const userMsg: Message = { role: 'user', content: value };
+    setMessages((prev) => [...prev, userMsg]);
 
     startTransition(async () => {
-      const res = await searchSpiritualContent(text);
-      setHistory((cur) => [...cur, { question: text, result: res }]);
+      const history = [...messages, userMsg]
+        .slice(-10)
+        .map((m) => ({ role: m.role, content: m.content }));
+      const result = await sendChatMessage(value, history);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: result.message, result },
+      ]);
     });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
-    <Container className="py-12 space-y-10">
-      <section className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold text-balance">الرفيق الروحاني</h1>
-        <p className="max-w-2xl mx-auto text-lg leading-8 arabic-muted text-pretty">
-          عبّر عمّا تشعر به، ودع الرفيق يواسيك ويقترح لك آيات وأذكارًا ونصيحة روحانية من القرآن والسنة
-        </p>
-      </section>
+    <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 4rem)' }}>
 
-      {history.length === 0 && (
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold text-brand-gold text-center">جرّب أن تقول...</h2>
-          <div className="grid gap-3 md:grid-cols-2">
-            {EXAMPLE_QUESTIONS.map((q, i) => (
-              <Card
-                key={i}
-                className="p-4 cursor-pointer hover:border-brand-gold/50 transition-all"
-                onClick={() => handleAsk(q)}
-              >
-                <p className="text-brand-cream hover:text-brand-gold transition-colors">{q}</p>
-              </Card>
-            ))}
+      {/* ── Header ── */}
+      <div className="border-b border-brand-gold/20 bg-black/40 backdrop-blur-sm sticky top-0 z-10">
+        <Container className="py-4 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-brand-gold/20 border border-brand-gold/40 flex items-center justify-center text-brand-gold font-bold text-lg select-none">
+            ر
           </div>
-        </section>
-      )}
+          <div>
+            <h1 className="text-lg font-bold text-brand-gold">الرفيق الروحاني</h1>
+            <p className="text-xs text-brand-cream/50">مساعدك الإسلامي — فتاوى · إرشاد روحاني · أذكار</p>
+          </div>
+        </Container>
+      </div>
 
-      {/* Conversation history */}
-      {history.length > 0 && (
-        <section className="space-y-8" aria-label="سجل المحادثة">
-          {history.map((entry, hIdx) => {
-            const dhikrResponses = entry.result.responses.filter((r) => r.type === 'dhikr');
-            const mainResponses = entry.result.responses.filter((r) => r.type !== 'dhikr');
-            return (
-              <div key={hIdx} className="space-y-4">
-                {/* User message */}
-                <div className="flex justify-start">
-                  <div className="bg-brand-gold/15 border border-brand-gold/30 rounded-2xl rounded-tr-sm px-5 py-3 max-w-[85%]">
-                    <p className="text-brand-cream leading-7">{entry.question}</p>
-                  </div>
-                </div>
+      {/* ── Chat area ── */}
+      <div className="flex-1 overflow-y-auto">
+        <Container className="py-6 space-y-5">
 
-                {/* Companion response */}
-                <div className="flex justify-end">
-                  <div className="space-y-3 max-w-[92%] w-full">
-                    {entry.result.error ? (
-                      <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4">
-                        <p className="text-red-300">{entry.result.error}</p>
-                      </div>
-                    ) : (
-                      <>
-                        {entry.result.feeling && entry.result.feeling !== 'عام' && (
-                          <p className="text-xs text-brand-cream/40 text-left">
-                            يبدو أنك تمر بحالة من {FEELING_LABELS[entry.result.feeling] ?? entry.result.feeling}
-                          </p>
-                        )}
-                        {entry.result.aiAdvice && (
-                          <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl rounded-tl-sm p-5 space-y-2">
-                            <p className="text-brand-gold font-semibold text-sm">الرفيق الروحاني</p>
-                            <p className="text-brand-cream leading-8 whitespace-pre-wrap">{entry.result.aiAdvice}</p>
-                          </div>
-                        )}
-                        {mainResponses.map((r, i) => (
-                          <div key={i} className="bg-black/30 border border-brand-gold/20 rounded-2xl p-5 space-y-2">
-                            <p className="text-brand-gold/80 text-sm font-semibold">{TYPE_LABELS[r.type] ?? r.type}</p>
-                            <p className="text-brand-cream text-lg leading-9">{r.content}</p>
-                            {(r.source || r.reference) && (
-                              <p className="text-brand-cream/50 text-sm">
-                                {[r.source, r.reference].filter(Boolean).join(' — ')}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                        {dhikrResponses.length > 0 && (
-                          <div className="bg-black/30 border border-brand-gold/20 rounded-2xl p-5 space-y-3">
-                            <p className="text-brand-gold/80 text-sm font-semibold">أذكار مقترحة لك</p>
-                            <div className="flex flex-wrap gap-2">
-                              {dhikrResponses.map((r, i) => (
-                                <span key={i} className="bg-brand-gold/10 text-brand-cream px-3 py-2 rounded-lg text-sm">
-                                  {r.content}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          {isPending && (
-            <div className="flex justify-end">
-              <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl px-5 py-3">
-                <p className="text-brand-cream/60 animate-pulse">الرفيق يفكر ويبحث لك...</p>
+          {/* Empty state */}
+          {messages.length === 0 && (
+            <div className="space-y-8">
+              <p className="text-center text-brand-cream/60 leading-8 pt-6 max-w-lg mx-auto">
+                اسألني في أي موضوع — حكم شرعي، فتوى، مشكلة تمر بها، ذكر أو دعاء، أو أي سؤال يخطر ببالك.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {QUICK_PROMPTS.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => handleSend(p)}
+                    className="text-right p-4 rounded-xl border border-brand-gold/20 bg-white/[0.03] hover:border-brand-gold/50 hover:bg-brand-gold/5 transition-all text-brand-cream/75 hover:text-brand-cream text-sm leading-7"
+                  >
+                    {p}
+                  </button>
+                ))}
               </div>
             </div>
           )}
-          <div ref={bottomRef} />
-        </section>
-      )}
 
-      {/* Input */}
-      <Card className="p-6 space-y-3 sticky bottom-4 backdrop-blur">
-        <textarea
-          placeholder="اكتب مشاعرك أو ما يدور في قلبك هنا..."
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) {
-              e.preventDefault();
-              handleAsk();
-            }
-          }}
-          className="w-full h-20 p-4 bg-black/30 border border-brand-gold/30 rounded-lg text-brand-cream focus:outline-none focus:border-brand-gold resize-none leading-relaxed"
-          aria-label="اكتب مشاعرك أو سؤالك"
-        />
-        <div className="flex gap-2">
-          <Button onClick={() => handleAsk()} variant="primary" className="flex-1" disabled={isPending || !question.trim()}>
-            {isPending ? 'جارٍ البحث...' : 'أرسل للرفيق'}
-          </Button>
-          {history.length > 0 && (
-            <Button variant="secondary" onClick={() => setHistory([])} disabled={isPending}>
-              محادثة جديدة
-            </Button>
+          {/* Messages */}
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}>
+              {msg.role === 'user' ? (
+                /* User bubble */
+                <div className="max-w-[80%] bg-brand-gold/15 border border-brand-gold/25 rounded-2xl rounded-tr-sm px-5 py-3">
+                  <p className="text-brand-cream leading-7">{msg.content}</p>
+                </div>
+              ) : (
+                /* Assistant bubble */
+                <div className="max-w-[88%] w-full space-y-3">
+                  {msg.result?.type && TYPE_BADGE[msg.result.type] && (
+                    <div className="flex justify-end">
+                      <span className={`text-xs px-3 py-0.5 rounded-full border ${TYPE_BADGE[msg.result.type].color}`}>
+                        {TYPE_BADGE[msg.result.type].label}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="bg-white/[0.05] border border-white/10 rounded-2xl rounded-tl-sm px-5 py-4">
+                    <p className="leading-8 text-brand-cream whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+
+                  {/* Quran verses */}
+                  {msg.result?.verses && msg.result.verses.length > 0 && (
+                    <div className="space-y-2">
+                      {msg.result.verses.map((v, vi) => (
+                        <div key={vi} className="border border-brand-gold/25 bg-brand-gold/5 rounded-xl px-4 py-3">
+                          <p className="text-brand-gold/90 leading-9 text-lg font-arabic">{v.text}</p>
+                          <p className="text-xs text-brand-cream/40 mt-1">{v.reference}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Dhikr suggestions */}
+                  {msg.result?.dhikr && msg.result.dhikr.length > 0 && (
+                    <div className="border border-emerald-500/20 bg-emerald-950/20 rounded-xl px-4 py-3 space-y-2">
+                      <p className="text-xs text-emerald-400/70">أذكار مقترحة</p>
+                      {msg.result.dhikr.map((d, di) => (
+                        <p key={di} className="text-emerald-300/80 leading-7 text-sm">{d}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Typing indicator */}
+          {isPending && (
+            <div className="flex justify-end">
+              <div className="bg-white/[0.05] border border-white/10 rounded-2xl rounded-tl-sm px-5 py-4">
+                <span className="inline-flex items-center gap-1.5 text-brand-cream/40">
+                  <span className="w-1.5 h-1.5 bg-brand-gold/50 rounded-full animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 bg-brand-gold/50 rounded-full animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 bg-brand-gold/50 rounded-full animate-bounce [animation-delay:300ms]" />
+                </span>
+              </div>
+            </div>
           )}
-        </div>
-      </Card>
-    </Container>
+
+          <div ref={bottomRef} />
+        </Container>
+      </div>
+
+      {/* ── Input bar ── */}
+      <div className="sticky bottom-0 border-t border-brand-gold/20 bg-black/80 backdrop-blur-sm">
+        <Container className="py-3 space-y-2">
+          {messages.length > 0 && (
+            <button
+              onClick={() => setMessages([])}
+              className="text-xs text-brand-cream/30 hover:text-brand-cream/60 transition-colors"
+            >
+              بدء محادثة جديدة
+            </button>
+          )}
+          <div className="flex items-end gap-3">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="اكتب سؤالك أو ما تشعر به..."
+              rows={1}
+              disabled={isPending}
+              aria-label="رسالتك للرفيق الروحاني"
+              className="flex-1 resize-none rounded-xl border border-brand-gold/25 bg-white/5 px-4 py-3 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:border-brand-gold/60 leading-7 max-h-36 overflow-y-auto"
+            />
+            <Button
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isPending}
+              className="shrink-0"
+              aria-label="إرسال الرسالة"
+            >
+              {isPending ? '...' : 'إرسال'}
+            </Button>
+          </div>
+          <p className="text-xs text-brand-cream/20 text-center">
+            للفتاوى الرسمية الملزمة راجع دار الإفتاء المصرية أو علماء متخصصين
+          </p>
+        </Container>
+      </div>
+
+    </div>
   );
 }
