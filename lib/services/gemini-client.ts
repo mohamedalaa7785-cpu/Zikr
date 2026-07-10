@@ -25,21 +25,31 @@ function gatewayAvailable(): boolean {
 }
 
 // ── Direct SDK with key rotation ─────────────────────────────────────────────
-const MAX_KEYS = 19;
+// Discover every available Gemini key once: GEMINI_API_KEY plus GEMINI_API_KEY_1..30.
+// The project provides GEMINI_API_KEY_2 .. GEMINI_API_KEY_19, but this also picks
+// up a plain GEMINI_API_KEY or GEMINI_API_KEY_1 if they are ever added.
+let cachedKeys: string[] | null = null;
 let keyIndex = 0;
 
-function getNextApiKey(): string | null {
-  // Try all keys starting from current index
-  for (let i = 0; i < MAX_KEYS; i++) {
-    const idx = ((keyIndex + i) % MAX_KEYS) + 1;
-    const suffix = idx === 1 ? '' : `_${idx}`;
-    const key = process.env[`GEMINI_API_KEY${suffix}`]?.trim();
-    if (key) {
-      keyIndex = (keyIndex + i + 1) % MAX_KEYS; // advance past the used key
-      return key;
-    }
+function getAvailableKeys(): string[] {
+  if (cachedKeys) return cachedKeys;
+  const keys: string[] = [];
+  const plain = process.env.GEMINI_API_KEY?.trim();
+  if (plain) keys.push(plain);
+  for (let i = 1; i <= 30; i++) {
+    const key = process.env[`GEMINI_API_KEY_${i}`]?.trim();
+    if (key) keys.push(key);
   }
-  return null;
+  cachedKeys = keys;
+  return keys;
+}
+
+function getNextApiKey(): string | null {
+  const keys = getAvailableKeys();
+  if (keys.length === 0) return null;
+  const key = keys[keyIndex % keys.length];
+  keyIndex = (keyIndex + 1) % keys.length;
+  return key;
 }
 
 function getDirectModel(key: string): string {
