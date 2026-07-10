@@ -87,7 +87,7 @@ export function AdhanPlayer({
             <Button
               key={voice.id}
               onClick={() => setVoice(voice.id)}
-              variant={currentVoice === voice.id ? 'default' : 'secondary'}
+              variant={currentVoice === voice.id ? 'primary' : 'secondary'}
               size="sm"
               className="flex-1"
             >
@@ -101,7 +101,7 @@ export function AdhanPlayer({
       <div className="flex items-center gap-3">
         <Button
           onClick={() => isPlaying ? pause() : play()}
-          variant="default"
+          variant="primary"
           className="flex-1"
           aria-label={isPlaying ? 'إيقاف الأذان' : 'تشغيل الأذان'}
         >
