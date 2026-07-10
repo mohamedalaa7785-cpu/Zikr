@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { BookOpen, Scroll, Star } from 'lucide-react';
 
+const FACEBOOK_PAGE_URL = 'https://www.facebook.com/share/1GsRPxEb8J';
+
 export function Footer() {
   return (
     <footer className='mt-24 border-t border-brand-gold/10 py-20 bg-black relative overflow-hidden'>
@@ -11,10 +13,21 @@ export function Footer() {
         <div className='space-y-6 col-span-1 md:col-span-1'>
           <h3 className='text-2xl font-bold text-brand-gold'>ZIKR | ذِكرٌ</h3>
           <p className='text-sm leading-relaxed text-brand-cream/60'>منصة روحانية شاملة تهدف لربط المسلم بكتاب الله وسنة رسوله ﷺ عبر تجربة تقنية حديثة، فاخرة، وميسرة للجميع.</p>
-          <div className="flex gap-4 pt-2">
+          <div className="flex gap-4 pt-2 items-center">
             <BookOpen className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
             <Scroll className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
             <Star className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
+            <a
+              href={FACEBOOK_PAGE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="صفحة الفيسبوك"
+              className="text-brand-gold/40 hover:text-brand-gold/80 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.883v2.252h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+              </svg>
+            </a>
           </div>
         </div>
         
@@ -47,6 +60,11 @@ export function Footer() {
             <li><Link href='/privacy' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>سياسة الخصوصية</Link></li>
             <li><Link href='/terms' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الشروط والأحكام</Link></li>
             <li><Link href='/auth/login' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>حسابي</Link></li>
+            <li>
+              <a href={FACEBOOK_PAGE_URL} target="_blank" rel="noopener noreferrer" className='text-brand-cream/60 hover:text-brand-gold transition-colors'>
+                صفحة الفيسبوك
+              </a>
+            </li>
             <li className="pt-4">
               <Badge variant="outline" className="border-brand-gold/20 text-brand-gold/40 text-[10px]">Version 1.2.0-stable</Badge>
             </li>

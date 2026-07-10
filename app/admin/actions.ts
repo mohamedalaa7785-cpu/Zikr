@@ -52,16 +52,29 @@ export async function saveSiteSettingAction(formData: FormData) {
   const key = String(formData.get('key') ?? '').trim();
   if (!key) throw new Error('مفتاح الإعداد مطلوب.');
 
+  const sectionKeys = ['showQuran','showHadith','showProphets','showCompanions','showKids','showPoetry','showPrayerTimes','showMemorization'] as const;
+
+  const sectionEntries: [string, boolean][] = sectionKeys.map(k => [k, formData.get(k) === 'on']);
+
+  const stringEntries: [string, string | null][] = [
+    ['title', value(formData, 'title')],
+    ['body', value(formData, 'body')],
+    ['imageUrl', value(formData, 'imageUrl')],
+    ['logoUrl', value(formData, 'logoUrl')],
+    ['youtubeChannelUrl', value(formData, 'youtubeChannelUrl')],
+    ['pinnedMessage', value(formData, 'pinnedMessage')],
+    ['facebookPageUrl', value(formData, 'facebookPageUrl')],
+    ['twitterUrl', value(formData, 'twitterUrl')],
+    ['instagramUrl', value(formData, 'instagramUrl')],
+  ];
+
+  const valueObj: JsonRecord = {};
+  for (const [k, v] of stringEntries) { if (v !== null) valueObj[k] = v; }
+  for (const [k, v] of sectionEntries) { valueObj[k] = v; }
+
   const payload: JsonRecord = {
     key,
-    value: {
-      title: value(formData, 'title'),
-      body: value(formData, 'body'),
-      imageUrl: value(formData, 'imageUrl'),
-      logoUrl: value(formData, 'logoUrl'),
-      youtubeChannelUrl: value(formData, 'youtubeChannelUrl'),
-      pinnedMessage: value(formData, 'pinnedMessage'),
-    },
+    value: valueObj,
     updated_at: new Date().toISOString(),
   };
 

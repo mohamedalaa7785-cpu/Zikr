@@ -61,6 +61,14 @@ export default async function AdminPage() {
         <h3 className='font-semibold text-brand-gold'>التحليلات</h3>
         <p className='mt-1 text-sm arabic-muted'>إحصائيات المحتوى والمستخدمين</p>
       </Link>
+      <Link href='/admin/kids' className='rounded-xl border border-brand-gold/20 bg-black/15 p-4 transition-colors hover:border-brand-gold/50'>
+        <h3 className='font-semibold text-brand-gold'>قسم الأطفال</h3>
+        <p className='mt-1 text-sm arabic-muted'>إدارة قصص وألعاب وفيديوهات الأطفال</p>
+      </Link>
+      <Link href='/admin/sections' className='rounded-xl border border-brand-gold/20 bg-black/15 p-4 transition-colors hover:border-brand-gold/50'>
+        <h3 className='font-semibold text-brand-gold'>ترتيب الأقسام</h3>
+        <p className='mt-1 text-sm arabic-muted'>تحديد ترتيب وظهور أقسام الموقع</p>
+      </Link>
     </section>
 
     <Card className='space-y-4'>
@@ -129,6 +137,44 @@ export default async function AdminPage() {
           <Field name='priority' label='الأولوية (الأعلى يظهر أولًا)' type='number' defaultValue='0' />
           <Published />
           <Button type='submit'>تثبيت الرسالة</Button>
+        </form>
+      </Card>
+
+      <Card className='space-y-4'>
+        <h2 className='text-xl text-brand-gold'>روابط التواصل الاجتماعي</h2>
+        <form action={saveSiteSettingAction} className='space-y-3'>
+          <input type='hidden' name='key' value='social' />
+          <Field name='facebookPageUrl' label='رابط صفحة الفيسبوك' placeholder='https://www.facebook.com/...' defaultValue='https://www.facebook.com/share/1GsRPxEb8J' />
+          <Field name='youtubeChannelUrl' label='رابط قناة اليوتيوب' placeholder='https://www.youtube.com/...' />
+          <Field name='twitterUrl' label='رابط تويتر/X' placeholder='https://x.com/...' />
+          <Field name='instagramUrl' label='رابط إنستغرام' placeholder='https://www.instagram.com/...' />
+          <Button type='submit'>حفظ روابط التواصل</Button>
+        </form>
+      </Card>
+
+      <Card className='space-y-4'>
+        <h2 className='text-xl text-brand-gold'>ترتيب وظهور الأقسام</h2>
+        <p className='text-sm arabic-muted'>حدد ترتيب الأقسام في القائمة الرئيسية وصفحة الرئيسية</p>
+        <form action={saveSiteSettingAction} className='space-y-3'>
+          <input type='hidden' name='key' value='nav_sections' />
+          <div className='space-y-2'>
+            {[
+              { name: 'showQuran', label: 'إظهار القرآن الكريم' },
+              { name: 'showHadith', label: 'إظهار الحديث الشريف' },
+              { name: 'showProphets', label: 'إظهار قصص الأنبياء' },
+              { name: 'showCompanions', label: 'إظهار الصحابة' },
+              { name: 'showKids', label: 'إظهار قسم الأطفال' },
+              { name: 'showPoetry', label: 'إظهار الشعر' },
+              { name: 'showPrayerTimes', label: 'إظهار مواقيت الصلاة' },
+              { name: 'showMemorization', label: 'إظهار خطط الحفظ' },
+            ].map((s) => (
+              <label key={s.name} className='flex items-center gap-2 text-sm arabic-muted cursor-pointer'>
+                <input name={s.name} type='checkbox' defaultChecked className='rounded' />
+                {s.label}
+              </label>
+            ))}
+          </div>
+          <Button type='submit'>حفظ ترتيب الأقسام</Button>
         </form>
       </Card>
 
