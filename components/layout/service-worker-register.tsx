@@ -6,40 +6,52 @@ export function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Check if service workers are supported
-    if (!('serviceWorker' in navigator)) {
-      console.warn('[PWA] Service Workers not supported');
+    // Only register in production
+    if (process.env.NODE_ENV !== 'production') {
       return;
     }
 
+    // Check if service workers are supported
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
+
+    let updateInterval: NodeJS.Timeout | null = null;
+    let registration: ServiceWorkerRegistration | null = null;
+
     const registerServiceWorker = async () => {
       try {
-        const registration = await navigator.serviceWorker.register('/sw.js', {
+        registration = await navigator.serviceWorker.register('/sw.js', {
           scope: '/',
           updateViaCache: 'none'
         });
 
-
         // Check for updates periodically
-        setInterval(() => {
-          registration.update();
+        updateInterval = setInterval(() => {
+          registration?.update();
         }, 60000); // Check every minute
 
         // Listen for new service worker
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
+        const handleUpdateFound = () => {
+          const newWorker = registration?.installing;
           if (!newWorker) return;
 
-          newWorker.addEventListener('statechange', () => {
+          const handleStateChange = () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New service worker is ready
-              // Notify user about update (optional)
-              // You can show a toast or notification here
+              // New service worker is ready, but do not prompt by default
+              console.log('[PWA] Service Worker updated');
             }
-          });
-        });
+          };
+
+          newWorker.addEventListener('statechange', handleStateChange);
+        };
+
+        registration.addEventListener('updatefound', handleUpdateFound);
       } catch (error) {
-        console.error('[PWA] Service Worker registration failed:', error);
+        // Silently fail in development; log only if needed for debugging
+        if (process.env.NODE_ENV === 'production') {
+          console.error('[PWA] Service Worker registration failed:', error);
+        }
       }
     };
 
@@ -47,11 +59,15 @@ export function ServiceWorkerRegister() {
     if (document.readyState === 'complete') {
       registerServiceWorker();
     } else {
-      window.addEventListener('load', registerServiceWorker);
+      window.addEventListener('load', () => {
+        registerServiceWorker();
+      });
     }
 
     return () => {
-      window.removeEventListener('load', registerServiceWorker);
+      if (updateInterval) {
+        clearInterval(updateInterval);
+      }
     };
   }, []);
 

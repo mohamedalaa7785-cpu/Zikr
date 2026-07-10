@@ -1,2 +1,2 @@
-# Google AdSense — replace pub-0000000000000000 with your real publisher ID after approval
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+# Google AdSense verified publisher ID
+google.com, pub-2457467624248791, DIRECT, f08c47fec0942fa0

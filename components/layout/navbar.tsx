@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Settings } from 'lucide-react';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/app/auth/actions';
@@ -65,6 +66,13 @@ export async function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
+            aria-label="الإعدادات"
+            className="rounded-md p-2 text-brand-cream/60 transition-colors hover:text-brand-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
+          >
+            <Settings className="h-5 w-5" aria-hidden="true" />
+          </Link>
           <MobileNav />
           {user ? (
             <>

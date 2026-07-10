@@ -5,8 +5,9 @@ import { SiteShell } from '@/components/layout/site-shell';
 import { defaultOgImage, siteConfig } from '@/lib/site';
 import { Analytics } from '@/components/layout/analytics';
 import { ServiceWorkerRegister } from '@/components/layout/service-worker-register';
-import { AdSense } from '@/components/layout/adsense';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+
+const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? 'ca-pub-2457467624248791';
 
 const notoNaskhArabic = Noto_Naskh_Arabic({
   subsets: ['arabic'],
@@ -93,12 +94,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name='apple-mobile-web-app-title' content={siteConfig.shortName} />
         <link rel='apple-touch-icon' href='/icons/icon-192.svg' />
         <link rel='manifest' href='/manifest.webmanifest' />
+        {/* AdSense: must be a plain <script> — next/script adds data-nscript which AdSense rejects */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+        />
+        {/* Google Funding Choices (consent management) */}
+        <script
+          async
+          src="https://fundingchoicesmessages.google.com/i/fundingchoicesmessages.js"
+        />
       </head>
       <body className='font-arabic antialiased'>
         <SiteShell>{children}</SiteShell>
         <Analytics />
         <ServiceWorkerRegister />
-        <AdSense />
         <SpeedInsights />
       </body>
     </html>
