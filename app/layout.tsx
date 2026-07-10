@@ -24,6 +24,9 @@ const amiri = Amiri({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
+  verification: {
+    google: 'yge0N_uefs8BynVrT_mhn_mBPNycS_rG_vN6fMVjJmw',
+  },
   title: {
     default: siteConfig.name,
     template: `%s | ${siteConfig.shortName}`,
