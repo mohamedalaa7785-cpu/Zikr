@@ -7,8 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Sunrise, Sun, Cloud, Sunset, Moon, type LucideIcon } from 'lucide-react';
+import Link from 'next/link';
+import { Settings } from 'lucide-react';
 import { getPrayerTimes, getPrayerTimesByCity, getNextPrayer, getCurrentPrayer, getPrayerNameAr, formatPrayerTime } from '@/lib/services/prayer-times';
 import type { PrayerTimesResponse } from '@/lib/services/prayer-times';
+import { unlockAudioContext, isAudioUnlocked } from '@/lib/audio/spiritual-tones';
+import { usePrayerAlert, PRAYER_NAMES_AR } from '@/hooks/use-prayer-alert';
 
 export default function PrayerTimesPage() {
   const [prayerData, setPrayerData] = useState<PrayerTimesResponse | null>(null);
@@ -20,6 +24,13 @@ export default function PrayerTimesPage() {
   const [currentPrayer, setCurrentPrayer] = useState<{ name: string; time: string } | null>(null);
   const [showCitySearch, setShowCitySearch] = useState(false);
   const [cityQuery, setCityQuery] = useState('');
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const { settings: azanSettings, togglePrayer } = usePrayerAlert();
+
+  const handleUnlockAudio = () => {
+    unlockAudioContext();
+    setAudioUnlocked(isAudioUnlocked());
+  };
 
   // Cairo fallback coords (used when geo is denied or unavailable)
   const CAIRO = { lat: 30.0444, lon: 31.2357, city: 'القاهرة (افتراضي)' };
@@ -126,6 +137,24 @@ export default function PrayerTimesPage() {
         {currentLocation && (
           <div className="text-lg text-brand-cream">{currentLocation.city}</div>
         )}
+
+        {/* Azan quick controls */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <Button
+            variant={audioUnlocked ? 'ghost' : 'secondary'}
+            onClick={handleUnlockAudio}
+            className="text-sm"
+          >
+            {audioUnlocked ? 'الصوت مفعّل' : 'تفعيل صوت الأذان'}
+          </Button>
+          <Link
+            href="/settings"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-brand-gold/25 px-4 py-2 text-sm text-brand-cream/70 transition-colors hover:border-brand-gold/50 hover:text-brand-gold"
+          >
+            <Settings className="h-4 w-4" aria-hidden="true" />
+            إعدادات الأذان
+          </Link>
+        </div>
       </section>
 
       {/* Location Controls */}
@@ -224,6 +253,18 @@ export default function PrayerTimesPage() {
                   <Badge variant="secondary" className="justify-center">
                     {formatPrayerTime(prayer.time)}
                   </Badge>
+                  {/* Azan enabled/disabled chip */}
+                  <button
+                    onClick={() => togglePrayer(prayer.name as import('@/hooks/use-prayer-alert').PrayerKey)}
+                    className={`mx-auto flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs transition-colors ${
+                      azanSettings.enabledPrayers[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey]
+                        ? 'bg-brand-gold/15 text-brand-gold hover:bg-brand-gold/25'
+                        : 'bg-brand-cream/5 text-brand-cream/30 hover:bg-brand-cream/10'
+                    }`}
+                    aria-label={`${azanSettings.enabledPrayers[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey] ? 'تعطيل' : 'تفعيل'} أذان ${PRAYER_NAMES_AR[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey]}`}
+                  >
+                    <span>{azanSettings.enabledPrayers[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey] ? 'الأذان مفعّل' : 'الأذان معطّل'}</span>
+                  </button>
                 </Card>
               ))}
             </div>

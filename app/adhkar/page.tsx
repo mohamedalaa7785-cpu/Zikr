@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,9 +67,32 @@ const adhkarData: Record<string, { title: string; icon: LucideIcon; items: { tex
 
 type AdhkarCategory = keyof typeof adhkarData;
 
+const COUNTERS_KEY = 'zikr_adhkar_counters';
+
+function loadCounters(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(COUNTERS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function AdhkarPage() {
   const [selectedCategory, setSelectedCategory] = useState<AdhkarCategory>('morning');
   const [counters, setCounters] = useState<Record<string, number>>({});
+
+  // Load persisted counters on mount
+  useEffect(() => {
+    setCounters(loadCounters());
+  }, []);
+
+  // Persist whenever counters change
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(COUNTERS_KEY, JSON.stringify(counters));
+  }, [counters]);
 
   const currentAdhkar = adhkarData[selectedCategory];
 
@@ -87,6 +110,10 @@ export default function AdhkarPage() {
       delete newCounters[`${selectedCategory}-${idx}`];
     });
     setCounters(newCounters);
+    // Persist the cleared state immediately
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(COUNTERS_KEY, JSON.stringify(newCounters));
+    }
   };
 
   const getProgress = (index: number, maxCount: number) => {
@@ -173,7 +200,7 @@ export default function AdhkarPage() {
       <Card className="p-6 text-center space-y-3 bg-brand-gold/10">
         <h3 className="text-xl font-bold text-brand-gold">فضل الذكر</h3>
         <p className="text-brand-cream/90 font-arabic text-lg leading-relaxed">
-          قال رسول الله ﷺ: &quot;أَلَا أُنَبِّئُكُمْ بِخَيْرِ أَعْمَالِكُمْ، وَأَزْكَاهَا عِنْدَ مَلِيكِكُمْ، وَأَرْفَعِهَا فِي دَرَجَاتِكُمْ، وَخَيْرٍ لَكُمْ مِنْ إِنْفَاقِ الذَّهَبِ وَالْوَرِقِ، وَخَيْرٍ لَكُمْ مِنْ أَنْ تَلْقَوْا عَدُوَّكُمْ فَتَضْرِبُوا أَعْنَاقَهُمْ وَيَضْرِبُوا أَعْنَاقَكُمْ؟&quot; قَالُوا: بَلَى، قَالَ: &quot;ذِكْرُ اللَّهِ تَعَالَى&quot;
+          قال رسول الله ﷺ: &quot;أَلَا أُنَبِّئُكُمْ بِخَيْرِ أَع��مَالِكُمْ، وَأَزْكَاهَا عِنْدَ مَلِيكِكُمْ، وَأَرْفَعِهَا فِي دَرَجَاتِكُمْ، وَخَيْرٍ لَكُمْ مِنْ إِنْفَاقِ الذَّهَبِ وَالْوَرِقِ، وَخَيْرٍ لَكُمْ مِنْ أَنْ تَلْقَوْا عَدُوَّكُمْ فَتَضْرِبُوا أَعْنَاقَهُمْ وَيَضْرِبُوا أَعْنَاقَكُمْ؟&quot; قَالُوا: بَلَى، قَالَ: &quot;ذِكْرُ اللَّهِ تَعَالَى&quot;
         </p>
       </Card>
     </Container>

@@ -1,9 +1,18 @@
 // Service Worker for Zikr PWA
-const CACHE_NAME = 'zikr-v2';
+const CACHE_NAME = 'zikr-v3';
+
+// App shell + key pages pre-cached on install for offline availability.
+// Audio files are NOT pre-cached (50–200MB per reciter).
 const STATIC_ASSETS = [
   '/',
   '/offline.html',
-  '/manifest.webmanifest'
+  '/manifest.webmanifest',
+  '/quran',
+  '/adhkar',
+  '/prayer-times',
+  '/tasbeeh',
+  '/dua',
+  '/settings',
 ];
 
 // Install event - cache static assets
