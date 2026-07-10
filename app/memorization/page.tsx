@@ -16,6 +16,7 @@ const plans = [
 
 export default async function MemorizationPage() {
   const adminPlans = await getMemorizationPlans();
+  const { entries, loggedIn } = await getMemorizationProgress();
   const visiblePlans = adminPlans.length ? adminPlans.map((plan) => ({
     title: plan.title,
     cadence: plan.cadence,
@@ -38,6 +39,11 @@ export default async function MemorizationPage() {
         <p className='text-sm leading-6 arabic-muted'>{plan.tajweed}</p>
       </Card>)}
     </section>
+
+    <Card className='space-y-4'>
+      <h2 className='text-2xl text-brand-gold'>متابعة تقدمك في الحفظ</h2>
+      <ProgressTracker initialEntries={entries} loggedIn={loggedIn} />
+    </Card>
 
     <Card className='space-y-4'>
       <h2 className='text-2xl text-brand-gold'>تسميع فويس وتقييم فوري</h2>

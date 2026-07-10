@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
+import { kidsContent as staticKidsContent } from '@/lib/data/kids-content';
 
 interface KidsContent {
   id: string;
@@ -30,51 +31,15 @@ const ageGroupLabels: Record<string, string> = {
   '13-15': '13-15 سنة',
 };
 
-// Static fallback content shown when DB is empty
-const STATIC_CONTENT: KidsContent[] = [
-  {
-    id: 'story-ibrahim',
-    title_ar: 'قصة سيدنا إبراهيم عليه السلام',
-    slug: 'story-ibrahim',
-    type: 'story',
-    age_group: '6-8',
-  },
-  {
-    id: 'story-yunus',
-    title_ar: 'قصة سيدنا يونس عليه السلام',
-    slug: 'story-yunus',
-    type: 'story',
-    age_group: '6-8',
-  },
-  {
-    id: 'prayer-before-sleep',
-    title_ar: 'دعاء النوم للأطفال',
-    slug: 'prayer-before-sleep',
-    type: 'prayer',
-    age_group: '3-5',
-  },
-  {
-    id: 'wudu-steps',
-    title_ar: 'خطوات الوضوء',
-    slug: 'wudu-steps',
-    type: 'wudu',
-    age_group: '6-8',
-  },
-  {
-    id: 'quiz-pillars',
-    title_ar: 'اختبار أركان الإسلام',
-    slug: 'quiz-pillars',
-    type: 'quiz',
-    age_group: '9-12',
-  },
-  {
-    id: 'story-musa',
-    title_ar: 'قصة سيدنا موسى عليه السلام',
-    slug: 'story-musa',
-    type: 'story',
-    age_group: '9-12',
-  },
-];
+// Full static content library shown when DB is empty
+const STATIC_CONTENT: KidsContent[] = staticKidsContent.map((item) => ({
+  id: item.id,
+  title_ar: item.title_ar,
+  slug: item.slug,
+  type: item.type,
+  age_group: item.age_group,
+  featured_image_url: item.featured_image_url,
+}));
 
 export const metadata = {
   title: 'قسم الأطفال | ذكر',

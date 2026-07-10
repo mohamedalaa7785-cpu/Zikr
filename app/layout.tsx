@@ -5,6 +5,7 @@ import { SiteShell } from '@/components/layout/site-shell';
 import { defaultOgImage, siteConfig } from '@/lib/site';
 import { Analytics } from '@/components/layout/analytics';
 import { ServiceWorkerRegister } from '@/components/layout/service-worker-register';
+import { AdSense } from '@/components/layout/adsense';
 
 const notoNaskhArabic = Noto_Naskh_Arabic({
   subsets: ['arabic'],
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteShell>{children}</SiteShell>
         <Analytics />
         <ServiceWorkerRegister />
+        <AdSense />
       </body>
     </html>
   );

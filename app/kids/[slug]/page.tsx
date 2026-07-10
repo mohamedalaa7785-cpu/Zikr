@@ -7,6 +7,7 @@ import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { getKidsItemBySlug } from '@/lib/data/kids-content';
 
 type QuizQuestion = {
   text: string;
@@ -84,9 +85,34 @@ export default function KidsDetailPage() {
           .eq('published', true)
           .limit(1)
           .single();
-        setContent(data ?? null);
+        if (data) {
+          setContent(data);
+        } else {
+          // Fall back to the static content library
+          const staticItem = getKidsItemBySlug(slug);
+          setContent(staticItem ? {
+            id: staticItem.id,
+            title_ar: staticItem.title_ar,
+            title_en: staticItem.title_en,
+            content_ar: staticItem.content_ar,
+            type: staticItem.type,
+            age_group: staticItem.age_group,
+            featured_image_url: staticItem.featured_image_url,
+            quiz_data: staticItem.quiz_data,
+          } : null);
+        }
       } catch {
-        setContent(null);
+        const staticItem = getKidsItemBySlug(slug ?? '');
+        setContent(staticItem ? {
+          id: staticItem.id,
+          title_ar: staticItem.title_ar,
+          title_en: staticItem.title_en,
+          content_ar: staticItem.content_ar,
+          type: staticItem.type,
+          age_group: staticItem.age_group,
+          featured_image_url: staticItem.featured_image_url,
+          quiz_data: staticItem.quiz_data,
+        } : null);
       } finally {
         setLoading(false);
       }
