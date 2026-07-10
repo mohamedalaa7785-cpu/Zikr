@@ -653,6 +653,7 @@ export const duaCategories = pgTable("dua_categories", {
   slug: text("slug").notNull().unique(),
   icon: text("icon"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -697,6 +698,7 @@ export const articleCategories = pgTable("article_categories", {
   descriptionEn: text("description_en"),
   icon: text("icon"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -737,6 +739,7 @@ export const videoCategories = pgTable("video_categories", {
   descriptionEn: text("description_en"),
   icon: text("icon"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -780,6 +783,7 @@ export const kidsContent = pgTable("kids_content", {
   videoUrl: text("video_url"),
   quizData: jsonb("quiz_data"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -986,6 +990,7 @@ export const tawasheehCategories = pgTable("tawasheeh_categories", {
   icon: text("icon"),
   orderNum: integer("order_num"),
   published: boolean("published").notNull().default(true),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -1012,6 +1017,7 @@ export const tawasheeh = pgTable("tawasheeh", {
   views: integer("views").notNull().default(0),
   published: boolean("published").notNull().default(true),
   featured: boolean("featured").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
   metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
