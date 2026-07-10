@@ -86,8 +86,10 @@ export default function TawasheehPage() {
           <audio
             ref={audioRef}
             key={currentTrack.id}
+            src={currentTrack.audioUrl}
             controls
             autoPlay
+            preload="auto"
             className="w-full"
             aria-label={`تشغيل ${currentTrack.titleAr}`}
             onPlay={() => setIsPlaying(true)}
@@ -98,8 +100,6 @@ export default function TawasheehPage() {
               setAudioError('تعذّر تحميل المقطع الصوتي');
             }}
           >
-            <source src={currentTrack.audioUrl} type="audio/mpeg" />
-            <source src={currentTrack.audioUrl} type="audio/ogg" />
             متصفحك لا يدعم تشغيل الصوت.
           </audio>
         </Card>
