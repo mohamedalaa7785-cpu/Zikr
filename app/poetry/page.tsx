@@ -82,7 +82,9 @@ type Tab = 'browse' | 'community' | 'write';
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 function StaticPoemCard({ poem }: { poem: (typeof islamicPoems)[0] }) {
-  const [likes, setLikes] = useState(Math.floor(Math.random() * 80) + 10);
+  // Deterministic seed based on poem index to avoid SSR/client hydration mismatch
+  const baseLikes = (poem.title.charCodeAt(0) % 70) + 10;
+  const [likes, setLikes] = useState(baseLikes);
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -271,7 +273,7 @@ export default function PoetryPage() {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-brand-gold">الشعر الإسلامي</h1>
         <p className="text-brand-cream/70 max-w-2xl mx-auto leading-relaxed">
-          استمتع بروائع الشعر الإسلامي، وشارك قصائدك مع المجتمع
+          استمتع بروائع ال��عر الإسلامي، وشارك قصائدك مع المجتمع
         </p>
       </div>
 

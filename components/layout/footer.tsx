@@ -57,6 +57,9 @@ export function Footer() {
           <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>قانوني وتقني</h3>
           <ul className='space-y-3 text-sm'>
             <li><Link href='/about' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>عن المنصة</Link></li>
+            <li><Link href='/platform' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>دليل المنصة</Link></li>
+            <li><Link href='/faq' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الأسئلة الشائعة</Link></li>
+            <li><Link href='/contact' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>تواصل معنا</Link></li>
             <li><Link href='/privacy' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>سياسة الخصوصية</Link></li>
             <li><Link href='/terms' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الشروط والأحكام</Link></li>
             <li><Link href='/auth/login' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>حسابي</Link></li>

@@ -1,6 +1,12 @@
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+
+export const metadata: Metadata = {
+  title: 'الملف الشخصي',
+  robots: { index: false, follow: false },
+};
 import { createClient } from '@/lib/supabase/server';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';

@@ -413,6 +413,27 @@ export async function getKidsContent(ageGroup?: string, type?: string, limit = 5
   }));
 }
 
+// ─── Battles ──────────────────────────────────────────────────────────────────
+export interface Battle {
+  id: string;
+  slug: string;
+  name_ar: string;
+  published: boolean;
+}
+
+export async function getBattles(limit = 100): Promise<Battle[]> {
+  const rows = await supabaseServerAdminRequest<any[]>(
+    `/rest/v1/battles?select=id,slug,name_ar,published&published=eq.true&order=year_hijri.asc&limit=${limit}`
+  ).catch(() => []);
+  return (rows ?? []).map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    name_ar: r.name_ar,
+    published: r.published,
+  }));
+}
+
+// ─── Kids Content ─────────────────────────────────────────────────────────────
 export async function getKidsContentBySlug(slug: string): Promise<KidsContent | null> {
   const rows = await supabaseServerAdminRequest<any[]>(
     `/rest/v1/kids_content?select=*&slug=eq.${slug}&published=eq.true&limit=1`

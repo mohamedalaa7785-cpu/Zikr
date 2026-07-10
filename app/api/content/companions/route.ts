@@ -1,22 +1,9 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-      },
-    }
-  );
-
+export async function GET(_request: NextRequest) {
   try {
+    const supabase = await createClient();
     const { data: companions, error } = await supabase
       .from('companions')
       .select('*')
@@ -26,7 +13,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
     return NextResponse.json(companions || []);
   } catch (error) {
-    console.error('Companions fetch error:', error);
+    console.error('[api/content/companions] GET error:', error);
     return NextResponse.json({ error: 'Failed to fetch companions' }, { status: 500 });
   }
 }

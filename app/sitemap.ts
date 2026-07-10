@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return staticRoutes;
     }
 
-    const [surahs, scholars, hadithBooks, stories, articles, videos, prophets, duas, kidsContent] = await Promise.all([
+    const [surahs, scholars, hadithBooks, stories, articles, videos, prophets, duas, kidsContent, battles] = await Promise.all([
       getAllSurahs("ar").catch((error): Surah[] => {
         console.error("[sitemap] Quran fetch failed:", error);
         return [];
@@ -67,6 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       import('@/lib/services/content').then(m => m.getProphets()).catch(() => []),
       import('@/lib/services/content').then(m => m.getDuas()).catch(() => []),
       import('@/lib/services/content').then(m => m.getKidsContent()).catch(() => []),
+      import('@/lib/services/content').then(m => m.getBattles()).catch(() => []),
     ]);
 
     const dynamicRoutes: MetadataRoute.Sitemap = [
@@ -128,6 +129,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ),
       ...kidsContent.map(kid =>
         route(`/kids/${kid.slug}`, {
+          lastModified: now,
+          changeFrequency: "monthly",
+          priority: 0.7,
+        })
+      ),
+      ...battles.map((battle: { slug: string }) =>
+        route(`/battles/${battle.slug}`, {
           lastModified: now,
           changeFrequency: "monthly",
           priority: 0.7,
