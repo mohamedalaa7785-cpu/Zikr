@@ -9,25 +9,50 @@ export function VoiceRecorder() {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [result, setResult] = useState<string>('');
   const [expanded, setExpanded] = useState(false);
+  const [micError, setMicError] = useState<string>('');
+  const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
   async function startRecording() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    chunksRef.current = [];
-    recorder.ondataavailable = (event) => {
-      if (event.data.size > 0) chunksRef.current.push(event.data);
-    };
-    recorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-      setAudioBlob(blob);
+    setMicError('');
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMicError('متصفحك لا يدعم تسجيل الصوت.');
+      return;
+    }
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      const name = err instanceof DOMException ? err.name : '';
+      if (name === 'NotAllowedError' || name === 'SecurityError') {
+        setMicError('تم رفض إذن الميكروفون. اسمح بالوصول للميكروفون من إعدادات المتصفح ثم حاول مجدداً.');
+      } else if (name === 'NotFoundError') {
+        setMicError('لم يتم العثور على ميكروفون في جهازك.');
+      } else {
+        setMicError('تعذر الوصول إلى الميكروفون. حاول مرة أخرى.');
+      }
+      return;
+    }
+    try {
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        setAudioBlob(blob);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+      recorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    } catch {
       stream.getTracks().forEach((track) => track.stop());
-    };
-    recorderRef.current = recorder;
-    recorder.start();
-    setIsRecording(true);
+      setMicError('تعذر بدء التسجيل. متصفحك قد لا يدعم MediaRecorder.');
+    }
   }
 
   function stopRecording() {
@@ -63,6 +88,10 @@ export function VoiceRecorder() {
       {audioBlob ? <span className='text-sm text-emerald-300'>تم تسجيل الصوت وجاهز للتقييم.</span> : <span className='text-sm arabic-muted'>اسمح للمتصفح باستخدام الميكروفون.</span>}
     </div>
 
+    {micError ? (
+      <p className='rounded-lg border border-red-500/30 bg-red-950/30 p-3 text-sm text-red-300' role='alert'>{micError}</p>
+    ) : null}
+
     {result ? (
       <div className='space-y-3'>
         <div className='flex items-center justify-between'>
@@ -72,12 +101,17 @@ export function VoiceRecorder() {
               type='button' 
               variant='secondary' 
               size='sm' 
-              onClick={() => {
-                navigator.clipboard.writeText(result);
-                alert('تم نسخ التقييم');
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(result);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                } catch {
+                  setMicError('تعذر النسخ إلى الحافظة.');
+                }
               }}
             >
-              نسخ التقييم
+              {copied ? 'تم النسخ' : 'نسخ التقييم'}
             </Button>
             <Button 
               type='button' 
