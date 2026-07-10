@@ -13,8 +13,8 @@ export const revalidate = 86400; // 24 hours
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
-// Private per-user pages and redirect-only aliases must not appear in the public sitemap.
-const PRIVATE_PATHS = new Set(['/profile', '/favorites', '/prayer', '/islamic-conquests']);
+// Private per-user pages must not appear in the public sitemap.
+const PRIVATE_PATHS = new Set(['/profile', '/favorites']);
 
 function siteConfigRoutes() {
   return appRoutes.filter((r) => !PRIVATE_PATHS.has(r.path));
