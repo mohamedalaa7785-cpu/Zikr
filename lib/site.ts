@@ -7,7 +7,43 @@ export const siteConfig = {
   dir: 'rtl' as const,
 };
 
-export const defaultOgImage = '/icons/icon-512.svg';
+export const defaultOgImage = '/og-image.png';
+
+import type { Metadata } from 'next';
+
+/**
+ * Build consistent page metadata with canonical URL, Open Graph, and Twitter cards.
+ * Use for every public page to avoid inheriting the root canonical.
+ */
+export function pageMetadata(opts: {
+  title: string;
+  description: string;
+  path: string;
+  noindex?: boolean;
+}): Metadata {
+  const { title, description, path, noindex } = opts;
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    ...(noindex ? { robots: { index: false, follow: false } } : {}),
+    openGraph: {
+      title,
+      description,
+      url: path,
+      type: 'website',
+      locale: siteConfig.locale,
+      siteName: siteConfig.shortName,
+      images: [{ url: defaultOgImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [defaultOgImage],
+    },
+  };
+}
 
 export type AppRoute = {
   path: string;
@@ -26,8 +62,7 @@ export const appRoutes = [
   { path: '/hadith', label: 'الأحاديث', sitemap: { changeFrequency: 'monthly', priority: 0.9 }, nav: 'primary', footer: 'platform' },
   { path: '/stories', label: 'القصص', sitemap: { changeFrequency: 'weekly', priority: 0.8 }, nav: 'primary' },
   { path: '/scholars', label: 'العلماء', sitemap: { changeFrequency: 'monthly', priority: 0.8 }, nav: 'primary', footer: 'platform' },
-  { path: '/prayer', label: 'الصلاة', sitemap: { changeFrequency: 'daily', priority: 0.7 }, nav: 'primary', footer: 'tools' },
-  { path: '/prayer-times', label: 'مواقيت الصلاة', sitemap: { changeFrequency: 'daily', priority: 0.7 }, nav: 'more' },
+  { path: '/prayer-times', label: 'مواقيت الصلاة', sitemap: { changeFrequency: 'daily', priority: 0.7 }, nav: 'primary', footer: 'tools' },
   { path: '/qibla', label: 'القبلة', sitemap: { changeFrequency: 'monthly', priority: 0.6 }, nav: 'more' },
   { path: '/adhkar', label: 'الأذكار', sitemap: { changeFrequency: 'weekly', priority: 0.8 }, nav: 'more', footer: 'platform' },
   { path: '/dua', label: 'الدعاء', sitemap: { changeFrequency: 'weekly', priority: 0.8 }, footer: 'platform' },
@@ -46,7 +81,7 @@ export const appRoutes = [
   { path: '/tafsir', label: 'التفسير', sitemap: { changeFrequency: 'monthly', priority: 0.7 } },
   { path: '/companions', label: 'الصحابة', sitemap: { changeFrequency: 'monthly', priority: 0.7 } },
   { path: '/battles', label: 'الغزوات', sitemap: { changeFrequency: 'monthly', priority: 0.6 } },
-  { path: '/islamic-conquests', label: 'الفتوحات', sitemap: { changeFrequency: 'monthly', priority: 0.6 } },
+  { path: '/conquests', label: 'الفتوحات', sitemap: { changeFrequency: 'monthly', priority: 0.6 } },
   { path: '/tawasheeh', label: 'التواشيح', sitemap: { changeFrequency: 'weekly', priority: 0.6 } },
   { path: '/search', label: 'بحث', sitemap: { changeFrequency: 'daily', priority: 0.7 }, nav: 'more', footer: 'tools' },
   { path: '/favorites', label: 'المفضلة', sitemap: { changeFrequency: 'weekly', priority: 0.4 }, nav: 'more' },

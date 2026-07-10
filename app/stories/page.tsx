@@ -10,6 +10,14 @@ import { getYoutubeChannelFeed } from '@/lib/services/youtube';
 
 export const revalidate = 1800;
 
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = pageMetadata({
+  title: 'القصص الإسلامية',
+  description: 'قصص الأنبياء والصحابة ووثائقيات التاريخ الإسلامي في مكتبة مرئية ومقروءة شاملة.',
+  path: '/stories',
+});
+
 export default async function StoriesPage() {
   const [stories, feed] = await Promise.all([
     getStories(),

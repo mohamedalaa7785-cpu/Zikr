@@ -3,6 +3,13 @@ import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Swords } from 'lucide-react';
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = pageMetadata({
+  title: 'الغزوات',
+  description: 'تعرف على غزوات الرسول صلى الله عليه وسلم: بدر وأحد والخندق وغيرها بالتفاصيل والتواريخ والمواقع.',
+  path: '/battles',
+});
 
 type Battle = {
   id: string;

@@ -69,6 +69,18 @@ const nextConfig: NextConfig = {
       destination: '/',
       permanent: false,
     },
+    {
+      // Legacy alias — canonical page is /prayer-times.
+      source: '/prayer',
+      destination: '/prayer-times',
+      permanent: true,
+    },
+    {
+      // Legacy alias — canonical page is /conquests.
+      source: '/islamic-conquests',
+      destination: '/conquests',
+      permanent: true,
+    },
   ],
   productionBrowserSourceMaps: false,
   trailingSlash: false,

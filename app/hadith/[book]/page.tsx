@@ -5,9 +5,23 @@ import { Container } from '@/components/ui/container';
 import { getHadithBook } from '@/lib/services/hadith';
 import { Badge } from '@/components/ui/badge';
 
+import { pageMetadata } from '@/lib/site';
+import type { Metadata } from 'next';
+
 interface BookPageProps {
   params: Promise<{ book: string }>;
   searchParams: Promise<{ page?: string }>;
+}
+
+export async function generateMetadata({ params }: BookPageProps): Promise<Metadata> {
+  const { book: slug } = await params;
+  const result = await getHadithBook(slug, 1, 1).catch(() => null);
+  const name = result?.name ?? 'كتاب الحديث';
+  return pageMetadata({
+    title: name,
+    description: `تصفح أحاديث ${name} كاملة مع أرقام الأحاديث والنصوص العربية.`,
+    path: `/hadith/${slug}`,
+  });
 }
 
 export default async function BookPage({ params, searchParams }: BookPageProps) {

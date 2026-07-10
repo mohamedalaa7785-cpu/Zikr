@@ -32,7 +32,7 @@ export function Footer() {
         <div className='space-y-6'>
           <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>أدوات ذكية</h3>
           <ul className='space-y-3 text-sm'>
-            <li><Link href='/prayer' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>مواقيت الصلاة</Link></li>
+            <li><Link href='/prayer-times' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>مواقيت الصلاة</Link></li>
             <li><Link href='/memorization' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>مساعد الحفظ</Link></li>
             <li><Link href='/spiritual-ai' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الرفيق الروحاني AI</Link></li>
             <li><Link href='/poetry' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>ديوان الشعر</Link></li>

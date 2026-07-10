@@ -16,6 +16,27 @@ type Companion = {
   death_year: string | null;
 };
 
+import { pageMetadata } from '@/lib/site';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  let companion: Companion | null = null;
+  try {
+    const data = await supabaseServerAnonRequest<Companion[]>(
+      `/rest/v1/companions?select=name_ar,title_ar,bio_ar&slug=eq.${slug}&published=eq.true`
+    );
+    companion = data && data.length > 0 ? (data[0] as Companion) : null;
+  } catch {
+    companion = null;
+  }
+  return pageMetadata({
+    title: companion?.name_ar ?? 'صحابي',
+    description: companion?.bio_ar?.slice(0, 160) ?? 'سيرة الصحابي الجليل وأبرز مواقفه.',
+    path: `/companions/${slug}`,
+  });
+}
+
 export default async function CompanionDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   let companion: Companion | null = null;

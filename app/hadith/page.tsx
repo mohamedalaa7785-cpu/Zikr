@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
 import { hadithBooks, hadiths } from '@/lib/data/content';
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = pageMetadata({
+  title: 'الأحاديث النبوية',
+  description: 'تصفح كتب الحديث الشريف: صحيح البخاري، صحيح مسلم، وغيرها من كتب السنة النبوية المعتمدة.',
+  path: '/hadith',
+});
 
 const hadithCollections = [
   {

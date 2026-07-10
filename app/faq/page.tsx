@@ -1,5 +1,13 @@
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
+import { pageMetadata } from '@/lib/site';
+import { generateFAQSchema } from '@/lib/seo';
+
+export const metadata = pageMetadata({
+  title: 'الأسئلة الشائعة',
+  description: 'إجابات على الأسئلة الشائعة حول منصة ZIKR: الحساب، المفضلة، التلاوات، ومزايا المنصة.',
+  path: '/faq',
+});
 
 const faqs = [
   {
@@ -37,8 +45,14 @@ const faqs = [
 ];
 
 export default function FAQPage() {
+  const faqJsonLd = generateFAQSchema(faqs.map((f) => ({ question: f.q, answer: f.a })));
+
   return (
     <Container className='space-y-8 py-10 text-right'>
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <section className='space-y-3'>
         <h1 className='text-3xl font-bold text-brand-gold'>الأسئلة الشائعة</h1>
         <p className='max-w-3xl leading-8 arabic-muted'>

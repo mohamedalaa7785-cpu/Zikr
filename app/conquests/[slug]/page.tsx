@@ -20,6 +20,27 @@ type Conquest = {
   published: boolean;
 };
 
+import { pageMetadata } from '@/lib/site';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  let conquest: Conquest | null = null;
+  try {
+    const data = await supabaseServerAnonRequest<Conquest[]>(
+      `/rest/v1/conquests?select=name_ar,description_ar&slug=eq.${slug}&published=eq.true`
+    );
+    conquest = data && data.length > 0 ? (data[0] as Conquest) : null;
+  } catch {
+    conquest = null;
+  }
+  return pageMetadata({
+    title: conquest?.name_ar ?? 'فتح إسلامي',
+    description: conquest?.description_ar?.slice(0, 160) ?? 'تفاصيل الفتح الإسلامي: القائد والتاريخ والموقع.',
+    path: `/conquests/${slug}`,
+  });
+}
+
 export default async function ConquestDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   let conquest: Conquest | null = null;
