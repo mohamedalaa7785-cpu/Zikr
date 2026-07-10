@@ -57,6 +57,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip third-party ad and tracking scripts
+  if (request.destination === 'script' && 
+      (url.hostname.includes('google') || 
+       url.hostname.includes('pagead') ||
+       url.hostname.includes('doubleclick'))) {
+    return;
+  }
+
   // Skip API calls - let them go directly to network
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/')) {
     event.respondWith(

@@ -6,6 +6,7 @@ import { defaultOgImage, siteConfig } from '@/lib/site';
 import { Analytics } from '@/components/layout/analytics';
 import { ServiceWorkerRegister } from '@/components/layout/service-worker-register';
 import { AdSense } from '@/components/layout/adsense';
+import { GoogleFundingChoices } from '@/components/layout/google-funding-choices';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const notoNaskhArabic = Noto_Naskh_Arabic({
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Analytics />
         <ServiceWorkerRegister />
         <AdSense />
+        <GoogleFundingChoices />
         <SpeedInsights />
       </body>
     </html>
