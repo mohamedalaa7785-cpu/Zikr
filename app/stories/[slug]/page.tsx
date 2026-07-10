@@ -3,9 +3,27 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 
 interface StoryPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: StoryPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  let title = "قصة";
+  let description = "اقرأ القصة كاملة في منصة ZIKR للمحتوى الإسلامي.";
+  try {
+    const story = await getStoryBySlug(slug);
+    if (story) {
+      title = story.title;
+      if (story.summary) description = story.summary.slice(0, 160);
+    }
+  } catch {
+    // fall back to generic metadata
+  }
+  return pageMetadata({ title, description, path: `/stories/${slug}` });
 }
 
 export default async function StoryPage({ params }: StoryPageProps) {
@@ -24,8 +42,8 @@ export default async function StoryPage({ params }: StoryPageProps) {
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <Button href="/stories" variant="ghost" className="mb-6">
-        <ChevronLeft className="mr-2 h-4 w-4" />
-        Back to Stories
+        <ChevronLeft className="ml-2 h-4 w-4" />
+        العودة إلى القصص
       </Button>
 
       <div className="flex flex-col gap-8">
