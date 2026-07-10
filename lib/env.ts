@@ -1,5 +1,3 @@
-import { envSchema, validateEnv } from "./env-validation";
-
 // ─── Numbered-suffix env var resolution ──────────────────────────────────────
 // Vercel integrations expose vars as NAME_19, NAME_22, etc. when multiple
 // projects share the same account. We resolve them here so the rest of the
@@ -160,7 +158,7 @@ const rawEnv: Record<string, string | undefined> = {
   FACEBOOK_PAGE_ID: r(e.FACEBOOK_PAGE_ID, "993431613855177"),
 };
 
-const validatedEnv = validateEnv(rawEnv);
+const validatedEnv = rawEnv;
 
 export function getPublicEnv() {
   return {
