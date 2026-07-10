@@ -1,5 +1,5 @@
 // Service Worker for Zikr PWA
-const CACHE_NAME = 'zikr-v3';
+const CACHE_NAME = 'zikr-v4';
 
 // App shell + key pages pre-cached on install for offline availability.
 // Audio files are NOT pre-cached (50–200MB per reciter).
@@ -13,6 +13,8 @@ const STATIC_ASSETS = [
   '/tasbeeh',
   '/dua',
   '/settings',
+  '/wird',
+  '/zakat',
 ];
 
 // Install event - cache static assets
@@ -100,9 +102,12 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Fallback to cache
+          // Fallback to cache, then to the dedicated offline page
           return caches.match(request).then((cached) => {
-            return cached || new Response('Offline - Page not cached', { status: 503 });
+            if (cached) return cached;
+            return caches.match('/offline.html').then((offline) => {
+              return offline || new Response('Offline - Page not cached', { status: 503 });
+            });
           });
         })
     );

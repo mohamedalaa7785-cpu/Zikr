@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { playSalawatTone, unlockAudioContext } from '@/lib/audio/spiritual-tones';
+import { playSalawatClip, unlockAudioContext } from '@/lib/audio/spiritual-tones';
 import { showSalawatNotification, isInQuietHours } from '@/lib/services/notifications';
 
 export type SalawatInterval = 15 | 30 | 60 | 0; // 0 = disabled
@@ -68,7 +68,7 @@ export function useSalawatReminder(): SalawatReminderReturn {
           isInQuietHours(settings.quietHours.from, settings.quietHours.to)) {
         return; // Respect quiet hours — skip silently
       }
-      playSalawatTone();
+      playSalawatClip();
       showSalawatNotification();
     };
 
@@ -94,7 +94,7 @@ export function useSalawatReminder(): SalawatReminderReturn {
 
   const testReminder = useCallback(() => {
     unlockAudioContext();
-    playSalawatTone();
+    playSalawatClip();
     showSalawatNotification();
   }, []);
 

@@ -79,6 +79,80 @@ export function playAzanTone(): void {
 }
 
 /**
+ * Real audio clip URLs.
+ * - Azan: full adhan (call to prayer) recitation.
+ * - Salawat: "الصلاة على النبي" recited by Sheikh Al-Minshawi.
+ * These are streamed via HTMLAudioElement (no CORS requirement for playback).
+ */
+export const AZAN_CLIP_URL = 'https://www.islamcan.com/audio/adhan/azan1.mp3';
+export const SALAWAT_CLIP_URL = 'https://archive.org/download/salawat-menshawy/salawat-menshawy.mp3';
+
+let azanEl: HTMLAudioElement | null = null;
+let salawatEl: HTMLAudioElement | null = null;
+
+function getClipEl(kind: 'azan' | 'salawat'): HTMLAudioElement | null {
+  if (typeof window === 'undefined') return null;
+  if (kind === 'azan') {
+    if (!azanEl) {
+      azanEl = new Audio(AZAN_CLIP_URL);
+      azanEl.preload = 'none';
+    }
+    return azanEl;
+  }
+  if (!salawatEl) {
+    salawatEl = new Audio(SALAWAT_CLIP_URL);
+    salawatEl.preload = 'none';
+  }
+  return salawatEl;
+}
+
+/**
+ * Play the real adhan clip. Falls back to the synthesized tone
+ * if the audio fails to load or autoplay is blocked.
+ */
+export function playAzanClip(): void {
+  const el = getClipEl('azan');
+  if (!el) {
+    playAzanTone();
+    return;
+  }
+  el.volume = masterVolume;
+  el.currentTime = 0;
+  el.play().catch(() => playAzanTone());
+}
+
+/** Stop the currently playing adhan clip. */
+export function stopAzanClip(): void {
+  if (azanEl) {
+    azanEl.pause();
+    azanEl.currentTime = 0;
+  }
+}
+
+/**
+ * Play the real "صلي على رسول الله" salawat clip.
+ * Falls back to the soft bell tone if playback fails.
+ */
+export function playSalawatClip(): void {
+  const el = getClipEl('salawat');
+  if (!el) {
+    playSalawatTone();
+    return;
+  }
+  el.volume = masterVolume;
+  el.currentTime = 0;
+  el.play().catch(() => playSalawatTone());
+}
+
+/** Stop the currently playing salawat clip. */
+export function stopSalawatClip(): void {
+  if (salawatEl) {
+    salawatEl.pause();
+    salawatEl.currentTime = 0;
+  }
+}
+
+/**
  * Play a single soft bell tone to signal the Salawat reminder.
  * 528 Hz (solfeggio MI tone), ~1.5 sec.
  */

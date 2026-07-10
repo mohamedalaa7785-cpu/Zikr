@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BookmarkButton } from '@/components/quran/bookmark-button';
 import { QuranAudioPlayer } from '@/components/quran/audio-player';
+import { MarkSurahRead } from '@/components/wird/mark-surah-read';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { getSurahById } from '@/lib/services/quran';
@@ -65,6 +66,13 @@ export default async function SurahPage({ params }: { params: Promise<{ surah: s
         <Badge variant="outline" className="text-lg px-4 py-1">
           {result.surah.numberOfAyahs} آية
         </Badge>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <MarkSurahRead surahId={result.surah.number} lastAyah={result.surah.numberOfAyahs} />
+        <Link href="/wird" className="text-sm text-brand-gold hover:underline">
+          وردي اليومي وختمتي
+        </Link>
       </div>
 
       <QuranAudioPlayer surahId={result.surah.number} />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { playAzanTone, unlockAudioContext, isAudioUnlocked } from '@/lib/audio/spiritual-tones';
+import { playAzanClip, unlockAudioContext, isAudioUnlocked } from '@/lib/audio/spiritual-tones';
 import { showPrayerNotification, requestNotificationPermission } from '@/lib/services/notifications';
 import type { NotificationPermission as PermResult } from '@/lib/services/notifications';
 
@@ -116,8 +116,8 @@ export function usePrayerAlert(): PrayerAlertReturn {
 
         if (diff <= 1 && !alreadyFired(prayer)) {
           markFired(prayer);
-          // Fire alert
-          playAzanTone();
+          // Fire alert — play the real adhan clip
+          playAzanClip();
           showPrayerNotification(PRAYER_NAMES_AR[prayer]);
           alertCallbackRef.current?.(prayer);
         }
@@ -158,7 +158,7 @@ export function usePrayerAlert(): PrayerAlertReturn {
 
   const testAzan = useCallback(() => {
     unlockAudioContext();
-    playAzanTone();
+    playAzanClip();
   }, []);
 
   const onAlertFired = useCallback((cb: (prayer: PrayerKey) => void) => {
