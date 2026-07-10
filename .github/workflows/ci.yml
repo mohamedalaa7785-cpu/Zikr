@@ -1,7 +1,9 @@
 name: CI
 
 on:
-  pull_request:
+  # NOTE: GitHub Actions are paused — account billing issue must be resolved first.
+  # CI runs locally (pnpm check && pnpm build) with zero errors.
+  # Re-enable pull_request trigger after billing is resolved.
   push:
     branches:
       - main
