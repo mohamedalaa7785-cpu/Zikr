@@ -1171,6 +1171,19 @@ CREATE TABLE IF NOT EXISTS public.memorization_plans (
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS public.memorization_progress (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id          UUID NOT NULL,
+  surah_number     INTEGER NOT NULL,
+  surah_name       TEXT NOT NULL,
+  total_ayahs      INTEGER NOT NULL,
+  memorized_ayahs  INTEGER NOT NULL DEFAULT 0,
+  last_reviewed_at TIMESTAMPTZ,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT memorization_progress_user_surah UNIQUE (user_id, surah_number)
+);
+
 -- ---------------------------------------------------------------------------
 -- RLS: ENABLE ON ALL TABLES
 -- ---------------------------------------------------------------------------
@@ -1339,6 +1352,11 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
   CREATE POLICY "users_own_notifications" ON public.notifications
+    FOR ALL USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE POLICY "users_own_memorization_progress" ON public.memorization_progress
     FOR ALL USING (auth.uid() = user_id);
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 

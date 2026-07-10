@@ -3,6 +3,10 @@ import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { getMemorizationPlans } from '@/lib/services/site-content';
 import { VoiceRecorder } from './voice-recorder';
+import { ProgressTracker } from './progress-tracker';
+import { getMemorizationProgress } from './actions';
+
+export const dynamic = 'force-dynamic';
 
 const plans = [
   { title: 'ورد يومي للحفظ', cadence: 'يومي', target: '5 آيات أو نصف صفحة', tajweed: 'تصحيح المخارج والمدود قبل الانتقال.' },

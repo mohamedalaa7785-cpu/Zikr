@@ -604,6 +604,27 @@ export const memorizationPlans = pgTable("memorization_plans", {
     .notNull(),
 });
 
+// User memorization progress (user-owned)
+export const memorizationProgress = pgTable(
+  "memorization_progress",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull(),
+    surahNumber: integer("surah_number").notNull(),
+    surahName: text("surah_name").notNull(),
+    totalAyahs: integer("total_ayahs").notNull(),
+    memorizedAyahs: integer("memorized_ayahs").notNull().default(0),
+    lastReviewedAt: timestamp("last_reviewed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  t => ({ uniq: unique("memorization_progress_user_surah").on(t.userId, t.surahNumber) })
+);
+
 // Prophets (public read, admin write)
 export const prophets = pgTable("prophets", {
   id: uuid("id").primaryKey(),
