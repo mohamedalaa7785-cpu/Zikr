@@ -1,8 +1,16 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { getCompetitions } from '@/lib/services/site-content';
+import { pageMetadata } from '@/lib/site';
+
+export const metadata: Metadata = pageMetadata({
+  title: 'المسابقات الإسلامية',
+  description: 'شارك في المسابقات الإسلامية القرآنية والدينية على منصة ذِكرٌ واحصل على جوائز قيّمة.',
+  path: '/competitions',
+});
 
 export default async function CompetitionsPage() {
   const competitions = await getCompetitions();

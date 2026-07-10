@@ -87,6 +87,9 @@ export const appRoutes = [
   { path: '/favorites', label: 'المفضلة', sitemap: { changeFrequency: 'weekly', priority: 0.4 }, nav: 'more' },
   { path: '/profile', label: 'الملف الشخصي', sitemap: { changeFrequency: 'weekly', priority: 0.4 } },
   { path: '/about', label: 'عن المنصة', sitemap: { changeFrequency: 'yearly', priority: 0.5 }, footer: 'legal' },
+  { path: '/contact', label: 'تواصل معنا', sitemap: { changeFrequency: 'yearly', priority: 0.5 }, footer: 'legal' },
+  { path: '/platform', label: 'دليل المنصة', sitemap: { changeFrequency: 'yearly', priority: 0.4 }, footer: 'legal' },
+  { path: '/faq', label: 'الأسئلة الشائعة', sitemap: { changeFrequency: 'yearly', priority: 0.4 }, footer: 'legal' },
   { path: '/privacy', label: 'سياسة الخصوصية', sitemap: { changeFrequency: 'yearly', priority: 0.3 }, footer: 'legal' },
   { path: '/terms', label: 'الشروط والأحكام', sitemap: { changeFrequency: 'yearly', priority: 0.3 }, footer: 'legal' },
 ] as const satisfies readonly AppRoute[];
