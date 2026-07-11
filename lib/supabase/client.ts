@@ -14,34 +14,15 @@ export function createClient(): BrowserClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!url || !key) {
-    // Return a no-op stub during build/SSR without env vars.
-    // Real API calls will surface errors in the UI at runtime, not at build time.
-    return createNoop() as unknown as BrowserClient;
+  if (!url) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL for browser Supabase client.');
+  }
+  if (!key) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY for browser Supabase client.');
   }
 
   _instance = createBrowserClient(url, key);
   return _instance;
-}
-
-/** Minimal stub returned when env vars are absent (build / SSR phase). */
-function createNoop() {
-  const noop = () => noopQuery;
-  const noopQuery: Record<string, unknown> = new Proxy(
-    {},
-    {
-      get(_t, prop) {
-        if (prop === 'then') return undefined; // not a thenable
-        return noop;
-      },
-    }
-  );
-  return {
-    auth: { getUser: async () => ({ data: { user: null }, error: null }) },
-    from: noop,
-    rpc: noop,
-    storage: { from: noop },
-  };
 }
 
 /** Alias kept for backward compatibility with existing imports. */

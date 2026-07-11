@@ -4,13 +4,16 @@ import { cookies } from 'next/headers';
 // Lazy accessors — read at call-time, not at module-evaluation time.
 // This prevents build-time / CI errors when env vars are absent.
 function getEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? anonKey;
-  if (!url || !anonKey) {
-    throw new Error('Supabase environment variables are not configured.');
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL on the server).');
   }
-  return { url, anonKey, serviceKey: serviceKey! };
+  if (!anonKey) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY (or SUPABASE_ANON_KEY on the server).');
+  }
+  return { url, anonKey, serviceKey };
 }
 
 /**
@@ -96,15 +99,24 @@ export const supabaseServerAnonRequest = <T>(path: string, init?: RequestInit) =
 
 /** Authenticated REST request using the service-role key (bypasses RLS). */
 export const supabaseServerAdminRequest = <T>(path: string, init?: RequestInit) =>
-  restRequest<T>(path, init, process.env.SUPABASE_SERVICE_ROLE_KEY);
+  (() => {
+    const { serviceKey } = getEnv();
+    if (!serviceKey) {
+      throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for server-admin Supabase request.');
+    }
+    return restRequest<T>(path, init, serviceKey);
+  })();
 
 /**
  * Exact row count of a table (service-role, bypasses RLS).
  * Uses a HEAD request with `Prefer: count=exact` and parses the Content-Range header.
  */
 export async function supabaseServerAdminCount(table: string): Promise<number> {
-  const { url, anonKey } = getEnv();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? anonKey;
+  const { url, serviceKey } = getEnv();
+  if (!serviceKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for server-admin Supabase count.');
+  }
+  const key = serviceKey;
   try {
     const res = await fetch(`${url}/rest/v1/${table}?select=id`, {
       method: 'HEAD',

@@ -197,6 +197,7 @@ export type Database = {
           created_at: string | null
           date_gregorian: string | null
           date_hijri: string | null
+          year_hijri: number | null
           description_ar: string | null
           description_en: string | null
           featured_image_url: string | null
@@ -216,6 +217,7 @@ export type Database = {
           created_at?: string | null
           date_gregorian?: string | null
           date_hijri?: string | null
+          year_hijri?: number | null
           description_ar?: string | null
           description_en?: string | null
           featured_image_url?: string | null
@@ -235,6 +237,7 @@ export type Database = {
           created_at?: string | null
           date_gregorian?: string | null
           date_hijri?: string | null
+          year_hijri?: number | null
           description_ar?: string | null
           description_en?: string | null
           featured_image_url?: string | null
@@ -303,6 +306,10 @@ export type Database = {
         Row: {
           bio_ar: string | null
           bio_en: string | null
+          title_ar: string | null
+          birth_place_ar: string | null
+          death_place_ar: string | null
+          death_year: string | null
           category: string | null
           created_at: string | null
           featured_image_url: string | null
@@ -319,6 +326,10 @@ export type Database = {
         Insert: {
           bio_ar?: string | null
           bio_en?: string | null
+          title_ar?: string | null
+          birth_place_ar?: string | null
+          death_place_ar?: string | null
+          death_year?: string | null
           category?: string | null
           created_at?: string | null
           featured_image_url?: string | null
@@ -335,6 +346,10 @@ export type Database = {
         Update: {
           bio_ar?: string | null
           bio_en?: string | null
+          title_ar?: string | null
+          birth_place_ar?: string | null
+          death_place_ar?: string | null
+          death_year?: string | null
           category?: string | null
           created_at?: string | null
           featured_image_url?: string | null
