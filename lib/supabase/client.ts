@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { getPublicEnv } from '@/lib/env';
 
 type BrowserClient = ReturnType<typeof createBrowserClient>;
 
@@ -11,8 +12,7 @@ let _instance: BrowserClient | null = null;
 export function createClient(): BrowserClient {
   if (_instance) return _instance;
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_ANON_KEY: key } = getPublicEnv();
 
   if (!url) {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL for browser Supabase client.');

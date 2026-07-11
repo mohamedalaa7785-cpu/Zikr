@@ -1,12 +1,15 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { getServerEnv } from '@/lib/env';
 
 // Lazy accessors — read at call-time, not at module-evaluation time.
 // This prevents build-time / CI errors when env vars are absent.
 function getEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const env = getServerEnv();
+  const url = env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
+
   if (!url) {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL on the server).');
   }

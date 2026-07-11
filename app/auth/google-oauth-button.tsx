@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import { buildOAuthRedirectUri } from '@/lib/auth-enhanced';
+import { getPublicEnv } from '@/lib/env';
 import { Button } from '@/components/ui/button';
 
 type GoogleOAuthButtonProps = {
@@ -30,8 +31,9 @@ export function GoogleOAuthButton({
       // Always prefer the configured NEXT_PUBLIC_SITE_URL so the redirect
       // matches the allowed callback URLs registered in Supabase/Google Cloud.
       // Fall back to window.location.origin only in local dev.
+      const { NEXT_PUBLIC_SITE_URL: siteUrlEnv } = getPublicEnv();
       const siteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL ||
+        siteUrlEnv ||
         (typeof window !== "undefined" ? window.location.origin : "");
 
       const redirectUri = buildOAuthRedirectUri(siteUrl, safeNext);
