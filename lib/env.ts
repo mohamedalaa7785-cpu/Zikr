@@ -160,6 +160,13 @@ const rawEnv: Record<string, string | undefined> = {
     "https://hadithapi.com/api"
   ),
 
+  // ── AWS S3 ───────────────────────────────────────────────────────────────
+  AWS_S3_ACCESS_KEY_ID: r(e.AWS_S3_ACCESS_KEY_ID, e.AWS_ACCESS_KEY_ID, e.AWS_S3_ACCESS_KEY_ID_19),
+  AWS_S3_SECRET_ACCESS_KEY: r(e.AWS_S3_SECRET_ACCESS_KEY, e.AWS_SECRET_ACCESS_KEY, e.AWS_S3_SECRET_ACCESS_KEY_19),
+  AWS_S3_BUCKET_NAME: r(e.AWS_S3_BUCKET_NAME, e.AWS_S3_BUCKET_NAME_19),
+  AWS_S3_REGION: r(e.AWS_S3_REGION, e.AWS_REGION, e.AWS_S3_REGION_19),
+  AWS_S3_PUBLIC_BASE_URL: r(e.AWS_S3_PUBLIC_BASE_URL, e.AWS_S3_PUBLIC_BASE_URL_19),
+
   // ── Facebook ──────────────────────────────────────────────────────────────
   FACEBOOK_APP_ID: r(e.FACEBOOK_APP_ID, "1547748713614342"),
   FACEBOOK_APP_SECRET: r(e.FACEBOOK_APP_SECRET, e.FACEBOOK_APP_SECRET_19),
@@ -203,6 +210,11 @@ export function getServerEnv() {
     YOUTUBE_REFRESH_TOKEN: validatedEnv.YOUTUBE_REFRESH_TOKEN || "",
     GOOGLE_CLIENT_ID: validatedEnv.GOOGLE_CLIENT_ID || "",
     GOOGLE_CLIENT_SECRET: validatedEnv.GOOGLE_CLIENT_SECRET || "",
+    AWS_S3_ACCESS_KEY_ID: validatedEnv.AWS_S3_ACCESS_KEY_ID || "",
+    AWS_S3_SECRET_ACCESS_KEY: validatedEnv.AWS_S3_SECRET_ACCESS_KEY || "",
+    AWS_S3_BUCKET_NAME: validatedEnv.AWS_S3_BUCKET_NAME || "",
+    AWS_S3_REGION: validatedEnv.AWS_S3_REGION || "",
+    AWS_S3_PUBLIC_BASE_URL: validatedEnv.AWS_S3_PUBLIC_BASE_URL || "",
     FACEBOOK_APP_ID: validatedEnv.FACEBOOK_APP_ID || "",
     FACEBOOK_APP_SECRET: validatedEnv.FACEBOOK_APP_SECRET || "",
     FACEBOOK_PAGE_ACCESS_TOKEN: validatedEnv.FACEBOOK_PAGE_ACCESS_TOKEN || "",
@@ -228,6 +240,8 @@ export function getEnvAudit() {
       "SUPABASE_SERVICE_ROLE_KEY",
       "SUPABASE_SECRET_KEY",
       "GOOGLE_CLIENT_SECRET",
+      "AWS_S3_ACCESS_KEY_ID",
+      "AWS_S3_SECRET_ACCESS_KEY",
     ],
     runtimeServer: [
       "NEXT_PUBLIC_SUPABASE_URL",
@@ -243,6 +257,11 @@ export function getEnvAudit() {
       "YOUTUBE_REFRESH_TOKEN",
       "GOOGLE_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",
+      "AWS_S3_ACCESS_KEY_ID",
+      "AWS_S3_SECRET_ACCESS_KEY",
+      "AWS_S3_BUCKET_NAME",
+      "AWS_S3_REGION",
+      "AWS_S3_PUBLIC_BASE_URL",
       "FACEBOOK_APP_ID",
       "FACEBOOK_APP_SECRET",
       "FACEBOOK_PAGE_ACCESS_TOKEN",
@@ -260,6 +279,11 @@ export function getEnvAudit() {
       "GEMINI_MODEL",
       "GOOGLE_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",
+      "AWS_S3_ACCESS_KEY_ID",
+      "AWS_S3_SECRET_ACCESS_KEY",
+      "AWS_S3_BUCKET_NAME",
+      "AWS_S3_REGION",
+      "AWS_S3_PUBLIC_BASE_URL",
       "FACEBOOK_APP_ID",
       "FACEBOOK_APP_SECRET",
       "FACEBOOK_PAGE_ACCESS_TOKEN",
