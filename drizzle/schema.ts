@@ -13,7 +13,6 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { relations } from "drizzle-orm";
 
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 export const favoriteItemTypeEnum = pgEnum("favorite_item_type", [
@@ -827,6 +826,10 @@ export const companions = pgTable("companions", {
   slug: text("slug").notNull().unique(),
   bioAr: text("bio_ar"),
   bioEn: text("bio_en"),
+  titleAr: text("title_ar"),
+  birthPlaceAr: text("birth_place_ar"),
+  deathPlaceAr: text("death_place_ar"),
+  deathYear: text("death_year"),
   category: text("category"),
   thumbnailUrl: text("thumbnail_url"),
   featuredImageUrl: text("featured_image_url"),
@@ -868,6 +871,7 @@ export const battles = pgTable("battles", {
   descriptionAr: text("description_ar"),
   descriptionEn: text("description_en"),
   dateHijri: text("date_hijri"),
+  yearHijri: integer("year_hijri"),
   dateGregorian: text("date_gregorian"),
   locationAr: text("location_ar"),
   locationEn: text("location_en"),

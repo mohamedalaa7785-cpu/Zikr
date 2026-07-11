@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -26,7 +26,7 @@ export async function GET(_request: NextRequest) {
       supabase.from('user_behavior').select('id', { count: 'exact', head: true }),
       supabase.from('profiles').select('created_at').gte('created_at', thirtyDaysAgo),
       supabase.from('user_behavior').select('created_at, user_id').gte('created_at', thirtyDaysAgo),
-      supabase.from('favorites').select('item_type, item_id'),
+      supabase.from('favorites').select('item_type, item_ref'),
     ]);
 
     const timeline = Array.from({ length: 30 }, (_, i) => {
@@ -46,17 +46,17 @@ export async function GET(_request: NextRequest) {
       };
     });
 
-    const favCounts = new Map<string, { item_type: string; item_id: string; count: number }>();
+    const favCounts = new Map<string, { item_type: string; item_ref: string; count: number }>();
     for (const f of favoritesRes.data || []) {
-      const key = `${f.item_type}:${f.item_id}`;
-      const entry = favCounts.get(key) || { item_type: f.item_type, item_id: f.item_id, count: 0 };
+      const key = `${f.item_type}:${f.item_ref}`;
+      const entry = favCounts.get(key) || { item_type: f.item_type, item_ref: f.item_ref, count: 0 };
       entry.count++;
       favCounts.set(key, entry);
     }
     const topContent = [...favCounts.values()]
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
-      .map((c) => ({ id: c.item_id, title: `${c.item_type} #${c.item_id}`, views: 0, favorites: c.count }));
+      .map((c) => ({ id: c.item_ref, title: `${c.item_type} #${c.item_ref}`, views: 0, favorites: c.count }));
 
     return NextResponse.json({
       stats: {
