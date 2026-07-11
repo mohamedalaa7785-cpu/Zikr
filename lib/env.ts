@@ -5,7 +5,25 @@
 // Priority: bare name → _19 suffix → _20 suffix → _22 suffix
 
 function r(...keys: Array<string | undefined>): string | undefined {
-  return keys.find((v) => v !== undefined && v !== "");
+  return keys.find(v => v !== undefined && v !== "");
+}
+
+function appAuthCallbackUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+
+  try {
+    const url = new URL(value);
+    if (
+      url.hostname.endsWith(".supabase.co") &&
+      url.pathname === "/auth/v1/callback"
+    ) {
+      return undefined;
+    }
+  } catch {
+    return value;
+  }
+
+  return value;
 }
 
 const e = process.env;
@@ -80,11 +98,8 @@ const rawEnv: Record<string, string | undefined> = {
   ),
   // AUTH_CALLBACK_URL should point to our app's /auth/callback, not Supabase's
   AUTH_CALLBACK_URL: r(
-    e.AUTH_CALLBACK_URL,
-    // If the _19 value is Supabase's own endpoint, skip it and use the app URL
-    e.AUTH_CALLBACK_URL_19?.includes("supabase.co/auth/v1/callback")
-      ? undefined
-      : e.AUTH_CALLBACK_URL_19,
+    appAuthCallbackUrl(e.AUTH_CALLBACK_URL),
+    appAuthCallbackUrl(e.AUTH_CALLBACK_URL_19),
     `${r(e.NEXT_PUBLIC_SITE_URL, "https://zikrmediaofficial.vercel.app")}/auth/callback`
   ),
 
@@ -110,10 +125,7 @@ const rawEnv: Record<string, string | undefined> = {
     e.YOUTUBE_CHANNEL_ID_20,
     e.YOUTUBE_CHANNEL_ID_19
   ),
-  YOUTUBE_REFRESH_TOKEN: r(
-    e.YOUTUBE_REFRESH_TOKEN,
-    e.YOUTUBE_REFRESH_TOKEN_19
-  ),
+  YOUTUBE_REFRESH_TOKEN: r(e.YOUTUBE_REFRESH_TOKEN, e.YOUTUBE_REFRESH_TOKEN_19),
 
   // ── Gemini AI ─────────────────────────────────────────────────────────────
   GEMINI_API_KEY: r(e.GEMINI_API_KEY, e.GEMINI_API_KEY_19),
