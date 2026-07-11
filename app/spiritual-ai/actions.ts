@@ -3,12 +3,21 @@
 import { generateGeminiText } from '@/lib/services/gemini-client';
 import { searchQuran } from '@/lib/services/quran';
 
+export interface ChatCitation {
+  label: string;
+  reference: string;
+  source: string;
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   type?: 'fatwa' | 'spiritual' | 'dhikr' | 'general';
   verses?: { text: string; reference: string }[];
   dhikr?: string[];
+  citations?: ChatCitation[];
+  confidence?: 'high' | 'medium' | 'low';
+  scholarNotice?: string;
 }
 
 export interface ChatResult {
@@ -16,10 +25,15 @@ export interface ChatResult {
   type: 'fatwa' | 'spiritual' | 'dhikr' | 'general';
   verses?: { text: string; reference: string }[];
   dhikr?: string[];
+  citations?: ChatCitation[];
+  confidence: 'high' | 'medium' | 'low';
+  scholarNotice: string;
   error?: string;
 }
 
-// ── Detect what kind of question was asked ───────────────────────────────────
+const SCHOLAR_NOTICE =
+  'تنبيه: هذا إرشاد معرفي وروحاني وليس فتوى مُلزِمة. في النوازل والأحكام الشخصية راجع دار إفتاء أو عالمًا مؤهلًا.';
+
 function classifyQuestion(text: string): 'fatwa' | 'spiritual' | 'dhikr' | 'general' {
   const t = text;
 
@@ -47,7 +61,6 @@ function classifyQuestion(text: string): 'fatwa' | 'spiritual' | 'dhikr' | 'gene
   return 'general';
 }
 
-// ── Detect emotion for dhikr suggestions ─────────────────────────────────────
 function detectEmotion(text: string): string {
   const map: Record<string, string[]> = {
     حزن: ['حزين', 'حزن', 'مكتئب', 'ضيق', 'فقدان', 'وحيد', 'يأس', 'محبط', 'تعبان'],
@@ -81,136 +94,133 @@ const DHIKR_MAP: Record<string, string[]> = {
   عام: ['سبحان الله وبحمده سبحان الله العظيم', 'لا إله إلا الله', 'اللهم صل وسلم على سيدنا محمد'],
 };
 
-// ── Build the AI prompt based on question type ───────────────────────────────
-function buildPrompt(userMessage: string, history: { role: string; content: string }[], type: string): string {
+function verseReference(ayah: { number?: number; numberInSurah: number }) {
+  return ayah.number && ayah.number > 0
+    ? `القرآن الكريم، آية ${ayah.numberInSurah} (رقم ${ayah.number})`
+    : `القرآن الكريم، آية ${ayah.numberInSurah}`;
+}
+
+function buildCitations(verses: { text: string; reference: string }[], type: ChatResult['type']): ChatCitation[] {
+  const quranCitations = verses.map((verse) => ({
+    label: 'آية',
+    reference: verse.reference,
+    source: verse.text,
+  }));
+
+  const safetyCitation: ChatCitation = {
+    label: type === 'fatwa' ? 'توجيه علمي' : 'سياسة أمان',
+    reference: 'منهج ZIKR للذكاء الإسلامي',
+    source: 'لا تُعرض أحكام شرعية مُلزِمة بلا مصدر واضح، ويُحال المستخدم لأهل العلم عند الحاجة.',
+  };
+
+  return [...quranCitations, safetyCitation].slice(0, 4);
+}
+
+function buildPrompt(
+  userMessage: string,
+  history: { role: string; content: string }[],
+  type: ChatResult['type'],
+  citations: ChatCitation[],
+): string {
   const historyText = history
-    .slice(-6) // last 3 exchanges max
+    .slice(-6)
     .map((m) => `${m.role === 'user' ? 'المستخدم' : 'الرفيق'}: ${m.content}`)
     .join('\n');
 
-  const baseIdentity = `أنت "الرفيق الروحاني" — مساعد إسلامي ذكي ومتخصص. تتحدث بالعربية الفصحى المبسطة وأحيانًا بالعامية المفهومة. ردودك دافئة، علمية، ومؤسسة على القرآن والسنة والفقه الإسلامي.`;
+  const sourceText = citations
+    .map((c, index) => `${index + 1}. ${c.label} — ${c.reference}: ${c.source}`)
+    .join('\n');
 
-  if (type === 'fatwa') {
-    return `${baseIdentity}
+  const baseIdentity = `أنت "الرفيق الروحاني" في منصة ZIKR. أجب بالعربية الواضحة، بتواضع علمي، وبلا ادعاء فتوى ملزمة. لا تنسب آية أو حديثًا أو قول عالم إلا إذا كان موجودًا في المصادر المتاحة أدناه. إن لم تكفِ المصادر فقل إن المسألة تحتاج عالمًا مؤهلًا.`;
 
-سياق المحادثة السابقة:
-${historyText}
-
-سأل المستخدم: "${userMessage}"
-
-أجب على هذا السؤال الفقهي/الشرعي بدقة واحترافية:
-1. اذكر الحكم الشرعي بوضوح (حلال / حرام / مكروه / مباح / واجب)
-2. اذكر الدليل من القرآن أو السنة باختصار
-3. اذكر رأي جمهور الفقهاء إن كان هناك خلاف
-4. قدم نصيحة عملية للمستخدم
-5. إن كان الأمر دقيقًا جدًا أو يحتاج مفتيًا متخصصًا، أشر إلى ذلك بأدب
-
-لا تتردد في إعطاء الحكم الشرعي الواضح. الغموض يضر المسلم.`;
-  }
-
-  if (type === 'spiritual') {
-    return `${baseIdentity}
-
-سياق المحادثة السابقة:
-${historyText}
-
-كتب المستخدم: "${userMessage}"
-
-رد عليه بأسلوب المرشد الروحاني:
-- خاطبه شخصيًا وأظهر التعاطف الحقيقي
-- قدم 3-4 جمل من النصيحة الروحانية العملية
-- اربط حالته بحكمة قرآنية أو نبوية
-- اختم بدعاء قصير مناسب لحالته
-لا تجعل ردك طويلًا جدًا (6-8 جمل كافية).`;
-  }
-
-  if (type === 'dhikr') {
-    return `${baseIdentity}
-
-سياق المحادثة السابقة:
-${historyText}
-
-طلب المستخدم: "${userMessage}"
-
-قدم له:
-1. الذكر أو الدعاء المطلوب كاملًا بالتشكيل
-2. مصدره (القرآن / الحديث / كتب الأذكار)
-3. فضله وثوابه باختصار
-4. أفضل وقت لقوله إن كان له وقت محدد`;
-  }
-
-  // general
   return `${baseIdentity}
 
-سياق المحادثة السابقة:
-${historyText}
+نوع السؤال: ${type}
+سياق قصير:
+${historyText || 'لا يوجد سياق سابق.'}
 
-سؤال المستخدم: "${userMessage}"
+مصادر مسموح الاستناد إليها في هذه الإجابة:
+${sourceText || 'لا توجد مصادر كافية.'}
 
-أجب بأسلوب عالم إسلامي متفتح وودود:
-- قدم إجابة علمية دقيقة من منظور إسلامي
-- استشهد بالقرآن أو السنة عند الحاجة
-- إن كان السؤال غير إسلامي بالكامل، أجب بشكل مفيد مع ربطه بالقيم الإسلامية إن أمكن
-الرد في 5-8 جمل.`;
+سؤال المستخدم:
+${userMessage}
+
+قواعد الإجابة:
+- لا تخترع آية أو حديثًا أو مرجعًا.
+- لا تستخدم ألفاظ الجزم في الفتوى إذا لم تكن المصادر كافية.
+- اذكر الدليل المتاح بوضوح، أو قل إن الدليل غير كافٍ.
+- اختم بتوجيه لمراجعة أهل العلم عند الفتاوى والنوازل.
+- اجعل الرد عمليًا، رحيمًا، ومختصرًا في 5 إلى 8 جمل.`;
 }
 
-// ── Main chat action ─────────────────────────────────────────────────────────
+function fallbackFor(type: ChatResult['type'], verses: { text: string; reference: string }[], dhikr?: string[]): string {
+  if (type === 'fatwa') {
+    return 'لا أستطيع إصدار حكم شرعي مُلزِم بلا تحقق كامل من الأدلة وسياق الواقعة. إن كان السؤال متعلقًا بمعاملة أو أسرة أو عبادة بتفاصيل خاصة، فالأحوط عرضه على دار إفتاء أو عالم موثوق. يمكنك استخدام نتائج القرآن المعروضة هنا كبداية للتأمل لا كفتوى نهائية.';
+  }
+  if (type === 'spiritual') {
+    return 'أسأل الله أن يشرح صدرك وييسر أمرك. خذ بالأسباب الهادئة: صلاة ركعتين، ذكر قصير ثابت، والحديث مع شخص أمين إن كان الضيق شديدًا. تذكّر أن رحمة الله قريبة، وأن طلب المساعدة لا ينافي التوكل.';
+  }
+  if (type === 'dhikr') {
+    return `يمكنك البدء بهذه الأذكار بتدبر وهدوء:\n${(dhikr ?? DHIKR_MAP['عام']).map((item) => `• ${item}`).join('\n')}`;
+  }
+  return verses.length > 0
+    ? 'وجدت لك آيات ذات صلة يمكن أن تكون بداية للبحث والتدبر. إن كان السؤال يحتاج حكمًا تفصيليًا، فارجع لأهل العلم مع بيان تفاصيل الواقعة.'
+    : 'لم أجد مصدرًا كافيًا للإجابة بثقة. أعد صياغة السؤال بتفاصيل أو ابحث في أقسام القرآن والحديث داخل ZIKR.';
+}
+
 export async function sendChatMessage(
   userMessage: string,
   history: { role: 'user' | 'assistant'; content: string }[],
 ): Promise<ChatResult> {
-  if (!userMessage.trim()) {
-    return { message: 'يرجى كتابة رسالتك.', type: 'general', error: 'empty' };
+  const normalizedMessage = userMessage.trim().slice(0, 1200);
+  if (!normalizedMessage) {
+    return {
+      message: 'يرجى كتابة رسالتك.',
+      type: 'general',
+      confidence: 'low',
+      scholarNotice: SCHOLAR_NOTICE,
+      error: 'empty',
+    };
   }
 
-  const type = classifyQuestion(userMessage);
-  const emotion = detectEmotion(userMessage);
+  const type = classifyQuestion(normalizedMessage);
+  const emotion = detectEmotion(normalizedMessage);
+  const quranResults = await searchQuran(
+    emotion === 'عام' ? normalizedMessage.slice(0, 40) : emotion,
+    'ar',
+  ).catch(() => []);
 
-  // Fetch relevant Quran verses in parallel with AI generation
-  const [quranResults] = await Promise.allSettled([
-    searchQuran(emotion === 'عام' ? userMessage.slice(0, 20) : emotion, 'ar').catch(() => []),
-  ]);
-
-  const verses =
-    quranResults.status === 'fulfilled' && quranResults.value.length > 0
-      ? quranResults.value.slice(0, 2).map((v) => ({
-          text: v.text,
-          reference: `آية ${v.numberInSurah}`,
-        }))
-      : [];
-
+  const verses = quranResults.slice(0, 2).map((v) => ({
+    text: v.text,
+    reference: verseReference(v),
+  }));
   const dhikr = DHIKR_MAP[emotion] ?? DHIKR_MAP['عام'];
-  const prompt = buildPrompt(userMessage, history, type);
+  const citations = buildCitations(verses, type);
+  const prompt = buildPrompt(normalizedMessage, history, type, citations);
+  const confidence: ChatResult['confidence'] = verses.length > 0 ? 'medium' : 'low';
 
   try {
     const aiResponse = await generateGeminiText(prompt, 1500);
-
-    if (!aiResponse) {
-      // Graceful fallback without AI
-      const fallbacks: Record<string, string> = {
-        fatwa: 'لم أتمكن من الاتصال بالذكاء الاصطناعي حاليًا. للحصول على فتوى موثوقة، يُنصح بمراجعة دار الإفتاء أو الاستعانة بعالم متخصص. جزاك الله خيرًا على سؤالك.',
-        spiritual: 'اعلم أن الله مع الصابرين، وأن مع العسر يسرًا. استعن بالصلاة والذكر، فإن في ذكر الله تطمئن القلوب.',
-        dhikr: 'من أفضل الأذكار: سبحان الله وبحمده سبحان الله العظيم، والاستغفار، والصلاة على النبي صلى الله عليه وسلم.',
-        general: 'شكرًا لسؤالك. يمكنك البحث في قسم القرآن والأحاديث في المنصة للحصول على إجابات مفيدة.',
-      };
-      return {
-        message: fallbacks[type] ?? fallbacks.general,
-        type,
-        verses,
-        dhikr: type === 'spiritual' || type === 'dhikr' ? dhikr : undefined,
-      };
-    }
+    const message = aiResponse?.trim() || fallbackFor(type, verses, dhikr);
 
     return {
-      message: aiResponse,
+      message,
       type,
       verses: type !== 'dhikr' ? verses : undefined,
       dhikr: type === 'spiritual' || type === 'dhikr' ? dhikr : undefined,
+      citations,
+      confidence,
+      scholarNotice: SCHOLAR_NOTICE,
     };
   } catch {
     return {
-      message: 'حدث خطأ أثناء المعالجة. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.',
+      message: fallbackFor(type, verses, dhikr),
       type,
+      verses: type !== 'dhikr' ? verses : undefined,
+      dhikr: type === 'spiritual' || type === 'dhikr' ? dhikr : undefined,
+      citations,
+      confidence: 'low',
+      scholarNotice: SCHOLAR_NOTICE,
       error: 'server_error',
     };
   }

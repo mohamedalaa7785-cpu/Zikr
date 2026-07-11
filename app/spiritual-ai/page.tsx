@@ -29,10 +29,10 @@ type Message = {
 
 export default function SpiritualAIPage() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput]       = useState('');
+  const [input, setInput] = useState('');
   const [isPending, startTransition] = useTransition();
-  const bottomRef  = useRef<HTMLDivElement>(null);
-  const inputRef   = useRef<HTMLTextAreaElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -149,6 +149,35 @@ export default function SpiritualAIPage() {
                       ))}
                     </div>
                   )}
+
+                  {/* Trust and citation metadata */}
+                  {(msg.result?.citations?.length || msg.result?.scholarNotice) && (
+                    <div className="rounded-xl border border-brand-gold/15 bg-black/25 px-4 py-3 space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs text-brand-gold/80">المراجع والثقة</p>
+                        {msg.result?.confidence && (
+                          <span className="rounded-full border border-brand-gold/20 bg-brand-gold/10 px-3 py-0.5 text-[11px] text-brand-cream/70">
+                            الثقة: {msg.result.confidence === 'medium' ? 'متوسطة' : msg.result.confidence === 'high' ? 'عالية' : 'منخفضة'}
+                          </span>
+                        )}
+                      </div>
+                      {msg.result?.citations && msg.result.citations.length > 0 && (
+                        <ul className="space-y-2">
+                          {msg.result.citations.map((citation, ci) => (
+                            <li key={`${citation.reference}-${ci}`} className="text-xs leading-6 text-brand-cream/55">
+                              <span className="text-brand-gold/80">{citation.label}</span> — {citation.reference}
+                              <span className="block text-brand-cream/35 line-clamp-2">{citation.source}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {msg.result?.scholarNotice && (
+                        <p className="border-t border-white/10 pt-2 text-xs leading-6 text-brand-cream/45">
+                          {msg.result.scholarNotice}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -204,7 +233,7 @@ export default function SpiritualAIPage() {
             </Button>
           </div>
           <p className="text-xs text-brand-cream/20 text-center">
-            للفتاوى الرسمية الملزمة راجع دار الإفتاء المصرية أو علماء متخصصين
+            للإلزام والفتاوى الرسمية راجع دار الإفتاء أو علماء متخصصين
           </p>
         </Container>
       </div>
