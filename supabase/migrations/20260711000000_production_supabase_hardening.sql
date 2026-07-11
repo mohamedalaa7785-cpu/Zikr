@@ -138,6 +138,8 @@ END$$;
 
 -- Storage: ensure avatars bucket exists and writes are user-scoped.
 DO $$
+DECLARE
+  can_manage_storage_objects boolean := false;
 BEGIN
   IF to_regclass('storage.buckets') IS NOT NULL THEN
     INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -148,7 +150,14 @@ BEGIN
       allowed_mime_types = EXCLUDED.allowed_mime_types;
   END IF;
 
-  IF to_regclass('storage.objects') IS NOT NULL THEN
+  SELECT COALESCE(pg_has_role(c.relowner, 'MEMBER'), false)
+  INTO can_manage_storage_objects
+  FROM pg_class c
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'storage'
+    AND c.relname = 'objects';
+
+  IF can_manage_storage_objects THEN
     DROP POLICY IF EXISTS avatars_public_select ON storage.objects;
     DROP POLICY IF EXISTS avatars_authenticated_insert_own ON storage.objects;
     DROP POLICY IF EXISTS avatars_authenticated_update_own ON storage.objects;
@@ -169,5 +178,7 @@ BEGIN
       USING (bucket_id = 'avatars' AND (SELECT auth.uid())::text = (storage.foldername(name))[1]);
 
     CREATE INDEX IF NOT EXISTS storage_objects_bucket_name_idx ON storage.objects(bucket_id, name);
+  ELSIF to_regclass('storage.objects') IS NOT NULL THEN
+    RAISE NOTICE 'Skipping storage.objects policy/index changes because % is not the table owner', current_user;
   END IF;
 END$$;
