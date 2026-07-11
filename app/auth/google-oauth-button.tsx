@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import { buildOAuthRedirectUri } from '@/lib/auth-enhanced';
-import { getPublicEnv } from '@/lib/env';
 import { Button } from '@/components/ui/button';
 
 type GoogleOAuthButtonProps = {
@@ -28,13 +27,10 @@ export function GoogleOAuthButton({
           ? next
           : '/profile';
 
-      // Always prefer the configured NEXT_PUBLIC_SITE_URL so the redirect
-      // matches the allowed callback URLs registered in Supabase/Google Cloud.
-      // Fall back to window.location.origin only in local dev.
-      const { NEXT_PUBLIC_SITE_URL: siteUrlEnv } = getPublicEnv();
+      // Use the current origin so Supabase's PKCE verifier cookie is written
+      // and then read back on the same domain during /auth/callback.
       const siteUrl =
-        siteUrlEnv ||
-        (typeof window !== "undefined" ? window.location.origin : "");
+        typeof window !== 'undefined' ? window.location.origin : '';
 
       const redirectUri = buildOAuthRedirectUri(siteUrl, safeNext);
 
@@ -45,6 +41,7 @@ export function GoogleOAuthButton({
           provider: 'google',
           options: {
             redirectTo: redirectUri,
+            scopes: 'email profile',
           },
         });
 

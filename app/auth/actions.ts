@@ -1,7 +1,9 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getServerEnv } from '@/lib/env';
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 // Uses the @supabase/ssr server client so that session cookies are written in
@@ -33,14 +35,41 @@ export async function registerAction(formData: FormData) {
   const password = String(formData.get('password') || '');
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({ email, password });
+  const requestOrigin = (await headers()).get('origin');
+  const siteUrl = requestOrigin || getServerEnv().NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/callback?next=/profile`,
+    },
+  });
 
   if (error) {
     const msg = encodeURIComponent(error.message);
     redirect(`/auth/register?error=${msg}`);
   }
 
-  // Redirect to login with a confirmation notice
+  if (data.user && data.session) {
+    await supabase.from('profiles').upsert({
+      id: data.user.id,
+      email: data.user.email ?? email,
+      display_name:
+        typeof data.user.user_metadata?.full_name === 'string'
+          ? data.user.user_metadata.full_name
+          : null,
+      avatar_url:
+        typeof data.user.user_metadata?.avatar_url === 'string'
+          ? data.user.user_metadata.avatar_url
+          : null,
+      updated_at: new Date().toISOString(),
+    });
+
+    redirect('/profile');
+  }
+
+  // If email confirmation is enabled, the session is created after the user
+  // clicks the confirmation link, which points back to /profile.
   redirect('/auth/login?message=check_email');
 }
 

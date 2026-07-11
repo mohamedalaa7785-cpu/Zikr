@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
+import { extractNextPath } from '@/lib/auth-enhanced';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/profile';
+  const safePath = extractNextPath(searchParams);
 
   // Supabase may forward OAuth errors directly to the callback
   const oauthError = searchParams.get('error');
@@ -17,11 +18,25 @@ export async function GET(request: NextRequest) {
   if (code) {
     try {
       const supabase = await createClient();
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) {
-        // Ensure next is a safe relative path
-        const safePath =
-          next.startsWith('/') ? next : '/profile';
+        const user = data.user;
+        if (user) {
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            email: user.email,
+            display_name:
+              typeof user.user_metadata?.full_name === 'string'
+                ? user.user_metadata.full_name
+                : null,
+            avatar_url:
+              typeof user.user_metadata?.avatar_url === 'string'
+                ? user.user_metadata.avatar_url
+                : null,
+            updated_at: new Date().toISOString(),
+          });
+        }
+
         return NextResponse.redirect(`${origin}${safePath}`);
       }
       console.error('[auth/callback] exchangeCodeForSession error:', error.message);

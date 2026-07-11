@@ -213,10 +213,12 @@ export function extractNextPath(searchParams: URLSearchParams): string {
   // Validate next path to prevent open redirect
   if (!next) return "/profile";
 
+  if (!next.startsWith("/") || next.startsWith("//")) return "/profile";
+
   try {
     const url = new URL(next, "http://localhost");
-    // Only allow relative paths
-    if (url.pathname.startsWith("/")) {
+    // Only allow same-origin relative paths.
+    if (url.origin === "http://localhost" && url.pathname.startsWith("/")) {
       return url.pathname + url.search;
     }
   } catch {

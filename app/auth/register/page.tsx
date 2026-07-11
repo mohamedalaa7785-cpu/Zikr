@@ -9,9 +9,6 @@ import { registerAction } from '../actions';
 import { GoogleOAuthButton } from '../google-oauth-button';
 import { useSearchParams } from 'next/navigation';
 
-// Always show Google OAuth — GOOGLE_CLIENT_ID is resolved server-side via lib/env.ts.
-const GOOGLE_OAUTH_ENABLED = true;
-
 function RegisterForm() {
   const searchParams = useSearchParams();
   const [isClient, setIsClient] = useState(false);
