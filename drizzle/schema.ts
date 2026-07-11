@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 
 export const roleEnum = pgEnum("role", ["user", "admin"]);
@@ -38,6 +39,10 @@ export const categoryEnum = pgEnum("category", [
   "dark",
   "romantic",
   "psychological",
+  "prophets",
+  "sahaba",
+  "documentaries",
+  "history",
 ]);
 export const paymentStatusEnum = pgEnum("payment_status", [
   "pending",
@@ -487,14 +492,14 @@ export const scholars = pgTable("scholars", {
 export const stories = pgTable("stories", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
-  userId: uuid("user_id"),
+  userId: uuid("user_id").references(() => profiles.id, { onDelete: "set null" }),
   title: text("title").notNull(),
   summary: text("summary"),
   content: text("content").notNull(),
   mood: text("mood"),
-  category: text("category").notNull(),
+  category: categoryEnum("category").notNull().default("psychological"),
   published: boolean("published").default(true),
-  metadata: jsonb("metadata").default({}),
+  metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -1226,7 +1231,7 @@ export const savedStories = pgTable("saved_stories", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
     .notNull()
-    .references(() => legacyUsers.id),
+    .references(() => profiles.id),
   storyId: uuid("story_id")
     .notNull()
     .references(() => stories.id),
@@ -1237,7 +1242,7 @@ export const storyProgress = pgTable("story_progress", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
     .notNull()
-    .references(() => legacyUsers.id),
+    .references(() => profiles.id),
   storyId: uuid("story_id")
     .notNull()
     .references(() => stories.id),
