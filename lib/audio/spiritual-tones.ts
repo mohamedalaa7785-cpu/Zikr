@@ -84,7 +84,7 @@ export function playAzanTone(): void {
  * - Salawat: "الصلاة على النبي" recited by Sheikh Al-Minshawi.
  * These are streamed via HTMLAudioElement (no CORS requirement for playback).
  */
-export const AZAN_CLIP_URL = 'https://www.islamcan.com/audio/adhan/azan1.mp3';
+export const AZAN_CLIP_URL = '/audio/adhan/makkah.mp3';
 export const SALAWAT_CLIP_URL = 'https://archive.org/download/salawat-menshawy/salawat-menshawy.mp3';
 
 let azanEl: HTMLAudioElement | null = null;
