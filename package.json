@@ -10,8 +10,9 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "db:migrate:supabase": "pnpm dlx supabase db push",
-    "lint": "pnpm check",
-    "deploy:check": "node scripts/validate-deployment-env.mjs"
+    "lint": "eslint .",
+    "deploy:check": "node scripts/validate-deployment-env.mjs",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

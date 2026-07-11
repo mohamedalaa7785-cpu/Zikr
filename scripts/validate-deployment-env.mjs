@@ -52,6 +52,20 @@ function addResult(status, label, detail) {
   results.push({ status, label, detail });
 }
 
+function isSupabaseAuthCallback(value) {
+  if (!value) return false;
+
+  try {
+    const url = new URL(value);
+    return (
+      url.hostname.endsWith(".supabase.co") &&
+      url.pathname === "/auth/v1/callback"
+    );
+  } catch {
+    return false;
+  }
+}
+
 function getEnv(name) {
   const aliases = {
     NEXT_PUBLIC_SUPABASE_URL: ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"],
@@ -70,7 +84,18 @@ function getEnv(name) {
 
   for (const key of aliases[name] || [name]) {
     const value = process.env[key]?.trim();
-    if (value) return value;
+    if (!value) continue;
+
+    if (name === "AUTH_CALLBACK_URL" && isSupabaseAuthCallback(value)) {
+      continue;
+    }
+
+    return value;
+  }
+
+  if (name === "AUTH_CALLBACK_URL") {
+    const siteUrl = getEnv("NEXT_PUBLIC_SITE_URL");
+    if (siteUrl) return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
   }
 
   return undefined;
