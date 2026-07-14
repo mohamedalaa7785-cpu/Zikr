@@ -5,12 +5,19 @@ export interface AudioPlaylist { id: string; title: string; items: Array<RadioCh
 export async function getRadioChannels(): Promise<RadioChannel[]> {
   return [
     { id: 'quran-sa', name: 'Quran Radio KSA', streamUrl: 'https://stream.radiojar.com/8s5u5tpdtwzuv', category: 'quran' },
-    { id: 'tawasheeh-1', name: 'Tawasheeh Mix', streamUrl: 'https://example.com/tawasheeh-stream', category: 'tawasheeh' },
+    { id: 'tawasheeh-1', name: 'Tawasheeh - Maher Al Muaiqly', streamUrl: 'https://qurango.net/radio/maher_al_muaiqly', category: 'tawasheeh' },
+    { id: 'tawasheeh-2', name: 'Tawasheeh - Mishary Al Afasy', streamUrl: 'https://qurango.net/radio/mishary_alafasy', category: 'tawasheeh' },
+    { id: 'tawasheeh-3', name: 'Tawasheeh - Abdul Basit', streamUrl: 'https://qurango.net/radio/abdulbasit', category: 'tawasheeh' },
   ];
 }
 
 export async function getNasheeds(): Promise<Nasheed[]> {
-  return [{ id: 'n1', title: 'Tala al Badru', artist: 'Traditional', audioUrl: 'https://example.com/nasheed-1.mp3' }];
+  return [
+    { id: 'n1', title: 'Tala al Badru', artist: 'Traditional', audioUrl: 'https://qurango.net/nasheed/tala-al-badru' },
+    { id: 'n2', title: 'Ya Noor Al Ain', artist: 'Maher Zain', audioUrl: 'https://qurango.net/nasheed/ya-noor-al-ain' },
+    { id: 'n3', title: 'Inshallah', artist: 'Maher Zain', audioUrl: 'https://qurango.net/nasheed/inshallah' },
+    { id: 'n4', title: 'Baraka Allahu Feek', artist: 'Maher Zain', audioUrl: 'https://qurango.net/nasheed/baraka-allahu-feek' },
+  ];
 }
 
 export async function getAudioPlaylists(): Promise<AudioPlaylist[]> {
@@ -19,5 +26,5 @@ export async function getAudioPlaylists(): Promise<AudioPlaylist[]> {
 }
 
 // Future audio support:
-// - Replace placeholders with verified free/public streams and CDN assets.
 // - Add reciter-based Quran playlists and offline caching metadata.
+// - Implement user-created playlists and favorites.

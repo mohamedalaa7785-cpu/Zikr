@@ -1,6 +1,10 @@
+ codex/fix-google-login-to-open-profile-5i6owf
 import { createServerClient } from '@supabase/ssr';
 import { extractNextPath } from '@/lib/auth-enhanced';
 import { getServerEnv } from '@/lib/env';
+import { createClient } from '@/lib/supabase/server';
+import { extractNextPath } from '@/lib/auth-enhanced';
+ Zikr
 import { NextRequest, NextResponse } from 'next/server';
 
 function redirectWithAuthCookies(
@@ -26,6 +30,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth/login?error=${msg}`);
   }
 
+ codex/fix-google-login-to-open-profile-5i6owf
   if (!code) {
     return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_failed`);
   }
@@ -52,6 +57,30 @@ export async function GET(request: NextRequest) {
             });
           },
         },
+  if (code) {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      if (!error) {
+        const user = data.user;
+        if (user) {
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            email: user.email,
+            display_name:
+              typeof user.user_metadata?.full_name === 'string'
+                ? user.user_metadata.full_name
+                : null,
+            avatar_url:
+              typeof user.user_metadata?.avatar_url === 'string'
+                ? user.user_metadata.avatar_url
+                : null,
+            updated_at: new Date().toISOString(),
+          });
+        }
+
+        return NextResponse.redirect(`${origin}${safePath}`);
+Zikr
       }
     );
 

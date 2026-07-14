@@ -4,7 +4,10 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getServerEnv } from '@/lib/env';
+ codex/fix-google-login-to-open-profile-5i6owf
 import { buildOAuthRedirectUri, extractNextPath } from '@/lib/auth-enhanced';
+
+ Zikr
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 // Uses the @supabase/ssr server client so that session cookies are written in
