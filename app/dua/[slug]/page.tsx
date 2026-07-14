@@ -43,18 +43,21 @@ export default function DuaDetailPage() {
           .limit(1)
           .single();
         setDua(data ?? null);
-      } catch {
+      } catch (error) {
+        console.error('Failed to fetch dua:', error);
         setDua(null);
       } finally {
         setLoading(false);
       }
     };
-    fetchDua();
-  }, [slug]);
+    void fetchDua();
+  }, [slug, supabase]);
 
   const copyToClipboard = () => {
     if (dua) {
-      navigator.clipboard.writeText(dua.text_ar);
+      navigator.clipboard.writeText(dua.text_ar).catch((error) => {
+        console.error('Failed to copy:', error);
+      });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

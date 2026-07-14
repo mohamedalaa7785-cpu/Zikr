@@ -1,6 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
+import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container } from '@/components/ui/container';
@@ -152,7 +153,7 @@ export default function KidsDetailPage() {
 
       {content.featured_image_url && (
         <div className="w-full h-96 rounded-lg overflow-hidden">
-          <img src={content.featured_image_url} alt={content.title_ar} className="w-full h-full object-cover" />
+          <Image src={content.featured_image_url} alt={content.title_ar} width={800} height={600} className="w-full h-full object-cover" />
         </div>
       )}
 

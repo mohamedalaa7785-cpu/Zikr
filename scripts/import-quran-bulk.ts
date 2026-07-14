@@ -47,7 +47,7 @@ async function main() {
     `;
 
     // Prepare Ayahs for bulk insert
-    const ayahsData = surah.ayahs.map((ayah: any) => {
+    const ayahsData = surah.ayahs.map((ayah: Record<string, unknown>) => {
       const mapped = {
         surah_id: surah.number || 0,
         ayah_number: ayah.numberInSurah || 0,

@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+import Image from 'next/image';
 
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
@@ -86,9 +87,7 @@ export default async function KidsPage() {
                   <Card className="h-full overflow-hidden hover:border-brand-gold/50 transition-colors cursor-pointer flex flex-col">
                     {item.featured_image_url && (
                       <div className="w-full h-40 bg-brand-gold/10 overflow-hidden">
-                        <img
-                          src={item.featured_image_url}
-                          alt={item.title_ar}
+                        <Image src={item.featured_image_url} alt={item.title_ar} width={800} height={600}
                           className="w-full h-full object-cover hover:scale-105 transition-transform"
                         />
                       </div>

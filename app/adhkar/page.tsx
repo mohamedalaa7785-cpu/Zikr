@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -85,7 +85,8 @@ export default function AdhkarPage() {
 
   // Load persisted counters on mount
   useEffect(() => {
-    setCounters(loadCounters());
+    const loaded = loadCounters();
+    setCounters(loaded);
   }, []);
 
   // Persist whenever counters change

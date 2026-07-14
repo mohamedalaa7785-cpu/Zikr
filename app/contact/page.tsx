@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, MessageCircle, Youtube, Facebook, Instagram, Twitter, Send, CheckCircle } from 'lucide-react';
+import { Mail, MessageCircle, Youtube, Facebook, Send, CheckCircle } from 'lucide-react';
 
 const contactChannels = [
   { icon: Mail, label: 'البريد الإلكتروني', value: 'info@zikr.app', href: 'mailto:info@zikr.app', color: 'text-sky-400' },

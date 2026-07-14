@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
-import { Card } from '@/components/ui/card';
 import { pageMetadata } from '@/lib/site';
 import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 

@@ -9,7 +9,6 @@ import {
   type DbSurah,
   type DbAyah,
   type DbReciter,
-  type DbTafsir,
   type Locale
 } from "./quran";
 

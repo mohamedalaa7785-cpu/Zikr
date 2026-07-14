@@ -15,7 +15,7 @@ async function main() {
   const surah = data.data.surahs[0];
   console.log(`Processing Surah ${surah.number}: ${surah.name}`);
 
-  const ayahsData = surah.ayahs.map((ayah: any) => {
+  const ayahsData = surah.ayahs.map((ayah: Record<string, unknown>) => {
     const mapped = {
       surah_id: surah.number || 0,
       ayah_number: ayah.numberInSurah || 0,

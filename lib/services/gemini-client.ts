@@ -52,8 +52,8 @@ function getNextApiKey(): string | null {
   return key;
 }
 
-function getDirectModel(key: string): string {
-  return process.env.GEMINI_MODEL?.replace(/^google\//, '') ?? 'gemini-2.5-flash';
+function getDirectModel(): string {
+  return process.env.GEMINI_MODEL?.replace(/^google\\/, '') ?? 'gemini-2.5-flash';
 }
 
 // BLOCK_ONLY_HIGH exists at runtime but some TS type versions omit it — cast
@@ -80,7 +80,7 @@ async function callDirectSdk(prompt: string, maxOutputTokens = 1500): Promise<st
     if (!key) break;
     try {
       const client = new GoogleGenerativeAI(key);
-      const modelId = getDirectModel(key);
+      const modelId = getDirectModel();
       const model = client.getGenerativeModel({
         model: modelId,
         safetySettings,
@@ -147,7 +147,7 @@ export async function* streamGeminiText(prompt: string): AsyncGenerator<string, 
   try {
     const client = new GoogleGenerativeAI(key);
     const model = client.getGenerativeModel({
-      model: getDirectModel(key),
+      model: getDirectModel(),
       safetySettings,
       generationConfig,
     });
@@ -171,7 +171,7 @@ export async function generateGeminiFromAudio(
     try {
       const client = new GoogleGenerativeAI(key);
       const model = client.getGenerativeModel({
-        model: getDirectModel(key),
+        model: getDirectModel(),
         safetySettings,
         generationConfig: { ...generationConfig, maxOutputTokens: 2000 },
       });

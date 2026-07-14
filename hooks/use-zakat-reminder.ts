@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'zikr_zakat_reminder';
 
@@ -85,10 +85,7 @@ export interface ZakatReminderReturn {
 }
 
 export function useZakatReminder(): ZakatReminderReturn {
-  const [settings, setSettings] = useState<ZakatSettings>(DEFAULT_SETTINGS);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
+  const [settings, setSettings] = useState<ZakatSettings>(() => {
     const s = load();
     // Roll a past due date forward so the reminder recurs yearly.
     if (s.dueDate) {
@@ -98,7 +95,11 @@ export function useZakatReminder(): ZakatReminderReturn {
         save(s);
       }
     }
-    setSettings(s);
+    return s;
+  });
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
     setLoaded(true);
   }, []);
 

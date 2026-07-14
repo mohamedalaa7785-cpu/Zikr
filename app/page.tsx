@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { getPrayerTimes, getPrayerTimesByCity } from '@/lib/services/prayer-times';
 import type { PrayerTimes } from '@/lib/types/prayer';
@@ -250,30 +249,34 @@ export default function HomePage() {
   const [prayerCity, setPrayerCity] = useState('Cairo');
   const [cityInput, setCityInput] = useState('');
   const [loadingPrayer, setLoadingPrayer] = useState(false);
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [activePrayer, setActivePrayer] = useState('');
   const [nextPrayer, setNextPrayer] = useState('');
+  const currentTimeRef = useRef<Date>(new Date());
+  const [, setUpdateTrigger] = useState(0);
 
   useEffect(() => {
-    setCurrentTime(new Date());
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    currentTimeRef.current = new Date();
+    const interval = setInterval(() => {
+      currentTimeRef.current = new Date();
+      setUpdateTrigger(prev => prev + 1);
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (prayerTimes && currentTime) {
-      const { active, next } = getActivePrayer(prayerTimes, currentTime);
+    if (prayerTimes && currentTimeRef.current) {
+      const { active, next } = getActivePrayer(prayerTimes, currentTimeRef.current);
       setActivePrayer(active);
       setNextPrayer(next);
     }
-  }, [currentTime, prayerTimes]);
+  }, [prayerTimes]);
 
   const fetchPrayerByCity = useCallback(async (city: string) => {
     setLoadingPrayer(true);
     try {
       const res = await getPrayerTimesByCity(city, 'Egypt');
       if (res?.data?.timings) setPrayerTimes(res.data.timings as PrayerTimes);
-    } catch { /* silent */ } finally { setLoadingPrayer(false); }
+    } catch (error) { console.error('Prayer fetch error:', error); } finally { setLoadingPrayer(false); }
   }, []);
 
   useEffect(() => {
@@ -288,16 +291,17 @@ export default function HomePage() {
         } catch { await fetchPrayerByCity(prayerCity); }
         finally { setLoadingPrayer(false); }
       },
-      async () => { await fetchPrayerByCity(prayerCity); },
+      async () => { void fetchPrayerByCity(prayerCity); },
       { timeout: 6000 },
     );
-  }, [prayerCity, fetchPrayerByCity]);
+  }, [prayerCity, fetchPrayerByCity, prayerTimes]);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   }, [searchQuery, router]);
 
+  const currentTime = currentTimeRef.current;
   const timeStr = currentTime
     ? currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
     : null;

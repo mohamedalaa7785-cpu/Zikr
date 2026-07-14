@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { requireAdmin } from '@/lib/services/admin';
 
 // ─── Full site sections list ──────────────────────────────────────────────────
 const ALL_SECTIONS = [

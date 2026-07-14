@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { VideoGenerationRequest } from '@/lib/services/video-automation';
+import { requireAdmin } from '@/lib/services/admin';
 
 interface CreateFormState {
   title: string;
@@ -33,10 +34,6 @@ export default function AdminVideosPage() {
     category: 'quran',
     content: '',
   });
-
-  useEffect(() => {
-    loadRequests();
-  }, []);
 
   const loadRequests = async () => {
     try {
@@ -84,7 +81,7 @@ export default function AdminVideosPage() {
       alert('تم إنشاء الفيديو بنجاح');
       setCreateForm({ title: '', description: '', category: 'quran', content: '' });
       setShowCreateForm(false);
-      loadRequests();
+      void loadRequests();
     } catch (error) {
       console.error('Failed to create video:', error);
       alert('فشل إنشاء الفيديو');
@@ -92,6 +89,10 @@ export default function AdminVideosPage() {
       setCreateLoading(false);
     }
   };
+
+  useEffect(() => {
+    void loadRequests();
+  }, []);
 
   const filteredRequests = filter === 'all' 
     ? requests 

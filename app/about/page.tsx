@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
-import { pageMetadata, siteConfig } from '@/lib/site';
+import { pageMetadata } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata({
   title: 'عن منصة ذِكرٌ',

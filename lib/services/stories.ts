@@ -132,7 +132,7 @@ export async function getStories(limit = 100): Promise<Story[]> {
         { cache: "force-cache", next: { revalidate: 1800 } }
       );
     } catch (summaryError) {
-      console.warn("[stories] Summary column may not exist, trying without it");
+      console.warn("[stories] Summary column may not exist, trying without it:", summaryError);
       response = await supabaseServerAnonRequest<StoryRow[]>(
         `/rest/v1/stories?select=id,slug,title,category,published,created_at,updated_at&published=eq.true&limit=${limit}&order=created_at.desc`,
         { cache: "force-cache", next: { revalidate: 1800 } }

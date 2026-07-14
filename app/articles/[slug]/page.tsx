@@ -1,6 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container } from '@/components/ui/container';
@@ -100,8 +101,10 @@ export default function ArticleDetailPage() {
     <Container className="py-12 space-y-8 max-w-3xl">
       {article.featured_image_url && (
         <div className="w-full h-96 rounded-lg overflow-hidden">
-          <img
+          <Image
             src={article.featured_image_url}
+            width={800}
+            height={384}
             alt={article.title}
             className="w-full h-full object-cover"
           />

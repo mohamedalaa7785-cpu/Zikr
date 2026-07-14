@@ -1,7 +1,7 @@
 declare module '@google/generative-ai' {
   export class GoogleGenerativeAI {
     constructor(apiKey: string);
-    getGenerativeModel(config: any): {
+    getGenerativeModel(config: Record<string, unknown>): {
       generateContent(prompt: string): Promise<{ response: { text(): string } }>;
       generateContentStream(prompt: string): Promise<{ stream: AsyncIterable<{ text(): string }> }>;
     };

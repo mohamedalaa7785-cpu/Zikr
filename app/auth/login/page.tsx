@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
@@ -30,11 +30,15 @@ function LoginForm() {
 
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
     const errorParam = searchParams.get('error');
     const msgParam = searchParams.get('message');
     if (errorParam) setError(decodeURIComponent(errorParam));
     if (msgParam) setMessage(MESSAGE_MAP[msgParam] ?? decodeURIComponent(msgParam));
-  }, [searchParams]);
+  }, [searchParams, isClient]);
 
   if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
 
