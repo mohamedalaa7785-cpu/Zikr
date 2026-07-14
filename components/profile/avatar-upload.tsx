@@ -56,8 +56,7 @@ export function AvatarUpload({ currentAvatarUrl, displayName, email }: AvatarUpl
         className="relative group h-24 w-24 rounded-full overflow-hidden ring-2 ring-brand-gold/30 focus:outline-none focus:ring-brand-gold transition-all"
       >
         {preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="صورة المستخدم" className="h-full w-full object-cover" />
+           <img src={preview} alt="صورة المستخدم" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-black/20 text-3xl text-brand-gold/50">
             {initial}

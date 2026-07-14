@@ -1,7 +1,10 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getServerEnv } from '@/lib/env';
+import { buildOAuthRedirectUri, extractNextPath } from '@/lib/auth-enhanced';
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 // Uses the @supabase/ssr server client so that session cookies are written in
@@ -27,20 +30,77 @@ export async function loginAction(formData: FormData) {
   redirect(next);
 }
 
+
+// ─── Google OAuth ─────────────────────────────────────────────────────────────
+export async function googleOAuthAction(formData: FormData) {
+  const rawNext = String(formData.get('next') || '/profile');
+  const next = extractNextPath(new URLSearchParams({ next: rawNext }));
+  const requestOrigin = (await headers()).get('origin');
+  const siteUrl = requestOrigin || getServerEnv().NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const redirectTo = buildOAuthRedirectUri(siteUrl, next);
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo,
+      scopes: 'email profile',
+    },
+  });
+
+  if (error) {
+    const msg = encodeURIComponent(error.message || 'تعذر تسجيل الدخول عبر Google. حاول مرة أخرى.');
+    redirect(`/auth/login?error=${msg}`);
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+
+  redirect('/auth/login?error=oauth_url_missing');
+}
+
 // ─── Register ─────────────────────────────────────────────────────────────────
 export async function registerAction(formData: FormData) {
   const email = String(formData.get('email') || '');
   const password = String(formData.get('password') || '');
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({ email, password });
+  const requestOrigin = (await headers()).get('origin');
+  const siteUrl = requestOrigin || getServerEnv().NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/callback?next=/profile`,
+    },
+  });
 
   if (error) {
     const msg = encodeURIComponent(error.message);
     redirect(`/auth/register?error=${msg}`);
   }
 
-  // Redirect to login with a confirmation notice
+  if (data.user && data.session) {
+    await supabase.from('profiles').upsert({
+      id: data.user.id,
+      email: data.user.email ?? email,
+      display_name:
+        typeof data.user.user_metadata?.full_name === 'string'
+          ? data.user.user_metadata.full_name
+          : null,
+      avatar_url:
+        typeof data.user.user_metadata?.avatar_url === 'string'
+          ? data.user.user_metadata.avatar_url
+          : null,
+      updated_at: new Date().toISOString(),
+    });
+
+    redirect('/profile');
+  }
+
+  // If email confirmation is enabled, the session is created after the user
+  // clicks the confirmation link, which points back to /profile.
   redirect('/auth/login?message=check_email');
 }
 
