@@ -118,7 +118,7 @@ export async function getAllSurahs(locale: Locale = "ar"): Promise<Surah[]> {
       ? response.data.map(surah => ({ ...surah, name: surah.englishName }))
       : response.data;
   } catch (error) {
-    console.error("[quran-service] Failed to fetch surahs, using fallback:", error);
+    debugLog("getAllSurahs using bundled fallback", error);
     return fallbackSurahs.map(s => ({
       number: s.id,
       name: locale === "en" ? s.nameEn : s.nameAr,

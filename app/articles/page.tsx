@@ -171,7 +171,6 @@ export default async function ArticlesPage() {
               <Card className="h-full flex flex-col hover:border-brand-gold/50 transition-colors cursor-pointer">
                 {article.featured_image_url ? (
                   <div className="w-full h-40 bg-brand-gold/10 rounded-t-xl overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={article.featured_image_url}
                       alt={article.title}
