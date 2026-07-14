@@ -24,7 +24,6 @@ async function QuranContent() {
     
     // Fallback to API if DB is empty/fails
     if (!surahs || surahs.length === 0) {
-      console.info('[quran-page] DB unavailable, falling back to external API');
       surahs = await getAllSurahs('ar');
     }
 

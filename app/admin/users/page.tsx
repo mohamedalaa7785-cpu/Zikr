@@ -85,8 +85,7 @@ export default async function AdminUsersPage() {
                     <td className='px-4 py-3'>
                       <div className='flex items-center gap-2'>
                         {user.avatar_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                           <img
                             src={user.avatar_url}
                             alt=''
                             className='h-8 w-8 rounded-full object-cover ring-1 ring-brand-gold/20'

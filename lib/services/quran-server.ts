@@ -1,6 +1,7 @@
 'use server';
 
 import { supabaseServerAnonRequest } from "@/lib/supabase/server";
+import { getServerEnv } from "@/lib/env";
 import type { Surah, Ayah, Reciter } from "@/lib/types/quran";
 import { 
   mapDbSurah, 
@@ -18,7 +19,14 @@ import {
  * This module interacts directly with Supabase REST API.
  */
 
+function hasSupabaseReadEnv() {
+  const env = getServerEnv();
+  return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
 export async function getAllSurahsFromDb(locale: Locale = "ar"): Promise<Surah[] | null> {
+  if (!hasSupabaseReadEnv()) return null;
+
   try {
     const dbSurahs = await supabaseServerAnonRequest<DbSurah[]>(
       "/rest/v1/quran_surahs?select=id,name_ar,name_en,name_translation,revelation_place,ayahs_count&order=id.asc"
@@ -36,6 +44,8 @@ export async function getSurahFromDb(
   surahId: number, 
   locale: Locale = "ar"
 ): Promise<{ surah: Surah; ayahs: Ayah[] } | null> {
+  if (!hasSupabaseReadEnv()) return null;
+
   try {
     // 1. Get Surah Metadata
     const dbSurahs = await supabaseServerAnonRequest<DbSurah[]>(
@@ -64,6 +74,8 @@ export async function getAyahFromDb(
   ayahNumber: number,
   locale: Locale = "ar"
 ): Promise<Ayah | null> {
+  if (!hasSupabaseReadEnv()) return null;
+
   try {
     const result = await supabaseServerAnonRequest<DbAyah[]>(
       `/rest/v1/quran_ayahs?surah_id=eq.${surahId}&ayah_number=eq.${ayahNumber}&limit=1&select=id,surah_id,ayah_number,text_ar,text_en,text_uthmani,text_simple,page,juz,hizb,rub,sajda`
@@ -81,6 +93,8 @@ export async function getTafsirFromDb(
   surahId: number,
   ayahNumber: number
 ): Promise<string | null> {
+  if (!hasSupabaseReadEnv()) return null;
+
   try {
     // Note: Column name is tafsir_ar in DB
     const result = await supabaseServerAnonRequest<Array<{ tafsir_ar: string }>>(
@@ -94,6 +108,8 @@ export async function getTafsirFromDb(
 }
 
 export async function getRecitersFromDb(): Promise<Reciter[] | null> {
+  if (!hasSupabaseReadEnv()) return null;
+
   try {
     const dbReciters = await supabaseServerAnonRequest<DbReciter[]>(
       "/rest/v1/quran_reciters?select=id,code,name_ar,name_en,base_url_template&order=name_en.asc"
