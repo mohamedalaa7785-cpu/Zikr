@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { supabaseServerAdminRequest } from '@/lib/supabase/server';
 
 export interface ArticleCategory {
@@ -246,15 +245,15 @@ export async function getDuas(categoryId?: string, limit = 50): Promise<Dua[]> {
   
   return rows.map(r => ({
     id: r.id as string,
-    titleAr: r.title_ar as string | undefined,
-    titleEn: r.title_en as string | undefined,
+    titleAr: r.title_ar as string,
+    titleEn: r.title_en as string,
     slug: r.slug as string,
-    textAr: r.text_ar as string | undefined,
+    textAr: r.text_ar as string,
     occasionAr: r.occasion_ar as string | undefined,
     sourceAr: r.source_ar as string | undefined,
     benefitsAr: r.benefits_ar as string | undefined,
     categoryId: r.category_id as string | undefined,
-    published: r.published as string | undefined
+    published: r.published as boolean
   }));
 }
 
@@ -268,16 +267,16 @@ export async function getDuaBySlug(slug: string): Promise<Dua | null> {
   
   return {
     id: r.id as string,
-    titleAr: r.title_ar as string | undefined,
-    titleEn: r.title_en as string | undefined,
+    titleAr: r.title_ar as string,
+    titleEn: r.title_en as string,
     slug: r.slug as string,
-    textAr: r.text_ar as string | undefined,
+    textAr: r.text_ar as string,
     textEn: r.text_en as string | undefined,
     occasionAr: r.occasion_ar as string | undefined,
     sourceAr: r.source_ar as string | undefined,
     benefitsAr: r.benefits_ar as string | undefined,
     categoryId: r.category_id as string | undefined,
-    published: r.published as string | undefined
+    published: r.published as boolean
   };
 }
 
@@ -310,8 +309,8 @@ export async function getProphets(): Promise<Prophet[]> {
     bioAr: r.bio_ar as string | undefined,
     featuredImageUrl: r.featured_image_url as string | undefined,
     thumbnailUrl: r.thumbnail_url as string | undefined,
-    orderNum: r.order_num as string | undefined,
-    published: r.published as string | undefined
+    orderNum: r.order_num as number | undefined,
+    published: r.published as boolean
   }));
 }
 
@@ -331,17 +330,17 @@ export async function getProphetBySlug(slug: string): Promise<Prophet | null> {
     bioAr: r.bio_ar as string | undefined,
     featuredImageUrl: r.featured_image_url as string | undefined,
     thumbnailUrl: r.thumbnail_url as string | undefined,
-    orderNum: r.order_num as string | undefined,
-    published: r.published as string | undefined
+    orderNum: r.order_num as number | undefined,
+    published: r.published as boolean
   };
 }
 
 // Prophet Sections
 export interface ProphetSection {
   id: string;
-  titleAr: string;
+  titleAr?: string;
   titleEn?: string;
-  contentAr: string;
+  contentAr?: string;
   contentEn?: string;
   sectionType?: string;
   orderNum?: number;
@@ -362,17 +361,17 @@ export async function getProphetSections(prophetId: string): Promise<ProphetSect
     contentAr: r.content_ar as string | undefined,
     contentEn: r.content_en as string | undefined,
     sectionType: r.section_type as string | undefined,
-    orderNum: r.order_num as string | undefined
+    orderNum: r.order_num as number | undefined
   }));
 }
 
 // Kids Content
 export interface KidsContent {
   id: string;
-  titleAr: string;
+  titleAr?: string;
   slug: string;
-  type: 'story' | 'prayer' | 'wudu' | 'quiz' | 'game' | 'video';
-  ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
+  type?: string;
+  ageGroup?: string;
   featuredImageUrl?: string;
   contentAr?: string;
   videoUrl?: string;
@@ -408,7 +407,7 @@ export async function getKidsContent(ageGroup?: string, type?: string, limit = 5
     featuredImageUrl: r.featured_image_url as string | undefined,
     contentAr: r.content_ar as string | undefined,
     videoUrl: r.video_url as string | undefined,
-    quiz_data: r.quiz_data as string | undefined,
+    quiz_data: r.quiz_data as Record<string, unknown> | undefined,
     published: r.published as boolean,
     createdAt: r.created_at as string
   }));
@@ -418,7 +417,7 @@ export async function getKidsContent(ageGroup?: string, type?: string, limit = 5
 export interface Battle {
   id: string;
   slug: string;
-  name_ar: string;
+  name_ar?: string;
   published: boolean;
 }
 
@@ -452,7 +451,7 @@ export async function getKidsContentBySlug(slug: string): Promise<KidsContent | 
     featuredImageUrl: r.featured_image_url as string | undefined,
     contentAr: r.content_ar as string | undefined,
     videoUrl: r.video_url as string | undefined,
-    quiz_data: r.quiz_data as string | undefined,
+    quiz_data: r.quiz_data as Record<string, unknown> | undefined,
     published: r.published as boolean,
     createdAt: r.created_at as string
   };

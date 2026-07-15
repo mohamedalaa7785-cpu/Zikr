@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
@@ -29,22 +30,7 @@ export default async function FavoritesPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return (
-      <Container className="py-16">
-        <Card className="text-center space-y-4 py-8">
-          <h1 className="text-3xl font-bold text-brand-gold">المفضلة</h1>
-          <p className="arabic-muted max-w-md mx-auto leading-7">
-            سجّل الدخول لحفظ الآيات والأحاديث والقصص المفضلة لديك والوصول إليها في أي وقت.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Button href="/auth/login?next=/favorites">تسجيل الدخول</Button>
-            <Button href="/auth/register" variant="secondary">إنشاء حساب</Button>
-          </div>
-        </Card>
-      </Container>
-    );
-  }
+  if (!user) redirect('/auth/login?next=/favorites');
 
   const { data: favorites } = await supabase
     .from('favorites')

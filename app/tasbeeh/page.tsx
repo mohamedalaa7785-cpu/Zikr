@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,19 @@ export default function TasbeehPage() {
   const [items, setItems] = useState<TasbeehItem[]>(DEFAULT_TASBEEH_ITEMS);
   const [totalCount, setTotalCount] = useState(0);
 
+  const resetToDefaults = useCallback(() => {
+    switch (tab) {
+      case 'morning':
+        setItems(MORNING_ADHKAR);
+        break;
+      case 'evening':
+        setItems(EVENING_ADHKAR);
+        break;
+      default:
+        setItems(DEFAULT_TASBEEH_ITEMS);
+    }
+  }, [tab]);
+
   // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem(`tasbeeh_${tab}`);
@@ -35,26 +48,13 @@ export default function TasbeehPage() {
     } else {
       resetToDefaults();
     }
-  }, [tab]);
+  }, [tab, resetToDefaults]);
 
   // Save to localStorage
   useEffect(() => {
     localStorage.setItem(`tasbeeh_${tab}`, JSON.stringify(items));
     setTotalCount(calculateTotalCount(items));
   }, [items, tab]);
-
-  const resetToDefaults = () => {
-    switch (tab) {
-      case 'morning':
-        setItems(MORNING_ADHKAR);
-        break;
-      case 'evening':
-        setItems(EVENING_ADHKAR);
-        break;
-      default:
-        setItems(DEFAULT_TASBEEH_ITEMS);
-    }
-  };
 
   const handleIncrement = (index: number) => {
     const newItems = [...items];
@@ -216,7 +216,7 @@ export default function TasbeehPage() {
         <h3 className="text-lg font-bold text-brand-gold">نصائح</h3>
         <ul className="space-y-2 text-brand-cream/80 text-sm">
           <li>• استخدم هذا العداد لتتبع أذكارك اليومية</li>
-          <li>• ��تم حفظ عددك تلقائياً في متصفحك</li>
+          <li>• يتم حفظ عددك تلقائياً في متصفحك</li>
           <li>• يمكنك إعادة تعيين العد في أي وقت</li>
           <li>• استمر في الأذكار بنية صادقة وقلب خاشع</li>
         </ul>

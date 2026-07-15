@@ -251,25 +251,22 @@ export default function HomePage() {
   const [loadingPrayer, setLoadingPrayer] = useState(false);
   const [activePrayer, setActivePrayer] = useState('');
   const [nextPrayer, setNextPrayer] = useState('');
-  const currentTimeRef = useRef<Date>(new Date());
-  const [, setUpdateTrigger] = useState(0);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   useEffect(() => {
-    currentTimeRef.current = new Date();
     const interval = setInterval(() => {
-      currentTimeRef.current = new Date();
-      setUpdateTrigger(prev => prev + 1);
+      setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (prayerTimes && currentTimeRef.current) {
-      const { active, next } = getActivePrayer(prayerTimes, currentTimeRef.current);
+    if (prayerTimes) {
+      const { active, next } = getActivePrayer(prayerTimes, currentTime);
       setActivePrayer(active);
       setNextPrayer(next);
     }
-  }, [prayerTimes]);
+  }, [prayerTimes, currentTime]);
 
   const fetchPrayerByCity = useCallback(async (city: string) => {
     setLoadingPrayer(true);
@@ -301,13 +298,18 @@ export default function HomePage() {
     if (searchQuery.trim()) router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   }, [searchQuery, router]);
 
-  const currentTime = currentTimeRef.current;
-  const timeStr = currentTime
-    ? currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
-    : null;
-  const dateStr = currentTime
-    ? currentTime.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    : null;
+  const timeStr = currentTime.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  const dateStr = currentTime.toLocaleDateString('ar-EG', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <div className="min-h-screen bg-brand-emeraldDeep text-brand-cream">

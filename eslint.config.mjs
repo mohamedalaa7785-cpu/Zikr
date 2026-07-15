@@ -24,6 +24,7 @@ const config = [
       "react-hooks/immutability": "warn",
       "react/no-unescaped-entities": "warn",
       "react-hooks/error-boundaries": "warn",
+      "@typescript-eslint/ban-ts-comment": "warn",
     },
   },
 ];

@@ -12,7 +12,10 @@ import { getServerEnv } from '@/lib/env';
 export async function loginAction(formData: FormData) {
   const email = String(formData.get('email') || '');
   const password = String(formData.get('password') || '');
-  const next = String(formData.get('next') || '/profile').replace(/^(?!\/)/, '/');
+  let next = String(formData.get('next') || '/profile');
+  if (!next.startsWith('/') || next.startsWith('//')) {
+    next = '/profile';
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -76,10 +79,8 @@ export async function registerAction(formData: FormData) {
 // ─── Forgot password ──────────────────────────────────────────────────────────
 export async function forgotAction(formData: FormData) {
   const email = String(formData.get('email') || '');
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.AUTH_CALLBACK_URL ||
-    'http://localhost:3000';
+  const env = getServerEnv();
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL;
 
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {

@@ -34,7 +34,8 @@ export default async function AdminUsersPage() {
   const [users, totalUsers] = await Promise.all([getUsers(), supabaseServerAdminCount('profiles')]);
 
   const adminCount = users.filter((u) => u.role === 'admin').length;
-  const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const now = new Date().getTime();
+  const thirtyDaysAgoMs = now - 30 * 24 * 60 * 60 * 1000;
   const recentCount = users.filter(
     (u) => u.created_at && new Date(u.created_at).getTime() > thirtyDaysAgoMs,
   ).length;
