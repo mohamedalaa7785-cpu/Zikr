@@ -1,3 +1,5 @@
+import { PRODUCTION_URL } from "@/lib/site";
+
 // ─── Numbered-suffix env var resolution ──────────────────────────────────────
 // Vercel integrations expose vars as NAME_19, NAME_22, etc. when multiple
 // projects share the same account. We resolve them here so the rest of the
@@ -162,13 +164,13 @@ const rawEnv: Record<string, string | undefined> = {
   NEXT_PUBLIC_SITE_URL: r(
     e.NEXT_PUBLIC_SITE_URL,
     e.NEXT_PUBLIC_SITE_URL_19,
-    "https://zikrmediaofficial.vercel.app"
+    PRODUCTION_URL
   ),
   // AUTH_CALLBACK_URL should point to our app's /auth/callback, not Supabase's
   AUTH_CALLBACK_URL: r(
     appAuthCallbackUrl(e.AUTH_CALLBACK_URL),
     appAuthCallbackUrl(e.AUTH_CALLBACK_URL_19),
-    `${r(e.NEXT_PUBLIC_SITE_URL, "https://zikrmediaofficial.vercel.app")}/auth/callback`
+    `${r(e.NEXT_PUBLIC_SITE_URL, PRODUCTION_URL)}/auth/callback`
   ),
 
   // ── Google OAuth ──────────────────────────────────────────────────────────
@@ -247,13 +249,13 @@ const rawEnv: Record<string, string | undefined> = {
   ),
 
   // ── Facebook ──────────────────────────────────────────────────────────────
-  FACEBOOK_APP_ID: r(e.FACEBOOK_APP_ID, "1547748713614342"),
+  FACEBOOK_APP_ID: r(e.FACEBOOK_APP_ID, e.FACEBOOK_APP_ID_19),
   FACEBOOK_APP_SECRET: r(e.FACEBOOK_APP_SECRET, e.FACEBOOK_APP_SECRET_19),
   FACEBOOK_PAGE_ACCESS_TOKEN: r(
     e.FACEBOOK_PAGE_ACCESS_TOKEN,
     e.FACEBOOK_PAGE_ACCESS_TOKEN_19
   ),
-  FACEBOOK_PAGE_ID: r(e.FACEBOOK_PAGE_ID, "993431613855177"),
+  FACEBOOK_PAGE_ID: r(e.FACEBOOK_PAGE_ID, e.FACEBOOK_PAGE_ID_19),
 };
 
 const validatedEnv = rawEnv;
