@@ -1,3 +1,34 @@
+# Supabase Migration Audit — Updated 2026-07-18
+
+## Update (2026-07-18)
+
+Two new migrations were added as part of a full Supabase ecosystem synchronization:
+
+- `20260718000000_video_automation_tables.sql`: Ensures `video_generation_requests`,
+  `video_publish_log`, and `video_publishing_config` tables exist with correct columns,
+  indexes, RLS, and policies. Previously these tables were applied directly to the
+  database without a corresponding local migration (all prior stubs).
+
+- `20260718001000_add_is_active_columns.sql`: Adds the `is_active` boolean column
+  to `article_categories`, `dua_categories`, `video_categories`, `tawasheeh_categories`,
+  `tawasheeh`, and `kids_content` — aligning the database with the Drizzle schema.
+
+`lib/types/supabase.ts` was updated to resolve:
+- `category` enum drift: added 4 missing values (`prophets`, `sahaba`, `documentaries`,
+  `history`) that were applied via Drizzle migration 0012 but never reflected in the
+  generated types.
+- Missing `is_active` column on 6 tables.
+- Missing `description_ar` / `description_en` on `video_categories`.
+- 14 tables present in Drizzle schema but absent from the generated types:
+  `adhkar_completions`, `adhkar_streaks`, `app_settings`, `bookmarks`,
+  `notification_settings`, `prophet_notes`, `quran_favorites`, `quran_reads`,
+  `search_history`, `social_shares`, `story_favorites`, `story_ratings`,
+  `story_reads`, `users` (legacy).
+- 3 actively-used runtime tables added: `video_generation_requests`,
+  `video_publish_log`, `video_publishing_config`.
+
+---
+
 # Supabase Migration Audit — Initial Report
 
 Branch: supabase/audit-fixes-20260705
