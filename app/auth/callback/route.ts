@@ -7,10 +7,13 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const safePath = extractNextPath(searchParams);
 
+  console.log('[auth/callback] Processing callback with code:', !!code, 'path:', safePath);
+
   // Supabase may forward OAuth errors directly to the callback
   const oauthError = searchParams.get('error');
   const oauthErrorDesc = searchParams.get('error_description');
   if (oauthError) {
+    console.error('[auth/callback] OAuth error:', oauthError, oauthErrorDesc);
     const msg = encodeURIComponent(oauthErrorDesc || oauthError);
     return NextResponse.redirect(`${origin}/auth/login?error=${msg}`);
   }
@@ -18,10 +21,21 @@ export async function GET(request: NextRequest) {
   if (code) {
     try {
       const supabase = await createClient();
+      console.log('[auth/callback] Exchanging code for session...');
+      
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-      if (!error) {
-        const user = data.user;
-        if (user) {
+      
+      if (error) {
+        console.error('[auth/callback] exchangeCodeForSession error:', error.message, error.status);
+        const msg = encodeURIComponent(error.message || 'تعذر تسجيل الدخول');
+        return NextResponse.redirect(`${origin}/auth/login?error=${msg}`);
+      }
+
+      const user = data.user;
+      if (user) {
+        console.log('[auth/callback] User authenticated:', user.id, user.email);
+        
+        try {
           await supabase.from('profiles').upsert({
             id: user.id,
             email: user.email,
@@ -35,15 +49,24 @@ export async function GET(request: NextRequest) {
                 : null,
             updated_at: new Date().toISOString(),
           });
+          console.log('[auth/callback] Profile upserted successfully');
+        } catch (profileErr) {
+          console.error('[auth/callback] Profile upsert error:', profileErr);
+          // Don't fail the login if profile update fails
         }
-
-        return NextResponse.redirect(`${origin}${safePath}`);
       }
-      console.error('[auth/callback] exchangeCodeForSession error:', error.message);
+
+      console.log('[auth/callback] Redirecting to:', safePath);
+      return NextResponse.redirect(`${origin}${safePath}`);
     } catch (err) {
-      console.error('[auth/callback] unexpected error:', err);
+      console.error('[auth/callback] Unexpected error:', err);
+      const msg = encodeURIComponent(
+        err instanceof Error ? err.message : 'حدث خطأ غير متوقع'
+      );
+      return NextResponse.redirect(`${origin}/auth/login?error=${msg}`);
     }
   }
 
+  console.warn('[auth/callback] No code provided in callback');
   return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_failed`);
 }

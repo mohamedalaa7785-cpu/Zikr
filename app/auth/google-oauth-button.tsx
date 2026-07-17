@@ -34,20 +34,28 @@ export function GoogleOAuthButton({
 
       const redirectUri = buildOAuthRedirectUri(siteUrl, safeNext);
 
+      console.log('[oauth] Starting Google login with redirectUri:', redirectUri);
+
       const client = createBrowserSupabaseClient();
 
-      const { error: oauthError } =
+      const { data, error: oauthError } =
         await client.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: redirectUri,
             scopes: 'email profile',
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            },
           },
         });
 
       if (oauthError) {
         throw oauthError;
       }
+
+      console.log('[oauth] Google OAuth initiated successfully', data);
     } catch (err) {
       const message =
         err instanceof Error
