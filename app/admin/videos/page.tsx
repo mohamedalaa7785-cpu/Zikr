@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { VideoGenerationRequest } from '@/lib/services/video-automation';
-import { requireAdmin } from '@/lib/services/admin';
 
 interface CreateFormState {
   title: string;
@@ -162,7 +161,7 @@ export default function AdminVideosPage() {
               <label className="block text-sm font-medium text-brand-cream/80 mb-2">الفئة</label>
               <select
                 value={createForm.category}
-                onChange={(e) => setCreateForm({ ...createForm, category: e.target.value as any })}
+                onChange={(e) => setCreateForm({ ...createForm, category: e.target.value as CreateFormState['category'] })}
                 className="w-full px-4 py-2 bg-black/30 border border-brand-gold/30 rounded text-brand-cream focus:outline-none focus:border-brand-gold"
               >
                 <option value="quran">القرآن الكريم</option>
