@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { initializeOfflineSupport } from '@/lib/offline/init';
 
 export function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Only register in production
+    if (process.env.NODE_ENV !== 'production') {
+      return;
+    }
 
     // Check if service workers are supported
     if (!('serviceWorker' in navigator)) {
@@ -21,11 +25,6 @@ export function ServiceWorkerRegister() {
           scope: '/',
           updateViaCache: 'none'
         });
-
-        console.log('[PWA] Service Worker registered');
-
-        // Initialize offline support features
-        await initializeOfflineSupport();
 
         // Check for updates periodically
         updateInterval = setInterval(() => {
@@ -49,7 +48,10 @@ export function ServiceWorkerRegister() {
 
         registration.addEventListener('updatefound', handleUpdateFound);
       } catch (error) {
-        console.error('[PWA] Service Worker registration failed:', error);
+        // Silently fail in development; log only if needed for debugging
+        if (process.env.NODE_ENV === 'production') {
+          console.error('[PWA] Service Worker registration failed:', error);
+        }
       }
     };
 
