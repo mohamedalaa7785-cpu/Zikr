@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { getPrayerTimes, getPrayerTimesByCity } from '@/lib/services/prayer-times';
+import { offlineDb } from '@/lib/offline-db';
 import type { PrayerTimes } from '@/lib/types/prayer';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -251,9 +252,18 @@ export default function HomePage() {
   const [loadingPrayer, setLoadingPrayer] = useState(false);
   const [activePrayer, setActivePrayer] = useState('');
   const [nextPrayer, setNextPrayer] = useState('');
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setCurrentTime(new Date());
+    
+    // Initialize offline database
+    offlineDb.initialize().catch(err => {
+      console.error('[HomePage] Failed to initialize offline DB:', err);
+    });
+    
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -298,18 +308,18 @@ export default function HomePage() {
     if (searchQuery.trim()) router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   }, [searchQuery, router]);
 
-  const timeStr = currentTime.toLocaleTimeString('en-GB', {
+  const timeStr = mounted && currentTime ? currentTime.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
     hour12: false,
-  });
-  const dateStr = currentTime.toLocaleDateString('ar-EG', {
+  }) : '';
+  const dateStr = mounted && currentTime ? currentTime.toLocaleDateString('ar-EG', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  });
+  }) : '';
 
   return (
     <div className="min-h-screen bg-brand-emeraldDeep text-brand-cream">
@@ -616,7 +626,7 @@ export default function HomePage() {
 
       {/* ═══════════════════════════════════════════════════════════════════════
           SECTION 4 — MORE CONTENT
-      ══════════════════════════════════════════════════════════════════════ */}
+      ══════════════���═══════════════════════════════════════════════════════ */}
       <section className="border-b border-brand-gold/12 px-4 py-12" aria-labelledby="more-heading">
         <Container className="space-y-6">
           <SectionDivider title="المزيد من المحتوى" />
