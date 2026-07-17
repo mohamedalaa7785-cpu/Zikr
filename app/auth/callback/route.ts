@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const safePath = extractNextPath(searchParams);
 
-  console.log('[auth/callback] Processing callback with code:', !!code, 'path:', safePath);
+  console.debug('[auth/callback] Processing callback with code:', !!code, 'path:', safePath);
 
   // Supabase may forward OAuth errors directly to the callback
   const oauthError = searchParams.get('error');
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   if (code) {
     try {
       const supabase = await createClient();
-      console.log('[auth/callback] Exchanging code for session...');
+      console.debug('[auth/callback] Exchanging code for session...');
       
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
       const user = data.user;
       if (user) {
-        console.log('[auth/callback] User authenticated:', user.id, user.email);
+        console.debug('[auth/callback] User authenticated:', user.id);
         
         try {
           await supabase.from('profiles').upsert({
@@ -49,14 +49,14 @@ export async function GET(request: NextRequest) {
                 : null,
             updated_at: new Date().toISOString(),
           });
-          console.log('[auth/callback] Profile upserted successfully');
+          console.debug('[auth/callback] Profile upserted successfully');
         } catch (profileErr) {
           console.error('[auth/callback] Profile upsert error:', profileErr);
           // Don't fail the login if profile update fails
         }
       }
 
-      console.log('[auth/callback] Redirecting to:', safePath);
+      console.debug('[auth/callback] Redirecting to:', safePath);
       return NextResponse.redirect(`${origin}${safePath}`);
     } catch (err) {
       console.error('[auth/callback] Unexpected error:', err);

@@ -14,12 +14,15 @@ import type { PrayerTimesResponse } from '@/lib/services/prayer-times';
 import { unlockAudioContext, isAudioUnlocked } from '@/lib/audio/spiritual-tones';
 import { usePrayerAlert, PRAYER_NAMES_AR } from '@/hooks/use-prayer-alert';
 
+// Cairo fallback coords (used when geo is denied or unavailable)
+const CAIRO = { lat: 30.0444, lon: 31.2357, city: 'القاهرة (افتراضي)' };
+
 export default function PrayerTimesPage() {
   const [prayerData, setPrayerData] = useState<PrayerTimesResponse | null>(null);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lon: number; city: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [, setCurrentTime] = useState<Date>(new Date());
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time: string; minutesUntil: number } | null>(null);
   const [currentPrayer, setCurrentPrayer] = useState<{ name: string; time: string } | null>(null);
   const [showCitySearch, setShowCitySearch] = useState(false);
@@ -31,9 +34,6 @@ export default function PrayerTimesPage() {
     unlockAudioContext();
     setAudioUnlocked(isAudioUnlocked());
   };
-
-  // Cairo fallback coords (used when geo is denied or unavailable)
-  const CAIRO = { lat: 30.0444, lon: 31.2357, city: 'القاهرة (افتراضي)' };
 
   const loadForCoords = useCallback(async (lat: number, lon: number, city: string) => {
     setCurrentLocation({ lat, lon, city });

@@ -63,12 +63,6 @@ function runSearch(query: string): Result[] {
   return [...surahResults, ...hadithResults, ...prophetResults];
 }
 
-const LABEL_MAP: Record<Result['type'], string> = {
-  surah: 'سورة',
-  hadith: 'حديث',
-  prophet: 'نبي',
-};
-
 const SUGGESTIONS = ['الفاتحة', 'الكهف', 'موسى', 'إبراهيم', 'الرحمن'];
 
 export default function SearchPage() {
