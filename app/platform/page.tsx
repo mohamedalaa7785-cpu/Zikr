@@ -148,7 +148,7 @@ export default function PlatformPage() {
 
         {/* Section cards */}
         <div className="space-y-6">
-          {sections.map((s, i) => (
+          {sections.map((s) => (
             <Card key={s.id} id={s.id} className="p-8 space-y-5 scroll-mt-20">
               <div className="flex items-start gap-4">
                 <div className="text-4xl shrink-0" aria-hidden>{s.icon}</div>

@@ -25,8 +25,8 @@ export function usePrayerTimes(): UsePrayerTimesReturn {
   const [times, setTimes] = useState<PrayerTimes | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [currentPrayer, setCurrentPrayer] = useState<string | null>(null);
-  const [nextPrayer, setNextPrayer] = useState<string | null>(null);
+  const [currentPrayer] = useState<string | null>(null);
+  const [nextPrayer] = useState<string | null>(null);
 
   const getPrayerTimes = useCallback(async (latitude: number, longitude: number) => {
     try {

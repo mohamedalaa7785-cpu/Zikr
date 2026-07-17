@@ -128,10 +128,6 @@ function buildPrompt(
     .map((m) => `${m.role === 'user' ? 'المستخدم' : 'الرفيق'}: ${m.content}`)
     .join('\n');
 
-  const sourceText = citations
-    .map((c, index) => `${index + 1}. ${c.label} — ${c.reference}: ${c.source}`)
-    .join('\n');
-
   const baseIdentity = `أنت "الرفيق الروحاني" في منصة ZIKR. أجب بالعربية الواضحة، بتواضع علمي، وبلا ادعاء فتوى ملزمة. لا تنسب آية أو حديثًا أو قول عالم إلا إذا كان موجودًا في المصادر المتاحة أدناه. إن لم تكفِ المصادر فقل إن المسألة تحتاج عالمًا مؤهلًا.`;
 
   if (type === 'fatwa') {
