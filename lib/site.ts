@@ -1,8 +1,14 @@
+/**
+ * Canonical production origin. Single source of truth for every fallback —
+ * override per environment with NEXT_PUBLIC_SITE_URL.
+ */
+export const PRODUCTION_URL = 'https://zikrmediaofficial.vercel.app';
+
 export const siteConfig = {
   name: 'ZIKR | ذِكرٌ',
   shortName: 'ZIKR',
   description: 'منصة روحانية تجمع القرآن والحديث والقصص والعلم في تجربة حديثة.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://zikr.app',
+  url: process.env.NEXT_PUBLIC_SITE_URL || PRODUCTION_URL,
   locale: 'ar_SA',
   dir: 'rtl' as const,
 };

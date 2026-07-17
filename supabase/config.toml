@@ -9,9 +9,10 @@ max_rows = 1000
 [auth]
 enabled = true
 site_url = "env(NEXT_PUBLIC_SITE_URL)"
+# AUTH_CALLBACK_URL is resolved from the environment (defaults to the
+# production origin — see lib/env.ts). Only localhost is hardcoded for dev.
 additional_redirect_urls = [
   "env(AUTH_CALLBACK_URL)",
-  "https://zikrmediaofficial.vercel.app/auth/callback",
   "http://localhost:3000/auth/callback",
 ]
 jwt_expiry = 3600
