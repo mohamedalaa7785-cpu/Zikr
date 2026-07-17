@@ -40,7 +40,6 @@ export function useOfflineData<T>({
         if (cached) {
           setData(cached);
           setIsCached(true);
-          console.log(`[OfflineData] Loaded ${storeName}/${key} from cache`);
           return true;
         }
       } else {
@@ -48,7 +47,6 @@ export function useOfflineData<T>({
         if (cached.length > 0) {
           setData(cached as unknown as T);
           setIsCached(true);
-          console.log(`[OfflineData] Loaded ${storeName} from cache`);
           return true;
         }
       }
@@ -84,7 +82,6 @@ export function useOfflineData<T>({
         }
         setData(newData);
         setIsCached(true);
-        console.log(`[OfflineData] Saved to ${storeName}`);
       } catch (err) {
         setError(err as Error);
         console.error(`[OfflineData] Save error:`, err);

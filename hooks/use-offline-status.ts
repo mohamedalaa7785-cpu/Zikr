@@ -22,7 +22,6 @@ export function useOfflineStatus(): OfflineStatus {
       isOnline: true,
       lastSyncTime: new Date(),
     }));
-    console.log('[OfflineStatus] Online');
   }, []);
 
   const handleOffline = useCallback(() => {
@@ -31,7 +30,6 @@ export function useOfflineStatus(): OfflineStatus {
       isOnline: false,
       wasOffline: true,
     }));
-    console.log('[OfflineStatus] Offline');
   }, []);
 
   useEffect(() => {

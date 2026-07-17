@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
+import { requireAdmin } from '@/lib/services/admin';
 
 export const metadata: Metadata = {
   title: 'لوحة التحكم | ذِكرٌ',
@@ -8,7 +9,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Enforce admin auth at the layout level so ALL admin routes — including
+  // client-rendered pages that cannot call requireAdmin() themselves — are
+  // protected. requireAdmin() redirects to /auth/login or /profile on failure.
+  await requireAdmin();
   return (
     <div className="flex min-h-screen bg-brand-emeraldDeep" dir="rtl">
       {/* Sidebar */}
