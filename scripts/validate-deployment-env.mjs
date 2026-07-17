@@ -71,23 +71,45 @@ function isSupabaseAuthCallback(value) {
   }
 }
 
+function withNumberedAliases(names) {
+  return names.flatMap(name => [
+    name,
+    `${name}_19`,
+    `${name}_20`,
+    `${name}_22`,
+  ]);
+}
+
 function getEnv(name) {
   const aliases = {
-    NEXT_PUBLIC_SUPABASE_URL: ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"],
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: [
+    NEXT_PUBLIC_SUPABASE_URL: withNumberedAliases([
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "SUPABASE_URL",
+    ]),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: withNumberedAliases([
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "SUPABASE_ANON_KEY",
       "SUPABASE_PUBLISHABLE_KEY",
-    ],
-    DATABASE_URL: [
+    ]),
+    DATABASE_URL: withNumberedAliases([
       "DATABASE_URL",
       "POSTGRES_URL",
       "POSTGRES_URL_NON_POOLING",
       "POSTGRES_PRISMA_URL",
-    ],
-    AWS_S3_ACCESS_KEY_ID: ["AWS_S3_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID"],
-    AWS_S3_SECRET_ACCESS_KEY: ["AWS_S3_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY"],
-    AWS_S3_REGION: ["AWS_S3_REGION", "AWS_REGION"],
+    ]),
+    AWS_S3_ACCESS_KEY_ID: withNumberedAliases([
+      "AWS_S3_ACCESS_KEY_ID",
+      "AWS_ACCESS_KEY_ID",
+    ]),
+    AWS_S3_SECRET_ACCESS_KEY: withNumberedAliases([
+      "AWS_S3_SECRET_ACCESS_KEY",
+      "AWS_SECRET_ACCESS_KEY",
+    ]),
+    AWS_S3_REGION: withNumberedAliases(["AWS_S3_REGION", "AWS_REGION"]),
+    SUPABASE_SERVICE_ROLE_KEY: withNumberedAliases([
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_SECRET_KEY",
+    ]),
   };
 
   for (const key of aliases[name] || [name]) {

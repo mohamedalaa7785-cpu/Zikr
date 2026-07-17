@@ -271,7 +271,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (prayerTimes) {
+    if (prayerTimes && currentTime) {
       const { active, next } = getActivePrayer(prayerTimes, currentTime);
       setActivePrayer(active);
       setNextPrayer(next);
