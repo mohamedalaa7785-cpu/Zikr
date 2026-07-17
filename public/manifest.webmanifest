@@ -1,0 +1,113 @@
+{
+  "name": "ذِكرٌ - منصة إسلامية شاملة",
+  "short_name": "ذِكرٌ",
+  "description": "منصة إسلامية شاملة توفر القرآن الكريم، الأذكار، الأحاديث، والمزيد. يعمل بدون اتصال بالإنترنت.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "background_color": "#071c20",
+  "theme_color": "#d4a574",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-540x720.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-1280x720.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["lifestyle", "productivity", "education"],
+  "shortcuts": [
+    {
+      "name": "القرآن الكريم",
+      "short_name": "القرآن",
+      "description": "اقرأ واستمع إلى القرآن الكريم",
+      "url": "/quran",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "الأذكار",
+      "short_name": "الأذكار",
+      "description": "أذكار الصباح والمساء والنوم",
+      "url": "/adhkar",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "مواقيت الصلاة",
+      "short_name": "الصلاة",
+      "description": "مواقيت الصلاة والآذان",
+      "url": "/prayer-times",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "التسبيح",
+      "short_name": "التسبيح",
+      "description": "عداد التسبيح والتكبير",
+      "url": "/tasbeeh",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/contact",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "subject",
+      "text": "message",
+      "url": "url"
+    }
+  }
+}
