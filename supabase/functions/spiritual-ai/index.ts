@@ -2,6 +2,7 @@ import { requireBearerToken } from '../_shared/auth.ts';
 import { handleOptions, jsonResponse } from '../_shared/cors.ts';
 import { buildSafeFallback, normalizeQuestion } from '../_shared/islamic-ai.ts';
 
+// v1.1.0
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return handleOptions(request);
   if (request.method !== 'POST') {
@@ -19,6 +20,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse(request, {
       question,
+      function_version: '1.1.0',
       ...buildSafeFallback(),
     });
   } catch (error) {

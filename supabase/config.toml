@@ -24,9 +24,10 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 
+# Storage is disabled — the app uses AWS S3 via lib/services/s3.ts.
+# Supabase storage is not used in this project.
 [storage]
-enabled = true
-file_size_limit = "50MiB"
+enabled = false
 
 [functions.health]
 verify_jwt = false
