@@ -276,6 +276,57 @@ export async function generateAdhkarVideo(
   });
 }
 
+
+function requestContentObject(request: VideoGenerationRequest): Record<string, unknown> {
+  return request.content && typeof request.content === 'object' && !Array.isArray(request.content)
+    ? (request.content as Record<string, unknown>)
+    : {};
+}
+
+function slugFromRequest(request: VideoGenerationRequest): string {
+  const content = requestContentObject(request);
+  const publicPath = content.publicPath;
+  if (typeof publicPath === 'string') {
+    const slug = publicPath.split('/').filter(Boolean).pop();
+    if (slug) return slug;
+  }
+  return request.title
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || request.id;
+}
+
+async function publishGeneratedVideoOnSite(
+  request: VideoGenerationRequest,
+  videoUrl: string,
+  youtubeId?: string | null,
+  facebookId?: string | null
+): Promise<void> {
+  const content = requestContentObject(request);
+  const slug = slugFromRequest(request);
+  await supabaseServerAdminRequest('/rest/v1/videos?on_conflict=slug', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({
+      title: request.title,
+      slug,
+      description: request.description,
+      youtube_id: youtubeId ?? null,
+      thumbnail_url: request.thumbnail_url ?? null,
+      published: true,
+      metadata: {
+        ...(typeof content.metadata === 'object' && content.metadata !== null ? content.metadata : {}),
+        generatedVideoUrl: videoUrl,
+        facebookId: facebookId ?? null,
+        source: 'video_generation_requests',
+        requestId: request.id,
+      },
+      updated_at: new Date().toISOString(),
+    }),
+  });
+}
+
 // ─── Video generation (HeyGen) ───────────────────────────────────────────────
 
 const HEYGEN_POLL_INTERVAL_MS = 5000;
@@ -578,7 +629,11 @@ export async function processVideoGenerationRequest(
       if (!facebookId) failures.push('Facebook publish failed');
     }
 
-    // 3. Record the outcome truthfully.
+    // 3. Record the outcome truthfully and keep the site video library in sync.
+    if (youtubeId || facebookId || videoUrl) {
+      await publishGeneratedVideoOnSite(request, videoUrl, youtubeId, facebookId);
+    }
+
     if (failures.length > 0) {
       await markVideoFailed(request.id, 'Publish Failed', failures.join('; '));
       await logPublishResult({
