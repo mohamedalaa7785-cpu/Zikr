@@ -40,6 +40,7 @@ async function readSupabase<T>(path: string): Promise<T | null> {
 function mapDbHadithBook(book: DbHadithBook): HadithBook {
   return {
     id: book.slug,
+    slug: book.slug,
     name: book.name_ar,
     available: book.hadith_count ?? 0,
   };
@@ -64,6 +65,7 @@ export async function getHadithBooks(): Promise<HadithBook[]> {
   >(`${HADITH_API_BASE}/books`);
   return Object.entries(res?.data ?? {}).map(([id, value]) => ({
     id,
+    slug: id,
     ...value,
   }));
 }
