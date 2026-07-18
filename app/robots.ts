@@ -1,16 +1,16 @@
-import type { MetadataRoute } from 'next';
-import { siteConfig } from '@/lib/site';
+import type { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/site";
 
-const baseUrl = siteConfig.url.replace(/\/$/, '');
+const baseUrl = siteConfig.url.replace(/\/$/, "");
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: '*',
-        allow: '/',
+        userAgent: "*",
+        allow: "/",
         // Private / admin / API routes must not be indexed
-        disallow: ['/admin/', '/api/', '/auth/', '/profile', '/favorites'],
+        disallow: ["/admin/", "/api/", "/auth/", "/favorites", "/profile"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
