@@ -13,11 +13,31 @@ export interface KidsItem {
   title_ar: string;
   title_en: string;
   slug: string;
-  type: 'story' | 'prayer' | 'wudu' | 'quiz' | 'game' | 'video' | 'memorize';
-  age_group: '3-5' | '6-8' | '9-12' | '13-15';
+  type:
+    | "story"
+    | "prayer"
+    | "wudu"
+    | "quiz"
+    | "game"
+    | "puzzle"
+    | "coloring"
+    | "matching"
+    | "video"
+    | "memorize";
+  age_group: "3-5" | "6-8" | "9-12" | "13-15";
   content_ar?: string;
   quiz_data?: { questions: KidsQuizQuestion[] };
   featured_image_url?: string;
+  video_url?: string;
+  metadata?: {
+    reward?: string;
+    memorizationTarget?: string;
+    durationDays?: number;
+    dailyPlan?: string[];
+    reviewPlan?: string[];
+    gameType?: string;
+    objective?: string;
+  };
 }
 
 export const kidsContent: KidsItem[] = [
@@ -25,12 +45,12 @@ export const kidsContent: KidsItem[] = [
   // Stories — قصص الأنبياء للأطفال
   // ------------------------------------------------------------------
   {
-    id: 'story-ibrahim',
-    title_ar: 'قصة سيدنا إبراهيم عليه السلام',
-    title_en: 'Prophet Ibrahim Story',
-    slug: 'story-ibrahim',
-    type: 'story',
-    age_group: '6-8',
+    id: "story-ibrahim",
+    title_ar: "قصة سيدنا إبراهيم عليه السلام",
+    title_en: "Prophet Ibrahim Story",
+    slug: "story-ibrahim",
+    type: "story",
+    age_group: "6-8",
     content_ar: `كان سيدنا إبراهيم عليه السلام يعيش في بلد يعبد أهلها الأصنام، وهي تماثيل من حجر لا تسمع ولا تتكلم ولا تنفع أحدًا.
 
 فكّر إبراهيم عليه السلام: كيف يعبد الناس حجارة صنعوها بأيديهم؟ فقرر أن يبيّن لهم الحق.
@@ -44,12 +64,12 @@ export const kidsContent: KidsItem[] = [
 الدرس المستفاد: الله يحمي من يؤمن به ويتوكل عليه، ولا نعبد إلا الله وحده.`,
   },
   {
-    id: 'story-yunus',
-    title_ar: 'قصة سيدنا يونس عليه السلام',
-    title_en: 'Prophet Yunus Story',
-    slug: 'story-yunus',
-    type: 'story',
-    age_group: '6-8',
+    id: "story-yunus",
+    title_ar: "قصة سيدنا يونس عليه السلام",
+    title_en: "Prophet Yunus Story",
+    slug: "story-yunus",
+    type: "story",
+    age_group: "6-8",
     content_ar: `أرسل الله سيدنا يونس عليه السلام إلى قومه ليدعوهم لعبادة الله، لكنهم لم يستمعوا إليه.
 
 حزن يونس وغضب، فترك قومه وركب سفينة في البحر. وفي منتصف الرحلة هاجت الأمواج وكادت السفينة تغرق.
@@ -63,12 +83,12 @@ export const kidsContent: KidsItem[] = [
 الدرس المستفاد: مهما كان الضيق شديدًا، الدعاء والاستغفار ينجيان المؤمن بإذن الله.`,
   },
   {
-    id: 'story-musa',
-    title_ar: 'قصة سيدنا موسى عليه السلام',
-    title_en: 'Prophet Musa Story',
-    slug: 'story-musa',
-    type: 'story',
-    age_group: '9-12',
+    id: "story-musa",
+    title_ar: "قصة سيدنا موسى عليه السلام",
+    title_en: "Prophet Musa Story",
+    slug: "story-musa",
+    type: "story",
+    age_group: "9-12",
     content_ar: `وُلد سيدنا موسى عليه السلام في زمن فرعون الظالم الذي كان يقتل كل مولود ذكر من بني إسرائيل.
 
 أوحى الله لأم موسى أن تضعه في صندوق وتلقيه في النهر. فحمله النهر إلى قصر فرعون نفسه! وربّته زوجة فرعون كابنها.
@@ -82,12 +102,12 @@ export const kidsContent: KidsItem[] = [
 الدرس المستفاد: الله ينصر المؤمنين الصابرين مهما كان عدوهم قويًا.`,
   },
   {
-    id: 'story-nuh',
-    title_ar: 'قصة سيدنا نوح والسفينة',
-    title_en: 'Prophet Nuh and the Ark',
-    slug: 'story-nuh',
-    type: 'story',
-    age_group: '6-8',
+    id: "story-nuh",
+    title_ar: "قصة سيدنا نوح والسفينة",
+    title_en: "Prophet Nuh and the Ark",
+    slug: "story-nuh",
+    type: "story",
+    age_group: "6-8",
     content_ar: `دعا سيدنا نوح عليه السلام قومه إلى عبادة الله 950 سنة كاملة! لكن أكثرهم لم يؤمنوا وسخروا منه.
 
 أمر الله نوحًا أن يبني سفينة عظيمة. وبينما هو يبنيها، كان الكفار يمرون عليه ويضحكون: تبني سفينة في الصحراء؟!
@@ -99,12 +119,12 @@ export const kidsContent: KidsItem[] = [
 الدرس المستفاد: الصبر على الدعوة إلى الخير، والنجاة تكون بطاعة الله.`,
   },
   {
-    id: 'story-muhammad-childhood',
-    title_ar: 'طفولة النبي محمد ﷺ',
-    title_en: 'Prophet Muhammad Childhood',
-    slug: 'story-muhammad-childhood',
-    type: 'story',
-    age_group: '9-12',
+    id: "story-muhammad-childhood",
+    title_ar: "طفولة النبي محمد ﷺ",
+    title_en: "Prophet Muhammad Childhood",
+    slug: "story-muhammad-childhood",
+    type: "story",
+    age_group: "9-12",
     content_ar: `وُلد النبي محمد ﷺ في مكة في عام الفيل، وكان يتيمًا؛ فقد توفي والده عبد الله قبل ولادته.
 
 أرضعته السيدة حليمة السعدية في البادية، وعاش عندها سنوات جميلة دخلت البركة فيها بيتها.
@@ -122,12 +142,12 @@ export const kidsContent: KidsItem[] = [
   // Duas — أدعية للأطفال
   // ------------------------------------------------------------------
   {
-    id: 'prayer-before-sleep',
-    title_ar: 'دعاء النوم للأطفال',
-    title_en: 'Bedtime Dua',
-    slug: 'prayer-before-sleep',
-    type: 'prayer',
-    age_group: '3-5',
+    id: "prayer-before-sleep",
+    title_ar: "دعاء النوم للأطفال",
+    title_en: "Bedtime Dua",
+    slug: "prayer-before-sleep",
+    type: "prayer",
+    age_group: "3-5",
     content_ar: `قبل أن تنام، قل هذا الدعاء الجميل:
 
 "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا"
@@ -144,12 +164,12 @@ export const kidsContent: KidsItem[] = [
 "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ"`,
   },
   {
-    id: 'prayer-eating',
-    title_ar: 'دعاء الطعام',
-    title_en: 'Dua for Eating',
-    slug: 'prayer-eating',
-    type: 'prayer',
-    age_group: '3-5',
+    id: "prayer-eating",
+    title_ar: "دعاء الطعام",
+    title_en: "Dua for Eating",
+    slug: "prayer-eating",
+    type: "prayer",
+    age_group: "3-5",
     content_ar: `قبل أن تأكل قل:
 
 "بِسْمِ اللَّهِ"
@@ -167,12 +187,12 @@ export const kidsContent: KidsItem[] = [
 - اشكر الله على النعمة`,
   },
   {
-    id: 'prayer-home',
-    title_ar: 'دعاء دخول البيت والخروج منه',
-    title_en: 'Dua for Entering and Leaving Home',
-    slug: 'prayer-home',
-    type: 'prayer',
-    age_group: '6-8',
+    id: "prayer-home",
+    title_ar: "دعاء دخول البيت والخروج منه",
+    title_en: "Dua for Entering and Leaving Home",
+    slug: "prayer-home",
+    type: "prayer",
+    age_group: "6-8",
     content_ar: `عند دخول البيت قل:
 
 "بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا"
@@ -190,12 +210,12 @@ export const kidsContent: KidsItem[] = [
   // Wudu — تعليم الوضوء
   // ------------------------------------------------------------------
   {
-    id: 'wudu-steps',
-    title_ar: 'خطوات الوضوء',
-    title_en: 'Wudu Steps',
-    slug: 'wudu-steps',
-    type: 'wudu',
-    age_group: '6-8',
+    id: "wudu-steps",
+    title_ar: "خطوات الوضوء",
+    title_en: "Wudu Steps",
+    slug: "wudu-steps",
+    type: "wudu",
+    age_group: "6-8",
     content_ar: `تعال نتعلم الوضوء خطوة بخطوة:
 
 1. النية: انوِ في قلبك أنك تتوضأ لله، وقل: بِسْمِ اللَّهِ
@@ -220,12 +240,12 @@ export const kidsContent: KidsItem[] = [
 "أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ"`,
   },
   {
-    id: 'salah-kids',
-    title_ar: 'كيف نصلي؟ تعليم الصلاة للأطفال',
-    title_en: 'How to Pray',
-    slug: 'salah-kids',
-    type: 'wudu',
-    age_group: '6-8',
+    id: "salah-kids",
+    title_ar: "كيف نصلي؟ تعليم الصلاة للأطفال",
+    title_en: "How to Pray",
+    slug: "salah-kids",
+    type: "wudu",
+    age_group: "6-8",
     content_ar: `الصلاة هي عمود الدين، وهي صلتنا بالله. تعال نتعلمها:
 
 أولاً: تأكد أنك متوضئ وملابسك نظيفة، وقف باتجاه القبلة.
@@ -255,138 +275,168 @@ export const kidsContent: KidsItem[] = [
   // Quizzes — اختبارات
   // ------------------------------------------------------------------
   {
-    id: 'quiz-pillars',
-    title_ar: 'اختبار أركان الإسلام',
-    title_en: 'Pillars of Islam Quiz',
-    slug: 'quiz-pillars',
-    type: 'quiz',
-    age_group: '9-12',
+    id: "quiz-pillars",
+    title_ar: "اختبار أركان الإسلام",
+    title_en: "Pillars of Islam Quiz",
+    slug: "quiz-pillars",
+    type: "quiz",
+    age_group: "9-12",
     quiz_data: {
       questions: [
         {
-          text: 'كم عدد أركان الإسلام؟',
-          options: ['ثلاثة', 'أربعة', 'خمسة', 'ستة'],
+          text: "كم عدد أركان الإسلام؟",
+          options: ["ثلاثة", "أربعة", "خمسة", "ستة"],
           correctAnswer: 2,
         },
         {
-          text: 'ما هو الركن الأول من أركان الإسلام؟',
-          options: ['الصلاة', 'الشهادتان', 'الصوم', 'الزكاة'],
+          text: "ما هو الركن الأول من أركان الإسلام؟",
+          options: ["الصلاة", "الشهادتان", "الصوم", "الزكاة"],
           correctAnswer: 1,
         },
         {
-          text: 'كم عدد الصلوات المفروضة في اليوم؟',
-          options: ['ثلاث صلوات', 'أربع صلوات', 'خمس صلوات', 'ست صلوات'],
+          text: "كم عدد الصلوات المفروضة في اليوم؟",
+          options: ["ثلاث صلوات", "أربع صلوات", "خمس صلوات", "ست صلوات"],
           correctAnswer: 2,
         },
         {
-          text: 'في أي شهر يصوم المسلمون؟',
-          options: ['شعبان', 'رجب', 'رمضان', 'شوال'],
+          text: "في أي شهر يصوم المسلمون؟",
+          options: ["شعبان", "رجب", "رمضان", "شوال"],
           correctAnswer: 2,
         },
         {
-          text: 'أين يذهب المسلمون لأداء فريضة الحج؟',
-          options: ['المدينة المنورة', 'مكة المكرمة', 'القدس', 'الطائف'],
+          text: "أين يذهب المسلمون لأداء فريضة الحج؟",
+          options: ["المدينة المنورة", "مكة المكرمة", "القدس", "الطائف"],
           correctAnswer: 1,
         },
       ],
     },
   },
   {
-    id: 'quiz-prophets',
-    title_ar: 'اختبار قصص الأنبياء',
-    title_en: 'Prophets Stories Quiz',
-    slug: 'quiz-prophets',
-    type: 'quiz',
-    age_group: '9-12',
+    id: "quiz-prophets",
+    title_ar: "اختبار قصص الأنبياء",
+    title_en: "Prophets Stories Quiz",
+    slug: "quiz-prophets",
+    type: "quiz",
+    age_group: "9-12",
     quiz_data: {
       questions: [
         {
-          text: 'من هو النبي الذي ابتلعه الحوت؟',
-          options: ['نوح عليه السلام', 'يونس عليه السلام', 'موسى عليه السلام', 'يوسف عليه السلام'],
+          text: "من هو النبي الذي ابتلعه الحوت؟",
+          options: [
+            "نوح عليه السلام",
+            "يونس عليه السلام",
+            "موسى عليه السلام",
+            "يوسف عليه السلام",
+          ],
           correctAnswer: 1,
         },
         {
-          text: 'من هو النبي الذي بنى السفينة؟',
-          options: ['إبراهيم عليه السلام', 'موسى عليه السلام', 'نوح عليه السلام', 'عيسى عليه السلام'],
+          text: "من هو النبي الذي بنى السفينة؟",
+          options: [
+            "إبراهيم عليه السلام",
+            "موسى عليه السلام",
+            "نوح عليه السلام",
+            "عيسى عليه السلام",
+          ],
           correctAnswer: 2,
         },
         {
-          text: 'من هو النبي الذي ألقاه قومه في النار فجعلها الله بردًا وسلامًا؟',
-          options: ['إبراهيم عليه السلام', 'إسماعيل عليه السلام', 'يعقوب عليه السلام', 'داود عليه السلام'],
+          text: "من هو النبي الذي ألقاه قومه في النار فجعلها الله بردًا وسلامًا؟",
+          options: [
+            "إبراهيم عليه السلام",
+            "إسماعيل عليه السلام",
+            "يعقوب عليه السلام",
+            "داود عليه السلام",
+          ],
           correctAnswer: 0,
         },
         {
-          text: 'من هو النبي الذي انشق له البحر؟',
-          options: ['هارون عليه السلام', 'موسى عليه السلام', 'سليمان عليه السلام', 'زكريا عليه السلام'],
+          text: "من هو النبي الذي انشق له البحر؟",
+          options: [
+            "هارون عليه السلام",
+            "موسى عليه السلام",
+            "سليمان عليه السلام",
+            "زكريا عليه السلام",
+          ],
           correctAnswer: 1,
         },
         {
-          text: 'ماذا كان لقب النبي محمد ﷺ قبل البعثة؟',
-          options: ['الفاروق', 'الصادق الأمين', 'ذو النورين', 'أسد الله'],
+          text: "ماذا كان لقب النبي محمد ﷺ قبل البعثة؟",
+          options: ["الفاروق", "الصادق الأمين", "ذو النورين", "أسد الله"],
           correctAnswer: 1,
         },
       ],
     },
   },
   {
-    id: 'quiz-wudu',
-    title_ar: 'اختبار الوضوء والصلاة',
-    title_en: 'Wudu and Salah Quiz',
-    slug: 'quiz-wudu',
-    type: 'quiz',
-    age_group: '6-8',
+    id: "quiz-wudu",
+    title_ar: "اختبار الوضوء والصلاة",
+    title_en: "Wudu and Salah Quiz",
+    slug: "quiz-wudu",
+    type: "quiz",
+    age_group: "6-8",
     quiz_data: {
       questions: [
         {
-          text: 'ماذا نقول قبل أن نبدأ الوضوء؟',
-          options: ['الحمد لله', 'بسم الله', 'الله أكبر', 'سبحان الله'],
+          text: "ماذا نقول قبل أن نبدأ الوضوء؟",
+          options: ["الحمد لله", "بسم الله", "الله أكبر", "سبحان الله"],
           correctAnswer: 1,
         },
         {
-          text: 'كم مرة نغسل الوجه في الوضوء؟',
-          options: ['مرة واحدة', 'مرتين', 'ثلاث مرات', 'أربع مرات'],
+          text: "كم مرة نغسل الوجه في الوضوء؟",
+          options: ["مرة واحدة", "مرتين", "ثلاث مرات", "أربع مرات"],
           correctAnswer: 2,
         },
         {
-          text: 'ماذا نقول في الركوع؟',
-          options: ['سبحان ربي الأعلى', 'سبحان ربي العظيم', 'رب اغفر لي', 'الله أكبر'],
+          text: "ماذا نقول في الركوع؟",
+          options: [
+            "سبحان ربي الأعلى",
+            "سبحان ربي العظيم",
+            "رب اغفر لي",
+            "الله أكبر",
+          ],
           correctAnswer: 1,
         },
         {
-          text: 'كم عدد ركعات صلاة الفجر؟',
-          options: ['ركعتان', 'ثلاث ركعات', 'أربع ركعات', 'خمس ركعات'],
+          text: "كم عدد ركعات صلاة الفجر؟",
+          options: ["ركعتان", "ثلاث ركعات", "أربع ركعات", "خمس ركعات"],
           correctAnswer: 0,
         },
       ],
     },
   },
   {
-    id: 'quiz-akhlaq',
-    title_ar: 'اختبار الأخلاق الإسلامية',
-    title_en: 'Islamic Manners Quiz',
-    slug: 'quiz-akhlaq',
-    type: 'quiz',
-    age_group: '6-8',
+    id: "quiz-akhlaq",
+    title_ar: "اختبار الأخلاق الإسلامية",
+    title_en: "Islamic Manners Quiz",
+    slug: "quiz-akhlaq",
+    type: "quiz",
+    age_group: "6-8",
     quiz_data: {
       questions: [
         {
-          text: 'ماذا نقول عندما نقابل صديقًا مسلمًا؟',
-          options: ['صباح الخير', 'السلام عليكم', 'أهلاً', 'مرحبًا'],
+          text: "ماذا نقول عندما نقابل صديقًا مسلمًا؟",
+          options: ["صباح الخير", "السلام عليكم", "أهلاً", "مرحبًا"],
           correctAnswer: 1,
         },
         {
-          text: 'بأي يد نأكل الطعام؟',
-          options: ['اليد اليسرى', 'اليد اليمنى', 'كلتا اليدين', 'لا يهم'],
+          text: "بأي يد نأكل الطعام؟",
+          options: ["اليد اليسرى", "اليد اليمنى", "كلتا اليدين", "لا يهم"],
           correctAnswer: 1,
         },
         {
-          text: 'ماذا نقول عندما نعطس؟',
-          options: ['سبحان الله', 'الحمد لله', 'الله أكبر', 'أستغفر الله'],
+          text: "ماذا نقول عندما نعطس؟",
+          options: ["سبحان الله", "الحمد لله", "الله أكبر", "أستغفر الله"],
           correctAnswer: 1,
         },
         {
-          text: 'ما هو حق الوالدين علينا؟',
-          options: ['الطاعة والبر والإحسان', 'إهمالهما', 'رفع الصوت عليهما', 'عدم مساعدتهما'],
+          text: "ما هو حق الوالدين علينا؟",
+          options: [
+            "الطاعة والبر والإحسان",
+            "إهمالهما",
+            "رفع الصوت عليهما",
+            "عدم مساعدتهما",
+          ],
           correctAnswer: 0,
         },
       ],
@@ -397,12 +447,12 @@ export const kidsContent: KidsItem[] = [
   // Learning — تعلم
   // ------------------------------------------------------------------
   {
-    id: 'names-of-allah-kids',
-    title_ar: 'أسماء الله الحسنى للأطفال',
-    title_en: 'Names of Allah for Kids',
-    slug: 'names-of-allah-kids',
-    type: 'story',
-    age_group: '3-5',
+    id: "names-of-allah-kids",
+    title_ar: "أسماء الله الحسنى للأطفال",
+    title_en: "Names of Allah for Kids",
+    slug: "names-of-allah-kids",
+    type: "story",
+    age_group: "3-5",
     content_ar: `الله له أسماء جميلة كثيرة، تعال نتعلم بعضها:
 
 الرَّحْمَن: الذي يرحم كل الناس والحيوانات
@@ -420,12 +470,12 @@ export const kidsContent: KidsItem[] = [
   // Inspiring Stories — قصص ملهمة
   // ------------------------------------------------------------------
   {
-    id: 'inspire-patience',
-    title_ar: 'قصة ملهمة: الصبر مفتاح الفرج',
-    title_en: 'Inspiring: Patience is Key',
-    slug: 'inspire-patience',
-    type: 'story',
-    age_group: '9-12',
+    id: "inspire-patience",
+    title_ar: "قصة ملهمة: الصبر مفتاح الفرج",
+    title_en: "Inspiring: Patience is Key",
+    slug: "inspire-patience",
+    type: "story",
+    age_group: "9-12",
     content_ar: `كان يوسف الصغير يحب القراءة كثيراً، لكنه كان يعاني في الرياضيات. كان زملاؤه يستهزئون منه أحياناً لأنه بطيء في الحل.
 
 لكن يوسف لم ييأس. كان كل يوم يجلس ساعة يتمرن على الأمثلة الصعبة، ويستعين بالله ويقول: "يا مسهّل صعّب علينا سهّل".
@@ -437,12 +487,12 @@ export const kidsContent: KidsItem[] = [
 تذكّر دائماً: "إِنَّ مَعَ الْعُسْرِ يُسْرًا" — مع كل صعوبة سهولة.`,
   },
   {
-    id: 'inspire-honesty',
-    title_ar: 'قصة ملهمة: الصدق ينجي',
-    title_en: 'Inspiring: Honesty Saves',
-    slug: 'inspire-honesty',
-    type: 'story',
-    age_group: '6-8',
+    id: "inspire-honesty",
+    title_ar: "قصة ملهمة: الصدق ينجي",
+    title_en: "Inspiring: Honesty Saves",
+    slug: "inspire-honesty",
+    type: "story",
+    age_group: "6-8",
     content_ar: `وجدت سارة محفظة فيها نقود كثيرة في طريقها للمدرسة. أغرتها المحفظة كثيراً، لكنها تذكّرت حديث النبي ﷺ: "عليكم بالصدق فإن الصدق يهدي إلى البر".
 
 أخذت سارة المحفظة إلى مدير المدرسة وسلّمتها له. وبعد يوم واحد، جاء صاحب المحفظة باكياً من الفرح، فكان فيها أجرة علاج والدته المريضة.
@@ -454,12 +504,12 @@ export const kidsContent: KidsItem[] = [
 الدرس: الصدق والأمانة تُرضي الله وتُسعد القلب.`,
   },
   {
-    id: 'inspire-helping',
-    title_ar: 'قصة ملهمة: مساعدة الآخرين',
-    title_en: 'Inspiring: Helping Others',
-    slug: 'inspire-helping',
-    type: 'story',
-    age_group: '6-8',
+    id: "inspire-helping",
+    title_ar: "قصة ملهمة: مساعدة الآخرين",
+    title_en: "Inspiring: Helping Others",
+    slug: "inspire-helping",
+    type: "story",
+    age_group: "6-8",
     content_ar: `لاحظ أحمد أن جاره الشيخ الكبير يعاني في حمل أكياس التسوق كل أسبوع. فقرر أن يساعده كل يوم جمعة.
 
 في البداية كان أحمد يتمنى اللعب مع أصدقائه بدلاً من المساعدة، لكنه تذكّر قول النبي ﷺ: "من كان في حاجة أخيه كان الله في حاجته".
@@ -475,33 +525,36 @@ export const kidsContent: KidsItem[] = [
   // Videos — فيديوهات تعليمية (روابط يوتيوب)
   // ------------------------------------------------------------------
   {
-    id: 'video-prayer-learn',
-    title_ar: 'فيديو: تعلم الصلاة خطوة بخطوة',
-    title_en: 'Video: Learn Prayer Step by Step',
-    slug: 'video-prayer-learn',
-    type: 'video',
-    age_group: '6-8',
-    featured_image_url: 'https://img.youtube.com/vi/RGgUMsVMuIE/hqdefault.jpg',
+    id: "video-prayer-learn",
+    title_ar: "فيديو: تعلم الصلاة خطوة بخطوة",
+    title_en: "Video: Learn Prayer Step by Step",
+    slug: "video-prayer-learn",
+    type: "video",
+    age_group: "6-8",
+    featured_image_url: "https://img.youtube.com/vi/RGgUMsVMuIE/hqdefault.jpg",
+    video_url: "https://www.youtube.com/embed/RGgUMsVMuIE",
     content_ar: `https://www.youtube.com/embed/RGgUMsVMuIE`,
   },
   {
-    id: 'video-wudu-learn',
-    title_ar: 'فيديو: كيف تتوضأ بشكل صحيح',
-    title_en: 'Video: How to Perform Wudu',
-    slug: 'video-wudu-learn',
-    type: 'video',
-    age_group: '6-8',
-    featured_image_url: 'https://img.youtube.com/vi/t3zjZJ9NJSY/hqdefault.jpg',
+    id: "video-wudu-learn",
+    title_ar: "فيديو: كيف تتوضأ بشكل صحيح",
+    title_en: "Video: How to Perform Wudu",
+    slug: "video-wudu-learn",
+    type: "video",
+    age_group: "6-8",
+    featured_image_url: "https://img.youtube.com/vi/t3zjZJ9NJSY/hqdefault.jpg",
+    video_url: "https://www.youtube.com/embed/t3zjZJ9NJSY",
     content_ar: `https://www.youtube.com/embed/t3zjZJ9NJSY`,
   },
   {
-    id: 'video-quran-basics',
-    title_ar: 'فيديو: تعلم أساسيات القرآن للأطفال',
-    title_en: 'Video: Quran Basics for Kids',
-    slug: 'video-quran-basics',
-    type: 'video',
-    age_group: '9-12',
-    featured_image_url: 'https://img.youtube.com/vi/fZGaJeIBfFk/hqdefault.jpg',
+    id: "video-quran-basics",
+    title_ar: "فيديو: تعلم أساسيات القرآن للأطفال",
+    title_en: "Video: Quran Basics for Kids",
+    slug: "video-quran-basics",
+    type: "video",
+    age_group: "9-12",
+    featured_image_url: "https://img.youtube.com/vi/fZGaJeIBfFk/hqdefault.jpg",
+    video_url: "https://www.youtube.com/embed/fZGaJeIBfFk",
     content_ar: `https://www.youtube.com/embed/fZGaJeIBfFk`,
   },
 
@@ -509,12 +562,12 @@ export const kidsContent: KidsItem[] = [
   // Religious foundations — الأسس الدينية
   // ------------------------------------------------------------------
   {
-    id: 'faith-pillars',
-    title_ar: 'أركان الإيمان الستة',
-    title_en: 'Six Pillars of Faith',
-    slug: 'faith-pillars',
-    type: 'story',
-    age_group: '9-12',
+    id: "faith-pillars",
+    title_ar: "أركان الإيمان الستة",
+    title_en: "Six Pillars of Faith",
+    slug: "faith-pillars",
+    type: "story",
+    age_group: "9-12",
     content_ar: `الإيمان ستة أركان، تعال نتعلمها:
 
 1. الإيمان بالله
@@ -538,12 +591,12 @@ export const kidsContent: KidsItem[] = [
 احفظ هذه الأركان الستة جيداً، فهي أساس دينك!`,
   },
   {
-    id: 'islam-pillars',
-    title_ar: 'أركان الإسلام الخمسة',
-    title_en: 'Five Pillars of Islam',
-    slug: 'islam-pillars',
-    type: 'story',
-    age_group: '6-8',
+    id: "islam-pillars",
+    title_ar: "أركان الإسلام الخمسة",
+    title_en: "Five Pillars of Islam",
+    slug: "islam-pillars",
+    type: "story",
+    age_group: "6-8",
     content_ar: `الإسلام بُني على خمسة أركان:
 
 1. الشهادتان
@@ -569,12 +622,12 @@ export const kidsContent: KidsItem[] = [
   // Memorization plans for kids — خطط الحفظ
   // ------------------------------------------------------------------
   {
-    id: 'memorize-fatiha',
-    title_ar: 'خطة حفظ سورة الفاتحة',
-    title_en: 'Memorize Al-Fatiha Plan',
-    slug: 'memorize-fatiha',
-    type: 'memorize',
-    age_group: '3-5',
+    id: "memorize-fatiha",
+    title_ar: "خطة حفظ سورة الفاتحة",
+    title_en: "Memorize Al-Fatiha Plan",
+    slug: "memorize-fatiha",
+    type: "memorize",
+    age_group: "3-5",
     content_ar: `سورة الفاتحة هي أم القرآن، نقرأها في كل ركعة من الصلاة!
 
 خطة الحفظ في 3 أيام:
@@ -597,12 +650,12 @@ export const kidsContent: KidsItem[] = [
 بعد كل يوم راجع ما حفظته من البداية. والآن أنت تعرف الفاتحة كاملة!`,
   },
   {
-    id: 'memorize-ikhlas-falaq-nas',
-    title_ar: 'خطة حفظ المعوذات والإخلاص',
-    title_en: 'Memorize Last 3 Surahs',
-    slug: 'memorize-ikhlas-falaq-nas',
-    type: 'memorize',
-    age_group: '6-8',
+    id: "memorize-ikhlas-falaq-nas",
+    title_ar: "خطة حفظ المعوذات والإخلاص",
+    title_en: "Memorize Last 3 Surahs",
+    slug: "memorize-ikhlas-falaq-nas",
+    type: "memorize",
+    age_group: "6-8",
     content_ar: `سور الإخلاص والفلق والناس نقرأها في الصلاة وقبل النوم، تعال نحفظها!
 
 سورة الإخلاص (اليوم الأول):
@@ -621,12 +674,83 @@ export const kidsContent: KidsItem[] = [
   },
 
   {
-    id: 'ramadan-kids',
-    title_ar: 'رمضان للأطفال',
-    title_en: 'Ramadan for Kids',
-    slug: 'ramadan-kids',
-    type: 'story',
-    age_group: '6-8',
+    id: "memorize-ayat-al-kursi-review",
+    title_ar: "خطة حفظ آية الكرسي مع مراجعة أسبوعية",
+    title_en: "Memorize Ayat Al-Kursi with Weekly Review",
+    slug: "memorize-ayat-al-kursi-review",
+    type: "memorize",
+    age_group: "9-12",
+    content_ar: `آية الكرسي من أعظم آيات القرآن، وهذه خطة سهلة للحفظ والمراجعة:
+
+اليوم 1: استمع للآية كاملة 5 مرات، ثم احفظ أول سطرين بتكرار كل جملة 10 مرات.
+اليوم 2: راجع ما سبق 5 مرات، واحفظ الجزء الأوسط بتقسيمه إلى جمل قصيرة.
+اليوم 3: احفظ آخر الآية، ثم اربط البداية بالوسط والنهاية.
+اليوم 4: تسميع كامل مع ولي الأمر أو المعلم، وتصحيح مواضع التوقف.
+اليوم 5: مراجعة خفيفة بعد صلاة المغرب، ثم تسميع بدون نظر.
+
+جدول المراجعة:
+- بعد يوم واحد: تسميع مرة كاملة.
+- بعد 3 أيام: تسميع كامل مع شرح معنى واحد من الآية.
+- بعد 7 أيام: تسميع كامل وكتابة أكثر الكلمات التي تحتاج تثبيتًا.
+- كل جمعة: مراجعة الآية مع سورة الإخلاص والمعوذتين.
+
+نصيحة للبطل: لا تتعجل؛ الحفظ القليل المتقن أفضل من الكثير بلا مراجعة.`,
+    metadata: {
+      reward: "وسام حافظ آية الكرسي",
+      memorizationTarget: "آية الكرسي",
+      durationDays: 5,
+      dailyPlan: ["استماع", "تكرار", "ربط المقاطع", "تسميع", "مراجعة"],
+      reviewPlan: ["بعد يوم", "بعد 3 أيام", "بعد أسبوع", "كل جمعة"],
+    },
+  },
+  {
+    id: "game-matching-dua-times",
+    title_ar: "لعبة توصيل الدعاء بالموقف",
+    title_en: "Match the Dua to the Moment",
+    slug: "game-matching-dua-times",
+    type: "matching",
+    age_group: "6-8",
+    content_ar: `اقرأ المواقف التالية، ثم صِل كل موقف بالدعاء المناسب:
+
+1. قبل النوم ← باسمك اللهم أموت وأحيا
+2. قبل الطعام ← بسم الله
+3. عند الخروج من البيت ← بسم الله توكلت على الله
+4. عند دخول الخلاء ← اللهم إني أعوذ بك من الخبث والخبائث
+5. بعد الانتهاء من الطعام ← الحمد لله الذي أطعمنا وسقانا
+
+طريقة اللعب مع الأسرة:
+- اكتب المواقف في بطاقات ذهبية.
+- اكتب الأدعية في بطاقات خضراء.
+- اقلب البطاقات واختبر ذاكرتك.
+- كل إجابة صحيحة = نجمة، وخمس نجوم = وسام الدعاء.`,
+    quiz_data: {
+      questions: [
+        {
+          text: "أي دعاء نقوله قبل الطعام؟",
+          options: ["بسم الله", "سبحان ربي العظيم", "السلام عليكم"],
+          correctAnswer: 0,
+        },
+        {
+          text: "متى نقول: باسمك اللهم أموت وأحيا؟",
+          options: ["قبل النوم", "بعد اللعب", "عند المطر"],
+          correctAnswer: 0,
+        },
+      ],
+    },
+    metadata: {
+      reward: "وسام الدعاء اليومي",
+      gameType: "matching",
+      objective: "ربط الأذكار اليومية بمواقفها بطريقة لعب آمنة.",
+    },
+  },
+
+  {
+    id: "ramadan-kids",
+    title_ar: "رمضان للأطفال",
+    title_en: "Ramadan for Kids",
+    slug: "ramadan-kids",
+    type: "story",
+    age_group: "6-8",
     content_ar: `رمضان شهر جميل ومميز جدًا عند المسلمين!
 
 ما هو الصيام؟
@@ -651,5 +775,5 @@ export const kidsContent: KidsItem[] = [
 ];
 
 export function getKidsItemBySlug(slug: string): KidsItem | undefined {
-  return kidsContent.find((item) => item.slug === slug);
+  return kidsContent.find(item => item.slug === slug);
 }

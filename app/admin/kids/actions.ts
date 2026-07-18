@@ -12,17 +12,35 @@ function value(formData: FormData, key: string) {
 function parseQuizData(raw: string | null) {
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as unknown;
+    const parsed = JSON.parse(raw) as unknown;
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      !Array.isArray((parsed as { questions?: unknown }).questions)
+    ) {
+      throw new Error();
+    }
+    return parsed;
   } catch {
-    throw new Error("بيانات اللعبة / الاختبار يجب أن تكون JSON صحيح.");
+    throw new Error(
+      "بيانات اللعبة / الاختبار يجب أن تكون JSON صحيحًا ويحتوي على questions."
+    );
   }
+}
+
+function normalizeSlug(slug: string) {
+  return slug
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
 }
 
 export async function saveKidsContentAction(formData: FormData) {
   await requireAdmin();
 
   const title_ar = String(formData.get("title_ar") ?? "").trim();
-  const slug = String(formData.get("slug") ?? "").trim();
+  const slug = normalizeSlug(String(formData.get("slug") ?? "").trim());
   const content_ar = String(formData.get("content_ar") ?? "").trim();
 
   if (!title_ar || !slug || !content_ar) {
@@ -43,7 +61,7 @@ export async function saveKidsContentAction(formData: FormData) {
       featured_image_url: value(formData, "featured_image_url"),
       video_url: value(formData, "video_url"),
       quiz_data: parseQuizData(value(formData, "quiz_data")),
-      published: formData.get("published") !== "off",
+      published: formData.has("published"),
       metadata: {
         reward: value(formData, "reward"),
         memorizationTarget: value(formData, "memorization_target"),

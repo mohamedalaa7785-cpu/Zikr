@@ -225,6 +225,7 @@ export default async function AdminPage() {
     usersCount,
     videosCount,
     duasCount,
+    socialQueueCount,
   ] = await Promise.all([
     runApiHealthChecks(),
     countTable("stories"),
@@ -233,6 +234,7 @@ export default async function AdminPage() {
     countTable("profiles"),
     countTable("videos"),
     countTable("duas"),
+    countTable("social_publish_queue"),
   ]);
 
   const maxContent = Math.max(
@@ -280,6 +282,11 @@ export default async function AdminPage() {
           <StatCard label="المقالات" value={articlesCount} note="مقالة" />
           <StatCard label="الأدعية" value={duasCount} note="دعاء مأثور" />
           <StatCard label="الفيديوهات" value={videosCount} note="فيديو" />
+          <StatCard
+            label="طابور النشر"
+            value={socialQueueCount}
+            note="عنصر اجتماعي"
+          />
           <StatCard label="المسابقات" value={competitionsCount} note="مسابقة" />
           <StatCard
             label="صلاحيتك"
@@ -349,6 +356,12 @@ export default async function AdminPage() {
               title="الفيديوهات"
               desc="مزامنة يوتيوب وإدارة الفيديوهات"
               badge="فيديو"
+            />
+            <QuickLink
+              href="/admin/social"
+              title="النشر التلقائي"
+              desc="متابعة طابور فيسبوك ويوتيوب والبوستات"
+              badge="Social"
             />
             <QuickLink
               href="/admin/kids"

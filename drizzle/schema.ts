@@ -491,7 +491,9 @@ export const scholars = pgTable("scholars", {
 export const stories = pgTable("stories", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
-  userId: uuid("user_id").references(() => profiles.id, { onDelete: "set null" }),
+  userId: uuid("user_id").references(() => profiles.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   summary: text("summary"),
   content: text("content").notNull(),
@@ -626,7 +628,12 @@ export const memorizationProgress = pgTable(
       .defaultNow()
       .notNull(),
   },
-  t => ({ uniq: unique("memorization_progress_user_surah").on(t.userId, t.surahNumber) })
+  t => ({
+    uniq: unique("memorization_progress_user_surah").on(
+      t.userId,
+      t.surahNumber
+    ),
+  })
 );
 
 // Prophets (public read, admin write)
@@ -1167,6 +1174,28 @@ export const videoPublishLog = pgTable("video_publish_log", {
     .defaultNow()
     .notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const socialPublishQueue = pgTable("social_publish_queue", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  contentType: text("content_type").notNull(),
+  contentId: text("content_id"),
+  title: text("title").notNull(),
+  body: text("body"),
+  imageUrl: text("image_url"),
+  videoUrl: text("video_url"),
+  targetPlatforms: text("target_platforms").array().notNull().default([]),
+  status: text("status").notNull().default("queued"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  errorMessage: text("error_message"),
+  metadata: jsonb("metadata").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });

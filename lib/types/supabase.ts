@@ -972,40 +972,58 @@ export type Database = {
       }
       kids_content: {
         Row: {
-          age_group: string | null
+          age_group: string
           content_ar: string | null
+          content_en: string | null
           created_at: string | null
           featured_image_url: string | null
           id: string
-          is_active: boolean | null
-          published: boolean | null
+          is_active: boolean
+          metadata: Json | null
+          published: boolean
+          quiz_data: Json | null
           slug: string
           title_ar: string
-          type: string | null
+          title_en: string
+          type: string
+          updated_at: string
+          video_url: string | null
         }
         Insert: {
-          age_group?: string | null
+          age_group?: string
           content_ar?: string | null
+          content_en?: string | null
           created_at?: string | null
           featured_image_url?: string | null
           id?: string
-          is_active?: boolean | null
-          published?: boolean | null
+          is_active?: boolean
+          metadata?: Json | null
+          published?: boolean
+          quiz_data?: Json | null
           slug: string
           title_ar: string
-          type?: string | null
+          title_en: string
+          type?: string
+          updated_at?: string
+          video_url?: string | null
         }
         Update: {
-          age_group?: string | null
+          age_group?: string
           content_ar?: string | null
+          content_en?: string | null
           created_at?: string | null
           featured_image_url?: string | null
           id?: string
-          is_active?: boolean | null
-          published?: boolean | null
+          is_active?: boolean
+          metadata?: Json | null
+          published?: boolean
+          quiz_data?: Json | null
           slug?: string
           title_ar?: string
-          type?: string | null
+          title_en?: string
+          type?: string
+          updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -2313,6 +2331,60 @@ export type Database = {
           published?: boolean | null
           slug?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      social_publish_queue: {
+        Row: {
+          body: string | null
+          content_id: string | null
+          content_type: string
+          created_at: string
+          error_message: string | null
+          id: string
+          image_url: string | null
+          metadata: Json
+          published_at: string | null
+          scheduled_at: string | null
+          status: string
+          target_platforms: string[]
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          body?: string | null
+          content_id?: string | null
+          content_type: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          target_platforms?: string[]
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          body?: string | null
+          content_id?: string | null
+          content_type?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          target_platforms?: string[]
+          title?: string
+          updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
