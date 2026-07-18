@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
+interface SearchRow {
+  id: string | number;
+  title: string | null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const query = request.nextUrl.searchParams.get('q');
@@ -19,10 +24,10 @@ export async function GET(request: NextRequest) {
     ]);
 
     const results = [
-      ...(quranResults.data || []).map((r) => ({ ...r, type: 'quran' })),
-      ...(hadithResults.data || []).map((r) => ({ ...r, type: 'hadith' })),
-      ...(duaResults.data || []).map((r) => ({ ...r, type: 'dua' })),
-      ...(storyResults.data || []).map((r) => ({ ...r, type: 'story' })),
+      ...((quranResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'quran' })),
+      ...((hadithResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'hadith' })),
+      ...((duaResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'dua' })),
+      ...((storyResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'story' })),
     ];
 
     return NextResponse.json(results);

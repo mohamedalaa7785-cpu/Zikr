@@ -1,6 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
+interface AdminContentRow {
+  id: string;
+  title: string;
+  published?: boolean | null;
+  views?: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -25,7 +34,7 @@ export async function GET() {
     ]);
 
     const content = [
-      ...(storiesRes.data || []).map((s) => ({
+      ...((storiesRes.data || []) as AdminContentRow[]).map((s) => ({
         id: s.id,
         title: s.title,
         type: 'story',
@@ -34,7 +43,7 @@ export async function GET() {
         createdAt: s.created_at,
         updatedAt: s.updated_at,
       })),
-      ...(articlesRes.data || []).map((a) => ({
+      ...((articlesRes.data || []) as AdminContentRow[]).map((a) => ({
         id: a.id,
         title: a.title,
         type: 'article',

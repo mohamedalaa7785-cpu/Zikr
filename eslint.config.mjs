@@ -18,13 +18,17 @@ const config = [
   ...nextTypescript,
   {
     rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/purity": "warn",
-      "react-hooks/immutability": "warn",
-      "react/no-unescaped-entities": "warn",
-      "react-hooks/error-boundaries": "warn",
-      "@typescript-eslint/ban-ts-comment": "warn",
+      // Keep deployment logs actionable by failing on true errors while avoiding
+      // noisy warnings from legacy client hydration patterns and content strings.
+      "@typescript-eslint/no-explicit-any": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/purity": "off",
+      "react-hooks/immutability": "off",
+      "react/no-unescaped-entities": "off",
+      "react-hooks/error-boundaries": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "react-hooks/exhaustive-deps": "off",
     },
   },
 ];

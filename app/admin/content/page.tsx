@@ -15,6 +15,15 @@ export const metadata: Metadata = {
   title: 'إدارة المحتوى | الأدمن',
 };
 
+interface ContentRow {
+  id: string;
+  title?: string | null;
+  published?: boolean | null;
+  is_active?: boolean | null;
+  views?: number | null;
+  created_at: string;
+}
+
 interface ContentItem {
   id: string;
   title: string;
@@ -58,23 +67,23 @@ async function getManagedContent(): Promise<ContentItem[]> {
     ]);
 
     const items: ContentItem[] = [
-      ...(storiesRes.data ?? []).map((s) => ({
-        id: s.id, title: s.title, published: s.published ?? false, views: 0,
+      ...((storiesRes.data ?? []) as ContentRow[]).map((s) => ({
+        id: s.id, title: s.title ?? 'بدون عنوان', published: s.published ?? false, views: 0,
         created_at: s.created_at, type: 'قصة', table: 'stories' as const,
       })),
-      ...(articlesRes.data ?? []).map((a) => ({
-        id: a.id, title: a.title, published: a.published ?? false, views: a.views ?? 0,
+      ...((articlesRes.data ?? []) as ContentRow[]).map((a) => ({
+        id: a.id, title: a.title ?? 'بدون عنوان', published: a.published ?? false, views: a.views ?? 0,
         created_at: a.created_at, type: 'مقالة', table: 'articles' as const,
       })),
-      ...(competitionsRes.data ?? []).map((c) => ({
-        id: c.id, title: c.title, published: c.published ?? false, views: 0,
+      ...((competitionsRes.data ?? []) as ContentRow[]).map((c) => ({
+        id: c.id, title: c.title ?? 'بدون عنوان', published: c.published ?? false, views: 0,
         created_at: c.created_at, type: 'مسابقة', table: 'competitions' as const,
       })),
-      ...(plansRes.data ?? []).map((p) => ({
-        id: p.id, title: p.title, published: p.published ?? false, views: 0,
+      ...((plansRes.data ?? []) as ContentRow[]).map((p) => ({
+        id: p.id, title: p.title ?? 'بدون عنوان', published: p.published ?? false, views: 0,
         created_at: p.created_at, type: 'خطة حفظ', table: 'memorization_plans' as const,
       })),
-      ...(pinnedRes.data ?? []).map((m) => ({
+      ...((pinnedRes.data ?? []) as ContentRow[]).map((m) => ({
         id: m.id, title: m.title ?? 'رسالة مثبتة', published: m.is_active ?? false, views: 0,
         created_at: m.created_at, type: 'رسالة مثبتة', table: 'pinned_messages' as const,
       })),
