@@ -7,7 +7,7 @@ export const PRODUCTION_URL = 'https://zikrmediaofficial.vercel.app';
 export const siteConfig = {
   name: 'ZIKR | ذِكرٌ',
   shortName: 'ZIKR',
-  description: 'منصة روحانية تجمع القرآن والحديث والقصص والعلم في تجربة حديثة.',
+  description: 'ZIKR - منصة إسلامية شاملة للقرآن الكريم، الأحاديث النبوية، قصص الأنبياء، ومواقيت الصلاة بتجربة حديثة ومتكاملة.',
   url: process.env.NEXT_PUBLIC_SITE_URL || PRODUCTION_URL,
   locale: 'ar_SA',
   dir: 'rtl' as const,
