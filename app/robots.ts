@@ -10,7 +10,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // Private / admin / API routes must not be indexed
-        disallow: ["/admin/", "/api/", "/auth/", "/favorites", "/profile"],
+        disallow: ["/admin/", "/api/", "/auth/", "/favorites", "/profile", "/settings"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

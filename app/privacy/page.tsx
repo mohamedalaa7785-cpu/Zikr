@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "سياسة الخصوصية",
   description:
     "سياسة خصوصية منصة ZIKR وبيان التعامل مع البيانات والحسابات والتكاملات الخارجية.",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

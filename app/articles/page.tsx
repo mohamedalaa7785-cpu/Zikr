@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
@@ -8,10 +9,11 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'المقالات الإسلامية',
   description: 'مقالات قيمة عن الإسلام والعقيدة والتطبيق العملي من منصة ذِكر.',
-};
+  path: '/articles',
+});
 
 export const revalidate = 1800;
 

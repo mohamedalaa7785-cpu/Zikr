@@ -23,13 +23,13 @@ export default function VideoDetailPage() {
   const slug = params.slug as string;
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createBrowserSupabaseClient();
 
   useEffect(() => {
     const fetchVideo = async () => {
       if (!slug) return;
       try {
         setLoading(true);
+        const supabase = createBrowserSupabaseClient();
         const { data } = await supabase
           .from('videos')
           .select('*')

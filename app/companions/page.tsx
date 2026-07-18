@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
@@ -8,10 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'الصحابة رضي الله عنهم',
   description: 'سير أصحاب النبي محمد ﷺ الذين حملوا الإسلام ونشروه في الآفاق.',
-};
+  path: '/companions',
+});
 
 export const revalidate = 3600;
 

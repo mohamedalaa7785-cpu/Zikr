@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import Image from "next/image";
+import { pageMetadata } from "@/lib/site";
 
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
@@ -56,10 +57,11 @@ const STATIC_CONTENT: KidsContent[] = staticKidsContent.map(item => ({
   featured_image_url: item.featured_image_url,
 }));
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "قسم الأطفال | ذكر",
   description: "محتوى إسلامي تعليمي وترفيهي آمن ومناسب للأطفال",
-};
+  path: "/kids",
+});
 
 export default async function KidsPage() {
   let content: KidsContent[] = STATIC_CONTENT;

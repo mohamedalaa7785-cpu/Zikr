@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
@@ -8,10 +9,11 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { Badge } from '@/components/ui/badge';
 import { getYoutubeChannelFeed } from '@/lib/services/youtube';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'الفيديوهات الإسلامية',
   description: 'شاهد أحدث الفيديوهات والمحتوى الإسلامي من قناة ذِكر على يوتيوب.',
-};
+  path: '/videos',
+});
 
 export const revalidate = 1800;
 
