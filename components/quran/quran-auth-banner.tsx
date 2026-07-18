@@ -1,9 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
-import { ReadingProgressCard } from '@/components/quran/reading-progress-card';
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type {
+  AuthChangeEvent,
+  Session,
+  UserResponse,
+} from "@supabase/supabase-js";
+import Link from "next/link";
+import { ReadingProgressCard } from "@/components/quran/reading-progress-card";
 
 /**
  * Renders client-side auth-aware UI for the Quran page header.
@@ -18,13 +23,17 @@ export function QuranAuthBanner() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsAuthenticated(!!user);
+    supabase.auth.getUser().then(({ data }: UserResponse) => {
+      setIsAuthenticated(!!data.user);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session?.user);
-    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setIsAuthenticated(!!session?.user);
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);

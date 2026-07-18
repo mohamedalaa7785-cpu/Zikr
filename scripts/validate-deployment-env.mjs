@@ -83,15 +83,6 @@ function withNumberedAliases(names) {
 
 function getEnv(name) {
   const aliases = {
-    NEXT_PUBLIC_SUPABASE_URL: withNumberedAliases([
-      "NEXT_PUBLIC_SUPABASE_URL",
-      "SUPABASE_URL",
-    ]),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: withNumberedAliases([
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-      "SUPABASE_ANON_KEY",
-      "SUPABASE_PUBLISHABLE_KEY",
-    ]),
     DATABASE_URL: withNumberedAliases([
       "DATABASE_URL",
       "POSTGRES_URL",
@@ -107,10 +98,6 @@ function getEnv(name) {
       "AWS_SECRET_ACCESS_KEY",
     ]),
     AWS_S3_REGION: withNumberedAliases(["AWS_S3_REGION", "AWS_REGION"]),
-    SUPABASE_SERVICE_ROLE_KEY: withNumberedAliases([
-      "SUPABASE_SERVICE_ROLE_KEY",
-      "SUPABASE_SECRET_KEY",
-    ]),
   };
 
   for (const key of aliases[name] || [name]) {
