@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
 import { pageMetadata } from '@/lib/site';
@@ -13,6 +12,15 @@ export const metadata: Metadata = pageMetadata({
   description: 'قصص الأنبياء والرسل عليهم السلام كاملة — من آدم إلى محمد ﷺ — مع تفاصيل حياتهم ومعجزاتهم وإمكانية مشاهدة الفيديوهات.',
   path: '/prophets',
 });
+
+interface ProphetRow {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  slug: string;
+  bio_ar?: string | null;
+  order_num?: number | null;
+}
 
 interface Prophet {
   id: string;
@@ -64,7 +72,12 @@ export default async function ProphetsPage() {
       .eq('published', true)
       .order('order_num', { ascending: true });
     if (data && data.length > 0) {
-      prophets = data.map((r) => ({ ...r, quran_mentions: undefined }));
+      prophets = (data as ProphetRow[]).map((r) => ({
+        ...r,
+        bio_ar: r.bio_ar ?? null,
+        order_num: r.order_num ?? null,
+        quran_mentions: undefined,
+      }));
     }
   } catch {
     // fall through to static

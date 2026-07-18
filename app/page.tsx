@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Container } from '@/components/ui/container';
@@ -249,28 +249,24 @@ export default function HomePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
+  const prayerTimesRef = useRef<PrayerTimes | null>(null);
   const [prayerCity, setPrayerCity] = useState('Cairo');
   const [cityInput, setCityInput] = useState('');
   const [loadingPrayer, setLoadingPrayer] = useState(false);
-  const [activePrayer, setActivePrayer] = useState('');
-  const [nextPrayer, setNextPrayer] = useState('');
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
-  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    setCurrentTime(new Date());
+    const updateClock = () => setCurrentTime(new Date());
+    queueMicrotask(updateClock);
     
     // Initialize offline database
     offlineDb.initialize().catch(err => {
       console.error('[HomePage] Failed to initialize offline DB:', err);
     });
     
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const interval = setInterval(updateClock, 1000);
 
     const checkAuth = async () => {
       const supabase = createBrowserSupabaseClient();
@@ -284,50 +280,75 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (prayerTimes && currentTime) {
-      const { active, next } = getActivePrayer(prayerTimes, currentTime);
-      setActivePrayer(active);
-      setNextPrayer(next);
-    }
+    prayerTimesRef.current = prayerTimes;
+  }, [prayerTimes]);
+
+  const { active: activePrayer, next: nextPrayer } = useMemo(() => {
+    if (!prayerTimes || !currentTime) return { active: '', next: '' };
+    return getActivePrayer(prayerTimes, currentTime);
   }, [prayerTimes, currentTime]);
 
-  const fetchPrayerByCity = useCallback(async (city: string) => {
-    setLoadingPrayer(true);
+  const fetchPrayerByCity = useCallback(async (city: string, options?: { keepExisting?: boolean }) => {
+    if (!options?.keepExisting) setLoadingPrayer(true);
     try {
       const res = await getPrayerTimesByCity(city, 'Egypt');
       if (res?.data?.timings) setPrayerTimes(res.data.timings as PrayerTimes);
-    } catch (error) { console.error('Prayer fetch error:', error); } finally { setLoadingPrayer(false); }
+    } catch (error) {
+      console.error('Prayer fetch error:', error);
+    } finally {
+      setLoadingPrayer(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (!('geolocation' in navigator)) { fetchPrayerByCity(prayerCity); return; }
-    setLoadingPrayer(true);
+    let cancelled = false;
+
+    const setFetchedPrayerTimes = (timings: PrayerTimes) => {
+      if (!cancelled) setPrayerTimes(timings);
+    };
+
+    const fallbackToCity = async (keepExisting = Boolean(prayerTimesRef.current)) => {
+      if (!cancelled) await fetchPrayerByCity(prayerCity, { keepExisting });
+    };
+
+    if (!prayerTimesRef.current) setLoadingPrayer(true);
+
+    if (!('geolocation' in navigator)) {
+      void fallbackToCity();
+      return () => { cancelled = true; };
+    }
+
     navigator.geolocation.getCurrentPosition(
       async ({ coords: { latitude, longitude } }) => {
         try {
           const res = await getPrayerTimes(latitude, longitude);
-          if (res?.data?.timings) setPrayerTimes(res.data.timings as PrayerTimes);
-          else await fetchPrayerByCity(prayerCity);
-        } catch { await fetchPrayerByCity(prayerCity); }
-        finally { setLoadingPrayer(false); }
+          if (res?.data?.timings) setFetchedPrayerTimes(res.data.timings as PrayerTimes);
+          else await fallbackToCity();
+        } catch {
+          await fallbackToCity();
+        } finally {
+          if (!cancelled) setLoadingPrayer(false);
+        }
       },
-      async () => { void fetchPrayerByCity(prayerCity); },
+      () => { void fallbackToCity(); },
       { timeout: 6000 },
     );
-  }, [prayerCity, fetchPrayerByCity, prayerTimes]);
+
+    return () => { cancelled = true; };
+  }, [prayerCity, fetchPrayerByCity]);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   }, [searchQuery, router]);
 
-  const timeStr = mounted && currentTime ? currentTime.toLocaleTimeString('en-GB', {
+  const timeStr = currentTime ? currentTime.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
     hour12: false,
   }) : '';
-  const dateStr = mounted && currentTime ? currentTime.toLocaleDateString('ar-EG', {
+  const dateStr = currentTime ? currentTime.toLocaleDateString('ar-EG', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -508,7 +529,9 @@ export default function HomePage() {
               <h2 id="prayer-times-heading" className="text-2xl font-bold text-brand-gold" dir="rtl">
                 أوقات الصلاة اليوم
               </h2>
-              <p className="text-sm text-brand-cream/40 mt-0.5" dir="rtl">{prayerCity} · يتجدد تلقائيًا</p>
+              <p className="text-sm text-brand-cream/40 mt-0.5" dir="rtl">
+                {prayerCity} · {loadingPrayer ? 'يتم التحديث دون إخفاء المواقيت' : 'يتجدد تلقائيًا'}
+              </p>
             </div>
             <form
               onSubmit={(e) => {
@@ -536,7 +559,7 @@ export default function HomePage() {
             </form>
           </div>
 
-          {prayerTimes && !loadingPrayer ? (
+          {prayerTimes ? (
             <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
               {prayerNames.map(({ key, label }) => {
                 const isActive = activePrayer === key;
