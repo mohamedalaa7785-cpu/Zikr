@@ -48,7 +48,7 @@ async function main() {
 
     // Prepare Ayahs for bulk insert
     const ayahsData = surah.ayahs.map((ayah: Record<string, unknown>) => {
-      const mapped = {
+      const mapped: Record<string, unknown> = {
         surah_id: surah.number || 0,
         ayah_number: ayah.numberInSurah || 0,
         text_ar: ayah.text || '',
@@ -62,7 +62,7 @@ async function main() {
       };
       
       // Final safety check for any undefined values
-      Object.keys(mapped).forEach(key => {
+      Object.keys(mapped).forEach((key: string) => {
         if (mapped[key] === undefined) mapped[key] = null;
       });
       
