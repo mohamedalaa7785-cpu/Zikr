@@ -24,10 +24,33 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 
-# Storage is disabled — the app uses AWS S3 via lib/services/s3.ts.
-# Supabase storage is not used in this project.
 [storage]
-enabled = false
+enabled = true
+file_size_limit = "50MiB"
+
+# Avatars bucket — public read, authenticated write, per-user path scoping
+[storage.buckets.avatars]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+
+# Media bucket — articles, stories, and other editorial media
+[storage.buckets.media]
+public = true
+file_size_limit = "20MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp", "video/mp4"]
+
+# Audio bucket — Quran recitations and tawasheeh clips (private, presigned URLs)
+[storage.buckets.audio]
+public = false
+file_size_limit = "50MiB"
+allowed_mime_types = ["audio/mpeg", "audio/mp4", "audio/ogg", "audio/wav"]
+
+# Documents bucket — PDFs and downloadable resources
+[storage.buckets.documents]
+public = false
+file_size_limit = "20MiB"
+allowed_mime_types = ["application/pdf"]
 
 [functions.health]
 verify_jwt = false

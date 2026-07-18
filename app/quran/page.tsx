@@ -6,9 +6,7 @@ import { SurahSearch } from '@/components/quran/surah-search';
 import { Suspense } from 'react';
 import { SurahSkeleton } from '@/components/quran/surah-skeleton';
 import { pageMetadata } from '@/lib/site';
-import { createClient } from '@/lib/supabase/server';
-import { ReadingProgressCard } from '@/components/quran/reading-progress-card';
-import Link from 'next/link';
+import { QuranAuthBanner } from '@/components/quran/quran-auth-banner';
 
 // إجبار الصفحة على الرندرة الديناميكية لمنع أخطاء الـ Build مع الـ no-store fetch
 export const dynamic = 'force-dynamic';
@@ -20,9 +18,6 @@ export const metadata = pageMetadata({
 });
 
 async function QuranContent() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
   try {
     // DB-First Strategy
     let surahs = await getAllSurahsFromDb('ar');
@@ -48,17 +43,8 @@ async function QuranContent() {
       <Container className='space-y-8 py-12'>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h1 className='text-4xl font-bold text-brand-gold'>القرآن الكريم</h1>
-          {!user && (
-            <Link 
-              href="/auth/register"
-              className="inline-flex items-center justify-center rounded-xl bg-brand-gold/10 border border-brand-gold/20 px-6 py-2 text-sm font-bold text-brand-gold hover:bg-brand-gold/20 transition-colors"
-            >
-              أنشئ حساباً مجانياً لحفظ تقدمك
-            </Link>
-          )}
+          <QuranAuthBanner />
         </div>
-
-        {user && <ReadingProgressCard />}
 
         <SurahSearch initialSurahs={surahs.map(s => ({
           number: s.number,
