@@ -10,24 +10,6 @@ function r(...keys: Array<string | undefined>): string | undefined {
   return keys.find(v => v !== undefined && v !== "");
 }
 
-function appAuthCallbackUrl(value: string | undefined): string | undefined {
-  if (!value) return undefined;
-
-  try {
-    const url = new URL(value);
-    if (
-      url.hostname.endsWith(".supabase.co") &&
-      url.pathname === "/auth/v1/callback"
-    ) {
-      return undefined;
-    }
-  } catch {
-    return value;
-  }
-
-  return value;
-}
-
 const e = process.env;
 
 const rawEnv: Record<string, string | undefined> = {
@@ -97,11 +79,19 @@ const rawEnv: Record<string, string | undefined> = {
   ),
 
   // ── Supabase ──────────────────────────────────────────────────────────────
-  // Canonical names only. The public URL and anon key are intentionally public;
-  // the service-role key remains server-only and is never returned by getPublicEnv().
-  NEXT_PUBLIC_SUPABASE_URL: r(e.NEXT_PUBLIC_SUPABASE_URL),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: r(e.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-  SUPABASE_SERVICE_ROLE_KEY: r(e.SUPABASE_SERVICE_ROLE_KEY),
+  // The public URL and anon key are intentionally public; the service-role key
+  // remains server-only and is never returned by getPublicEnv(). Accept both
+  // app-facing NEXT_PUBLIC_* names and Supabase integration names.
+  NEXT_PUBLIC_SUPABASE_URL: r(e.NEXT_PUBLIC_SUPABASE_URL, e.SUPABASE_URL),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: r(
+    e.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    e.SUPABASE_ANON_KEY,
+    e.SUPABASE_PUBLISHABLE_KEY
+  ),
+  SUPABASE_SERVICE_ROLE_KEY: r(
+    e.SUPABASE_SERVICE_ROLE_KEY,
+    e.SUPABASE_SECRET_KEY
+  ),
 
   // ── Site / Auth ───────────────────────────────────────────────────────────
   // NEXT_PUBLIC_SITE_URL: use the known production URL when the env var is empty
@@ -110,11 +100,13 @@ const rawEnv: Record<string, string | undefined> = {
     e.NEXT_PUBLIC_SITE_URL_19,
     PRODUCTION_URL
   ),
-  // AUTH_CALLBACK_URL should point to our app's /auth/callback, not Supabase's
+  // AUTH_CALLBACK_URL is the OAuth provider callback registered with Google/Facebook.
+  // Supabase expects this to be the project auth endpoint, while in-app redirects
+  // continue to use NEXT_PUBLIC_SITE_URL + /auth/callback.
   AUTH_CALLBACK_URL: r(
-    appAuthCallbackUrl(e.AUTH_CALLBACK_URL),
-    appAuthCallbackUrl(e.AUTH_CALLBACK_URL_19),
-    `${r(e.NEXT_PUBLIC_SITE_URL, PRODUCTION_URL)}/auth/callback`
+    e.AUTH_CALLBACK_URL,
+    e.AUTH_CALLBACK_URL_19,
+    `${r(e.SUPABASE_URL, e.NEXT_PUBLIC_SUPABASE_URL, "https://eydxvcamhjhajxjrsgym.supabase.co")}/auth/v1/callback`
   ),
 
   // ── Google OAuth ──────────────────────────────────────────────────────────
