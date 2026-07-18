@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Capacitor splash screen background layer -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background color: ZIKR dark emerald -->
+    <item android:drawable="@color/colorSplashBackground" />
+</layer-list>

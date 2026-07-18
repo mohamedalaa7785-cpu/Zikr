@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Universal Links / Associated Domains for zikrmediaofficial.vercel.app -->
+  <key>com.apple.developer.associated-domains</key>
+  <array>
+    <string>applinks:zikrmediaofficial.vercel.app</string>
+    <string>webcredentials:zikrmediaofficial.vercel.app</string>
+  </array>
+
+  <!-- Push Notifications -->
+  <key>aps-environment</key>
+  <string>production</string>
+
+  <!-- iCloud — required for cross-device data; remove if not used -->
+  <!-- <key>com.apple.developer.icloud-container-identifiers</key> -->
+  <!-- <array><string>iCloud.com.zikr.app</string></array> -->
+</dict>
+</plist>

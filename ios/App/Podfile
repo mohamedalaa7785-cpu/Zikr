@@ -1,0 +1,21 @@
+require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
+
+platform :ios, '16.0'
+use_frameworks!
+
+# Workaround to avoid Xcode 14 migration error
+post_install do |installer|
+  assertDeploymentTarget(installer)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+      # Suppress code-signing warnings during pod install
+      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+    end
+  end
+end
+
+target 'App' do
+  capacitor_pods
+  # Add any additional Pods here
+end
