@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Container } from '@/components/ui/container';
+import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import { getPrayerTimes, getPrayerTimesByCity } from '@/lib/services/prayer-times';
 import { offlineDb } from '@/lib/offline-db';
 import type { PrayerTimes } from '@/lib/types/prayer';
@@ -254,6 +256,8 @@ export default function HomePage() {
   const [nextPrayer, setNextPrayer] = useState('');
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -267,6 +271,15 @@ export default function HomePage() {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
+
+    const checkAuth = async () => {
+      const supabase = createBrowserSupabaseClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setAuthLoaded(true);
+    };
+    checkAuth();
+
     return () => clearInterval(interval);
   }, []);
 
@@ -729,12 +742,22 @@ export default function HomePage() {
                 >
                   أذكار اليوم
                 </Link>
-                <Link
-                  href="/auth/register"
-                  className="rounded-xl border border-brand-gold/15 px-8 py-3 text-sm text-brand-cream/45 hover:border-brand-gold/30 hover:text-brand-cream/65 transition-colors"
-                >
-                  إنشاء حساب مجاني
-                </Link>
+                {!user && authLoaded && (
+                  <Link
+                    href="/auth/register"
+                    className="rounded-xl border border-brand-gold/15 px-8 py-3 text-sm text-brand-cream/45 hover:border-brand-gold/30 hover:text-brand-cream/65 transition-colors"
+                  >
+                    إنشاء حساب مجاني
+                  </Link>
+                )}
+                {user && authLoaded && (
+                  <Link
+                    href="/profile"
+                    className="rounded-xl border border-brand-gold/15 px-8 py-3 text-sm text-brand-cream/45 hover:border-brand-gold/30 hover:text-brand-cream/65 transition-colors"
+                  >
+                    الملف الشخصي
+                  </Link>
+                )}
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { BookOpen, Scroll, Star } from 'lucide-react';
 
-const FACEBOOK_PAGE_URL = 'https://www.facebook.com/share/1GsRPxEb8J';
+const FACEBOOK_PAGE_URL = 'https://www.facebook.com/ZikrMediaOfficial';
 
 export function Footer() {
   return (

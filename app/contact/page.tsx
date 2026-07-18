@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, MessageCircle, Youtube, Facebook, Send, CheckCircle } from 'lucide-react';
+import { Mail, Youtube, Facebook, Send, CheckCircle } from 'lucide-react';
 
 const contactChannels = [
-  { icon: Mail, label: 'البريد الإلكتروني', value: 'info@zikr.app', href: 'mailto:info@zikr.app', color: 'text-sky-400' },
-  { icon: Youtube, label: 'قناة يوتيوب', value: 'ZIKR | ذِكرٌ', href: 'https://www.youtube.com/@zikr', color: 'text-red-400' },
-  { icon: Facebook, label: 'فيسبوك', value: 'ZIKR Facebook', href: 'https://www.facebook.com/share/1GsRPxEb8J', color: 'text-blue-400' },
-  { icon: MessageCircle, label: 'تيليجرام', value: '@zikr_app', href: 'https://t.me/zikr_app', color: 'text-sky-300' },
+  { icon: Mail, label: 'البريد الإلكتروني', value: 'zikrmediaofficial@gmail.com', href: 'mailto:zikrmediaofficial@gmail.com', color: 'text-sky-400' },
+  { icon: Youtube, label: 'قناة يوتيوب', value: 'ZIKR | ذِكرٌ', href: 'https://www.youtube.com/@ZikrMediaOfficial', color: 'text-red-400' },
+  { icon: Facebook, label: 'فيسبوك', value: 'Zikr Media Official', href: 'https://www.facebook.com/ZikrMediaOfficial', color: 'text-blue-400' },
 ];
 
 export default function ContactPage() {
@@ -61,7 +60,7 @@ export default function ContactPage() {
         {/* Contact channels */}
         <section>
           <h2 className="text-xl font-bold text-brand-gold mb-6">قنوات التواصل</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {contactChannels.map((ch) => (
               <a
                 key={ch.label}
