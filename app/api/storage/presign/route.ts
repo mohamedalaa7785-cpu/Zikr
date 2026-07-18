@@ -1,8 +1,15 @@
-import { createPresignedDownloadUrl, createPresignedUploadUrl, isS3Configured, sanitizeS3Segment, type S3ObjectPurpose } from '@/lib/services/s3';
+import {
+  createPresignedDownloadUrl,
+  createPresignedUploadUrl,
+  getStoragePurposeConfig,
+  parseStorageKey,
+  sanitizeStorageSegment,
+  type StorageObjectPurpose,
+} from '@/lib/services/storage';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-const PURPOSES = new Set<S3ObjectPurpose>(['avatar', 'media', 'audio', 'document']);
+const PURPOSES = new Set<StorageObjectPurpose>(['avatar', 'media', 'audio', 'document']);
 
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
@@ -19,10 +26,8 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireUser();
     if (!user) return jsonError('Unauthorized', 401);
-    if (!isS3Configured()) return jsonError('AWS S3 storage is not configured.', 503);
-
     const body = await request.json().catch(() => null);
-    const purpose = body?.purpose as S3ObjectPurpose;
+    const purpose = body?.purpose as StorageObjectPurpose;
     if (!PURPOSES.has(purpose)) return jsonError('Invalid upload purpose.', 400);
 
     const filename = typeof body?.filename === 'string' ? body.filename : '';
@@ -48,13 +53,17 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireUser();
     if (!user) return jsonError('Unauthorized', 401);
-    if (!isS3Configured()) return jsonError('AWS S3 storage is not configured.', 503);
-
     const key = request.nextUrl.searchParams.get('key')?.trim();
     if (!key) return jsonError('Missing object key.', 400);
 
-    const ownerSegment = sanitizeS3Segment(user.id);
-    const ownsKey = Array.from(PURPOSES).some((purpose) => key.startsWith(`${purpose}/${ownerSegment}/`));
+    const parsed = parseStorageKey(key);
+    if (!parsed) return jsonError('Invalid storage object key.', 400);
+
+    const ownerSegment = sanitizeStorageSegment(user.id);
+    const ownsKey = Array.from(PURPOSES).some((purpose) => {
+      const { bucket } = getStoragePurposeConfig(purpose);
+      return parsed.bucket === bucket && parsed.path.startsWith(`${ownerSegment}/`);
+    });
     if (!ownsKey) return jsonError('Forbidden object key.', 403);
 
     const url = await createPresignedDownloadUrl(key);
