@@ -21,6 +21,9 @@ export default function PrayerTimesPage() {
   const [prayerData, setPrayerData] = useState<PrayerTimesResponse | null>(null);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lon: number; city: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  // isFetching is true during any fetch (including refreshes); loading is only
+  // true on the very first fetch before we have data to display.
+  const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [, setCurrentTime] = useState<Date>(new Date());
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time: string; minutesUntil: number } | null>(null);
@@ -37,10 +40,12 @@ export default function PrayerTimesPage() {
 
   const loadForCoords = useCallback(async (lat: number, lon: number, city: string) => {
     setCurrentLocation({ lat, lon, city });
+    setIsFetching(true);
     try {
       const data = await getPrayerTimes(lat, lon);
       if (data) {
         setPrayerData(data);
+        setError(null);
       } else {
         setError('فشل في جلب مواقيت الصلاة');
       }
@@ -48,12 +53,14 @@ export default function PrayerTimesPage() {
       setError('حدث خطأ في جلب البيانات');
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
   }, []);
 
   // Request geolocation — falls back to Cairo on denial
   const requestLocation = useCallback(async () => {
-    setLoading(true);
+    setIsFetching(true);
+    if (!prayerData) setLoading(true);
     setError(null);
 
     if (!('geolocation' in navigator)) {
@@ -76,7 +83,8 @@ export default function PrayerTimesPage() {
 
   // Fetch prayer times by city
   const fetchByCity = useCallback(async (city: string) => {
-    setLoading(true);
+    setIsFetching(true);
+    if (!prayerData) setLoading(true);
     setError(null);
 
     try {
@@ -91,8 +99,9 @@ export default function PrayerTimesPage() {
       setError('حدث خطأ في البحث');
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
-  }, []);
+  }, [prayerData]);
 
   // Update current time and next prayer
   useEffect(() => {
@@ -160,7 +169,7 @@ export default function PrayerTimesPage() {
       {/* Location Controls */}
       <section className="space-y-4">
         <div className="flex gap-4 justify-center flex-wrap">
-          <Button onClick={requestLocation} disabled={loading}>
+          <Button onClick={requestLocation} disabled={isFetching}>
             استخدم موقعي الحالي
           </Button>
           <Button onClick={() => setShowCitySearch((v) => !v)} variant="secondary">
@@ -186,7 +195,7 @@ export default function PrayerTimesPage() {
               aria-label="اسم المدينة"
               className="flex-1 rounded-lg border border-brand-gold/30 bg-black/30 px-4 py-2 text-brand-cream placeholder:text-brand-cream/40 focus:border-brand-gold focus:outline-none"
             />
-            <Button type="submit" disabled={loading || !cityQuery.trim()}>
+            <Button type="submit" disabled={isFetching || !cityQuery.trim()}>
               بحث
             </Button>
           </form>
@@ -203,15 +212,22 @@ export default function PrayerTimesPage() {
         </Card>
       )}
 
-      {/* Loading State */}
-      {loading && (
+      {/* Loading State — shown only on first load before any data is available */}
+      {loading && !prayerData && (
         <Card className="text-center p-8">
           <p className="text-brand-cream/60">جاري تحميل مواقيت الصلاة...</p>
         </Card>
       )}
 
-      {/* Prayer Times Display */}
-      {prayerData && !loading && (
+      {/* Refresh indicator — shown when updating data that already exists */}
+      {isFetching && prayerData && (
+        <p className="text-center text-xs text-brand-cream/40 animate-pulse">
+          جاري تحديث المواقيت...
+        </p>
+      )}
+
+      {/* Prayer Times Display — stays visible during refresh */}
+      {prayerData && (
         <>
           {/* Current Prayer Status */}
           {nextPrayer && (
