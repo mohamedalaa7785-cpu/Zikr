@@ -97,67 +97,11 @@ const rawEnv: Record<string, string | undefined> = {
   ),
 
   // ── Supabase ──────────────────────────────────────────────────────────────
-  NEXT_PUBLIC_SUPABASE_URL: r(
-    e.NEXT_PUBLIC_SUPABASE_URL,
-    e.SUPABASE_URL,
-    e.SUPABASE_URL_19,
-    e.SUPABASE_URL_20,
-    e.SUPABASE_URL_22
-  ),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: r(
-    e.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    e.SUPABASE_ANON_KEY,
-    e.SUPABASE_ANON_KEY_19,
-    e.SUPABASE_ANON_KEY_20,
-    e.SUPABASE_ANON_KEY_22,
-    e.SUPABASE_PUBLISHABLE_KEY,
-    e.SUPABASE_PUBLISHABLE_KEY_19,
-    e.SUPABASE_PUBLISHABLE_KEY_20,
-    e.SUPABASE_PUBLISHABLE_KEY_22
-  ),
-  SUPABASE_URL: r(
-    e.SUPABASE_URL,
-    e.SUPABASE_URL_19,
-    e.SUPABASE_URL_20,
-    e.SUPABASE_URL_22
-  ),
-  SUPABASE_ANON_KEY: r(
-    e.SUPABASE_ANON_KEY,
-    e.SUPABASE_ANON_KEY_19,
-    e.SUPABASE_ANON_KEY_20,
-    e.SUPABASE_ANON_KEY_22,
-    e.SUPABASE_PUBLISHABLE_KEY_19,
-    e.SUPABASE_PUBLISHABLE_KEY_20,
-    e.SUPABASE_PUBLISHABLE_KEY_22
-  ),
-  SUPABASE_SERVICE_ROLE_KEY: r(
-    e.SUPABASE_SERVICE_ROLE_KEY,
-    e.SUPABASE_SERVICE_ROLE_KEY_19,
-    e.SUPABASE_SERVICE_ROLE_KEY_20,
-    e.SUPABASE_SERVICE_ROLE_KEY_22,
-    e.SUPABASE_SECRET_KEY,
-    e.SUPABASE_SECRET_KEY_19,
-    e.SUPABASE_SECRET_KEY_20,
-    e.SUPABASE_SECRET_KEY_22
-  ),
-  SUPABASE_JWT_SECRET: r(
-    e.SUPABASE_JWT_SECRET,
-    e.SUPABASE_JWT_SECRET_19,
-    e.SUPABASE_JWT_SECRET_20,
-    e.SUPABASE_JWT_SECRET_22
-  ),
-  SUPABASE_SECRET_KEY: r(
-    e.SUPABASE_SECRET_KEY,
-    e.SUPABASE_SECRET_KEY_19,
-    e.SUPABASE_SECRET_KEY_20,
-    e.SUPABASE_SECRET_KEY_22
-  ),
-  SUPABASE_PUBLISHABLE_KEY: r(
-    e.SUPABASE_PUBLISHABLE_KEY,
-    e.SUPABASE_PUBLISHABLE_KEY_19,
-    e.SUPABASE_PUBLISHABLE_KEY_20,
-    e.SUPABASE_PUBLISHABLE_KEY_22
-  ),
+  // Canonical names only. The public URL and anon key are intentionally public;
+  // the service-role key remains server-only and is never returned by getPublicEnv().
+  NEXT_PUBLIC_SUPABASE_URL: r(e.NEXT_PUBLIC_SUPABASE_URL),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: r(e.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+  SUPABASE_SERVICE_ROLE_KEY: r(e.SUPABASE_SERVICE_ROLE_KEY),
 
   // ── Site / Auth ───────────────────────────────────────────────────────────
   // NEXT_PUBLIC_SITE_URL: use the known production URL when the env var is empty
@@ -328,7 +272,6 @@ export function getEnvAudit() {
     ],
     serverOnly: [
       "SUPABASE_SERVICE_ROLE_KEY",
-      "SUPABASE_SECRET_KEY",
       "GOOGLE_CLIENT_SECRET",
       "AWS_S3_ACCESS_KEY_ID",
       "AWS_S3_SECRET_ACCESS_KEY",

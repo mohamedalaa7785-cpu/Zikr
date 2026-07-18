@@ -1,27 +1,24 @@
-import { createServerClient } from '@supabase/ssr';
-import type { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from "@supabase/ssr";
+import type { NextRequest, NextResponse } from "next/server";
+import { getPublicEnv } from "@/lib/env";
 
 /**
- * Create a Supabase client suitable for use in Next.js middleware.
- * Unlike the server client, this one reads/writes cookies via NextRequest
- * and NextResponse so tokens can be refreshed inside the middleware edge runtime.
- *
- * Returns the client AND the (possibly mutated) response so the caller can
- * forward the updated Set-Cookie headers to the browser.
+ * Create a Supabase client suitable for the Next.js proxy edge runtime.
+ * Cookie writes are mirrored to the request and response so refreshed tokens are
+ * visible to downstream server components and persisted in the browser.
  */
 export function createMiddlewareClient(
   request: NextRequest,
   response: NextResponse
 ) {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.SUPABASE_URL ||
-    '';
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY ||
-    '';
+  const env = getPublicEnv();
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const configured = Boolean(supabaseUrl && supabaseAnonKey);
+
+  if (!configured) {
+    return { supabase: null, response, configured } as const;
+  }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -29,11 +26,9 @@ export function createMiddlewareClient(
         return request.cookies.getAll();
       },
       setAll(cookiesToSet) {
-        // Write to request so downstream server components see the refreshed token.
         cookiesToSet.forEach(({ name, value }) =>
           request.cookies.set(name, value)
         );
-        // Write to response so the browser receives the updated cookie.
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options)
         );
@@ -41,5 +36,5 @@ export function createMiddlewareClient(
     },
   });
 
-  return { supabase, response };
+  return { supabase, response, configured } as const;
 }
