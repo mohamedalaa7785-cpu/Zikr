@@ -13,20 +13,16 @@ The following environment variables are required for the application to function
 | `NEXT_PUBLIC_SITE_URL`          | The public URL of the deployed site.                                        | Public   |
 | `SUPABASE_SERVICE_ROLE_KEY`     | The Supabase service role key, used for server-side operations.             | Server   |
 | `DATABASE_URL`                  | The connection string for the PostgreSQL database.                          | Server   |
-| `AUTH_CALLBACK_URL`             | Authentication callback URL. Must end with `/auth/callback`.               | Server   |
+| `AUTH_CALLBACK_URL`             | OAuth callback URL. Use the Supabase provider callback (`https://eydxvcamhjhajxjrsgym.supabase.co/auth/v1/callback`) for provider registration, or the app callback (`${NEXT_PUBLIC_SITE_URL}/auth/callback`) for app redirects. | Server   |
 
 ## Optional Integration Environment Variables
 
-The following environment variables are optional and are used for integrating with external services.
+The following environment variables are optional and are used for integrating with external services. File uploads use the Supabase Storage buckets configured in `supabase/config.toml`; no AWS S3 variables are required.
 
 | Variable Name             | Description                                                                 | Type     |
 | :------------------------ | :-------------------------------------------------------------------------- | :------- |
 | `GEMINI_API_KEY`                | API key for Google Gemini services.                                         | Server   |
 | `GEMINI_MODEL`                  | Optional Gemini model override (recommended: `gemini-2.5-flash`).           | Server   |
-| `AWS_S3_ACCESS_KEY_ID`          | AWS S3 access key ID for storage.                                           | Server   |
-| `AWS_S3_SECRET_ACCESS_KEY`      | AWS S3 secret access key for storage.                                       | Server   |
-| `AWS_S3_BUCKET_NAME`            | AWS S3 bucket name for storage.                                             | Server   |
-| `AWS_S3_REGION`                 | AWS S3 region for storage.                                                  | Server   |
 | `QURAN_API_BASE_URL`            | Base URL for the Quran API.                                                 | Server   |
 | `QURAN_AUDIO_CDN_URL`           | CDN URL for Quran audio files.                                              | Server   |
 | `HADITH_API_BASE_URL`           | Base URL for the Hadith API.                                                | Server   |

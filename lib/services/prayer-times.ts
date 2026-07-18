@@ -181,8 +181,8 @@ export function getNextPrayer(
   const now = currentTime.getHours() * 60 + currentTime.getMinutes();
 
   for (const prayer of prayers) {
-    const [hours, minutes] = prayer.time.split(':').map(Number);
-    const prayerMinutes = hours * 60 + minutes;
+    const prayerMinutes = parsePrayerTimeMinutes(prayer.time);
+    if (prayerMinutes === null) continue;
 
     if (prayerMinutes > now) {
       return {
@@ -194,8 +194,8 @@ export function getNextPrayer(
   }
 
   // If no prayer found today, return Fajr tomorrow
-  const fajrMinutes = timings.Fajr.split(':').map(Number);
-  const fajrTotalMinutes = fajrMinutes[0] * 60 + fajrMinutes[1];
+  const fajrTotalMinutes = parsePrayerTimeMinutes(timings.Fajr);
+  if (fajrTotalMinutes === null) return null;
   const minutesUntilFajr = 24 * 60 - now + fajrTotalMinutes;
 
   return {
@@ -223,8 +223,8 @@ export function getCurrentPrayer(
   const now = currentTime.getHours() * 60 + currentTime.getMinutes();
 
   for (let i = prayers.length - 1; i >= 0; i--) {
-    const [hours, minutes] = prayers[i].time.split(':').map(Number);
-    const prayerMinutes = hours * 60 + minutes;
+    const prayerMinutes = parsePrayerTimeMinutes(prayers[i].time);
+    if (prayerMinutes === null) continue;
 
     if (prayerMinutes <= now) {
       return {
@@ -238,16 +238,37 @@ export function getCurrentPrayer(
 }
 
 /**
- * Alias for getPrayerTimes — kept for backwards compatibility with callers
+ * Alias for getPrayerTimes — kept for backward compatibility with callers
  * that used the old prayer.ts service name.
  */
 export const getPrayerTimesByCoordinates = getPrayerTimes;
 
 /**
- * Format time string (HH:MM) to readable format
+ * Parse an Aladhan prayer time value into minutes after midnight.
+ *
+ * Aladhan may append timezone hints (for example, "05:12 (+03)"), so
+ * callers should use this helper instead of splitting on ':' and coercing.
+ */
+export function parsePrayerTimeMinutes(timeStr: string): number | null {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return null;
+
+  return hours * 60 + minutes;
+}
+
+/**
+ * Format prayer API time values as HH:MM, dropping timezone suffixes.
  */
 export function formatPrayerTime(timeStr: string): string {
-  const [hours, minutes] = timeStr.split(':');
+  const minutesAfterMidnight = parsePrayerTimeMinutes(timeStr);
+  if (minutesAfterMidnight === null) return timeStr;
+
+  const hours = Math.floor(minutesAfterMidnight / 60).toString().padStart(2, '0');
+  const minutes = (minutesAfterMidnight % 60).toString().padStart(2, '0');
   return `${hours}:${minutes}`;
 }
 
@@ -291,7 +312,7 @@ export const CALCULATION_METHODS = {
   16: 'MUIS, Singapore',
   17: 'MUIS, Singapore (Revised)',
   18: 'Majlis Ugama Islam Singapura, Singapore',
-  19: 'Union Organization islamic de France',
+  19: 'Union des Organisations Islamiques de France (UOIF)',
   20: 'Diyanet İşleri Başkanlığı, Turkey',
   21: 'Spiritual Administration of Muslims of Russia',
   22: 'Moonsighting Committee Worldwide',

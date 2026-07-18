@@ -32,7 +32,7 @@ ZIKR embodies a **spiritual, cinematic, luxurious, calm, and immersive** aesthet
 - **Database**: Supabase (PostgreSQL) accessed via the Supabase REST API
 - **ORM / Schema**: Drizzle ORM (schema + SQL migrations)
 - **AI**: Google Gemini (`@google/generative-ai`)
-- **Storage**: AWS S3 (optional)
+- **Storage**: Supabase Storage
 - **Deployment**: Vercel
 - **UI Components**: Radix UI
 
@@ -82,7 +82,6 @@ See `.env.example` for all required environment variables. Key variables:
 
 - `DATABASE_URL`: PostgreSQL connection string
 - `SUPABASE_URL` & `SUPABASE_ANON_KEY`: Supabase configuration
-- `AWS_*`: S3 storage configuration
 - `GEMINI_API_KEY`: For AI assistant features via Google Gemini
 - `GEMINI_MODEL`: Optional model override (default `gemini-2.5-flash`)
 

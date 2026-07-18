@@ -43,11 +43,6 @@ const OPTIONAL_INTEGRATIONS = [
   "HADITH_API_BASE_URL",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
-  "AWS_S3_ACCESS_KEY_ID",
-  "AWS_S3_SECRET_ACCESS_KEY",
-  "AWS_S3_BUCKET_NAME",
-  "AWS_S3_REGION",
-  "AWS_S3_PUBLIC_BASE_URL",
   "CRON_SECRET",
 ];
 
@@ -85,15 +80,6 @@ function getEnv(name) {
       "POSTGRES_URL_NON_POOLING",
       "POSTGRES_PRISMA_URL",
     ]),
-    AWS_S3_ACCESS_KEY_ID: withNumberedAliases([
-      "AWS_S3_ACCESS_KEY_ID",
-      "AWS_ACCESS_KEY_ID",
-    ]),
-    AWS_S3_SECRET_ACCESS_KEY: withNumberedAliases([
-      "AWS_S3_SECRET_ACCESS_KEY",
-      "AWS_SECRET_ACCESS_KEY",
-    ]),
-    AWS_S3_REGION: withNumberedAliases(["AWS_S3_REGION", "AWS_REGION"]),
   };
 
   for (const key of aliases[name] || [name]) {
@@ -178,28 +164,6 @@ function validateUrls() {
         "must be either the Supabase provider callback (/auth/v1/callback) or this app's /auth/callback URL"
       );
     }
-  }
-}
-
-function validateAwsS3() {
-  const names = [
-    "AWS_S3_ACCESS_KEY_ID",
-    "AWS_S3_SECRET_ACCESS_KEY",
-    "AWS_S3_BUCKET_NAME",
-    "AWS_S3_REGION",
-  ];
-  const configured = names.filter(name => Boolean(getEnv(name)));
-
-  if (configured.length > 0 && configured.length < names.length) {
-    addResult(
-      "fail",
-      "AWS S3",
-      `partial configuration; set all of ${names.join(", ")}`
-    );
-  }
-
-  if (configured.length === names.length) {
-    addResult("pass", "AWS S3", "required upload variables are configured");
   }
 }
 
@@ -349,7 +313,6 @@ function printResults() {
 validatePresence();
 validateUrls();
 validateDatabaseUrl();
-validateAwsS3();
 await validateSupabaseRest();
 await validateYoutube();
 printResults();
