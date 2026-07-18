@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { defaultOgImage, siteConfig } from "@/lib/site";
 import { Analytics } from "@/components/layout/analytics";
 import { ServiceWorkerRegister } from "@/components/layout/service-worker-register";
+import { NativeCapacitorBridge } from "@/components/layout/native-capacitor-bridge";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const ADSENSE_CLIENT =
@@ -125,6 +126,7 @@ export default function RootLayout({
         <SiteShell>{children}</SiteShell>
         <Analytics />
         <ServiceWorkerRegister />
+        <NativeCapacitorBridge />
         <SpeedInsights />
       </body>
     </html>
