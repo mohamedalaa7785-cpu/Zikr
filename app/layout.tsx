@@ -99,6 +99,7 @@ export default function RootLayout({
         />
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
         <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
         {/* Ad scripts are production-only: preview/dev domains are not authorized
             for AdSense and the scripts throw opaque cross-origin "Script error."s.
             They must be plain <script> tags — next/script adds data-nscript which AdSense rejects */}

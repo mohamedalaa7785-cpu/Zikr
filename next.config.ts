@@ -7,93 +7,64 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: false,
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.ytimg.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img.youtube.com',
-      },
+      { protocol: 'https', hostname: 'supabase.co' },
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'i.ytimg.com' },
+      { protocol: 'https', hostname: 'img.youtube.com' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  headers: async () => [
-    {
-      source: '/:path*',
-      headers: [
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'X-Frame-Options', value: 'DENY' },
-        { key: 'X-XSS-Protection', value: '1; mode=block' },
-        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        {
-          key: 'Content-Security-Policy',
-          // cap://localhost is required for Capacitor native WebView (iOS/Android)
-          value: `default-src 'self' cap://localhost; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://pagead2.googlesyndication.com https://partner.googleadservices.com https://www.googletagservices.com https://adservice.google.com https://fundingchoicesmessages.google.com https://va.vercel-scripts.com; script-src-elem 'self' 'unsafe-inline' https://va.vercel-scripts.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://www.googletagservices.com https://adservice.google.com https://fundingchoicesmessages.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://*.supabase.co https://i.ytimg.com https://img.youtube.com https://pagead2.googlesyndication.com https://*.googleusercontent.com https://*.gstatic.com; media-src 'self' blob: https://*.supabase.co https://cdn.islamic.network https://everyayah.com https://quranaudio.pages.dev https://*.mp3quran.net https://download.quranicaudio.com https://archive.org https://*.archive.org https://server6.mp3quran.net https://server8.mp3quran.net https://stream.radiojar.com https://qurango.net; connect-src 'self' cap://localhost https://va.vercel-scripts.com https://*.supabase.co https://www.googleapis.com https://generativelanguage.googleapis.com https://api.hadith.gading.dev https://api.aladhan.com https://api.alquran.cloud https://everyayah.com https://quranaudio.pages.dev https://*.mp3quran.net https://download.quranicaudio.com https://archive.org https://*.archive.org https://pagead2.googlesyndication.com https://adservice.google.com https://fundingchoicesmessages.google.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com; font-src 'self' data: https://fonts.gstatic.com;`,
-        },
-        { key: 'Permissions-Policy', value: 'geolocation=(self), microphone=(self), camera=()' },
-        { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
-      ],
-    },
-    {
-      source: '/api/:path*',
-      headers: [
-        { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-      ],
-    },
-    {
-      source: '/static/:path*',
-      headers: [
-        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-      ],
-    },
-    {
-      source: '/:path*.svg',
-      headers: [
-        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-      ],
-    },
-  ],
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Link',
+            value: [
+              '<https://fonts.googleapis.com>; rel=preconnect',
+              '<https://fonts.gstatic.com>; rel=preconnect; crossorigin',
+              `<${process.env.NEXT_PUBLIC_SUPABASE_URL}>; rel=preconnect`,
+            ].filter(Boolean).join(', '),
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: `default-src 'self' cap://localhost; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''} https://pagead2.googlesyndication.com https://partner.googleadservices.com https://www.googletagservices.com https://adservice.google.com https://fundingchoicesmessages.google.com https://va.vercel-scripts.com; script-src-elem 'self' 'unsafe-inline' https://va.vercel-scripts.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://www.googletagservices.com https://adservice.google.com https://fundingchoicesmessages.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://*.supabase.co https://i.ytimg.com https://img.youtube.com https://pagead2.googlesyndication.com https://*.googleusercontent.com https://*.gstatic.com; media-src 'self' blob: https://*.supabase.co https://cdn.islamic.network https://everyayah.com https://quranaudio.pages.dev https://*.mp3quran.net https://download.quranicaudio.com https://archive.org https://*.archive.org https://server6.mp3quran.net https://server8.mp3quran.net https://stream.radiojar.com https://qurango.net; connect-src 'self' cap://localhost https://va.vercel-scripts.com https://*.supabase.co https://www.googleapis.com https://generativelanguage.googleapis.com https://api.hadith.gading.dev https://api.aladhan.com https://api.alquran.cloud https://everyayah.com https://quranaudio.pages.dev https://*.mp3quran.net https://download.quranicaudio.com https://archive.org https://*.archive.org https://pagead2.googlesyndication.com https://adservice.google.com https://fundingchoicesmessages.google.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com; font-src 'self' data: https://fonts.gstatic.com;`,
+          },
+          { key: 'Permissions-Policy', value: 'geolocation=(self), microphone=(self), camera=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+      {
+        source: '/static/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      {
+        source: '/:path*.svg',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+    ];
+  },
   redirects: async () => [
-    {
-      source: '/home',
-      destination: '/',
-      permanent: false,
-    },
-    {
-      // Legacy alias — canonical page is /prayer-times.
-      source: '/prayer',
-      destination: '/prayer-times',
-      permanent: true,
-    },
-    {
-      // Legacy alias — canonical page is /conquests.
-      source: '/islamic-conquests',
-      destination: '/conquests',
-      permanent: true,
-    },
+    { source: '/home', destination: '/', permanent: false },
+    { source: '/prayer', destination: '/prayer-times', permanent: true },
+    { source: '/islamic-conquests', destination: '/conquests', permanent: true },
   ],
   productionBrowserSourceMaps: false,
   trailingSlash: false,
   experimental: {
-    serverActions: {
-      bodySizeLimit: '4mb',
-    },
-    // Only list packages that are actually installed in package.json.
-    // Listing absent packages causes unnecessary build-time resolution work.
-    optimizePackageImports: [
-      'lucide-react',
-    ],
+    serverActions: { bodySizeLimit: '4mb' },
+    optimizePackageImports: ['lucide-react'],
   },
 };
 
