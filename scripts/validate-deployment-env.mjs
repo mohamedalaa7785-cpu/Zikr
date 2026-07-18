@@ -58,20 +58,6 @@ function addResult(status, label, detail) {
   results.push({ status, label, detail });
 }
 
-function isSupabaseAuthCallback(value) {
-  if (!value) return false;
-
-  try {
-    const url = new URL(value);
-    return (
-      url.hostname.endsWith(".supabase.co") &&
-      url.pathname === "/auth/v1/callback"
-    );
-  } catch {
-    return false;
-  }
-}
-
 function withNumberedAliases(names) {
   return names.flatMap(name => [
     name,
@@ -83,6 +69,16 @@ function withNumberedAliases(names) {
 
 function getEnv(name) {
   const aliases = {
+    NEXT_PUBLIC_SUPABASE_URL: ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"],
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: [
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "SUPABASE_ANON_KEY",
+      "SUPABASE_PUBLISHABLE_KEY",
+    ],
+    SUPABASE_SERVICE_ROLE_KEY: [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_SECRET_KEY",
+    ],
     DATABASE_URL: withNumberedAliases([
       "DATABASE_URL",
       "POSTGRES_URL",
@@ -104,16 +100,14 @@ function getEnv(name) {
     const value = process.env[key]?.trim();
     if (!value) continue;
 
-    if (name === "AUTH_CALLBACK_URL" && isSupabaseAuthCallback(value)) {
-      continue;
-    }
-
     return value;
   }
 
   if (name === "AUTH_CALLBACK_URL") {
-    const siteUrl = getEnv("NEXT_PUBLIC_SITE_URL");
-    if (siteUrl) return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
+    const supabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
+    if (supabaseUrl)
+      return `${supabaseUrl.replace(/\/$/, "")}/auth/v1/callback`;
+    return "https://eydxvcamhjhajxjrsgym.supabase.co/auth/v1/callback";
   }
 
   return undefined;
@@ -168,20 +162,20 @@ function validateUrls() {
     );
   }
 
-  if (siteUrl && callbackUrl) {
-    if (siteUrl.origin !== callbackUrl.origin) {
-      addResult(
-        "fail",
-        "AUTH_CALLBACK_URL",
-        "must use the same origin as NEXT_PUBLIC_SITE_URL"
-      );
-    }
+  if (callbackUrl) {
+    const isAppCallback =
+      callbackUrl.pathname === "/auth/callback" &&
+      (!siteUrl || callbackUrl.origin === siteUrl.origin);
+    const isSupabaseProviderCallback =
+      callbackUrl.pathname === "/auth/v1/callback" &&
+      callbackUrl.hostname.endsWith(".supabase.co") &&
+      (!supabaseUrl || callbackUrl.origin === supabaseUrl.origin);
 
-    if (callbackUrl.pathname !== "/auth/callback") {
+    if (!isAppCallback && !isSupabaseProviderCallback) {
       addResult(
         "fail",
         "AUTH_CALLBACK_URL",
-        "must end with /auth/callback; /api/auth/callback is not an app route here"
+        "must be either the Supabase provider callback (/auth/v1/callback) or this app's /auth/callback URL"
       );
     }
   }
