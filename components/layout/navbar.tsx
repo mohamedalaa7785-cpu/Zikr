@@ -1,10 +1,9 @@
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import { Container } from '@/components/ui/container';
-import { Button } from '@/components/ui/button';
-import { logoutAction } from '@/app/auth/actions';
 import { createClient } from '@/lib/supabase/server';
 import { MobileNav } from './mobile-nav';
+import { AuthNavActions } from './auth-nav-actions';
 
 const links = [
   { href: '/quran', label: 'القرآن' },
@@ -76,27 +75,7 @@ export async function Navbar() {
             <Settings className="h-5 w-5" aria-hidden="true" />
           </Link>
           <MobileNav />
-          {user ? (
-            <>
-              <Button variant="ghost" href="/profile" className="text-sm">
-                الملف الشخصي
-              </Button>
-              {isAdmin && (
-                <Button variant="ghost" href="/admin" className="text-sm">
-                  الأدمن
-                </Button>
-              )}
-              <form action={logoutAction}>
-                <Button variant="secondary" type="submit" className="text-sm">
-                  خروج
-                </Button>
-              </form>
-            </>
-          ) : (
-            <Button href="/auth/login" className="text-sm">
-              تسجيل الدخول
-            </Button>
-          )}
+          <AuthNavActions initialUser={user} initialIsAdmin={isAdmin} />
         </div>
       </Container>
     </header>
