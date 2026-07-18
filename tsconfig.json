@@ -1,6 +1,8 @@
 {
   "include": [
     "next-env.d.ts",
+    "*.ts",
+    "*.tsx",
     "app/**/*",
     "components/**/*",
     "features/**/*",
@@ -12,6 +14,7 @@
     "styles/**/*",
     "types/**/*",
     "shared/**/*",
+    "scripts/**/*.ts",
     "drizzle/**/*.ts",
     "next.config.ts",
     ".next/types/**/*.ts",

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <!-- ── App Identity ──────────────────────────────────────────────── -->
+    <key>CFBundleName</key>
+    <string>زِكرٌ</string>
+    <key>CFBundleDisplayName</key>
+    <string>زِكرٌ</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.zikr.app</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <!-- ── Custom URL Scheme: zikr:// ──────────────────────────────── -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.zikr.app</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>zikr</string>
+            </array>
+        </dict>
+    </dict>
+    </array>
+
+    <!-- ── Privacy usage descriptions (required for App Store review) ── -->
+    <key>NSCameraUsageDescription</key>
+    <string>تستخدم ZIKR الكاميرا لتحديث صورة ملفك الشخصي.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>تستخدم ZIKR مكتبة الصور لاختيار صورة ملفك الشخصي.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>تستخدم ZIKR موقعك لحساب أوقات الصلاة الدقيقة.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>تستخدم ZIKR موقعك لإرسال تنبيهات أوقات الصلاة في الوقت المناسب.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>لا تستخدم ZIKR الميكروفون.</string>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>تستخدم ZIKR الإشعارات لتنبيهك بمواقيت الصلاة.</string>
+
+    <!-- ── Background modes ─────────────────────────────────────────── -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+        <string>audio</string>
+    </array>
+
+    <!-- ── App Transport Security ─────────────────────────────────── -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>zikrmediaofficial.vercel.app</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <false/>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+            </dict>
+            <!-- Allow localhost for dev live-reload -->
+            <key>localhost</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+
+    <!-- ── iOS UI configuration ─────────────────────────────────────── -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>armv7</string>
+    </array>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleLightContent</string>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>
+    <key>UIUserInterfaceStyle</key>
+    <string>Dark</string>
+
+</dict>
+</plist>

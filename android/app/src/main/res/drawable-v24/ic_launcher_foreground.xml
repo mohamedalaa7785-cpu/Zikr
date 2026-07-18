@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZIKR Adaptive Icon Foreground — gold Arabic letter ذ (Dhikr)
+    Replace with the actual vector asset exported from your designer.
+    The icon safe zone is a 66dp circle centered in the 108dp canvas.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Gold background circle -->
+    <path
+        android:fillColor="#C7A252"
+        android:pathData="M54,54m-38,0a38,38 0,1 1,76 0a38,38 0,1 1,-76 0" />
+    <!-- White Arabic ذ glyph (placeholder — replace with actual path) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,38 Q54,30 64,38 L68,55 Q60,62 54,58 Q48,62 40,55 Z" />
+</vector>

@@ -16,6 +16,9 @@ additional_redirect_urls = [
   "https://eydxvcamhjhajxjrsgym.supabase.co/auth/v1/callback",
   "env(AUTH_CALLBACK_URL)",
   "http://localhost:3000/auth/callback",
+  # Capacitor deep-link scheme for Android and iOS native app
+  "zikr://auth/callback",
+  "zikr://auth/callback/",
 ]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true

@@ -3,6 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { playAzanClip, unlockAudioContext, isAudioUnlocked } from '@/lib/audio/spiritual-tones';
 import { showPrayerNotification, requestNotificationPermission } from '@/lib/services/notifications';
+import { isNative } from '@/lib/capacitor';
+import {
+  schedulePrayerNotifications,
+  requestLocalNotificationPermission,
+  cancelAllPrayerNotifications,
+} from '@/lib/mobile/local-notifications';
+import { triggerHaptic } from '@/lib/mobile/haptics';
 import type { NotificationPermission as PermResult } from '@/lib/services/notifications';
 
 export type PrayerKey = 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
@@ -95,8 +102,19 @@ export function usePrayerAlert(): PrayerAlertReturn {
     }
   }, []);
 
-  // Tick every 30s — compare HH:MM with each enabled prayer time ±1 min
+  // On native: schedule local notifications for all enabled prayers once per day.
+  // On web: poll every 30s and fire browser notifications / audio.
   useEffect(() => {
+    if (isNative()) {
+      // Native path — schedule OS-level notifications for today's prayer times
+      const timings = getTimings();
+      if (!timings) return;
+      schedulePrayerNotifications(timings, settings.enabledPrayers).catch(() => {});
+      // Return early — no interval needed; the OS handles delivery
+      return;
+    }
+
+    // Web path — interval-based check (existing behaviour)
     const check = () => {
       const timings = getTimings();
       if (!timings) return;
@@ -109,14 +127,12 @@ export function usePrayerAlert(): PrayerAlertReturn {
         const prayerTime = timings[prayer];
         if (!prayerTime) continue;
 
-        // Compare exact HH:MM (the API returns "HH:MM" strings)
         const [ph, pm] = prayerTime.split(':').map(Number);
         const [nh, nm] = hhmm.split(':').map(Number);
         const diff = Math.abs(ph * 60 + pm - (nh * 60 + nm));
 
         if (diff <= 1 && !alreadyFired(prayer)) {
           markFired(prayer);
-          // Fire alert — play the real adhan clip
           playAzanClip();
           showPrayerNotification(PRAYER_NAMES_AR[prayer]);
           alertCallbackRef.current?.(prayer);
@@ -124,7 +140,7 @@ export function usePrayerAlert(): PrayerAlertReturn {
       }
     };
 
-    check(); // run immediately on mount / settings change
+    check();
     const interval = setInterval(check, 30_000);
     return () => clearInterval(interval);
   }, [settings]);
@@ -136,6 +152,18 @@ export function usePrayerAlert(): PrayerAlertReturn {
         enabledPrayers: { ...prev.enabledPrayers, [p]: !prev.enabledPrayers[p] },
       };
       saveSettings(next);
+
+      // Re-schedule on native when a prayer is toggled
+      if (isNative()) {
+        const timings = getTimings();
+        if (timings) {
+          if (!next.enabledPrayers[p]) {
+            cancelAllPrayerNotifications().catch(() => {});
+          }
+          schedulePrayerNotifications(timings, next.enabledPrayers).catch(() => {});
+        }
+      }
+
       return next;
     });
   }, []);
@@ -150,6 +178,10 @@ export function usePrayerAlert(): PrayerAlertReturn {
   }, []);
 
   const requestPermission = useCallback(async () => {
+    if (isNative()) {
+      await requestLocalNotificationPermission();
+      return;
+    }
     const result = await requestNotificationPermission();
     if (result !== 'unsupported') {
       setNotificationPermission(result);
@@ -157,8 +189,11 @@ export function usePrayerAlert(): PrayerAlertReturn {
   }, []);
 
   const testAzan = useCallback(() => {
-    unlockAudioContext();
-    playAzanClip();
+    triggerHaptic('medium').catch(() => {});
+    if (!isNative()) {
+      unlockAudioContext();
+      playAzanClip();
+    }
   }, []);
 
   const onAlertFired = useCallback((cb: (prayer: PrayerKey) => void) => {

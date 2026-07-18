@@ -4,6 +4,8 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { defaultOgImage, siteConfig } from "@/lib/site";
 import { Analytics } from "@/components/layout/analytics";
 import { ServiceWorkerRegister } from "@/components/layout/service-worker-register";
+import { CapacitorInit } from "@/components/mobile/capacitor-init";
+import { AppUrlListener } from "@/components/mobile/app-url-listener";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const ADSENSE_CLIENT =
@@ -125,6 +127,9 @@ export default function RootLayout({
         <SiteShell>{children}</SiteShell>
         <Analytics />
         <ServiceWorkerRegister />
+        {/* Capacitor native runtime bootstrap — no-ops on web */}
+        <CapacitorInit />
+        <AppUrlListener />
         <SpeedInsights />
       </body>
     </html>

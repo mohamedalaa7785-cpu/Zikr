@@ -1,0 +1,81 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace "com.zikr.app"
+    compileSdk 35
+    defaultConfig {
+        applicationId "com.zikr.app"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+            // Include the raw adhan sound for local notifications
+            noCompress "mp3"
+        }
+    }
+    signingConfigs {
+        release {
+            // Set these via environment variables or local.properties (never commit)
+            // KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+            storeFile     file(System.getenv("KEYSTORE_PATH") ?: "keystore/release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
+            keyAlias      System.getenv("KEY_ALIAS") ?: "zikr"
+            keyPassword   System.getenv("KEY_PASSWORD") ?: ""
+        }
+    }
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            signingConfig    signingConfigs.release
+            minifyEnabled    true
+            proguardFiles    getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Enable AAB shrinking for Play Store submission
+            shrinkResources  true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+    // Bundle format for Play Store (AAB)
+    bundle {
+        language {
+            enableSplit = false   // include all locales (Arabic RTL)
+        }
+    }
+    splits {
+        abi {
+            enable false
+        }
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
+    implementation "androidx.core:core-splashscreen:1.0.1"
+    implementation project(':capacitor-android')
+    implementation project(':capacitor-cordova-android-plugins')
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
+}
+
+apply from: 'capacitor.build.gradle'

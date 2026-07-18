@@ -245,8 +245,8 @@ export const notificationSettings = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id").notNull(),
-    emailNotifications: boolean("emailNotifications").notNull().default(true),
-    pushNotifications: boolean("pushNotifications").notNull().default(true),
+    emailNotifications: boolean("email_notifications").notNull().default(true),
+    pushNotifications: boolean("push_notifications").notNull().default(true),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -283,7 +283,7 @@ export const appSettings = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id").notNull(),
     theme: text("theme").notNull().default("system"),
-    fontSize: text("fontSize").notNull().default("medium"),
+    fontSize: text("font_size").notNull().default("medium"),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -501,8 +501,8 @@ export const stories = pgTable("stories", {
   category: categoryEnum("category").notNull().default("psychological"),
   published: boolean("published").default(true),
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Subscription & Payments (user-owned)
@@ -511,9 +511,9 @@ export const userSubscriptions = pgTable("user_subscriptions", {
   userId: uuid("user_id").references(() => profiles.id),
   plan: planEnum("plan").notNull().default("free"),
   credits: integer("credits").notNull().default(20),
-  expiresAt: timestamp("expires_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const payments = pgTable("payments", {
@@ -524,7 +524,7 @@ export const payments = pgTable("payments", {
   referenceNote: text("reference_note").notNull(),
   screenshotUrl: text("screenshot_url"),
   status: paymentStatusEnum("status").notNull().default("pending"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Research (user-owned)
@@ -537,14 +537,14 @@ export const researchRequests = pgTable("research_requests", {
   type: text("type").notNull(),
   language: text("language").notNull().default("en"),
   status: statusEnum("status").notNull().default("pending"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const generatedResearch = pgTable("generated_research", {
   id: uuid("id").defaultRandom().primaryKey(),
   requestId: uuid("request_id").references(() => researchRequests.id),
   content: text("content").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Site admin (admin-only write)
