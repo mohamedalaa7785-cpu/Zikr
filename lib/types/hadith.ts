@@ -1,7 +1,8 @@
-import type { PaginationMeta } from '@/lib/types/common';
+import type { PaginationMeta } from "@/lib/types/common";
 
 export interface HadithBook {
   id: string;
+  slug?: string;
   name: string;
   available: number;
 }
