@@ -59,6 +59,9 @@ export const profiles = pgTable("profiles", {
   avatarUrl: text("avatar_url"),
   locale: text("locale").notNull().default("ar"),
   role: roleEnum("role").notNull().default("user"),
+  // Push notification tokens — added by migration 20260719000000
+  pushToken: text("push_token"),
+  pushPlatform: text("push_platform"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -1260,29 +1263,37 @@ export const episodes = pgTable("episodes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const savedStories = pgTable("saved_stories", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => profiles.id),
-  storyId: uuid("story_id")
-    .notNull()
-    .references(() => stories.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const savedStories = pgTable(
+  "saved_stories",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profiles.id),
+    storyId: uuid("story_id")
+      .notNull()
+      .references(() => stories.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  t => ({ uniq: unique().on(t.userId, t.storyId) })
+);
 
-export const storyProgress = pgTable("story_progress", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => profiles.id),
-  storyId: uuid("story_id")
-    .notNull()
-    .references(() => stories.id),
-  progress: integer("progress").notNull().default(0),
-  completed: boolean("completed").notNull().default(false),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const storyProgress = pgTable(
+  "story_progress",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profiles.id),
+    storyId: uuid("story_id")
+      .notNull()
+      .references(() => stories.id),
+    progress: integer("progress").notNull().default(0),
+    completed: boolean("completed").notNull().default(false),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  t => ({ uniq: unique().on(t.userId, t.storyId) })
+);
 
 export const subscriptions = pgTable("subscriptions", {
   id: uuid("id").defaultRandom().primaryKey(),
