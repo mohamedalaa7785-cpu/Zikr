@@ -6,31 +6,31 @@
 
 -- ==================== ENUMS (idempotent) ====================
 DO $$ BEGIN
-  CREATE TYPE IF NOT EXISTS role AS ENUM ('user', 'admin');
+  CREATE TYPE role AS ENUM ('user', 'admin');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE IF NOT EXISTS favorite_item_type AS ENUM ('quran','hadith','story','scholar','dua');
+  CREATE TYPE favorite_item_type AS ENUM ('quran','hadith','story','scholar','dua');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE IF NOT EXISTS progress_scope AS ENUM ('quran','hadith','stories');
+  CREATE TYPE progress_scope AS ENUM ('quran','hadith','stories');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE IF NOT EXISTS reminder_type AS ENUM ('prayer','quran','adhkar','fasting','zakat');
+  CREATE TYPE reminder_type AS ENUM ('prayer','quran','adhkar','fasting','zakat');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE IF NOT EXISTS payment_status AS ENUM ('pending','approved','rejected');
+  CREATE TYPE payment_status AS ENUM ('pending','approved','rejected');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE IF NOT EXISTS plan AS ENUM ('free','pro','premium');
+  CREATE TYPE plan AS ENUM ('free','pro','premium');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE IF NOT EXISTS status AS ENUM ('pending','completed','failed');
+  CREATE TYPE status AS ENUM ('pending','completed','failed');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 -- ==================== PUBLIC CONTENT TABLES ====================
@@ -454,189 +454,244 @@ CREATE INDEX IF NOT EXISTS idx_tawasheeh_favorites_user_id ON tawasheeh_favorite
 
 -- profiles
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "profiles_select_own" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY IF NOT EXISTS "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY IF NOT EXISTS "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+DROP POLICY IF EXISTS "profiles_select_own" ON profiles;
+CREATE POLICY "profiles_select_own" ON profiles FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
+CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
+DROP POLICY IF EXISTS "profiles_insert_own" ON profiles;
+CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- favorites
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "favorites_all_own" ON favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "favorites_all_own" ON favorites;
+CREATE POLICY "favorites_all_own" ON favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- reading_progress
 ALTER TABLE reading_progress ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "reading_progress_all_own" ON reading_progress USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "reading_progress_all_own" ON reading_progress;
+CREATE POLICY "reading_progress_all_own" ON reading_progress USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- reminders
 ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "reminders_all_own" ON reminders USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "reminders_all_own" ON reminders;
+CREATE POLICY "reminders_all_own" ON reminders USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- quran_favorites
 ALTER TABLE quran_favorites ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "quran_favorites_all_own" ON quran_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "quran_favorites_all_own" ON quran_favorites;
+CREATE POLICY "quran_favorites_all_own" ON quran_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- bookmarks
 ALTER TABLE bookmarks ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "bookmarks_all_own" ON bookmarks USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "bookmarks_all_own" ON bookmarks;
+CREATE POLICY "bookmarks_all_own" ON bookmarks USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- search_history
 ALTER TABLE search_history ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "search_history_all_own" ON search_history USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "search_history_all_own" ON search_history;
+CREATE POLICY "search_history_all_own" ON search_history USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- quran_reads
 ALTER TABLE quran_reads ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "quran_reads_all_own" ON quran_reads USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "quran_reads_all_own" ON quran_reads;
+CREATE POLICY "quran_reads_all_own" ON quran_reads USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- story_reads
 ALTER TABLE story_reads ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "story_reads_all_own" ON story_reads USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "story_reads_all_own" ON story_reads;
+CREATE POLICY "story_reads_all_own" ON story_reads USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- story_ratings
 ALTER TABLE story_ratings ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "story_ratings_all_own" ON story_ratings USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "story_ratings_all_own" ON story_ratings;
+CREATE POLICY "story_ratings_all_own" ON story_ratings USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- story_favorites
 ALTER TABLE story_favorites ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "story_favorites_all_own" ON story_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "story_favorites_all_own" ON story_favorites;
+CREATE POLICY "story_favorites_all_own" ON story_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- social_shares
 ALTER TABLE social_shares ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "social_shares_all_own" ON social_shares USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "social_shares_all_own" ON social_shares;
+CREATE POLICY "social_shares_all_own" ON social_shares USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- prophet_notes
 ALTER TABLE prophet_notes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "prophet_notes_all_own" ON prophet_notes USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "prophet_notes_all_own" ON prophet_notes;
+CREATE POLICY "prophet_notes_all_own" ON prophet_notes USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- notification_settings
 ALTER TABLE notification_settings ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "notification_settings_all_own" ON notification_settings USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "notification_settings_all_own" ON notification_settings;
+CREATE POLICY "notification_settings_all_own" ON notification_settings USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- adhkar_completions
 ALTER TABLE adhkar_completions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "adhkar_completions_all_own" ON adhkar_completions USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "adhkar_completions_all_own" ON adhkar_completions;
+CREATE POLICY "adhkar_completions_all_own" ON adhkar_completions USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- adhkar_streaks
 ALTER TABLE adhkar_streaks ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "adhkar_streaks_all_own" ON adhkar_streaks USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "adhkar_streaks_all_own" ON adhkar_streaks;
+CREATE POLICY "adhkar_streaks_all_own" ON adhkar_streaks USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- app_settings
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "app_settings_all_own" ON app_settings USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "app_settings_all_own" ON app_settings;
+CREATE POLICY "app_settings_all_own" ON app_settings USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- notifications
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "notifications_select_own" ON notifications FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "notifications_update_own" ON notifications FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "notifications_select_own" ON notifications;
+CREATE POLICY "notifications_select_own" ON notifications FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "notifications_update_own" ON notifications;
+CREATE POLICY "notifications_update_own" ON notifications FOR UPDATE USING (auth.uid() = user_id);
 
 -- prayer_locations
 ALTER TABLE prayer_locations ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "prayer_locations_all_own" ON prayer_locations USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "prayer_locations_all_own" ON prayer_locations;
+CREATE POLICY "prayer_locations_all_own" ON prayer_locations USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- prayer_preferences
 ALTER TABLE prayer_preferences ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "prayer_preferences_all_own" ON prayer_preferences USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "prayer_preferences_all_own" ON prayer_preferences;
+CREATE POLICY "prayer_preferences_all_own" ON prayer_preferences USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- prayer_notifications
 ALTER TABLE prayer_notifications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "prayer_notifications_select_own" ON prayer_notifications FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY IF NOT EXISTS "prayer_notifications_insert_own" ON prayer_notifications FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "prayer_notifications_select_own" ON prayer_notifications;
+CREATE POLICY "prayer_notifications_select_own" ON prayer_notifications FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "prayer_notifications_insert_own" ON prayer_notifications;
+CREATE POLICY "prayer_notifications_insert_own" ON prayer_notifications FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- reciter_favorites
 ALTER TABLE reciter_favorites ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "reciter_favorites_all_own" ON reciter_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "reciter_favorites_all_own" ON reciter_favorites;
+CREATE POLICY "reciter_favorites_all_own" ON reciter_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- recent_recitations
 ALTER TABLE recent_recitations ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "recent_recitations_all_own" ON recent_recitations USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "recent_recitations_all_own" ON recent_recitations;
+CREATE POLICY "recent_recitations_all_own" ON recent_recitations USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- tawasheeh_favorites
 ALTER TABLE tawasheeh_favorites ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "tawasheeh_favorites_all_own" ON tawasheeh_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "tawasheeh_favorites_all_own" ON tawasheeh_favorites;
+CREATE POLICY "tawasheeh_favorites_all_own" ON tawasheeh_favorites USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- tawasheeh_playlists
 ALTER TABLE tawasheeh_playlists ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "tawasheeh_playlists_all_own" ON tawasheeh_playlists USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "tawasheeh_playlists_all_own" ON tawasheeh_playlists;
+CREATE POLICY "tawasheeh_playlists_all_own" ON tawasheeh_playlists USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- tawasheeh_playlist_items (accessible via playlist ownership)
 ALTER TABLE tawasheeh_playlist_items ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "tawasheeh_playlist_items_all_own" ON tawasheeh_playlist_items
+DROP POLICY IF EXISTS "tawasheeh_playlist_items_all_own" ON tawasheeh_playlist_items;
+CREATE POLICY "tawasheeh_playlist_items_all_own" ON tawasheeh_playlist_items
   USING (EXISTS (SELECT 1 FROM tawasheeh_playlists p WHERE p.id = playlist_id AND p.user_id = auth.uid()))
   WITH CHECK (EXISTS (SELECT 1 FROM tawasheeh_playlists p WHERE p.id = playlist_id AND p.user_id = auth.uid()));
 
 -- user_subscriptions
 ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "user_subscriptions_select_own" ON user_subscriptions FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "user_subscriptions_select_own" ON user_subscriptions;
+CREATE POLICY "user_subscriptions_select_own" ON user_subscriptions FOR SELECT USING (auth.uid() = user_id);
 
 -- ==================== PUBLIC READ POLICIES ====================
 -- Allow anon + authenticated to read public content tables.
 
 ALTER TABLE quran_surahs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "quran_surahs_public_read" ON quran_surahs FOR SELECT USING (true);
+DROP POLICY IF EXISTS "quran_surahs_public_read" ON quran_surahs;
+CREATE POLICY "quran_surahs_public_read" ON quran_surahs FOR SELECT USING (true);
 
 ALTER TABLE quran_ayahs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "quran_ayahs_public_read" ON quran_ayahs FOR SELECT USING (true);
+DROP POLICY IF EXISTS "quran_ayahs_public_read" ON quran_ayahs;
+CREATE POLICY "quran_ayahs_public_read" ON quran_ayahs FOR SELECT USING (true);
 
 ALTER TABLE quran_tafsir ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "quran_tafsir_public_read" ON quran_tafsir FOR SELECT USING (true);
+DROP POLICY IF EXISTS "quran_tafsir_public_read" ON quran_tafsir;
+CREATE POLICY "quran_tafsir_public_read" ON quran_tafsir FOR SELECT USING (true);
 
 ALTER TABLE quran_reciters ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "quran_reciters_public_read" ON quran_reciters FOR SELECT USING (true);
+DROP POLICY IF EXISTS "quran_reciters_public_read" ON quran_reciters;
+CREATE POLICY "quran_reciters_public_read" ON quran_reciters FOR SELECT USING (true);
 
 ALTER TABLE quran_audio ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "quran_audio_public_read" ON quran_audio FOR SELECT USING (true);
+DROP POLICY IF EXISTS "quran_audio_public_read" ON quran_audio;
+CREATE POLICY "quran_audio_public_read" ON quran_audio FOR SELECT USING (true);
 
 ALTER TABLE hadith_books ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "hadith_books_public_read" ON hadith_books FOR SELECT USING (true);
+DROP POLICY IF EXISTS "hadith_books_public_read" ON hadith_books;
+CREATE POLICY "hadith_books_public_read" ON hadith_books FOR SELECT USING (true);
 
 ALTER TABLE hadiths ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "hadiths_public_read" ON hadiths FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "hadiths_public_read" ON hadiths;
+CREATE POLICY "hadiths_public_read" ON hadiths FOR SELECT USING (published = true);
 
 ALTER TABLE scholars ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "scholars_public_read" ON scholars FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "scholars_public_read" ON scholars;
+CREATE POLICY "scholars_public_read" ON scholars FOR SELECT USING (published = true);
 
 ALTER TABLE stories ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "stories_public_read" ON stories FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "stories_public_read" ON stories;
+CREATE POLICY "stories_public_read" ON stories FOR SELECT USING (published = true);
 
 ALTER TABLE prophets ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "prophets_public_read" ON prophets FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "prophets_public_read" ON prophets;
+CREATE POLICY "prophets_public_read" ON prophets FOR SELECT USING (published = true);
 
 ALTER TABLE prophet_sections ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "prophet_sections_public_read" ON prophet_sections FOR SELECT USING (true);
+DROP POLICY IF EXISTS "prophet_sections_public_read" ON prophet_sections;
+CREATE POLICY "prophet_sections_public_read" ON prophet_sections FOR SELECT USING (true);
 
 ALTER TABLE duas ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "duas_public_read" ON duas FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "duas_public_read" ON duas;
+CREATE POLICY "duas_public_read" ON duas FOR SELECT USING (published = true);
 
 ALTER TABLE dua_categories ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "dua_categories_public_read" ON dua_categories FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "dua_categories_public_read" ON dua_categories;
+CREATE POLICY "dua_categories_public_read" ON dua_categories FOR SELECT USING (published = true);
 
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "articles_public_read" ON articles FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "articles_public_read" ON articles;
+CREATE POLICY "articles_public_read" ON articles FOR SELECT USING (published = true);
 
 ALTER TABLE article_categories ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "article_categories_public_read" ON article_categories FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "article_categories_public_read" ON article_categories;
+CREATE POLICY "article_categories_public_read" ON article_categories FOR SELECT USING (published = true);
 
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "videos_public_read" ON videos FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "videos_public_read" ON videos;
+CREATE POLICY "videos_public_read" ON videos FOR SELECT USING (published = true);
 
 ALTER TABLE battles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "battles_public_read" ON battles FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "battles_public_read" ON battles;
+CREATE POLICY "battles_public_read" ON battles FOR SELECT USING (published = true);
 
 ALTER TABLE conquests ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "conquests_public_read" ON conquests FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "conquests_public_read" ON conquests;
+CREATE POLICY "conquests_public_read" ON conquests FOR SELECT USING (published = true);
 
 ALTER TABLE tawasheeh ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "tawasheeh_public_read" ON tawasheeh FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "tawasheeh_public_read" ON tawasheeh;
+CREATE POLICY "tawasheeh_public_read" ON tawasheeh FOR SELECT USING (published = true);
 
 ALTER TABLE tawasheeh_categories ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "tawasheeh_categories_public_read" ON tawasheeh_categories FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "tawasheeh_categories_public_read" ON tawasheeh_categories;
+CREATE POLICY "tawasheeh_categories_public_read" ON tawasheeh_categories FOR SELECT USING (published = true);
 
 ALTER TABLE companions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "companions_public_read" ON companions FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "companions_public_read" ON companions;
+CREATE POLICY "companions_public_read" ON companions FOR SELECT USING (published = true);
 
 ALTER TABLE competitions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "competitions_public_read" ON competitions FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "competitions_public_read" ON competitions;
+CREATE POLICY "competitions_public_read" ON competitions FOR SELECT USING (published = true);
 
 ALTER TABLE pinned_messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "pinned_messages_public_read" ON pinned_messages FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "pinned_messages_public_read" ON pinned_messages;
+CREATE POLICY "pinned_messages_public_read" ON pinned_messages FOR SELECT USING (is_active = true);
 
 ALTER TABLE memorization_plans ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "memorization_plans_public_read" ON memorization_plans FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "memorization_plans_public_read" ON memorization_plans;
+CREATE POLICY "memorization_plans_public_read" ON memorization_plans FOR SELECT USING (published = true);

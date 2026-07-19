@@ -12,59 +12,86 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ── CREATE ENUMS ─────────────────────────────────────────────────────────
 
-CREATE TYPE IF NOT EXISTS public.user_role AS ENUM ('user', 'admin');
+DO $$ BEGIN
+  CREATE TYPE public.user_role AS ENUM ('user', 'admin');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE IF NOT EXISTS public.favorite_item_type AS ENUM (
-  'quran',
-  'hadith',
-  'story',
-  'scholar',
-  'dua'
-);
+DO $$ BEGIN
+  CREATE TYPE public.favorite_item_type AS ENUM (
+    'quran',
+    'hadith',
+    'story',
+    'scholar',
+    'dua'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE IF NOT EXISTS public.progress_scope AS ENUM (
-  'quran',
-  'hadith',
-  'stories'
-);
+DO $$ BEGIN
+  CREATE TYPE public.progress_scope AS ENUM (
+    'quran',
+    'hadith',
+    'stories'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE IF NOT EXISTS public.reminder_type AS ENUM (
-  'prayer',
-  'quran',
-  'adhkar',
-  'fasting',
-  'zakat'
-);
+DO $$ BEGIN
+  CREATE TYPE public.reminder_type AS ENUM (
+    'prayer',
+    'quran',
+    'adhkar',
+    'fasting',
+    'zakat'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE IF NOT EXISTS public.category AS ENUM (
-  'dark',
-  'romantic',
-  'psychological',
-  'prophets',
-  'stories',
-  'duas',
-  'hadith',
-  'quran'
-);
+DO $$ BEGIN
+  CREATE TYPE public.category AS ENUM (
+    'dark',
+    'romantic',
+    'psychological',
+    'prophets',
+    'stories',
+    'duas',
+    'hadith',
+    'quran',
+    'sahaba',
+    'documentaries',
+    'history'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE IF NOT EXISTS public.payment_status AS ENUM (
-  'pending',
-  'approved',
-  'rejected'
-);
+DO $$ BEGIN
+  CREATE TYPE public.payment_status AS ENUM (
+    'pending',
+    'approved',
+    'rejected'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE IF NOT EXISTS public.subscription_plan AS ENUM (
-  'free',
-  'pro',
-  'premium'
-);
+DO $$ BEGIN
+  CREATE TYPE public.subscription_plan AS ENUM (
+    'free',
+    'pro',
+    'premium'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TYPE IF NOT EXISTS public.job_status AS ENUM (
-  'pending',
-  'processing',
-  'completed',
-  'failed'
-);
+DO $$ BEGIN
+  CREATE TYPE public.job_status AS ENUM (
+    'pending',
+    'processing',
+    'completed',
+    'failed'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ── CREATE TABLES ───────────────────────────────────────────────────────
 
@@ -207,20 +234,36 @@ CREATE TABLE IF NOT EXISTS public.reciters (
   updated_at timestamp with time zone DEFAULT now()
 );
 
+-- Video Categories
+CREATE TABLE IF NOT EXISTS public.video_categories (
+  id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+  name_ar text NOT NULL,
+  name_en text NOT NULL,
+  slug text NOT NULL UNIQUE,
+  description_ar text,
+  description_en text,
+  icon text,
+  published boolean NOT NULL DEFAULT true,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
 -- Videos
 CREATE TABLE IF NOT EXISTS public.videos (
   id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+  category_id uuid REFERENCES public.video_categories (id) ON DELETE CASCADE,
   title text NOT NULL,
+  slug text NOT NULL UNIQUE,
   description text,
-  category public.category,
-  youtube_url text,
   youtube_id text,
-  duration_seconds integer,
   thumbnail_url text,
-  view_count integer DEFAULT 0,
-  is_published boolean DEFAULT true,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now()
+  duration integer,
+  views integer NOT NULL DEFAULT 0,
+  published boolean NOT NULL DEFAULT true,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
 -- Admin Logs
@@ -322,8 +365,11 @@ CREATE INDEX IF NOT EXISTS idx_stories_category ON public.stories (category);
 CREATE INDEX IF NOT EXISTS idx_stories_approved ON public.stories (is_approved);
 
 -- Videos Indexes
-CREATE INDEX IF NOT EXISTS idx_videos_category ON public.videos (category);
-CREATE INDEX IF NOT EXISTS idx_videos_published ON public.videos (is_published);
+CREATE INDEX IF NOT EXISTS idx_video_categories_slug ON public.video_categories (slug);
+CREATE INDEX IF NOT EXISTS idx_video_categories_public ON public.video_categories (published, is_active);
+CREATE INDEX IF NOT EXISTS idx_videos_category ON public.videos (category_id);
+CREATE INDEX IF NOT EXISTS idx_videos_slug ON public.videos (slug);
+CREATE INDEX IF NOT EXISTS idx_videos_published ON public.videos (published);
 CREATE INDEX IF NOT EXISTS idx_videos_youtube_id ON public.videos (youtube_id);
 
 -- Admin Logs Indexes
@@ -357,25 +403,27 @@ ALTER TABLE public.social_publish_queue ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.social_publish_queue FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.video_render_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.video_render_jobs FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.video_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.videos ENABLE ROW LEVEL SECURITY;
 
 -- ── RLS POLICIES FOR PROFILES ───────────────────────────────────────────
 
 -- Allow public read access to profiles
 DROP POLICY IF EXISTS "Profiles are public" ON public.profiles;
 CREATE POLICY "Profiles are public" ON public.profiles
-  FOR SELECT USING (true);
+  FOR SELECT TO anon, authenticated USING (true);
 
 -- Users can update their own profile
 DROP POLICY IF EXISTS "Users update own profile" ON public.profiles;
 CREATE POLICY "Users update own profile" ON public.profiles
-  FOR UPDATE USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+  FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = id)
+  WITH CHECK ((SELECT auth.uid()) = id);
 
 -- Admins can delete profiles
 DROP POLICY IF EXISTS "Only admins can delete profiles" ON public.profiles;
 CREATE POLICY "Only admins can delete profiles" ON public.profiles
-  FOR DELETE USING (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  FOR DELETE TO authenticated USING (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   );
 
 -- ── RLS POLICIES FOR FAVORITES ──────────────────────────────────────────
@@ -383,53 +431,53 @@ CREATE POLICY "Only admins can delete profiles" ON public.profiles
 -- Users see only their own favorites
 DROP POLICY IF EXISTS "Users see own favorites" ON public.favorites;
 CREATE POLICY "Users see own favorites" ON public.favorites
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT TO authenticated USING ((SELECT auth.uid()) = user_id);
 
 -- Users can create their own favorites
 DROP POLICY IF EXISTS "Users create own favorites" ON public.favorites;
 CREATE POLICY "Users create own favorites" ON public.favorites
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT TO authenticated WITH CHECK ((SELECT auth.uid()) = user_id);
 
 -- Users can delete their own favorites
 DROP POLICY IF EXISTS "Users delete own favorites" ON public.favorites;
 CREATE POLICY "Users delete own favorites" ON public.favorites
-  FOR DELETE USING (auth.uid() = user_id);
+  FOR DELETE TO authenticated USING ((SELECT auth.uid()) = user_id);
 
 -- ── RLS POLICIES FOR READING_PROGRESS ───────────────────────────────────
 
 -- Users see only their own reading progress
 DROP POLICY IF EXISTS "Users see own reading progress" ON public.reading_progress;
 CREATE POLICY "Users see own reading progress" ON public.reading_progress
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT TO authenticated USING ((SELECT auth.uid()) = user_id);
 
 -- Users can update their own reading progress
 DROP POLICY IF EXISTS "Users update own reading progress" ON public.reading_progress;
 CREATE POLICY "Users update own reading progress" ON public.reading_progress
-  FOR UPDATE USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = user_id)
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 -- Users can create their own reading progress
 DROP POLICY IF EXISTS "Users create own reading progress" ON public.reading_progress;
 CREATE POLICY "Users create own reading progress" ON public.reading_progress
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT TO authenticated WITH CHECK ((SELECT auth.uid()) = user_id);
 
 -- ── RLS POLICIES FOR PRAYER_TIMES ───────────────────────────────────────
 
 -- Users see only their own prayer times
 DROP POLICY IF EXISTS "Users see own prayer times" ON public.prayer_times;
 CREATE POLICY "Users see own prayer times" ON public.prayer_times
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT TO authenticated USING ((SELECT auth.uid()) = user_id);
 
 -- Users can create their own prayer times
 DROP POLICY IF EXISTS "Users create own prayer times" ON public.prayer_times;
 CREATE POLICY "Users create own prayer times" ON public.prayer_times
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT TO authenticated WITH CHECK ((SELECT auth.uid()) = user_id);
 
 -- Users can update their own prayer times
 DROP POLICY IF EXISTS "Users update own prayer times" ON public.prayer_times;
 CREATE POLICY "Users update own prayer times" ON public.prayer_times
-  FOR UPDATE USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+  FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = user_id)
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 -- ── RLS POLICIES FOR ADMIN_LOGS ─────────────────────────────────────────
 
@@ -437,13 +485,13 @@ CREATE POLICY "Users update own prayer times" ON public.prayer_times
 DROP POLICY IF EXISTS "Admins see all logs" ON public.admin_logs;
 CREATE POLICY "Admins see all logs" ON public.admin_logs
   FOR SELECT USING (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   );
 
 -- Users see only their own logs
 DROP POLICY IF EXISTS "Users see own logs" ON public.admin_logs;
 CREATE POLICY "Users see own logs" ON public.admin_logs
-  FOR SELECT USING (auth.uid() = admin_id);
+  FOR SELECT TO authenticated USING ((SELECT auth.uid()) = admin_id);
 
 -- ── RLS POLICIES FOR MODERATION_QUEUE ───────────────────────────────────
 
@@ -451,16 +499,16 @@ CREATE POLICY "Users see own logs" ON public.admin_logs
 DROP POLICY IF EXISTS "Only admins access moderation" ON public.moderation_queue;
 CREATE POLICY "Only admins access moderation" ON public.moderation_queue
   FOR SELECT USING (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   );
 
 DROP POLICY IF EXISTS "Only admins update moderation" ON public.moderation_queue;
 CREATE POLICY "Only admins update moderation" ON public.moderation_queue
-  FOR UPDATE USING (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  FOR UPDATE TO authenticated USING (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   )
   WITH CHECK (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   );
 
 
@@ -468,20 +516,50 @@ CREATE POLICY "Only admins update moderation" ON public.moderation_queue
 
 DROP POLICY IF EXISTS "Admins manage social publish queue" ON public.social_publish_queue;
 CREATE POLICY "Admins manage social publish queue" ON public.social_publish_queue
-  FOR ALL USING (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  FOR ALL TO authenticated USING (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   )
   WITH CHECK (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   );
 
 DROP POLICY IF EXISTS "Admins manage video render jobs" ON public.video_render_jobs;
 CREATE POLICY "Admins manage video render jobs" ON public.video_render_jobs
-  FOR ALL USING (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  FOR ALL TO authenticated USING (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   )
   WITH CHECK (
-    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
+  );
+
+-- ── RLS POLICIES FOR VIDEO CONTENT ─────────────────────────────────────
+
+DROP POLICY IF EXISTS "Public read video categories" ON public.video_categories;
+CREATE POLICY "Public read video categories" ON public.video_categories
+  FOR SELECT TO anon, authenticated
+  USING (published IS TRUE AND is_active IS TRUE);
+
+DROP POLICY IF EXISTS "Admins manage video categories" ON public.video_categories;
+CREATE POLICY "Admins manage video categories" ON public.video_categories
+  FOR ALL TO authenticated USING (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
+  )
+  WITH CHECK (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
+  );
+
+DROP POLICY IF EXISTS "Public read videos" ON public.videos;
+CREATE POLICY "Public read videos" ON public.videos
+  FOR SELECT TO anon, authenticated
+  USING (published IS TRUE);
+
+DROP POLICY IF EXISTS "Admins manage videos" ON public.videos;
+CREATE POLICY "Admins manage videos" ON public.videos
+  FOR ALL TO authenticated USING (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
+  )
+  WITH CHECK (
+    (SELECT role FROM public.profiles WHERE id = (SELECT auth.uid())) = 'admin'
   );
 
 -- ── GRANT PUBLIC ACCESS TO CONTENT TABLES ───────────────────────────────
@@ -492,6 +570,7 @@ GRANT SELECT ON public.hadith TO anon;
 GRANT SELECT ON public.stories TO anon;
 GRANT SELECT ON public.adhkar TO anon;
 GRANT SELECT ON public.reciters TO anon;
+GRANT SELECT ON public.video_categories TO anon;
 GRANT SELECT ON public.videos TO anon;
 
 -- ══════════════════════════════════════════════════════════════════════════
