@@ -82,6 +82,7 @@ const NON_INDEXABLE_PATHS = new Set([
   "/auth",
   "/favorites",
   "/profile",
+  "/settings",
 ]);
 
 const EXTRA_PUBLIC_ROUTES = [

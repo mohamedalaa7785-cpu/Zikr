@@ -1,20 +1,11 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'عداد التسبيح | ZIKR',
   description: 'عداد تسبيح ذكي - احسب أذكارك وتسبيحاتك بسهولة مع تتبع التقدم والحفظ التلقائي',
-  keywords: ['تسبيح', 'أذكار', 'عداد', 'إسلام', 'ذكر', 'عبادة', 'صباح', 'مساء'],
-  openGraph: {
-    title: 'عداد التسبيح',
-    description: 'عداد تسبيح ذكي - احسب أذكارك وتسبيحاتك بسهولة',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'عداد التسبيح',
-    description: 'عداد تسبيح ذكي - احسب أذكارك وتسبيحاتك بسهولة',
-  },
-};
+  path: '/tasbeeh',
+});
 
 export default function TasbeehLayout({
   children,

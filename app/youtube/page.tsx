@@ -1,15 +1,17 @@
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/section-header';
 import { getYoutubeChannelFeed } from '@/lib/services/youtube';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'قناة يوتيوب | ذِكر',
   description: 'تابع أحدث المقاطع والقوائم على قناة ذِكر الرسمية على يوتيوب.',
-};
+  path: '/youtube',
+});
 
 export const revalidate = 1800;
 

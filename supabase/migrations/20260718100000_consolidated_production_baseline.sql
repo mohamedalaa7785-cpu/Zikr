@@ -251,18 +251,21 @@ CREATE TABLE IF NOT EXISTS public.moderation_queue (
   updated_at timestamp with time zone DEFAULT now()
 );
 
--- Social Publishing Queue
-CREATE TABLE IF NOT EXISTS public.social_publishing_queue (
+-- Social Publishing Queue (aligned with drizzle/schema.ts and app REST calls)
+CREATE TABLE IF NOT EXISTS public.social_publish_queue (
   id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-  content_id text NOT NULL,
   content_type text NOT NULL,
-  platform text NOT NULL,
-  status public.job_status DEFAULT 'pending'::public.job_status,
+  content_id text,
+  title text NOT NULL,
+  body text,
+  image_url text,
+  video_url text,
+  target_platforms text[] NOT NULL DEFAULT '{}',
+  status text NOT NULL DEFAULT 'queued',
   scheduled_at timestamp with time zone,
   published_at timestamp with time zone,
-  publish_result jsonb,
   error_message text,
-  is_active boolean DEFAULT true,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
 );
@@ -334,9 +337,9 @@ CREATE INDEX IF NOT EXISTS idx_moderation_queue_content_type ON public.moderatio
 CREATE INDEX IF NOT EXISTS idx_moderation_queue_reported_by ON public.moderation_queue (reported_by);
 
 -- Social Publishing Queue Indexes
-CREATE INDEX IF NOT EXISTS idx_social_pub_queue_status ON public.social_publishing_queue (status);
-CREATE INDEX IF NOT EXISTS idx_social_pub_queue_platform ON public.social_publishing_queue (platform);
-CREATE INDEX IF NOT EXISTS idx_social_pub_queue_scheduled ON public.social_publishing_queue (scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_social_pub_queue_status ON public.social_publish_queue (status);
+CREATE INDEX IF NOT EXISTS idx_social_pub_queue_platforms ON public.social_publish_queue USING gin (target_platforms);
+CREATE INDEX IF NOT EXISTS idx_social_pub_queue_scheduled ON public.social_publish_queue (scheduled_at);
 
 -- Video Render Jobs Indexes
 CREATE INDEX IF NOT EXISTS idx_video_render_status ON public.video_render_jobs (status);
@@ -350,20 +353,27 @@ ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.prayer_times ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.moderation_queue ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.social_publish_queue ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.social_publish_queue FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.video_render_jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.video_render_jobs FORCE ROW LEVEL SECURITY;
 
 -- ── RLS POLICIES FOR PROFILES ───────────────────────────────────────────
 
 -- Allow public read access to profiles
-CREATE POLICY IF NOT EXISTS "Profiles are public" ON public.profiles
+DROP POLICY IF EXISTS "Profiles are public" ON public.profiles;
+CREATE POLICY "Profiles are public" ON public.profiles
   FOR SELECT USING (true);
 
 -- Users can update their own profile
-CREATE POLICY IF NOT EXISTS "Users update own profile" ON public.profiles
+DROP POLICY IF EXISTS "Users update own profile" ON public.profiles;
+CREATE POLICY "Users update own profile" ON public.profiles
   FOR UPDATE USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
 
 -- Admins can delete profiles
-CREATE POLICY IF NOT EXISTS "Only admins can delete profiles" ON public.profiles
+DROP POLICY IF EXISTS "Only admins can delete profiles" ON public.profiles;
+CREATE POLICY "Only admins can delete profiles" ON public.profiles
   FOR DELETE USING (
     (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
   );
@@ -371,69 +381,103 @@ CREATE POLICY IF NOT EXISTS "Only admins can delete profiles" ON public.profiles
 -- ── RLS POLICIES FOR FAVORITES ──────────────────────────────────────────
 
 -- Users see only their own favorites
-CREATE POLICY IF NOT EXISTS "Users see own favorites" ON public.favorites
+DROP POLICY IF EXISTS "Users see own favorites" ON public.favorites;
+CREATE POLICY "Users see own favorites" ON public.favorites
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Users can create their own favorites
-CREATE POLICY IF NOT EXISTS "Users create own favorites" ON public.favorites
+DROP POLICY IF EXISTS "Users create own favorites" ON public.favorites;
+CREATE POLICY "Users create own favorites" ON public.favorites
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Users can delete their own favorites
-CREATE POLICY IF NOT EXISTS "Users delete own favorites" ON public.favorites
+DROP POLICY IF EXISTS "Users delete own favorites" ON public.favorites;
+CREATE POLICY "Users delete own favorites" ON public.favorites
   FOR DELETE USING (auth.uid() = user_id);
 
 -- ── RLS POLICIES FOR READING_PROGRESS ───────────────────────────────────
 
 -- Users see only their own reading progress
-CREATE POLICY IF NOT EXISTS "Users see own reading progress" ON public.reading_progress
+DROP POLICY IF EXISTS "Users see own reading progress" ON public.reading_progress;
+CREATE POLICY "Users see own reading progress" ON public.reading_progress
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Users can update their own reading progress
-CREATE POLICY IF NOT EXISTS "Users update own reading progress" ON public.reading_progress
+DROP POLICY IF EXISTS "Users update own reading progress" ON public.reading_progress;
+CREATE POLICY "Users update own reading progress" ON public.reading_progress
   FOR UPDATE USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
 -- Users can create their own reading progress
-CREATE POLICY IF NOT EXISTS "Users create own reading progress" ON public.reading_progress
+DROP POLICY IF EXISTS "Users create own reading progress" ON public.reading_progress;
+CREATE POLICY "Users create own reading progress" ON public.reading_progress
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- ── RLS POLICIES FOR PRAYER_TIMES ───────────────────────────────────────
 
 -- Users see only their own prayer times
-CREATE POLICY IF NOT EXISTS "Users see own prayer times" ON public.prayer_times
+DROP POLICY IF EXISTS "Users see own prayer times" ON public.prayer_times;
+CREATE POLICY "Users see own prayer times" ON public.prayer_times
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Users can create their own prayer times
-CREATE POLICY IF NOT EXISTS "Users create own prayer times" ON public.prayer_times
+DROP POLICY IF EXISTS "Users create own prayer times" ON public.prayer_times;
+CREATE POLICY "Users create own prayer times" ON public.prayer_times
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Users can update their own prayer times
-CREATE POLICY IF NOT EXISTS "Users update own prayer times" ON public.prayer_times
+DROP POLICY IF EXISTS "Users update own prayer times" ON public.prayer_times;
+CREATE POLICY "Users update own prayer times" ON public.prayer_times
   FOR UPDATE USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
 -- ── RLS POLICIES FOR ADMIN_LOGS ─────────────────────────────────────────
 
 -- Admins see all logs
-CREATE POLICY IF NOT EXISTS "Admins see all logs" ON public.admin_logs
+DROP POLICY IF EXISTS "Admins see all logs" ON public.admin_logs;
+CREATE POLICY "Admins see all logs" ON public.admin_logs
   FOR SELECT USING (
     (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
   );
 
 -- Users see only their own logs
-CREATE POLICY IF NOT EXISTS "Users see own logs" ON public.admin_logs
+DROP POLICY IF EXISTS "Users see own logs" ON public.admin_logs;
+CREATE POLICY "Users see own logs" ON public.admin_logs
   FOR SELECT USING (auth.uid() = admin_id);
 
 -- ── RLS POLICIES FOR MODERATION_QUEUE ───────────────────────────────────
 
 -- Only admins can access moderation queue
-CREATE POLICY IF NOT EXISTS "Only admins access moderation" ON public.moderation_queue
+DROP POLICY IF EXISTS "Only admins access moderation" ON public.moderation_queue;
+CREATE POLICY "Only admins access moderation" ON public.moderation_queue
   FOR SELECT USING (
     (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
   );
 
-CREATE POLICY IF NOT EXISTS "Only admins update moderation" ON public.moderation_queue
+DROP POLICY IF EXISTS "Only admins update moderation" ON public.moderation_queue;
+CREATE POLICY "Only admins update moderation" ON public.moderation_queue
   FOR UPDATE USING (
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  )
+  WITH CHECK (
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  );
+
+
+-- ── RLS POLICIES FOR SOCIAL/VIDEO QUEUES ───────────────────────────────
+
+DROP POLICY IF EXISTS "Admins manage social publish queue" ON public.social_publish_queue;
+CREATE POLICY "Admins manage social publish queue" ON public.social_publish_queue
+  FOR ALL USING (
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  )
+  WITH CHECK (
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
+  );
+
+DROP POLICY IF EXISTS "Admins manage video render jobs" ON public.video_render_jobs;
+CREATE POLICY "Admins manage video render jobs" ON public.video_render_jobs
+  FOR ALL USING (
     (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
   )
   WITH CHECK (

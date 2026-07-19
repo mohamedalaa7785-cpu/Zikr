@@ -29,7 +29,6 @@ export default function ArticleDetailPage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createBrowserSupabaseClient();
 
   useEffect(() => {
     if (!slug) return;
@@ -38,6 +37,7 @@ export default function ArticleDetailPage() {
       setLoading(true);
 
       try {
+        const supabase = createBrowserSupabaseClient();
         const { data, error } = await supabase
           .from('articles')
           .select('*')
@@ -69,13 +69,14 @@ export default function ArticleDetailPage() {
         });
       } catch (error) {
         console.error('Error fetching article:', error);
+        setArticle(null);
       } finally {
         setLoading(false);
       }
     };
 
     fetchArticle();
-  }, [slug, supabase]);
+  }, [slug]);
 
   if (loading) {
     return (

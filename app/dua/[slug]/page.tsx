@@ -28,13 +28,13 @@ export default function DuaDetailPage() {
   const [dua, setDua] = useState<Dua | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const supabase = createBrowserSupabaseClient();
 
   useEffect(() => {
     const fetchDua = async () => {
       if (!slug) return;
       try {
         setLoading(true);
+        const supabase = createBrowserSupabaseClient();
         const { data } = await supabase
           .from('duas')
           .select('*')
@@ -51,7 +51,7 @@ export default function DuaDetailPage() {
       }
     };
     void fetchDua();
-  }, [slug, supabase]);
+  }, [slug]);
 
   const copyToClipboard = () => {
     if (dua) {
