@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   alternates: {
     canonical: "/",
+    languages: {
+      ar: "/",
+      en: "/",
+    },
   },
   openGraph: {
     title: siteConfig.name,
@@ -48,7 +52,7 @@ const jsonLd = {
       name: siteConfig.name,
       url: siteConfig.url,
       description: siteConfig.description,
-      inLanguage: "ar",
+      inLanguage: ["ar", "en"],
       potentialAction: {
         "@type": "SearchAction",
         target: {

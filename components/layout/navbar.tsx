@@ -4,23 +4,25 @@ import { Container } from '@/components/ui/container';
 import { createClient } from '@/lib/supabase/server';
 import { MobileNav } from './mobile-nav';
 import { AuthNavActions } from './auth-nav-actions';
+import { LanguageToggle } from './language-toggle';
+import { LanguageAwareNav, type NavLink } from './language-aware-nav';
 
-const links = [
-  { href: '/quran', label: 'القرآن' },
-  { href: '/hadith', label: 'الأحاديث' },
-  { href: '/stories', label: 'القصص' },
-  { href: '/adhkar', label: 'الأذكار' },
-  { href: '/dua', label: 'الأدعية' },
-  { href: '/wird', label: 'الورد' },
-  { href: '/prayer-times', label: 'الصلاة' },
-  { href: '/zakat', label: 'الزكاة' },
-  { href: '/qibla', label: 'القبلة' },
-  { href: '/prophets', label: 'الأنبياء' },
-  { href: '/companions', label: 'الصحابة' },
-  { href: '/scholars', label: 'العلماء' },
-  { href: '/spiritual-ai', label: 'الروحاني' },
-  { href: '/kids', label: 'الأطفال' },
-  { href: '/search', label: 'بحث' },
+const links: NavLink[] = [
+  { href: '/quran', label: 'القرآن', labelEn: 'Quran' },
+  { href: '/hadith', label: 'الأحاديث', labelEn: 'Hadith' },
+  { href: '/stories', label: 'القصص', labelEn: 'Stories' },
+  { href: '/adhkar', label: 'الأذكار', labelEn: 'Adhkar' },
+  { href: '/dua', label: 'الأدعية', labelEn: 'Dua' },
+  { href: '/wird', label: 'الورد', labelEn: 'Wird' },
+  { href: '/prayer-times', label: 'الصلاة', labelEn: 'Prayer' },
+  { href: '/zakat', label: 'الزكاة', labelEn: 'Zakat' },
+  { href: '/qibla', label: 'القبلة', labelEn: 'Qibla' },
+  { href: '/prophets', label: 'الأنبياء', labelEn: 'Prophets' },
+  { href: '/companions', label: 'الصحابة', labelEn: 'Companions' },
+  { href: '/scholars', label: 'العلماء', labelEn: 'Scholars' },
+  { href: '/spiritual-ai', label: 'الروحاني', labelEn: 'Spiritual AI' },
+  { href: '/kids', label: 'الأطفال', labelEn: 'Kids' },
+  { href: '/search', label: 'بحث', labelEn: 'Search' },
 ];
 
 export async function Navbar() {
@@ -54,19 +56,10 @@ export async function Navbar() {
           <span className="hidden sm:block text-xs text-brand-gold/40 font-mono tracking-widest pt-1">ZIKR</span>
         </Link>
 
-        <nav className="hidden md:flex flex-wrap justify-end gap-x-4 gap-y-2">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm text-brand-cream/70 hover:text-brand-gold transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <LanguageAwareNav links={links} />
 
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <Link
             href="/settings"
             aria-label="الإعدادات"
