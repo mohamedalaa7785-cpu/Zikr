@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { BookOpen, ChevronLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,11 +22,14 @@ export async function ContinueReadingBanner() {
           </p>
         </div>
       </div>
-      <Button asChild size="sm" variant="outline" className="shrink-0 gap-1 border-amber-500/40 text-amber-400 hover:bg-amber-500/10">
-        <Link href={`/quran/${progress.surah_id}#ayah-${progress.ayah_number}`}>
-          استكمال
-          <ChevronLeft className="w-4 h-4" />
-        </Link>
+      <Button
+        href={`/quran/${progress.surah_id}#ayah-${progress.ayah_number}`}
+        size="sm"
+        variant="outline"
+        className="shrink-0 gap-1 border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
+      >
+        استكمال
+        <ChevronLeft className="w-4 h-4" />
       </Button>
     </Card>
   );
