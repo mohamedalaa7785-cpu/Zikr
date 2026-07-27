@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { getPrayerTimes, getPrayerTimesByCity } from '@/lib/services/prayer-times';
+import { getPrayerTimes, getPrayerTimesByCity, convertTo12Hour } from '@/lib/services/prayer-times';
 import { offlineDb } from '@/lib/offline-db';
 import type { PrayerTimes } from '@/lib/types/prayer';
 import { useLanguage } from '@/components/layout/language-provider';
@@ -131,11 +131,15 @@ const moreContent = [
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+function toMinutes(timeStr: string): number {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return 0;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return hours * 60 + minutes;
+}
+
 function getActivePrayer(timings: PrayerTimes, now: Date) {
-  const toMinutes = (t: string) => {
-    const [h, m] = t.replace(/\s*(AM|PM)/i, '').split(':').map(Number);
-    return h * 60 + m;
-  };
   const cur = now.getHours() * 60 + now.getMinutes();
   const keys: Array<'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha'> = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
   let active: (typeof keys)[number] | '' = '';
@@ -582,7 +586,7 @@ export default function HomePage() {
                     )}
                     <p className="text-xs text-brand-gold/60 mb-2 font-arabic" dir="rtl">{label}</p>
                     <p className="text-lg font-bold text-brand-cream tabular-nums">
-                      {prayerTimes[key]?.replace(/\s*(AM|PM)/i, '') ?? '--:--'}
+                      {prayerTimes[key] ? convertTo12Hour(prayerTimes[key], true) : '--:-- --'}
                     </p>
                     {isActive && (
                       <span className="mt-1.5 inline-block text-[10px] text-brand-gold font-bold tracking-widest px-2 py-0.5 rounded-full bg-brand-gold/15">الآن</span>

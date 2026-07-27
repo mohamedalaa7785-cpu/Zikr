@@ -273,6 +273,29 @@ export function formatPrayerTime(timeStr: string): string {
 }
 
 /**
+ * Convert 24-hour format to 12-hour format with AM/PM
+ * @param timeStr - Time string in HH:MM format
+ * @param ar - Return in Arabic (صباحاً/مساءً) or English (AM/PM)
+ * @returns Formatted time string like "5:12 ص" or "5:12 AM"
+ */
+export function convertTo12Hour(timeStr: string, ar: boolean = true): string {
+  const minutesAfterMidnight = parsePrayerTimeMinutes(timeStr);
+  if (minutesAfterMidnight === null) return timeStr;
+
+  let hours = Math.floor(minutesAfterMidnight / 60);
+  const minutes = (minutesAfterMidnight % 60).toString().padStart(2, '0');
+  
+  const isPM = hours >= 12;
+  hours = hours % 12 || 12; // Convert 0 to 12, 13-23 to 1-11
+  
+  const suffix = ar 
+    ? (isPM ? 'م' : 'ص')  // Arabic: م = مساءً (PM), ص = صباحاً (AM)
+    : (isPM ? 'PM' : 'AM');
+  
+  return `${hours}:${minutes} ${suffix}`;
+}
+
+/**
  * Get prayer name in Arabic
  */
 export function getPrayerNameAr(englishName: string): string {
