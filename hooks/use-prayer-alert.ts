@@ -120,6 +120,13 @@ export function usePrayerAlert(): PrayerAlertReturn {
           playAzanClip();
           showPrayerNotification(PRAYER_NAMES_AR[prayer]);
           alertCallbackRef.current?.(prayer);
+          // Also deliver via SW for background notifications
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+              type: 'SHOW_PRAYER_NOTIFICATION',
+              prayerName: PRAYER_NAMES_AR[prayer],
+            });
+          }
         }
       }
     };

@@ -70,6 +70,13 @@ export function useSalawatReminder(): SalawatReminderReturn {
       }
       playSalawatClip();
       showSalawatNotification();
+      // Also dispatch via SW for background delivery
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SHOW_DHIKR_NOTIFICATION',
+          text: 'اللهم صلِّ وسلم على نبينا محمد',
+        });
+      }
     };
 
     const interval = setInterval(fire, settings.intervalMinutes * 60 * 1000);
