@@ -16,6 +16,14 @@ export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsPr
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
 
   useEffect(() => {
+    // Guard: if Supabase public env vars are not available at runtime in the
+    // browser (e.g. preview sandbox), rely on the server-passed initialUser
+    // and skip client-side auth subscription.
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL_FALLBACK;
+    if (!supabaseUrl) return;
+
     const supabase = createClient();
 
     async function syncUser() {
