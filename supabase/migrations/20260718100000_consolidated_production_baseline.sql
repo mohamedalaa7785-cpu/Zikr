@@ -395,7 +395,15 @@ CREATE INDEX IF NOT EXISTS idx_hadith_approved ON public.hadith (is_approved);
 
 -- Stories Indexes
 CREATE INDEX IF NOT EXISTS idx_stories_category ON public.stories (category);
-CREATE INDEX IF NOT EXISTS idx_stories_approved ON public.stories (is_approved);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'stories' AND column_name = 'is_approved'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS idx_stories_approved ON public.stories (is_approved);
+  END IF;
+END $$;
 
 -- Videos Indexes
 CREATE INDEX IF NOT EXISTS idx_video_categories_slug ON public.video_categories (slug);
@@ -606,6 +614,6 @@ GRANT SELECT ON public.reciters TO anon;
 GRANT SELECT ON public.video_categories TO anon;
 GRANT SELECT ON public.videos TO anon;
 
--- ══════════════════════════════════════════════════════════════════════════
+-- ══════════════════════════════════════════════════════════��═══════════════
 -- END OF CONSOLIDATED PRODUCTION BASELINE MIGRATION
 -- ══════════════════════════════════════════════════════════════════════════

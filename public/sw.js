@@ -1,5 +1,5 @@
 // Service Worker for Zikr PWA
-const CACHE_NAME = 'zikr-v4';
+const CACHE_NAME = 'zikr-v5';
 
 // App shell + key pages pre-cached on install for offline availability.
 // Audio files are NOT pre-cached (50–200MB per reciter).
@@ -15,6 +15,28 @@ const STATIC_ASSETS = [
   '/settings',
   '/wird',
   '/zakat',
+  // Content pages
+  '/prophets',
+  '/companions',
+  '/articles',
+  '/hadith',
+  '/kids',
+  '/battles',
+  '/conquests',
+  '/stories',
+  '/about',
+  '/privacy',
+  '/contact',
+  '/reciters',
+  '/scholars',
+  '/search',
+  '/radio',
+  '/qibla',
+  '/poetry',
+  '/memorization',
+  '/spiritual-ai',
+  '/faq',
+  '/platform',
 ];
 
 // Install event - cache static assets
@@ -149,4 +171,61 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  // Allow page to schedule a background prayer reminder
+  if (event.data && event.data.type === 'SHOW_PRAYER_NOTIFICATION') {
+    const { prayerName } = event.data;
+    self.registration.showNotification(`حان وقت صلاة ${prayerName}`, {
+      body: 'الصلاة خير من النوم — حافظ على صلاتك',
+      icon: '/icons/icon-192.svg',
+      badge: '/icons/icon-192.svg',
+      tag: `prayer-${prayerName}`,
+      dir: 'rtl',
+      lang: 'ar',
+    });
+  }
+  // Dhikr / Salawat background reminder
+  if (event.data && event.data.type === 'SHOW_DHIKR_NOTIFICATION') {
+    const { text } = event.data;
+    self.registration.showNotification('تذكير بالذكر', {
+      body: text ?? 'اللهم صلِّ على سيدنا محمد',
+      icon: '/icons/icon-192.svg',
+      badge: '/icons/icon-192.svg',
+      tag: 'dhikr-reminder',
+      dir: 'rtl',
+      lang: 'ar',
+    });
+  }
+});
+
+// Handle push events (from server push, if configured later)
+self.addEventListener('push', (event) => {
+  let data = { title: 'تذكير ذِكر', body: 'افتح التطبيق للاطلاع على الإشعار' };
+  try {
+    if (event.data) {
+      data = event.data.json();
+    }
+  } catch { /* ignore */ }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/icons/icon-192.svg',
+      badge: '/icons/icon-192.svg',
+      dir: 'rtl',
+      lang: 'ar',
+    })
+  );
+});
+
+// Notification click — bring app to focus
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow('/');
+    })
+  );
 });
