@@ -91,7 +91,10 @@ export type Database = {
           author: string | null
           category_id: string | null
           content: string
+          content_ar: string
+          content_en: string | null
           created_at: string | null
+          featured: boolean | null
           featured_image_url: string | null
           id: string
           metadata: Json | null
@@ -99,8 +102,12 @@ export type Database = {
           searchable: unknown
           slug: string
           summary: string | null
+          summary_ar: string | null
+          summary_en: string | null
           tags: string[] | null
           title: string
+          title_ar: string
+          title_en: string | null
           updated_at: string | null
           views: number | null
         }
@@ -108,7 +115,10 @@ export type Database = {
           author?: string | null
           category_id?: string | null
           content: string
+          content_ar: string
+          content_en?: string | null
           created_at?: string | null
+          featured?: boolean | null
           featured_image_url?: string | null
           id?: string
           metadata?: Json | null
@@ -116,8 +126,12 @@ export type Database = {
           searchable?: unknown
           slug: string
           summary?: string | null
+          summary_ar?: string | null
+          summary_en?: string | null
           tags?: string[] | null
           title: string
+          title_ar: string
+          title_en?: string | null
           updated_at?: string | null
           views?: number | null
         }
@@ -125,7 +139,10 @@ export type Database = {
           author?: string | null
           category_id?: string | null
           content?: string
+          content_ar?: string
+          content_en?: string | null
           created_at?: string | null
+          featured?: boolean | null
           featured_image_url?: string | null
           id?: string
           metadata?: Json | null
@@ -133,8 +150,12 @@ export type Database = {
           searchable?: unknown
           slug?: string
           summary?: string | null
+          summary_ar?: string | null
+          summary_en?: string | null
           tags?: string[] | null
           title?: string
+          title_ar?: string
+          title_en?: string | null
           updated_at?: string | null
           views?: number | null
         }
