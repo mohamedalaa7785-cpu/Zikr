@@ -1114,10 +1114,10 @@ DECLARE
     'saved_stories', 'story_progress', 'reminders', 'adhkar_completions',
     'adhkar_streaks', 'notification_settings', 'app_settings', 'prophet_notes',
     'social_shares', 'tawasheeh_favorites', 'tawasheeh_playlists',
-    'tawasheeh_playlist_items', 'reciter_favorites', 'recent_recitations',
+    'reciter_favorites', 'recent_recitations',
     'prayer_locations', 'prayer_preferences', 'prayer_notifications',
     'memorization_progress', 'user_subscriptions', 'payments',
-    'research_requests', 'generated_research'
+    'research_requests'
   ];
 BEGIN
   FOREACH tbl IN ARRAY user_tables LOOP
@@ -1144,6 +1144,86 @@ BEGIN
     );
   END LOOP;
 END $$;
+
+-- Tawasheeh playlist items are owned through their parent playlist.
+DROP POLICY IF EXISTS "user_select_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items;
+DROP POLICY IF EXISTS "user_insert_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items;
+DROP POLICY IF EXISTS "user_update_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items;
+DROP POLICY IF EXISTS "user_delete_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items;
+
+CREATE POLICY "user_select_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items
+  FOR SELECT TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM public.tawasheeh_playlists p
+      WHERE p.id = playlist_id AND p.user_id = (SELECT auth.uid())
+    )
+  );
+CREATE POLICY "user_insert_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items
+  FOR INSERT TO authenticated WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.tawasheeh_playlists p
+      WHERE p.id = playlist_id AND p.user_id = (SELECT auth.uid())
+    )
+  );
+CREATE POLICY "user_update_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items
+  FOR UPDATE TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM public.tawasheeh_playlists p
+      WHERE p.id = playlist_id AND p.user_id = (SELECT auth.uid())
+    )
+  ) WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.tawasheeh_playlists p
+      WHERE p.id = playlist_id AND p.user_id = (SELECT auth.uid())
+    )
+  );
+CREATE POLICY "user_delete_tawasheeh_playlist_items" ON public.tawasheeh_playlist_items
+  FOR DELETE TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM public.tawasheeh_playlists p
+      WHERE p.id = playlist_id AND p.user_id = (SELECT auth.uid())
+    )
+  );
+
+-- Generated research is owned through its parent research request.
+DROP POLICY IF EXISTS "user_select_generated_research" ON public.generated_research;
+DROP POLICY IF EXISTS "user_insert_generated_research" ON public.generated_research;
+DROP POLICY IF EXISTS "user_update_generated_research" ON public.generated_research;
+DROP POLICY IF EXISTS "user_delete_generated_research" ON public.generated_research;
+
+CREATE POLICY "user_select_generated_research" ON public.generated_research
+  FOR SELECT TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM public.research_requests r
+      WHERE r.id = request_id AND r.user_id = (SELECT auth.uid())
+    )
+  );
+CREATE POLICY "user_insert_generated_research" ON public.generated_research
+  FOR INSERT TO authenticated WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.research_requests r
+      WHERE r.id = request_id AND r.user_id = (SELECT auth.uid())
+    )
+  );
+CREATE POLICY "user_update_generated_research" ON public.generated_research
+  FOR UPDATE TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM public.research_requests r
+      WHERE r.id = request_id AND r.user_id = (SELECT auth.uid())
+    )
+  ) WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.research_requests r
+      WHERE r.id = request_id AND r.user_id = (SELECT auth.uid())
+    )
+  );
+CREATE POLICY "user_delete_generated_research" ON public.generated_research
+  FOR DELETE TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM public.research_requests r
+      WHERE r.id = request_id AND r.user_id = (SELECT auth.uid())
+    )
+  );
 
 -- Contacts: any authenticated user can insert, admins can read all
 DROP POLICY IF EXISTS "contacts_insert" ON public.contacts;

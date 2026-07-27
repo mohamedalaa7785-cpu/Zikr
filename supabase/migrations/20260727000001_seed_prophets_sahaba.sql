@@ -6,7 +6,26 @@
 
 -- ── PROPHETS ─────────────────────────────────────────────────────────────────
 
-INSERT INTO public.prophets (id, name_ar, name_en, slug, order_number, mentioned_in_quran, summary_ar, summary_en, story_ar, story_en, miracles_ar, miracles_en, lessons_ar, lessons_en, published) VALUES
+INSERT INTO public.prophets (id, name_ar, name_en, slug, order_num, bio_ar, bio_en, published, metadata)
+SELECT
+  id,
+  name_ar,
+  name_en,
+  slug,
+  order_number,
+  story_ar,
+  story_en,
+  published,
+  jsonb_build_object(
+    'mentioned_in_quran', mentioned_in_quran,
+    'summary_ar', summary_ar,
+    'summary_en', summary_en,
+    'miracles_ar', miracles_ar::jsonb,
+    'miracles_en', miracles_en::jsonb,
+    'lessons_ar', lessons_ar::jsonb,
+    'lessons_en', lessons_en::jsonb
+  )
+FROM (VALUES
 (
   gen_random_uuid(), 'آدم عليه السلام', 'Prophet Adam (AS)', 'adam',
   1, true,
@@ -111,14 +130,39 @@ INSERT INTO public.prophets (id, name_ar, name_en, slug, order_number, mentioned
   '["Love for the Prophet ﷺ and following his Sunnah", "Patience in enduring harm for the sake of the call", "The Prophet''s character is the highest example for every Muslim"]',
   true
 )
+ ) AS seed(id, name_ar, name_en, slug, order_number, mentioned_in_quran, summary_ar, summary_en, story_ar, story_en, miracles_ar, miracles_en, lessons_ar, lessons_en, published)
 ON CONFLICT (slug) DO UPDATE SET
-  summary_ar = EXCLUDED.summary_ar,
-  summary_en = EXCLUDED.summary_en,
+  name_ar = EXCLUDED.name_ar,
+  name_en = EXCLUDED.name_en,
+  order_num = EXCLUDED.order_num,
+  bio_ar = EXCLUDED.bio_ar,
+  bio_en = EXCLUDED.bio_en,
+  metadata = EXCLUDED.metadata,
   published = EXCLUDED.published;
 
 -- ── COMPANIONS (SAHABA) ───────────────────────────────────────────────────────
 
-INSERT INTO public.companions (id, name_ar, name_en, slug, title_ar, title_en, category, birth_year, death_year, summary_ar, summary_en, story_ar, story_en, virtues_ar, virtues_en, published) VALUES
+INSERT INTO public.companions (id, name_ar, name_en, slug, title_ar, category, death_year, bio_ar, bio_en, published, metadata)
+SELECT
+  id,
+  name_ar,
+  name_en,
+  slug,
+  title_ar,
+  category,
+  death_year::text,
+  story_ar,
+  story_en,
+  published,
+  jsonb_build_object(
+    'title_en', title_en,
+    'birth_year', birth_year,
+    'summary_ar', summary_ar,
+    'summary_en', summary_en,
+    'virtues_ar', virtues_ar::jsonb,
+    'virtues_en', virtues_en::jsonb
+  )
+FROM (VALUES
 (
   gen_random_uuid(), 'أبو بكر الصديق', 'Abu Bakr Al-Siddiq', 'abu-bakr',
   'الصديق', 'The Truthful', 'khulafa',
@@ -215,7 +259,14 @@ INSERT INTO public.companions (id, name_ar, name_en, slug, title_ar, title_en, c
   '["Suggesting the Trench at the Battle of Confederates", "His long journey in search of truth", "The Prophet''s testimony that he is from the People of the House"]',
   true
 )
+ ) AS seed(id, name_ar, name_en, slug, title_ar, title_en, category, birth_year, death_year, summary_ar, summary_en, story_ar, story_en, virtues_ar, virtues_en, published)
 ON CONFLICT (slug) DO UPDATE SET
-  summary_ar = EXCLUDED.summary_ar,
-  summary_en = EXCLUDED.summary_en,
+  name_ar = EXCLUDED.name_ar,
+  name_en = EXCLUDED.name_en,
+  title_ar = EXCLUDED.title_ar,
+  category = EXCLUDED.category,
+  death_year = EXCLUDED.death_year,
+  bio_ar = EXCLUDED.bio_ar,
+  bio_en = EXCLUDED.bio_en,
+  metadata = EXCLUDED.metadata,
   published = EXCLUDED.published;
