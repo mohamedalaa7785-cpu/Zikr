@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { getStaticArticleBySlug } from '@/lib/data/articles';
 
 interface Article {
   id: string;
@@ -15,7 +16,7 @@ interface Article {
   content: string;
   summary?: string;
   author?: string;
-  featured_image_url?: string;
+  featured_image_url?: string | null;
   tags?: string[];
   views: number;
   created_at: string;
@@ -49,7 +50,7 @@ export default function ArticleDetailPage() {
         if (error) throw error;
 
         if (!data) {
-          setArticle(null);
+          setArticle(getStaticArticleBySlug(slug));
           return;
         }
 
@@ -69,7 +70,7 @@ export default function ArticleDetailPage() {
         });
       } catch (error) {
         console.error('Error fetching article:', error);
-        setArticle(null);
+        setArticle(getStaticArticleBySlug(slug));
       } finally {
         setLoading(false);
       }
