@@ -87,7 +87,7 @@ export default async function SurahPage({ params }: { params: Promise<{ surah: s
       ) : (
         <div className='space-y-6'>
           {result.ayahs.map((ayah) => (
-            <Card key={ayah.numberInSurah} className="p-6 hover:shadow-md transition-shadow">
+            <Card key={ayah.numberInSurah} id={`ayah-${ayah.numberInSurah}`} className="p-6 hover:shadow-md transition-shadow scroll-mt-24">
               <div className='flex flex-col gap-4'>
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1 text-right">
@@ -100,10 +100,16 @@ export default async function SurahPage({ params }: { params: Promise<{ surah: s
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4 pt-4 border-t border-muted">
+                <div className="flex items-center gap-4 pt-4 border-t border-muted flex-wrap">
                   <BookmarkButton
                     keyRef={`quran:${result.surah.number}:${ayah.numberInSurah}`}
                     initialSaved={favoritedRefs.has(`quran:${result.surah.number}:${ayah.numberInSurah}`)}
+                  />
+                  <MushafBookmark
+                    surahId={result.surah.number}
+                    ayahNumber={ayah.numberInSurah}
+                    surahName={result.surah.name}
+                    isCurrentBookmark={readingProgress?.ayah_number === ayah.numberInSurah}
                   />
                   <Link 
                     className='text-sm text-brand-gold hover:underline' 

@@ -4,6 +4,7 @@ import { Container } from '@/components/ui/container';
 import { createClient } from '@/lib/supabase/server';
 import { MobileNav } from './mobile-nav';
 import { AuthNavActions } from './auth-nav-actions';
+import { LanguageToggle } from './language-toggle';
 
 const links = [
   { href: '/quran', label: 'القرآن' },
@@ -67,6 +68,7 @@ export async function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <Link
             href="/settings"
             aria-label="الإعدادات"
