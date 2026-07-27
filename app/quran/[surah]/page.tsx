@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BookmarkButton } from '@/components/quran/bookmark-button';
+import { MushafBookmark } from '@/components/quran/mushaf-bookmark';
 import { QuranAudioPlayer } from '@/components/quran/audio-player';
 import { MarkSurahRead } from '@/components/wird/mark-surah-read';
 import { Card } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Container } from '@/components/ui/container';
 import { getSurahById } from '@/lib/services/quran';
 import { getSurahFromDb } from '@/lib/services/quran-server';
 import { getFavoritedRefs } from '@/app/favorites/actions';
+import { getReadingProgress } from '@/app/quran/actions';
 import { Badge } from '@/components/ui/badge';
 
 export const revalidate = 3600; // Surah page cache
@@ -51,9 +53,12 @@ export default async function SurahPage({ params }: { params: Promise<{ surah: s
 
   if (!result) return notFound();
 
-  // Batch-fetch all favorite states for this page in one query
+  // Batch-fetch all favorite states + reading progress in parallel
   const allRefs = result.ayahs.map((a) => `quran:${result!.surah.number}:${a.numberInSurah}`);
-  const favoritedRefs = await getFavoritedRefs(allRefs, 'quran');
+  const [favoritedRefs, readingProgress] = await Promise.all([
+    getFavoritedRefs(allRefs, 'quran'),
+    getReadingProgress(result.surah.number),
+  ]);
 
   return (
     <Container className='space-y-6 py-12'>

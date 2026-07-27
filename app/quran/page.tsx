@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { SurahSkeleton } from '@/components/quran/surah-skeleton';
 import { pageMetadata } from '@/lib/site';
 import { QuranAuthBanner } from '@/components/quran/quran-auth-banner';
+import { ContinueReadingBanner } from '@/components/quran/continue-reading-banner';
 
 // إجبار الصفحة على الرندرة الديناميكية لمنع أخطاء الـ Build مع الـ no-store fetch
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,11 @@ async function QuranContent() {
           <h1 className='text-4xl font-bold text-brand-gold'>القرآن الكريم</h1>
           <QuranAuthBanner />
         </div>
+
+        {/* Continue reading banner — server-rendered, shows only for logged-in users */}
+        <Suspense fallback={null}>
+          <ContinueReadingBanner />
+        </Suspense>
 
         <SurahSearch initialSurahs={surahs.map(s => ({
           number: s.number,
