@@ -1,0 +1,2 @@
+-- Migration 20260728214316 was applied directly to the database.
+-- Stub created to satisfy local/remote version tracking.
