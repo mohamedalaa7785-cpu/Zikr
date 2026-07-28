@@ -85,7 +85,7 @@ export default function RootLayout({
       dir={siteConfig.dir}
       data-scroll-behavior="smooth"
       className="bg-black"
-      suppressHydrationWarning
+      suppressHydrationWarning={true}
     >
       <head>
         <meta name="theme-color" content="#0A2A1E" />

@@ -25,9 +25,22 @@ function getStoredLocale(): Locale {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getStoredLocale);
+  // Initialize with default locale consistently for both server and client
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    // After hydration, update to stored locale if available
+    setIsHydrated(true);
+    const storedLocale = getStoredLocale();
+    if (storedLocale !== DEFAULT_LOCALE) {
+      setLocaleState(storedLocale);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    
     const meta = localeMeta[locale];
     document.documentElement.lang = meta.lang;
     document.documentElement.dir = meta.dir;
@@ -39,7 +52,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Storage can be unavailable in private/restricted browser contexts.
     }
-  }, [locale]);
+  }, [locale, isHydrated]);
 
   const value = useMemo<LanguageContextValue>(() => {
     const dir = localeMeta[locale].dir;
