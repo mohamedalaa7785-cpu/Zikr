@@ -16,11 +16,12 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const searchTerm = `%${query.trim()}%`;
 
-    const [quranResults, hadithResults, duaResults, storyResults] = await Promise.all([
+    const [quranResults, hadithResults, duaResults, storyResults, articleResults] = await Promise.all([
       supabase.from('quran_surahs').select('id, title:name_ar').ilike('name_ar', searchTerm).limit(5),
       supabase.from('hadiths').select('id, title:text_ar').ilike('text_ar', searchTerm).limit(5),
       supabase.from('duas').select('id, title:title_ar').ilike('title_ar', searchTerm).limit(5),
       supabase.from('stories').select('id, title').ilike('title', searchTerm).limit(5),
+      supabase.from('articles').select('id, title:title_ar, slug').ilike('title_ar', searchTerm).limit(5),
     ]);
 
     const results = [
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
       ...((hadithResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'hadith' })),
       ...((duaResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'dua' })),
       ...((storyResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'story' })),
+      ...((articleResults.data || []) as SearchRow[]).map((r) => ({ ...r, type: 'article' })),
     ];
 
     return NextResponse.json(results);
