@@ -1,0 +1,22 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.zikr.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.zikr.app'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+}
+
+apply from: '../../node_modules/@capacitor/android/capacitor.gradle'
+
+dependencies {
+    implementation project(':capacitor-android')
+}

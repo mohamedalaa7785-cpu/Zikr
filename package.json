@@ -12,7 +12,16 @@
     "db:migrate:supabase": "pnpm dlx supabase db push",
     "lint": "eslint .",
     "deploy:check": "node scripts/validate-deployment-env.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cap": "pnpm dlx @capacitor/cli",
+    "cap:sync": "pnpm dlx @capacitor/cli sync",
+    "cap:android": "pnpm dlx @capacitor/cli open android",
+    "cap:ios": "pnpm dlx @capacitor/cli open ios",
+    "mobile:build": "pnpm build && pnpm cap:sync",
+    "mobile:check": "node scripts/verify-mobile-readiness.mjs",
+    "routes:check": "node scripts/verify-platform-routes.mjs",
+    "verify": "pnpm routes:check && pnpm imports:check && pnpm mobile:check && pnpm lint && pnpm check && pnpm build",
+    "imports:check": "node scripts/verify-local-imports.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

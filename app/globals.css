@@ -155,3 +155,34 @@ p {
   border-right-width: 4px;
   border-left-width: 0;
 }
+
+/* Capacitor native shell refinements: preserve the premium dark RTL web design
+   while respecting native safe areas and bottom system navigation. */
+.capacitor-native body {
+  background: #000;
+  overscroll-behavior-y: none;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.capacitor-native [data-mobile-nav],
+.capacitor-native nav[aria-label="التنقل السفلي"] {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}
+
+.capacitor-native[data-network="offline"] body::before {
+  content: "أنت الآن في وضع عدم الاتصال";
+  position: fixed;
+  inset-inline: 1rem;
+  top: max(env(safe-area-inset-top), 0.75rem);
+  z-index: 9999;
+  border: 1px solid rgba(216, 183, 91, 0.35);
+  border-radius: 999px;
+  background: rgba(7, 16, 13, 0.88);
+  color: #f8e7b0;
+  padding: 0.45rem 0.9rem;
+  text-align: center;
+  font-size: 0.8rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 0 28px rgba(216, 183, 91, 0.18);
+}
