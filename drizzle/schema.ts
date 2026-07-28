@@ -1307,7 +1307,7 @@ export const tasks = pgTable("tasks", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
     .notNull()
-    .references(() => legacyUsers.id),
+    .references(() => profiles.id, { onDelete: "cascade" }),
   input: text("input").notNull(),
   result: text("result").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
