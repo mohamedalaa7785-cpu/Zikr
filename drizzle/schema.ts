@@ -245,8 +245,8 @@ export const notificationSettings = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id").notNull(),
-    emailNotifications: boolean("emailNotifications").notNull().default(true),
-    pushNotifications: boolean("pushNotifications").notNull().default(true),
+    emailNotifications: boolean("email_notifications").notNull().default(true),
+    pushNotifications: boolean("push_notifications").notNull().default(true),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -283,7 +283,7 @@ export const appSettings = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id").notNull(),
     theme: text("theme").notNull().default("system"),
-    fontSize: text("fontSize").notNull().default("medium"),
+    fontSize: text("font_size").notNull().default("medium"),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -1225,10 +1225,10 @@ export const videoPublishingConfig = pgTable("video_publishing_config", {
 
 export const legacyUsers = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
-  openId: text("openId").unique(),
+  openId: text("open_id").unique(),
   name: text("name"),
   email: text("email").unique(),
-  loginMethod: text("loginMethod"),
+  loginMethod: text("login_method"),
   role: roleEnum("role").notNull().default("user"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -1243,7 +1243,7 @@ export const contacts = pgTable("contacts", {
   message: text("message").notNull(),
   language: text("language").notNull().default("en"),
   read: boolean("read").notNull().default(false),
-  notificationSent: boolean("notificationSent").notNull().default(false),
+  notificationSent: boolean("notification_sent").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -1251,17 +1251,17 @@ export const contacts = pgTable("contacts", {
 export const episodes = pgTable("episodes", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
-  titleEn: text("titleEn").notNull(),
-  titleAr: text("titleAr").notNull(),
-  descriptionEn: text("descriptionEn").notNull(),
-  descriptionAr: text("descriptionAr").notNull(),
-  contentEn: text("contentEn").notNull(),
-  contentAr: text("contentAr").notNull(),
-  keywordsEn: text("keywordsEn"),
-  keywordsAr: text("keywordsAr"),
+  titleEn: text("title_en").notNull(),
+  titleAr: text("title_ar").notNull(),
+  descriptionEn: text("description_en").notNull(),
+  descriptionAr: text("description_ar").notNull(),
+  contentEn: text("content_en").notNull(),
+  contentAr: text("content_ar").notNull(),
+  keywordsEn: text("keywords_en"),
+  keywordsAr: text("keywords_ar"),
   category: text("category"),
-  thumbnailUrl: text("thumbnailUrl"),
-  youtubeVideoId: text("youtubeVideoId"),
+  thumbnailUrl: text("thumbnail_url"),
+  youtubeVideoId: text("youtube_video_id"),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -1296,7 +1296,7 @@ export const subscriptions = pgTable("subscriptions", {
   email: text("email").notNull().unique(),
   language: text("language").notNull().default("en"),
   verified: boolean("verified").notNull().default(false),
-  verificationToken: text("verificationToken"),
+  verificationToken: text("verification_token"),
   subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
   unsubscribedAt: timestamp("unsubscribed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -1315,7 +1315,7 @@ export const tasks = pgTable("tasks", {
 
 export const userBehavior = pgTable("user_behavior", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => legacyUsers.id),
+  userId: uuid("user_id"),
   page: text("page").notNull(),
   timeSpent: integer("time_spent").notNull().default(0),
   interaction: text("interaction").notNull(),
