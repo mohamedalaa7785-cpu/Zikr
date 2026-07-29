@@ -7,14 +7,55 @@ export interface NotificationPreference {
   quietHours?: { from: string; to: string };
 }
 
+type NativeNotificationFacade = {
+  scheduleLocalNotification?: (notification: {
+    id: number;
+    title: string;
+    body: string;
+    scheduleAt?: string;
+    sound?: string;
+  }) => Promise<void>;
+};
+
+type NativeNotificationWindow = Window & {
+  zikrNative?: NativeNotificationFacade;
+};
+
 const DEFAULT_PREFERENCE: NotificationPreference = {
   prayerReminders: true,
   adhkarReminders: true,
   quranReminders: false,
 };
 
+function notificationId(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  return Math.max(1, hash % 2147483647);
+}
+
+async function showNativeNotification(title: string, body: string, tag: string): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  const native = (window as NativeNotificationWindow).zikrNative;
+  if (!native?.scheduleLocalNotification) return false;
+
+  await native.scheduleLocalNotification({
+    id: notificationId(tag),
+    title,
+    body,
+    sound: tag.startsWith('prayer-') ? 'adhan.wav' : undefined,
+  });
+  return true;
+}
+
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
-  if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
+  if (typeof window === 'undefined') return 'unsupported';
+
+  const native = (window as NativeNotificationWindow).zikrNative;
+  if (native) return 'granted';
+
+  if (!('Notification' in window)) return 'unsupported';
   return Notification.requestPermission() as Promise<NotificationPermission>;
 }
 
@@ -54,58 +95,77 @@ export function isInQuietHours(from: string, to: string): boolean {
   }
 }
 
-/** Show a browser notification for a prayer time. No-ops gracefully if not granted. */
+/** Show a browser/native notification for a prayer time. No-ops gracefully if not granted. */
 export function showPrayerNotification(prayerNameAr: string): void {
   if (typeof window === 'undefined') return;
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
 
-  try {
-    new Notification(`حان وقت صلاة ${prayerNameAr}`, {
-      body: 'الصلاة خير من النوم — حافظ على صلاتك',
-      icon: '/icons/icon-192.svg',
-      tag: `prayer-${prayerNameAr}`,
-    });
-  } catch {
-    // Some environments restrict Notification constructor — ignore silently
-  }
+  const title = `حان وقت صلاة ${prayerNameAr}`;
+  const body = 'الصلاة خير من النوم — حافظ على صلاتك';
+  const tag = `prayer-${prayerNameAr}`;
+
+  void showNativeNotification(title, body, tag).then((handled) => {
+    if (handled) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    try {
+      new Notification(title, {
+        body,
+        icon: '/icons/icon-192.svg',
+        tag,
+      });
+    } catch {
+      // Some environments restrict Notification constructor — ignore silently
+    }
+  });
 }
 
-/** Show a browser notification reminding the user their zakat is due. */
+/** Show a browser/native notification reminding the user their zakat is due. */
 export function showZakatNotification(daysLeft: number): void {
   if (typeof window === 'undefined') return;
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
 
   const body =
     daysLeft > 0
       ? `اقترب موعد إخراج زكاتك — تبقّى ${daysLeft} يوماً`
       : 'حان موعد إخراج زكاتك — لا تنسَ أداءها';
 
-  try {
-    new Notification('تذكير الزكاة', {
-      body,
-      icon: '/icons/icon-192.svg',
-      tag: 'zakat-reminder',
-    });
-  } catch {
-    // ignore
-  }
+  void showNativeNotification('تذكير الزكاة', body, 'zakat-reminder').then((handled) => {
+    if (handled) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    try {
+      new Notification('تذكير الزكاة', {
+        body,
+        icon: '/icons/icon-192.svg',
+        tag: 'zakat-reminder',
+      });
+    } catch {
+      // ignore
+    }
+  });
 }
 
-/** Show a browser notification for the Salawat reminder. */
+/** Show a browser/native notification for the Salawat reminder. */
 export function showSalawatNotification(): void {
   if (typeof window === 'undefined') return;
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
 
-  try {
-    new Notification('اللهم صل على محمد', {
-      body: 'صلِّ على النبي ﷺ — اللهم صل وسلم وبارك عليه',
-      icon: '/icons/icon-192.svg',
-      tag: 'salawat-reminder',
-    });
-  } catch {
-    // ignore
-  }
+  const title = 'اللهم صل على محمد';
+  const body = 'صلِّ على النبي ﷺ — اللهم صل وسلم وبارك عليه';
+
+  void showNativeNotification(title, body, 'salawat-reminder').then((handled) => {
+    if (handled) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    try {
+      new Notification(title, {
+        body,
+        icon: '/icons/icon-192.svg',
+        tag: 'salawat-reminder',
+      });
+    } catch {
+      // ignore
+    }
+  });
 }
