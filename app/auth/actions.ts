@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getServerEnv } from '@/lib/env';
+import { getCanonicalAuthBaseUrl } from '@/lib/auth-enhanced';
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 // Uses the @supabase/ssr server client so that session cookies are written in
@@ -39,7 +40,9 @@ export async function registerAction(formData: FormData) {
 
   const supabase = await createClient();
   const requestOrigin = (await headers()).get('origin');
-  const siteUrl = requestOrigin || getServerEnv().NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = getCanonicalAuthBaseUrl(
+    requestOrigin || getServerEnv().NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+  );
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -80,7 +83,7 @@ export async function registerAction(formData: FormData) {
 export async function forgotAction(formData: FormData) {
   const email = String(formData.get('email') || '');
   const env = getServerEnv();
-  const siteUrl = env.NEXT_PUBLIC_SITE_URL;
+  const siteUrl = getCanonicalAuthBaseUrl(env.NEXT_PUBLIC_SITE_URL);
 
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {

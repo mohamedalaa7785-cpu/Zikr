@@ -4,6 +4,7 @@
  */
 
 import { jwtDecode } from "jwt-decode";
+import { PRODUCTION_URL } from "@/lib/site";
 
 interface DecodedToken {
   exp?: number;
@@ -197,11 +198,51 @@ export function buildOAuthRedirectUri(
   baseUrl: string,
   nextPath?: string
 ): string {
-  const url = new URL("/auth/callback", baseUrl);
+  const url = new URL("/auth/callback", getCanonicalAuthBaseUrl(baseUrl));
   if (nextPath) {
     url.searchParams.set("next", nextPath);
   }
   return url.toString();
+}
+
+/**
+ * Keep production auth on one registered, user-facing origin.
+ *
+ * Supabase OAuth is sensitive to the exact redirect URL. On Vercel, users can
+ * reach the same deployment through generated preview/deployment hosts; if the
+ * OAuth callback uses one of those hosts, the session can appear to "jump" to a
+ * different link. Localhost is preserved for development.
+ */
+export function getCanonicalAuthBaseUrl(baseUrl?: string | null): string {
+  if (!baseUrl) return PRODUCTION_URL;
+
+  try {
+    const url = new URL(baseUrl);
+    const host = url.hostname.toLowerCase();
+
+    if (host === "localhost" || host === "127.0.0.1" || host === "::1") {
+      return url.origin;
+    }
+
+    return PRODUCTION_URL;
+  } catch {
+    return PRODUCTION_URL;
+  }
+}
+
+/**
+ * Resolve the safe origin used by auth route handlers after callback.
+ */
+export function getTrustedAuthOrigin(request: Request): string {
+  const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const host = forwardedHost ?? request.headers.get("host");
+
+  if (host) {
+    return getCanonicalAuthBaseUrl(`${forwardedProto}://${host}`);
+  }
+
+  return PRODUCTION_URL;
 }
 
 /**

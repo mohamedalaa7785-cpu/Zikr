@@ -1,4 +1,4 @@
-import { supabaseServerAdminRequest } from '@/lib/supabase/server';
+import { supabaseServerAnonRequest } from '@/lib/supabase/server';
 
 export interface ArticleCategory {
   id: string;
@@ -48,7 +48,7 @@ export interface Video {
 
 // Articles
 export async function getArticleCategories(): Promise<ArticleCategory[]> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     '/rest/v1/article_categories?select=id,name_ar,name_en,slug,icon&published=eq.true&order=name_ar.asc'
   ).catch((error) => {
     console.error('[content] Failed to fetch article categories:', error);
@@ -73,7 +73,7 @@ export async function getArticles(categoryId?: string, limit = 20): Promise<Arti
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(query).catch((error) => {
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(query).catch((error) => {
     console.error('[content] Failed to fetch articles:', error);
     return [];
   });
@@ -94,7 +94,7 @@ export async function getArticles(categoryId?: string, limit = 20): Promise<Arti
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     `/rest/v1/articles?select=*&slug=eq.${slug}&published=eq.true&limit=1`
   ).catch(() => []);
   
@@ -119,7 +119,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
 // Videos
 export async function getVideoCategories(): Promise<VideoCategory[]> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     '/rest/v1/video_categories?select=id,name_ar,name_en,slug,icon&published=eq.true&order=name_ar.asc'
   ).catch((error) => {
     console.error('[content] Failed to fetch video categories:', error);
@@ -144,7 +144,7 @@ export async function getVideos(categoryId?: string, limit = 20): Promise<Video[
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(query).catch((error) => {
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(query).catch((error) => {
     console.error('[content] Failed to fetch videos:', error);
     return [];
   });
@@ -166,7 +166,7 @@ export async function getVideos(categoryId?: string, limit = 20): Promise<Video[
 }
 
 export async function getVideoBySlug(slug: string): Promise<Video | null> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     `/rest/v1/videos?select=*&slug=eq.${slug}&published=eq.true&limit=1`
   ).catch(() => []);
   
@@ -213,7 +213,7 @@ export interface Dua {
 }
 
 export async function getDuaCategories(): Promise<DuaCategory[]> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     '/rest/v1/dua_categories?select=id,name_ar,name_en,slug,icon&published=eq.true&order=name_ar.asc'
   ).catch((error) => {
     console.error('[content] Failed to fetch dua categories:', error);
@@ -238,7 +238,7 @@ export async function getDuas(categoryId?: string, limit = 50): Promise<Dua[]> {
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(query).catch((error) => {
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(query).catch((error) => {
     console.error('[content] Failed to fetch duas:', error);
     return [];
   });
@@ -258,7 +258,7 @@ export async function getDuas(categoryId?: string, limit = 50): Promise<Dua[]> {
 }
 
 export async function getDuaBySlug(slug: string): Promise<Dua | null> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     `/rest/v1/duas?select=*&slug=eq.${slug}&published=eq.true&limit=1`
   ).catch(() => []);
   
@@ -294,7 +294,7 @@ export interface Prophet {
 }
 
 export async function getProphets(): Promise<Prophet[]> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     '/rest/v1/prophets?select=*&published=eq.true&order=order_num.asc'
   ).catch((error) => {
     console.error('[content] Failed to fetch prophets:', error);
@@ -315,7 +315,7 @@ export async function getProphets(): Promise<Prophet[]> {
 }
 
 export async function getProphetBySlug(slug: string): Promise<Prophet | null> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     `/rest/v1/prophets?select=*&slug=eq.${slug}&published=eq.true&limit=1`
   ).catch(() => []);
   
@@ -347,7 +347,7 @@ export interface ProphetSection {
 }
 
 export async function getProphetSections(prophetId: string): Promise<ProphetSection[]> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     `/rest/v1/prophet_sections?select=*&prophet_id=eq.${prophetId}&order=order_num.asc`
   ).catch((error) => {
     console.error('[content] Failed to fetch prophet sections for', prophetId, ':', error);
@@ -393,7 +393,7 @@ export async function getKidsContent(ageGroup?: string, type?: string, limit = 5
   
   query += `&limit=${limit}`;
 
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(query).catch((error) => {
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(query).catch((error) => {
     console.error('[content] Failed to fetch kids content:', error);
     return [];
   });
@@ -422,7 +422,7 @@ export interface Battle {
 }
 
 export async function getBattles(limit = 100): Promise<Battle[]> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     `/rest/v1/battles?select=id,slug,name_ar,published&published=eq.true&order=year_hijri.asc&limit=${limit}`
   ).catch(() => []);
   return (rows ?? []).map((r) => ({
@@ -435,7 +435,7 @@ export async function getBattles(limit = 100): Promise<Battle[]> {
 
 // ─── Kids Content ─────────────────────────────────────────────────────────────
 export async function getKidsContentBySlug(slug: string): Promise<KidsContent | null> {
-  const rows = await supabaseServerAdminRequest<Array<Record<string, unknown>>>(
+  const rows = await supabaseServerAnonRequest<Array<Record<string, unknown>>>(
     `/rest/v1/kids_content?select=*&slug=eq.${slug}&published=eq.true&limit=1`
   ).catch(() => []);
   

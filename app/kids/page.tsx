@@ -6,7 +6,10 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { kidsContent as staticKidsContent } from "@/lib/data/kids-content";
+import {
+  kidsContent as staticKidsContent,
+  normalizeKidsContentRow,
+} from "@/lib/data/kids-content";
 
 interface KidsContent {
   id: string;
@@ -57,6 +60,8 @@ const STATIC_CONTENT: KidsContent[] = staticKidsContent.map(item => ({
   featured_image_url: item.featured_image_url,
 }));
 
+const KIDS_DB_TIMEOUT_MS = 3000;
+
 export const metadata = pageMetadata({
   title: "قسم الأطفال | ذكر",
   description: "محتوى إسلامي تعليمي وترفيهي آمن ومناسب للأطفال",
@@ -67,18 +72,30 @@ export default async function KidsPage() {
   let content: KidsContent[] = STATIC_CONTENT;
   try {
     const supabase = await createClient();
-    const { data } = await supabase
-      .from("kids_content")
-      .select("*")
-      .eq("published", true)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
-    if (data && data.length > 0) content = data;
+    const { data } = await Promise.race([
+      supabase
+        .from("kids_content")
+        .select("*")
+        .eq("published", true)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false }),
+      new Promise<{ data: null }>(resolve =>
+        setTimeout(() => resolve({ data: null }), KIDS_DB_TIMEOUT_MS)
+      ),
+    ]);
+    const normalized = (data ?? [])
+      .map(row => normalizeKidsContentRow(row))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+    if (normalized.length > 0) content = normalized;
   } catch {
     // fall through to static content
   }
 
   const byAgeGroup = (age: string) => content.filter(c => c.age_group === age);
+  const hasVisibleContent = Object.keys(ageGroupLabels).some(
+    age => byAgeGroup(age).length > 0
+  );
+  if (!hasVisibleContent) content = STATIC_CONTENT;
 
   return (
     <Container className="py-12 space-y-12">
