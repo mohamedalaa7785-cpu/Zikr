@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
-import { extractNextPath } from '@/lib/auth-enhanced';
+import { extractNextPath, getTrustedAuthOrigin } from '@/lib/auth-enhanced';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  const origin = getTrustedAuthOrigin(request);
   const code = searchParams.get('code');
   const safePath = extractNextPath(searchParams);
 

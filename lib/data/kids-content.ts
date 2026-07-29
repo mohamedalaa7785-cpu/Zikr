@@ -40,6 +40,55 @@ export interface KidsItem {
   };
 }
 
+type KidsLegacyRow = Partial<KidsItem> & {
+  content_type?: string | null;
+  age_min?: number | null;
+  age_max?: number | null;
+  summary_ar?: string | null;
+  featured_image_url?: string | null;
+  video_url?: string | null;
+  quiz_data?: unknown;
+  metadata?: KidsItem["metadata"] | null;
+  published?: boolean | null;
+  is_active?: boolean | null;
+};
+
+function ageRangeToGroup(ageMin?: number | null, ageMax?: number | null) {
+  if (!ageMin && !ageMax) return undefined;
+  const min = ageMin ?? ageMax ?? 6;
+  const max = ageMax ?? ageMin ?? 8;
+
+  if (max <= 5) return "3-5";
+  if (min <= 8 && max <= 10) return "6-8";
+  if (min <= 12 && max <= 12) return "9-12";
+  return "13-15";
+}
+
+export function normalizeKidsContentRow(row: KidsLegacyRow): KidsItem | null {
+  const titleAr = row.title_ar?.trim();
+  const slug = row.slug?.trim();
+  if (!titleAr || !slug) return null;
+  if (row.published === false || row.is_active === false) return null;
+
+  const type = (row.content_type ?? row.type ?? "story") as KidsItem["type"];
+  const ageGroup =
+    row.age_group ?? ageRangeToGroup(row.age_min, row.age_max) ?? "6-8";
+
+  return {
+    id: row.id ?? slug,
+    title_ar: titleAr,
+    title_en: row.title_en?.trim() || titleAr,
+    slug,
+    type,
+    age_group: ageGroup as KidsItem["age_group"],
+    content_ar: row.content_ar ?? row.summary_ar ?? undefined,
+    quiz_data: row.quiz_data as KidsItem["quiz_data"],
+    featured_image_url: row.featured_image_url ?? undefined,
+    video_url: row.video_url ?? undefined,
+    metadata: row.metadata ?? undefined,
+  };
+}
+
 export const kidsContent: KidsItem[] = [
   // ------------------------------------------------------------------
   // Stories — قصص الأنبياء للأطفال

@@ -27,8 +27,8 @@ export function GoogleOAuthButton({
           ? next
           : '/profile';
 
-      // Use the current origin so Supabase's PKCE verifier cookie is written
-      // and then read back on the same domain during /auth/callback.
+      // Build the callback on the canonical production domain to avoid Vercel
+      // deployment/preview hosts taking over after Google redirects back.
       const siteUrl =
         typeof window !== 'undefined' ? window.location.origin : '';
 

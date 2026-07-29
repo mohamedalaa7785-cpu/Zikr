@@ -8,7 +8,10 @@ import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import { getKidsItemBySlug } from "@/lib/data/kids-content";
+import {
+  getKidsItemBySlug,
+  normalizeKidsContentRow,
+} from "@/lib/data/kids-content";
 
 type QuizQuestion = {
   text: string;
@@ -73,6 +76,24 @@ function getQuizQuestions(quizData: unknown): QuizQuestion[] {
   return d.questions.filter(isQuizQuestion);
 }
 
+function toDetailContent(row: unknown): KidsContent | null {
+  const item = normalizeKidsContentRow(row as Parameters<typeof normalizeKidsContentRow>[0]);
+  return item
+    ? {
+        id: item.id,
+        title_ar: item.title_ar,
+        title_en: item.title_en,
+        content_ar: item.content_ar,
+        type: item.type,
+        age_group: item.age_group,
+        featured_image_url: item.featured_image_url,
+        video_url: item.video_url,
+        quiz_data: item.quiz_data,
+        metadata: item.metadata,
+      }
+    : null;
+}
+
 export default function KidsDetailPage() {
   const params = useParams();
   const rawSlug = params.slug;
@@ -98,54 +119,36 @@ export default function KidsDetailPage() {
         setQuizAnswers({});
         setQuizSubmitted(false);
         const supabase = createBrowserSupabaseClient();
-        const { data } = await supabase
+        let result = await supabase
           .from("kids_content")
           .select("*")
           .eq("slug", slug)
           .eq("published", true)
           .eq("is_active", true)
           .limit(1)
-          .single();
-        if (data) {
-          setContent(data);
+          .maybeSingle();
+
+        if (result.error) {
+          result = await supabase
+            .from("kids_content")
+            .select("*")
+            .eq("slug", slug)
+            .eq("published", true)
+            .limit(1)
+            .maybeSingle();
+        }
+
+        const normalized = result.data ? toDetailContent(result.data) : null;
+        if (normalized) {
+          setContent(normalized);
         } else {
           // Fall back to the static content library
           const staticItem = getKidsItemBySlug(slug);
-          setContent(
-            staticItem
-              ? {
-                  id: staticItem.id,
-                  title_ar: staticItem.title_ar,
-                  title_en: staticItem.title_en,
-                  content_ar: staticItem.content_ar,
-                  type: staticItem.type,
-                  age_group: staticItem.age_group,
-                  featured_image_url: staticItem.featured_image_url,
-                  video_url: staticItem.video_url,
-                  quiz_data: staticItem.quiz_data,
-                  metadata: staticItem.metadata,
-                }
-              : null
-          );
+          setContent(staticItem ? toDetailContent(staticItem) : null);
         }
       } catch {
         const staticItem = getKidsItemBySlug(slug ?? "");
-        setContent(
-          staticItem
-            ? {
-                id: staticItem.id,
-                title_ar: staticItem.title_ar,
-                title_en: staticItem.title_en,
-                content_ar: staticItem.content_ar,
-                type: staticItem.type,
-                age_group: staticItem.age_group,
-                featured_image_url: staticItem.featured_image_url,
-                video_url: staticItem.video_url,
-                quiz_data: staticItem.quiz_data,
-                metadata: staticItem.metadata,
-              }
-            : null
-        );
+        setContent(staticItem ? toDetailContent(staticItem) : null);
       } finally {
         setLoading(false);
       }
