@@ -1,19 +1,23 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
+import { staticArticles } from '@/lib/data/articles';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'المقالات الإسلامية',
   description: 'مقالات قيمة عن الإسلام والعقيدة والتطبيق العملي من منصة ذِكر.',
-};
+  path: '/articles',
+});
 
 export const revalidate = 1800;
+
 
 interface Article {
   id: string;
@@ -34,68 +38,6 @@ interface ArticleCategory {
   icon?: string | null;
 }
 
-const staticArticles: Article[] = [
-  {
-    id: '1',
-    title: 'أهمية الصلاة في حياة المسلم',
-    slug: 'importance-of-prayer',
-    summary: 'الصلاة عماد الدين وركن الإسلام الثاني، وهي الصلة التي تربط العبد بربه خمس مرات في اليوم والليلة.',
-    author: 'فريق ذِكر',
-    featured_image_url: null,
-    views: 0,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    title: 'فضل قراءة القرآن الكريم',
-    slug: 'virtues-of-quran',
-    summary: 'القرآن الكريم كلام الله المنزل على نبيه محمد صلى الله عليه وسلم، وقراءته عبادة عظيمة ومنهل للهداية والنور.',
-    author: 'فريق ذِكر',
-    featured_image_url: null,
-    views: 0,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    title: 'الأخلاق الإسلامية وأثرها في المجتمع',
-    slug: 'islamic-ethics',
-    summary: 'الأخلاق الحميدة من صميم الإسلام، فقد بعث النبي صلى الله عليه وسلم ليتمم مكارم الأخلاق.',
-    author: 'فريق ذِكر',
-    featured_image_url: null,
-    views: 0,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    title: 'الذكر وأثره في تحقيق الطمأنينة',
-    slug: 'dhikr-and-tranquility',
-    summary: 'ألا بذكر الله تطمئن القلوب، وفي هذا المقال نستعرض فضل الذكر وأنواعه وآثاره الروحانية.',
-    author: 'فريق ذِكر',
-    featured_image_url: null,
-    views: 0,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: '5',
-    title: 'فضل الاستغفار والتوبة إلى الله',
-    slug: 'istighfar-and-tawbah',
-    summary: 'التوبة باب مفتوح لكل مذنب، والاستغفار مفتاح الرزق والبركة والفرج في الضيق.',
-    author: 'فريق ذِكر',
-    featured_image_url: null,
-    views: 0,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: '6',
-    title: 'صلة الرحم وأثرها في بركة العمر',
-    slug: 'silat-al-rahim',
-    summary: 'أمر الله بصلة الرحم وحذر من قطعها، وفي هذا المقال نستعرض فضل صلة الأرحام وآثارها الإيجابية.',
-    author: 'فريق ذِكر',
-    featured_image_url: null,
-    views: 0,
-    created_at: new Date().toISOString(),
-  },
-];
 
 const staticCategories: ArticleCategory[] = [
   { id: 'aqeedah', name_ar: 'العقيدة', slug: 'aqeedah', icon: null },
@@ -167,7 +109,7 @@ export default async function ArticlesPage() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {displayArticles.map((article) => (
-            <Link key={article.id} href={showStatic ? '/articles' : `/articles/${article.slug}`}>
+            <Link key={article.id} href={`/articles/${article.slug}`}>
               <Card className="h-full flex flex-col hover:border-brand-gold/50 transition-colors cursor-pointer">
                 {article.featured_image_url ? (
                   <div className="w-full h-40 bg-brand-gold/10 rounded-t-xl overflow-hidden">

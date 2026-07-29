@@ -14,11 +14,15 @@ export function createClient(): BrowserClient {
 
   const { NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_ANON_KEY: key } = getPublicEnv();
 
-  if (!url) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL for browser Supabase client.');
-  }
-  if (!key) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY for browser Supabase client.');
+  if (!url || !key) {
+    // In the v0 preview sandbox, NEXT_PUBLIC_* vars are not injected at build
+    // time. Return a placeholder so the rest of the app degrades gracefully
+    // (the server already provides initialUser via SSR props).
+    // In production on Vercel, NEXT_PUBLIC_SUPABASE_URL is always set.
+    return createBrowserClient(
+      url || 'https://placeholder.supabase.co',
+      key || 'placeholder-anon-key',
+    );
   }
 
   _instance = createBrowserClient(url, key);

@@ -1,15 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
 
-const PROTECTED_PREFIXES = [
-  "/profile",
-  "/settings",
-  "/favorites",
-  "/memorization",
-  "/wird",
-  "/tasbeeh",
-  "/admin",
-];
+const PROTECTED_PREFIXES = ["/profile", "/favorites", "/admin"];
 
 const AUTH_ONLY_PATHS = ["/auth/login", "/auth/register"];
 const AUTH_CALLBACK_PREFIX = "/auth/callback";

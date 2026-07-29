@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { getPrayerTimes, getPrayerTimesByCity } from '@/lib/services/prayer-times';
+import { getPrayerTimes, getPrayerTimesByCity, convertTo12Hour } from '@/lib/services/prayer-times';
 import { offlineDb } from '@/lib/offline-db';
 import type { PrayerTimes } from '@/lib/types/prayer';
+import { useLanguage } from '@/components/layout/language-provider';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const prayerNames = [
@@ -130,11 +131,15 @@ const moreContent = [
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+function toMinutes(timeStr: string): number {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return 0;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return hours * 60 + minutes;
+}
+
 function getActivePrayer(timings: PrayerTimes, now: Date) {
-  const toMinutes = (t: string) => {
-    const [h, m] = t.replace(/\s*(AM|PM)/i, '').split(':').map(Number);
-    return h * 60 + m;
-  };
   const cur = now.getHours() * 60 + now.getMinutes();
   const keys: Array<'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha'> = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
   let active: (typeof keys)[number] | '' = '';
@@ -247,6 +252,7 @@ function SectionDivider({ title }: { title: string }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter();
+  const { isEnglish, dir } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const prayerTimesRef = useRef<PrayerTimes | null>(null);
@@ -348,7 +354,7 @@ export default function HomePage() {
     second: '2-digit',
     hour12: false,
   }) : '';
-  const dateStr = currentTime ? currentTime.toLocaleDateString('ar-EG', {
+  const dateStr = currentTime ? currentTime.toLocaleDateString(isEnglish ? 'en-US' : 'ar-EG', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -363,7 +369,7 @@ export default function HomePage() {
       ══════════════════════════════════════════════════════════════════════ */}
       <section
         className="relative overflow-hidden border-b border-brand-gold/15"
-        aria-label="الصفحة الرئيسية"
+        aria-label={isEnglish ? 'Home page' : 'الصفحة الرئيسية'}
         style={{ background: 'linear-gradient(180deg, #050f0a 0%, #0A2A1E 40%, #071f16 100%)' }}
       >
         {/* Animated stars */}
@@ -421,7 +427,7 @@ export default function HomePage() {
               className="text-brand-cream/55 text-base md:text-xl tracking-widest"
               style={{ fontFamily: 'var(--font-amiri)' }}
             >
-              منصتك الروحانية الشاملة
+              {isEnglish ? 'Your complete spiritual platform' : 'منصتك الروحانية الشاملة'}
             </p>
 
             {/* Live clock */}
@@ -434,7 +440,7 @@ export default function HomePage() {
                   <span className="w-2 h-2 rounded-full bg-brand-gold animate-pulse shrink-0" />
                   <span className="text-2xl font-mono font-bold text-brand-gold tabular-nums tracking-wider">{timeStr}</span>
                 </div>
-                <span className="text-xs text-brand-cream/40 font-arabic" dir="rtl">{dateStr}</span>
+                <span className="text-xs text-brand-cream/40 font-arabic" dir={dir}>{dateStr}</span>
               </div>
             )}
           </div>
@@ -452,21 +458,21 @@ export default function HomePage() {
               />
               <input
                 type="search"
-                placeholder="ابحث عن آية، حديث، ذِكر، أو قصة..."
+                placeholder={isEnglish ? 'Search for an ayah, hadith, dhikr, or story...' : 'ابحث عن آية، حديث، ذِكر، أو قصة...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault();
                 }}
-                aria-label="البحث في المحتوى"
+                aria-label={isEnglish ? 'Search content' : 'البحث في المحتوى'}
                 className="w-full px-6 py-4 pr-14 rounded-2xl border border-brand-gold/25 bg-black/40 text-brand-cream placeholder:text-brand-cream/30 focus:border-brand-gold/55 focus:outline-none focus:ring-2 focus:ring-brand-gold/15 text-base"
                 style={{ backdropFilter: 'blur(16px)' }}
-                dir="rtl"
+                dir={dir}
               />
               <button
                 type="submit"
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-brand-gold/15 flex items-center justify-center text-brand-gold hover:bg-brand-gold/25 transition-colors"
-                aria-label="بحث"
+                aria-label={isEnglish ? 'Search' : 'بحث'}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -476,37 +482,37 @@ export default function HomePage() {
           </div>
 
           {/* Quick nav grid */}
-          <nav aria-label="أقسام المنصة" className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-11 gap-2">
+          <nav aria-label={isEnglish ? 'Platform sections' : 'أقسام المنصة'} className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-11 gap-2">
             {[
-              { label: 'القرآن', href: '/quran' },
-              { label: 'الأحاديث', href: '/hadith' },
-              { label: 'الأنبياء', href: '/prophets' },
-              { label: 'الصحابة', href: '/companions' },
-              { label: 'الأذكار', href: '/adhkar' },
-              { label: 'الأدعية', href: '/dua' },
-              { label: 'المقالات', href: '/articles' },
-              { label: 'الفيديوهات', href: '/videos' },
-              { label: 'الأطفال', href: '/kids' },
-              { label: 'الرفيق', href: '/spiritual-ai' },
-              { label: 'الشعر', href: '/poetry' },
-              { label: 'العلماء', href: '/scholars' },
-              { label: 'الحفظ', href: '/memorization' },
-              { label: 'الصلاة', href: '/prayer-times' },
-              { label: 'القبلة', href: '/qibla' },
-              { label: 'الغزوات', href: '/battles' },
-              { label: 'الفتوحات', href: '/conquests' },
-              { label: 'المداحون', href: '/tawasheeh' },
-              { label: 'القراء', href: '/reciters' },
-              { label: 'الإذاعة', href: '/radio' },
-              { label: 'التسبيح', href: '/tasbeeh' },
-              { label: 'يوتيوب', href: '/youtube' },
+              { label: 'القرآن', labelEn: 'Quran', href: '/quran' },
+              { label: 'الأحاديث', labelEn: 'Hadith', href: '/hadith' },
+              { label: 'الأنبياء', labelEn: 'Prophets', href: '/prophets' },
+              { label: 'الصحابة', labelEn: 'Companions', href: '/companions' },
+              { label: 'الأذكار', labelEn: 'Adhkar', href: '/adhkar' },
+              { label: 'الأدعية', labelEn: 'Dua', href: '/dua' },
+              { label: 'المقالات', labelEn: 'Articles', href: '/articles' },
+              { label: 'الفيديوهات', labelEn: 'Videos', href: '/videos' },
+              { label: 'الأطفال', labelEn: 'Kids', href: '/kids' },
+              { label: 'الرفيق', labelEn: 'AI', href: '/spiritual-ai' },
+              { label: 'الشعر', labelEn: 'Poetry', href: '/poetry' },
+              { label: 'العلماء', labelEn: 'Scholars', href: '/scholars' },
+              { label: 'الحفظ', labelEn: 'Memorize', href: '/memorization' },
+              { label: 'الصلاة', labelEn: 'Prayer', href: '/prayer-times' },
+              { label: 'القبلة', labelEn: 'Qibla', href: '/qibla' },
+              { label: 'الغزوات', labelEn: 'Battles', href: '/battles' },
+              { label: 'الفتوحات', labelEn: 'Conquests', href: '/conquests' },
+              { label: 'المداحون', labelEn: 'Tawasheeh', href: '/tawasheeh' },
+              { label: 'القراء', labelEn: 'Reciters', href: '/reciters' },
+              { label: 'الإذاعة', labelEn: 'Radio', href: '/radio' },
+              { label: 'التسبيح', labelEn: 'Tasbeeh', href: '/tasbeeh' },
+              { label: 'يوتيوب', labelEn: 'YouTube', href: '/youtube' },
             ].map((cat) => (
               <Link
                 key={cat.href}
                 href={cat.href}
                 className="group flex items-center justify-center p-2.5 rounded-xl border border-brand-gold/12 bg-black/20 hover:border-brand-gold/40 hover:bg-brand-gold/8 transition-all duration-200 min-h-[44px]"
               >
-                <span className="text-[11px] text-center text-brand-cream/60 group-hover:text-brand-gold leading-tight transition-colors">{cat.label}</span>
+                <span className="text-[11px] text-center text-brand-cream/60 group-hover:text-brand-gold leading-tight transition-colors">{isEnglish ? cat.labelEn : cat.label}</span>
               </Link>
             ))}
           </nav>
@@ -580,7 +586,7 @@ export default function HomePage() {
                     )}
                     <p className="text-xs text-brand-gold/60 mb-2 font-arabic" dir="rtl">{label}</p>
                     <p className="text-lg font-bold text-brand-cream tabular-nums">
-                      {prayerTimes[key]?.replace(/\s*(AM|PM)/i, '') ?? '--:--'}
+                      {prayerTimes[key] ? convertTo12Hour(prayerTimes[key], true) : '--:-- --'}
                     </p>
                     {isActive && (
                       <span className="mt-1.5 inline-block text-[10px] text-brand-gold font-bold tracking-widest px-2 py-0.5 rounded-full bg-brand-gold/15">الآن</span>

@@ -1,18 +1,63 @@
+'use client';
+
 import { Container } from '@/components/ui/container';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { BookOpen, Scroll, Star } from 'lucide-react';
+import { useLanguage } from './language-provider';
 
 const FACEBOOK_PAGE_URL = 'https://www.facebook.com/ZikrMediaOfficial';
 
 export function Footer() {
+  const { isEnglish } = useLanguage();
+
+  const copy = isEnglish
+    ? {
+        description: 'A complete spiritual platform connecting Muslims with the Book of Allah and the Sunnah through a modern, premium, and accessible experience.',
+        sections: 'Platform Sections',
+        tools: 'Smart Tools',
+        legal: 'Legal & Platform',
+        copyright: `© ${new Date().getFullYear()} ZIKR | ذِكرٌ — Built with care to serve the Muslim ummah. All rights reserved.`,
+      }
+    : {
+        description: 'منصة روحانية شاملة تهدف لربط المسلم بكتاب الله وسنة رسوله ﷺ عبر تجربة تقنية حديثة، فاخرة، وميسرة للجميع.',
+        sections: 'أقسام المنصة',
+        tools: 'أدوات ذكية',
+        legal: 'قانوني وتقني',
+        copyright: `© ${new Date().getFullYear()} ZIKR | ذِكرٌ — صُنع بحب لخدمة الأمة الإسلامية. جميع الحقوق محفوظة.`,
+      };
+
+  const sectionLinks = [
+    { href: '/quran', ar: 'القرآن الكريم', en: 'Holy Quran' },
+    { href: '/hadith', ar: 'الأحاديث النبوية', en: 'Prophetic Hadith' },
+    { href: '/adhkar', ar: 'حصن المسلم', en: 'Fortress of the Muslim' },
+    { href: '/prophets', ar: 'قصص الأنبياء', en: 'Stories of the Prophets' },
+    { href: '/scholars', ar: 'تراجم العلماء', en: 'Scholar Biographies' },
+  ];
+  const toolLinks = [
+    { href: '/prayer-times', ar: 'مواقيت الصلاة', en: 'Prayer Times' },
+    { href: '/memorization', ar: 'مساعد الحفظ', en: 'Memorization Assistant' },
+    { href: '/spiritual-ai', ar: 'الرفيق الروحاني AI', en: 'Spiritual AI Companion' },
+    { href: '/poetry', ar: 'ديوان الشعر', en: 'Poetry Collection' },
+    { href: '/search', ar: 'البحث الشامل', en: 'Universal Search' },
+  ];
+  const legalLinks = [
+    { href: '/about', ar: 'عن المنصة', en: 'About' },
+    { href: '/platform', ar: 'دليل المنصة', en: 'Platform Guide' },
+    { href: '/faq', ar: 'الأسئلة الشائعة', en: 'FAQ' },
+    { href: '/contact', ar: 'تواصل معنا', en: 'Contact' },
+    { href: '/privacy', ar: 'سياسة الخصوصية', en: 'Privacy Policy' },
+    { href: '/terms', ar: 'الشروط والأحكام', en: 'Terms' },
+    { href: '/auth/login', ar: 'حسابي', en: 'My Account' },
+  ];
+
   return (
     <footer className='mt-24 border-t border-brand-gold/10 py-20 bg-black relative overflow-hidden'>
       <div className="absolute inset-0 bg-[url('/branding/pattern.svg')] opacity-[0.02] pointer-events-none" />
       <Container className='grid gap-12 md:grid-cols-4 relative'>
         <div className='space-y-6 col-span-1 md:col-span-1'>
           <h3 className='text-2xl font-bold text-brand-gold'>ZIKR | ذِكرٌ</h3>
-          <p className='text-sm leading-relaxed text-brand-cream/60'>منصة روحانية شاملة تهدف لربط المسلم بكتاب الله وسنة رسوله ﷺ عبر تجربة تقنية حديثة، فاخرة، وميسرة للجميع.</p>
+          <p className='text-sm leading-relaxed text-brand-cream/60'>{copy.description}</p>
           <div className="flex gap-4 pt-2 items-center">
             <BookOpen className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
             <Scroll className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
@@ -21,7 +66,7 @@ export function Footer() {
               href={FACEBOOK_PAGE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="صفحة الفيسبوك"
+              aria-label={isEnglish ? 'Facebook page' : 'صفحة الفيسبوك'}
               className="text-brand-gold/40 hover:text-brand-gold/80 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -32,40 +77,32 @@ export function Footer() {
         </div>
         
         <div className='space-y-6'>
-          <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>أقسام المنصة</h3>
+          <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>{copy.sections}</h3>
           <ul className='space-y-3 text-sm'>
-            <li><Link href='/quran' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>القرآن الكريم</Link></li>
-            <li><Link href='/hadith' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الأحاديث النبوية</Link></li>
-            <li><Link href='/adhkar' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>حصن المسلم</Link></li>
-            <li><Link href='/prophets' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>قصص الأنبياء</Link></li>
-            <li><Link href='/scholars' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>تراجم العلماء</Link></li>
+            {sectionLinks.map((link) => (
+              <li key={link.href}><Link href={link.href} className='text-brand-cream/60 hover:text-brand-gold transition-colors'>{isEnglish ? link.en : link.ar}</Link></li>
+            ))}
           </ul>
         </div>
 
         <div className='space-y-6'>
-          <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>أدوات ذكية</h3>
+          <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>{copy.tools}</h3>
           <ul className='space-y-3 text-sm'>
-            <li><Link href='/prayer-times' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>مواقيت الصلاة</Link></li>
-            <li><Link href='/memorization' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>مساعد الحفظ</Link></li>
-            <li><Link href='/spiritual-ai' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الرفيق الروحاني AI</Link></li>
-            <li><Link href='/poetry' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>ديوان الشعر</Link></li>
-            <li><Link href='/search' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>البحث الشامل</Link></li>
+            {toolLinks.map((link) => (
+              <li key={link.href}><Link href={link.href} className='text-brand-cream/60 hover:text-brand-gold transition-colors'>{isEnglish ? link.en : link.ar}</Link></li>
+            ))}
           </ul>
         </div>
 
         <div className='space-y-6'>
-          <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>قانوني وتقني</h3>
+          <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>{copy.legal}</h3>
           <ul className='space-y-3 text-sm'>
-            <li><Link href='/about' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>عن المنصة</Link></li>
-            <li><Link href='/platform' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>دليل المنصة</Link></li>
-            <li><Link href='/faq' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الأسئلة الشائعة</Link></li>
-            <li><Link href='/contact' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>تواصل معنا</Link></li>
-            <li><Link href='/privacy' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>سياسة الخصوصية</Link></li>
-            <li><Link href='/terms' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>الشروط والأحكام</Link></li>
-            <li><Link href='/auth/login' className='text-brand-cream/60 hover:text-brand-gold transition-colors'>حسابي</Link></li>
+            {legalLinks.map((link) => (
+              <li key={link.href}><Link href={link.href} className='text-brand-cream/60 hover:text-brand-gold transition-colors'>{isEnglish ? link.en : link.ar}</Link></li>
+            ))}
             <li>
               <a href={FACEBOOK_PAGE_URL} target="_blank" rel="noopener noreferrer" className='text-brand-cream/60 hover:text-brand-gold transition-colors'>
-                صفحة الفيسبوك
+                {isEnglish ? 'Facebook Page' : 'صفحة الفيسبوك'}
               </a>
             </li>
             <li className="pt-4">
@@ -76,7 +113,7 @@ export function Footer() {
       </Container>
       
       <Container className='mt-20 border-t border-brand-gold/10 pt-10 text-center text-xs text-brand-cream/30 relative'>
-        <p dir="rtl">© {new Date().getFullYear()} ZIKR | ذِكرٌ — صُنع بحب لخدمة الأمة الإسلامية. جميع الحقوق محفوظة.</p>
+        <p dir={isEnglish ? 'ltr' : 'rtl'}>{copy.copyright}</p>
       </Container>
     </footer>
   );

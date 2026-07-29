@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { WirdDashboard } from '@/components/wird/wird-dashboard';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'الورد اليومي وختم القرآن',
   description:
     'حدّد وردك اليومي من الآيات وتابع تقدّمك في ختم القرآن الكريم مع عدّاد المداومة — يعمل بالكامل بدون إنترنت.',
-};
+  path: '/wird',
+});
 
 export default function WirdPage() {
   return (

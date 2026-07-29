@@ -2,36 +2,38 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useLanguage } from './language-provider';
 
 const allLinks = [
-  { href: '/quran', label: 'القرآن الكريم' },
-  { href: '/hadith', label: 'الأحاديث' },
-  { href: '/adhkar', label: 'الأذكار' },
-  { href: '/dua', label: 'الأدعية' },
-  { href: '/tasbeeh', label: 'التسبيح' },
-  { href: '/wird', label: 'الورد اليومي وختم القرآن' },
-  { href: '/prayer-times', label: 'مواقيت الصلاة' },
-  { href: '/zakat', label: 'الزكاة والتذكير' },
-  { href: '/qibla', label: 'القبلة' },
-  { href: '/prophets', label: 'قصص الأنبياء' },
-  { href: '/companions', label: 'الصحابة' },
-  { href: '/scholars', label: 'العلماء' },
-  { href: '/stories', label: 'القصص الإسلامية' },
-  { href: '/articles', label: 'المقالات' },
-  { href: '/videos', label: 'الفيديوهات' },
-  { href: '/youtube', label: 'قناة يوتيوب' },
-  { href: '/radio', label: 'إذاعة القرآن' },
-  { href: '/spiritual-ai', label: 'الرفيق الروحاني' },
-  { href: '/memorization', label: 'الحفظ' },
-  { href: '/poetry', label: 'الشعر' },
-  { href: '/kids', label: 'قسم الأطفال' },
-  { href: '/battles', label: 'الغزوات' },
-  { href: '/conquests', label: 'الفتوحات' },
-  { href: '/search', label: 'البحث' },
+  { href: '/quran', label: 'القرآن الكريم', labelEn: 'Holy Quran' },
+  { href: '/hadith', label: 'الأحاديث', labelEn: 'Hadith' },
+  { href: '/adhkar', label: 'الأذكار', labelEn: 'Adhkar' },
+  { href: '/dua', label: 'الأدعية', labelEn: 'Dua' },
+  { href: '/tasbeeh', label: 'التسبيح', labelEn: 'Tasbeeh' },
+  { href: '/wird', label: 'الورد اليومي وختم القرآن', labelEn: 'Daily Wird & Khatm' },
+  { href: '/prayer-times', label: 'مواقيت الصلاة', labelEn: 'Prayer Times' },
+  { href: '/zakat', label: 'الزكاة والتذكير', labelEn: 'Zakat' },
+  { href: '/qibla', label: 'القبلة', labelEn: 'Qibla' },
+  { href: '/prophets', label: 'قصص الأنبياء', labelEn: 'Prophets' },
+  { href: '/companions', label: 'الصحابة', labelEn: 'Companions' },
+  { href: '/scholars', label: 'العلماء', labelEn: 'Scholars' },
+  { href: '/stories', label: 'القصص الإسلامية', labelEn: 'Islamic Stories' },
+  { href: '/articles', label: 'المقالات', labelEn: 'Articles' },
+  { href: '/videos', label: 'الفيديوهات', labelEn: 'Videos' },
+  { href: '/youtube', label: 'قناة يوتيوب', labelEn: 'YouTube' },
+  { href: '/radio', label: 'إذاعة القرآن', labelEn: 'Quran Radio' },
+  { href: '/spiritual-ai', label: 'الرفيق الروحاني', labelEn: 'Spiritual AI' },
+  { href: '/memorization', label: 'الحفظ', labelEn: 'Memorization' },
+  { href: '/poetry', label: 'الشعر', labelEn: 'Poetry' },
+  { href: '/kids', label: 'قسم الأطفال', labelEn: 'Kids' },
+  { href: '/battles', label: 'الغزوات', labelEn: 'Battles' },
+  { href: '/conquests', label: 'الفتوحات', labelEn: 'Conquests' },
+  { href: '/search', label: 'البحث', labelEn: 'Search' },
 ];
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  const { isEnglish, dir } = useLanguage();
 
   return (
     <>
@@ -39,7 +41,7 @@ export function MobileNav() {
       <button
         onClick={() => setOpen((v) => !v)}
         className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-lg hover:bg-brand-gold/10 transition-colors"
-        aria-label={open ? 'إغلاق القائمة' : 'فتح القائمة'}
+        aria-label={open ? (isEnglish ? 'Close menu' : 'إغلاق القائمة') : (isEnglish ? 'Open menu' : 'فتح القائمة')}
         aria-expanded={open}
       >
         <span className={`block h-0.5 w-5 bg-brand-gold transition-all duration-200 ${open ? 'translate-y-2 rotate-45' : ''}`} />
@@ -58,15 +60,15 @@ export function MobileNav() {
 
       {/* Slide-in Drawer */}
       <nav
-        className={`fixed top-0 right-0 z-40 h-full w-72 bg-brand-emeraldDeep border-l border-brand-gold/15 shadow-xl md:hidden transition-transform duration-300 ease-in-out overflow-y-auto ${open ? 'translate-x-0' : 'translate-x-full'}`}
-        aria-label="القائمة الرئيسية"
+        className={`fixed top-0 end-0 z-40 h-full w-72 bg-brand-emeraldDeep border-s border-brand-gold/15 shadow-xl md:hidden transition-transform duration-300 ease-in-out overflow-y-auto ${open ? 'translate-x-0' : dir === 'rtl' ? 'translate-x-full' : '-translate-x-full'}`}
+        aria-label={isEnglish ? 'Primary navigation' : 'القائمة الرئيسية'}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-brand-gold/15">
           <span className="text-xl font-bold text-brand-gold">ذِكرٌ</span>
           <button
             onClick={() => setOpen(false)}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-brand-gold/10 transition-colors"
-            aria-label="إغلاق"
+            aria-label={isEnglish ? 'Close' : 'إغلاق'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-brand-gold/70">
               <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
@@ -82,7 +84,7 @@ export function MobileNav() {
               onClick={() => setOpen(false)}
               className="flex items-center px-4 py-2.5 rounded-lg text-sm text-brand-cream/70 hover:text-brand-gold hover:bg-brand-gold/8 transition-all"
             >
-              {link.label}
+              {isEnglish ? link.labelEn : link.label}
             </Link>
           ))}
         </div>

@@ -59,6 +59,15 @@ const navItems = [
         ),
       },
       {
+        href: '/admin/social',
+        label: 'النشر التلقائي',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4.5 h-4.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3.75h6m-8.25 8.25 2.25-2.25h9.75A2.25 2.25 0 0 0 19.5 15.75V6A2.25 2.25 0 0 0 17.25 3.75H6.75A2.25 2.25 0 0 0 4.5 6v9.75c0 .621.504 1.125 1.125 1.125h.375v3.375Z" />
+          </svg>
+        ),
+      },
+      {
         href: '/admin/kids',
         label: 'قسم الأطفال',
         icon: (

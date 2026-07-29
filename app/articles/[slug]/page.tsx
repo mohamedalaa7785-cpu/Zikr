@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { createBrowserSupabaseClient } from '@/lib/supabase/client';
+import { getStaticArticleBySlug } from '@/lib/data/articles';
 
 interface Article {
   id: string;
@@ -15,7 +16,7 @@ interface Article {
   content: string;
   summary?: string;
   author?: string;
-  featured_image_url?: string;
+  featured_image_url?: string | null;
   tags?: string[];
   views: number;
   created_at: string;
@@ -29,7 +30,6 @@ export default function ArticleDetailPage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createBrowserSupabaseClient();
 
   useEffect(() => {
     if (!slug) return;
@@ -38,6 +38,7 @@ export default function ArticleDetailPage() {
       setLoading(true);
 
       try {
+        const supabase = createBrowserSupabaseClient();
         const { data, error } = await supabase
           .from('articles')
           .select('*')
@@ -49,7 +50,7 @@ export default function ArticleDetailPage() {
         if (error) throw error;
 
         if (!data) {
-          setArticle(null);
+          setArticle(getStaticArticleBySlug(slug));
           return;
         }
 
@@ -69,13 +70,14 @@ export default function ArticleDetailPage() {
         });
       } catch (error) {
         console.error('Error fetching article:', error);
+        setArticle(getStaticArticleBySlug(slug));
       } finally {
         setLoading(false);
       }
     };
 
     fetchArticle();
-  }, [slug, supabase]);
+  }, [slug]);
 
   if (loading) {
     return (

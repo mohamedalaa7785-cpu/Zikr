@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { surahs, hadiths, prophets } from '@/lib/data/content';
 import type { Surah, Hadith, Prophet } from '@/lib/data/content';
 
@@ -71,10 +71,20 @@ export default function SearchPage() {
   const [searched, setSearched] = useState(false);
   const [, startTransition] = useTransition();
 
+  useEffect(() => {
+    const initialQuery = new URLSearchParams(window.location.search).get('q');
+    if (initialQuery?.trim()) {
+      handleSearch(initialQuery);
+    }
+  }, []);
+
   const handleSearch = (q: string) => {
     const trimmed = q.trim();
     if (!trimmed) return;
     setQuery(trimmed);
+    const params = new URLSearchParams(window.location.search);
+    params.set('q', trimmed);
+    window.history.replaceState(null, '', `/search?${params.toString()}`);
     startTransition(() => {
       setResults(runSearch(trimmed));
       setSearched(true);

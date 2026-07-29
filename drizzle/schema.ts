@@ -245,8 +245,8 @@ export const notificationSettings = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id").notNull(),
-    emailNotifications: boolean("emailNotifications").notNull().default(true),
-    pushNotifications: boolean("pushNotifications").notNull().default(true),
+    emailNotifications: boolean("email_notifications").notNull().default(true),
+    pushNotifications: boolean("push_notifications").notNull().default(true),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -283,7 +283,7 @@ export const appSettings = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id").notNull(),
     theme: text("theme").notNull().default("system"),
-    fontSize: text("fontSize").notNull().default("medium"),
+    fontSize: text("font_size").notNull().default("medium"),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -491,7 +491,9 @@ export const scholars = pgTable("scholars", {
 export const stories = pgTable("stories", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
-  userId: uuid("user_id").references(() => profiles.id, { onDelete: "set null" }),
+  userId: uuid("user_id").references(() => profiles.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   summary: text("summary"),
   content: text("content").notNull(),
@@ -626,7 +628,12 @@ export const memorizationProgress = pgTable(
       .defaultNow()
       .notNull(),
   },
-  t => ({ uniq: unique("memorization_progress_user_surah").on(t.userId, t.surahNumber) })
+  t => ({
+    uniq: unique("memorization_progress_user_surah").on(
+      t.userId,
+      t.surahNumber
+    ),
+  })
 );
 
 // Prophets (public read, admin write)
@@ -739,12 +746,19 @@ export const articles = pgTable("articles", {
     onDelete: "cascade",
   }),
   title: text("title").notNull(),
+  titleAr: text("title_ar").notNull(),
+  titleEn: text("title_en"),
   slug: text("slug").notNull().unique(),
   content: text("content").notNull(),
+  contentAr: text("content_ar").notNull(),
+  contentEn: text("content_en"),
   summary: text("summary"),
+  summaryAr: text("summary_ar"),
+  summaryEn: text("summary_en"),
   author: text("author"),
   tags: text("tags").array().default([]),
   featuredImageUrl: text("featured_image_url"),
+  featured: boolean("featured").notNull().default(false),
   published: boolean("published").notNull().default(true),
   views: integer("views").notNull().default(0),
   metadata: jsonb("metadata").default({}),
@@ -1171,6 +1185,28 @@ export const videoPublishLog = pgTable("video_publish_log", {
     .notNull(),
 });
 
+export const socialPublishQueue = pgTable("social_publish_queue", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  contentType: text("content_type").notNull(),
+  contentId: text("content_id"),
+  title: text("title").notNull(),
+  body: text("body"),
+  imageUrl: text("image_url"),
+  videoUrl: text("video_url"),
+  targetPlatforms: text("target_platforms").array().notNull().default([]),
+  status: text("status").notNull().default("queued"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  errorMessage: text("error_message"),
+  metadata: jsonb("metadata").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const videoPublishingConfig = pgTable("video_publishing_config", {
   id: uuid("id").defaultRandom().primaryKey(),
   youtubeEnabled: boolean("youtube_enabled").notNull().default(false),
@@ -1189,10 +1225,10 @@ export const videoPublishingConfig = pgTable("video_publishing_config", {
 
 export const legacyUsers = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
-  openId: text("openId").unique(),
+  openId: text("open_id").unique(),
   name: text("name"),
   email: text("email").unique(),
-  loginMethod: text("loginMethod"),
+  loginMethod: text("login_method"),
   role: roleEnum("role").notNull().default("user"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -1207,7 +1243,7 @@ export const contacts = pgTable("contacts", {
   message: text("message").notNull(),
   language: text("language").notNull().default("en"),
   read: boolean("read").notNull().default(false),
-  notificationSent: boolean("notificationSent").notNull().default(false),
+  notificationSent: boolean("notification_sent").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -1215,17 +1251,17 @@ export const contacts = pgTable("contacts", {
 export const episodes = pgTable("episodes", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
-  titleEn: text("titleEn").notNull(),
-  titleAr: text("titleAr").notNull(),
-  descriptionEn: text("descriptionEn").notNull(),
-  descriptionAr: text("descriptionAr").notNull(),
-  contentEn: text("contentEn").notNull(),
-  contentAr: text("contentAr").notNull(),
-  keywordsEn: text("keywordsEn"),
-  keywordsAr: text("keywordsAr"),
+  titleEn: text("title_en").notNull(),
+  titleAr: text("title_ar").notNull(),
+  descriptionEn: text("description_en").notNull(),
+  descriptionAr: text("description_ar").notNull(),
+  contentEn: text("content_en").notNull(),
+  contentAr: text("content_ar").notNull(),
+  keywordsEn: text("keywords_en"),
+  keywordsAr: text("keywords_ar"),
   category: text("category"),
-  thumbnailUrl: text("thumbnailUrl"),
-  youtubeVideoId: text("youtubeVideoId"),
+  thumbnailUrl: text("thumbnail_url"),
+  youtubeVideoId: text("youtube_video_id"),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -1260,7 +1296,7 @@ export const subscriptions = pgTable("subscriptions", {
   email: text("email").notNull().unique(),
   language: text("language").notNull().default("en"),
   verified: boolean("verified").notNull().default(false),
-  verificationToken: text("verificationToken"),
+  verificationToken: text("verification_token"),
   subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
   unsubscribedAt: timestamp("unsubscribed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -1271,7 +1307,7 @@ export const tasks = pgTable("tasks", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
     .notNull()
-    .references(() => legacyUsers.id),
+    .references(() => profiles.id, { onDelete: "cascade" }),
   input: text("input").notNull(),
   result: text("result").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -1279,7 +1315,7 @@ export const tasks = pgTable("tasks", {
 
 export const userBehavior = pgTable("user_behavior", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id").references(() => legacyUsers.id),
+  userId: uuid("user_id"),
   page: text("page").notNull(),
   timeSpent: integer("time_spent").notNull().default(0),
   interaction: text("interaction").notNull(),

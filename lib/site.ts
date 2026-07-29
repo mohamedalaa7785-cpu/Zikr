@@ -7,7 +7,7 @@ export const PRODUCTION_URL = 'https://zikrmediaofficial.vercel.app';
 export const siteConfig = {
   name: 'ZIKR | ذِكرٌ',
   shortName: 'ZIKR',
-  description: 'منصة روحانية تجمع القرآن والحديث والقصص والعلم في تجربة حديثة.',
+  description: 'ZIKR - منصة إسلامية شاملة للقرآن الكريم، الأحاديث النبوية، قصص الأنبياء، ومواقيت الصلاة بتجربة حديثة ومتكاملة.',
   url: process.env.NEXT_PUBLIC_SITE_URL || PRODUCTION_URL,
   locale: 'ar_SA',
   dir: 'rtl' as const,
@@ -32,7 +32,19 @@ export function pageMetadata(opts: {
     title,
     description,
     alternates: { canonical: path },
-    ...(noindex ? { robots: { index: false, follow: false } } : {}),
+    robots: noindex
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+            'max-video-preview': -1,
+          },
+        },
     openGraph: {
       title,
       description,
@@ -79,6 +91,8 @@ export const appRoutes = [
   { path: '/youtube', label: 'يوتيوب', sitemap: { changeFrequency: 'daily', priority: 0.7 }, nav: 'more' },
   { path: '/kids', label: 'الأطفال', sitemap: { changeFrequency: 'weekly', priority: 0.7 } },
   { path: '/memorization', label: 'الحفظ', sitemap: { changeFrequency: 'weekly', priority: 0.6 }, nav: 'more', footer: 'tools' },
+  { path: '/wird', label: 'الورد اليومي', sitemap: { changeFrequency: 'weekly', priority: 0.6 }, footer: 'tools' },
+  { path: '/zakat', label: 'الزكاة', sitemap: { changeFrequency: 'monthly', priority: 0.6 }, footer: 'tools' },
   { path: '/spiritual-ai', label: 'الرفيق الروحاني', sitemap: { changeFrequency: 'weekly', priority: 0.6 }, nav: 'more', footer: 'tools' },
   { path: '/poetry', label: 'الشعر', sitemap: { changeFrequency: 'weekly', priority: 0.6 }, nav: 'more', footer: 'tools' },
   { path: '/competitions', label: 'مسابقات', sitemap: { changeFrequency: 'weekly', priority: 0.6 }, nav: 'more' },
@@ -90,6 +104,7 @@ export const appRoutes = [
   { path: '/conquests', label: 'الفتوحات', sitemap: { changeFrequency: 'monthly', priority: 0.6 } },
   { path: '/tawasheeh', label: 'التواشيح', sitemap: { changeFrequency: 'weekly', priority: 0.6 } },
   { path: '/search', label: 'بحث', sitemap: { changeFrequency: 'daily', priority: 0.7 }, nav: 'more', footer: 'tools' },
+  { path: '/settings', label: 'الإعدادات', sitemap: { changeFrequency: 'monthly', priority: 0.4 }, footer: 'tools' },
   { path: '/favorites', label: 'المفضلة', sitemap: { changeFrequency: 'weekly', priority: 0.4 }, nav: 'more' },
   { path: '/profile', label: 'الملف الشخصي', sitemap: { changeFrequency: 'weekly', priority: 0.4 } },
   { path: '/about', label: 'عن المنصة', sitemap: { changeFrequency: 'yearly', priority: 0.5 }, footer: 'legal' },

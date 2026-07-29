@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { ZakatDashboard } from '@/components/zakat/zakat-dashboard';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'الزكاة والتذكير السنوي',
   description:
     'احسب زكاة مالك واضبط تذكيراً سنوياً متجدداً بموعد إخراج الزكاة عند حولان الحول — يعمل بدون إنترنت.',
-};
+  path: '/zakat',
+});
 
 export default function ZakatPage() {
   return (
