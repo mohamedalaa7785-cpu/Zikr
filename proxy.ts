@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
 
-const PROTECTED_PREFIXES = ["/profile", "/favorites", "/admin"];
+const PROTECTED_PREFIXES = ["/profile", "/favorites", "/admin", "/wird", "/memorization"];
 
 const AUTH_ONLY_PATHS = ["/auth/login", "/auth/register"];
 const AUTH_CALLBACK_PREFIX = "/auth/callback";
@@ -24,6 +24,7 @@ function redirectToLogin(request: NextRequest) {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Let the OAuth callback through without session checks
   if (
     pathname === AUTH_CALLBACK_PREFIX ||
     pathname.startsWith(`${AUTH_CALLBACK_PREFIX}/`)
@@ -31,21 +32,24 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  let response = NextResponse.next({ request });
   const isProtected = matchesPrefix(pathname, PROTECTED_PREFIXES);
   const isAuthOnlyPage = matchesPrefix(pathname, AUTH_ONLY_PATHS);
 
+  // Build the mutable response ONCE — pass it to createMiddlewareClient so
+  // any Set-Cookie headers Supabase writes are preserved on this response.
+  const response = NextResponse.next({ request });
   const { supabase, configured } = createMiddlewareClient(request, response);
 
   if (!configured || !supabase) {
     return isProtected ? redirectToLogin(request) : response;
   }
 
+  // getUser() validates the JWT and refreshes tokens when needed.
+  // The refreshed session cookies are written onto `response` by the
+  // cookie callbacks inside createMiddlewareClient.
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  response = NextResponse.next({ request });
 
   if (!user && isProtected) {
     return redirectToLogin(request);
@@ -55,6 +59,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/profile", request.url));
   }
 
+  // Return the same `response` so Set-Cookie headers are forwarded
   return response;
 }
 

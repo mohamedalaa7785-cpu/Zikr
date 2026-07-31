@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { extractNextPath, getTrustedAuthOrigin } from '@/lib/auth-enhanced';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -35,25 +35,37 @@ export async function GET(request: NextRequest) {
       const user = data.user;
       if (user) {
         console.debug('[auth/callback] User authenticated:', user.id);
-        
+
         try {
-          await supabase.from('profiles').upsert({
-            id: user.id,
-            email: user.email,
-            display_name:
-              typeof user.user_metadata?.full_name === 'string'
-                ? user.user_metadata.full_name
-                : null,
-            avatar_url:
-              typeof user.user_metadata?.avatar_url === 'string'
-                ? user.user_metadata.avatar_url
-                : null,
-            updated_at: new Date().toISOString(),
-          });
-          console.debug('[auth/callback] Profile upserted successfully');
+          // Use the service-role admin client to bypass RLS for the upsert.
+          // The anon-key client bound to the just-exchanged session may not yet
+          // have its cookies flushed to the response, so RLS checks can fail for
+          // brand-new users who have no row in `profiles` yet.
+          const adminClient = createAdminClient();
+          const { error: upsertError } = await adminClient.from('profiles').upsert(
+            {
+              id: user.id,
+              email: user.email ?? null,
+              display_name:
+                typeof user.user_metadata?.full_name === 'string'
+                  ? user.user_metadata.full_name
+                  : null,
+              avatar_url:
+                typeof user.user_metadata?.avatar_url === 'string'
+                  ? user.user_metadata.avatar_url
+                  : null,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'id' }
+          );
+          if (upsertError) {
+            console.error('[auth/callback] Profile upsert error:', upsertError.message);
+          } else {
+            console.debug('[auth/callback] Profile upserted successfully');
+          }
         } catch (profileErr) {
-          console.error('[auth/callback] Profile upsert error:', profileErr);
-          // Don't fail the login if profile update fails
+          console.error('[auth/callback] Profile upsert exception:', profileErr);
+          // Never fail the login flow due to a profile write error
         }
       }
 
