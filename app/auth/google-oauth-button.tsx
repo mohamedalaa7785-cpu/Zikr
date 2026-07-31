@@ -36,7 +36,7 @@ export function GoogleOAuthButton({
 
       const client = createBrowserSupabaseClient();
 
-      const { data, error: oauthError } =
+      const { error: oauthError } =
         await client.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -52,6 +52,9 @@ export function GoogleOAuthButton({
       if (oauthError) {
         throw oauthError;
       }
+
+      // The redirect to Google happens automatically after signInWithOAuth
+      // The page will unload and redirect to Google, so we don't set loading to false
 
     } catch (err) {
       const message =
