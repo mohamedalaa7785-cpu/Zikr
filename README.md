@@ -2,6 +2,10 @@
 
 ## A Premium Islamic Spiritual Platform
 
+> **📢 Background Jobs Migration:** Background jobs have been migrated from Vercel Cron to GitHub Actions. See [`QUICK_START_GITHUB_ACTIONS.md`](./QUICK_START_GITHUB_ACTIONS.md) for setup. All functionality preserved.
+
+## 
+
 ZIKR is a cinematic, luxurious Islamic platform designed to deepen spiritual connection through the Quran, Hadith, Islamic stories, AI-powered assistance, and Islamic radio. Built with modern web technologies and a focus on user experience, ZIKR combines traditional Islamic knowledge with contemporary digital innovation.
 
 ### 🌟 Key Features

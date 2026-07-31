@@ -175,13 +175,6 @@ const rawEnv: Record<string, string | undefined> = {
   ),
   FACEBOOK_PAGE_ID: r(e.FACEBOOK_PAGE_ID, e.FACEBOOK_PAGE_ID_19),
 
-  // ── Cron ─────────────────────────────────────────────────────────────────
-  CRON_SECRET: r(
-    e.CRON_SECRET,
-    e.CRON_SECRET_19,
-    e.CRON_SECRET_20,
-    e.CRON_SECRET_22
-  ),
 };
 
 const validatedEnv = rawEnv;
@@ -221,7 +214,6 @@ export function getServerEnv() {
     FACEBOOK_APP_SECRET: validatedEnv.FACEBOOK_APP_SECRET || "",
     FACEBOOK_PAGE_ACCESS_TOKEN: validatedEnv.FACEBOOK_PAGE_ACCESS_TOKEN || "",
     FACEBOOK_PAGE_ID: validatedEnv.FACEBOOK_PAGE_ID || "",
-    CRON_SECRET: validatedEnv.CRON_SECRET || "",
   };
 }
 
