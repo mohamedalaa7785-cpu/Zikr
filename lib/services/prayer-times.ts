@@ -1,7 +1,8 @@
 import { safeApiFetch } from '@/lib/services/http';
 import { ServiceError } from '@/lib/types/common';
 
-const ALADHAN_API_BASE = 'https://api.aladhan.com/v1';
+// Use local API proxy to avoid CORS and crawl issues
+const API_BASE = '/api/prayer-times';
 
 export interface PrayerTime {
   Fajr: string;
@@ -108,7 +109,7 @@ export async function getPrayerTimes(
     }
 
     const { data } = await safeApiFetch<PrayerTimesResponse>(
-      `${ALADHAN_API_BASE}/timings?${params.toString()}`
+      `${API_BASE}?${params.toString()}`
     );
 
     return data || null;
@@ -136,7 +137,6 @@ export async function getPrayerTimesByCity(
   if (!cleanCity) return null;
 
   try {
-    let url: string;
     const params = new URLSearchParams({ method: method.toString() });
     if (date) params.append('date', date);
 
@@ -144,15 +144,13 @@ export async function getPrayerTimesByCity(
       // timingsByCity requires BOTH city and country.
       params.append('city', cleanCity);
       params.append('country', country.trim());
-      url = `${ALADHAN_API_BASE}/timingsByCity?${params.toString()}`;
     } else {
       // Without a country, use timingsByAddress which geocodes free-form
       // input and supports Arabic city names (e.g. "القاهرة").
       params.append('address', cleanCity);
-      url = `${ALADHAN_API_BASE}/timingsByAddress?${params.toString()}`;
     }
 
-    const { data } = await safeApiFetch<PrayerTimesResponse>(url);
+    const { data } = await safeApiFetch<PrayerTimesResponse>(`${API_BASE}?${params.toString()}`);
     return data || null;
   } catch (error) {
     console.error('[prayer-times] Failed to fetch prayer times by city:', error);
