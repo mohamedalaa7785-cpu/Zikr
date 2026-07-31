@@ -93,7 +93,7 @@
   - `/api/tawasheeh/` - المداحون ✅
   - `/api/user/` - بيانات المستخدم
   - `/api/admin/` - إدارة النظام
-  - `/api/cron/` - مهام مجدولة
+  - `.github/workflows/background-jobs.yml` - مهام مجدولة
 
 ---
 

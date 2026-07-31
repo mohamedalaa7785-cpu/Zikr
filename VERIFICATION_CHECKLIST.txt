@@ -62,7 +62,7 @@
     ├─ /api/tawasheeh/*     ✅ عاملة - WORKING
     ├─ /api/user/*          ✅ عاملة - WORKING
     ├─ /api/admin/*         ✅ عاملة - WORKING
-    └─ /api/cron/*          ✅ عاملة - WORKING
+    └─ GitHub Actions background jobs ✅ عاملة - WORKING
 
 [✅] Authentication
     ├─ Email/Password       ✅ عاملة - WORKING

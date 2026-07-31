@@ -62,6 +62,44 @@ export async function getPendingVideoRequests(limit = 100): Promise<VideoGenerat
 }
 
 /**
+ * Claim pending video requests before processing.
+ *
+ * The conditional PATCH (`id` + `status=eq.pending`) is an optimistic lock so
+ * overlapping runners cannot process the same row twice. Claimed rows move
+ * pending → processing before any external API side effects occur.
+ */
+export async function claimPendingVideoRequests(limit = 100): Promise<VideoGenerationRequest[]> {
+  const pendingRequests = await getPendingVideoRequests(limit);
+  const claimed: VideoGenerationRequest[] = [];
+
+  for (const request of pendingRequests) {
+    try {
+      const result = await supabaseServerAdminRequest<VideoGenerationRequest[]>(
+        `/rest/v1/video_generation_requests?id=eq.${encodeURIComponent(request.id)}&status=eq.pending`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Prefer: 'return=representation',
+          },
+          body: JSON.stringify({
+            status: 'processing',
+            error_message: null,
+            error_details: null,
+            updated_at: new Date().toISOString(),
+          }),
+        }
+      );
+      if (Array.isArray(result) && result[0]) claimed.push(result[0]);
+    } catch (error) {
+      console.error(`[video-automation] Failed to claim video request ${request.id}:`, error);
+    }
+  }
+
+  return claimed;
+}
+
+/**
  * Get all video requests (any status) for the admin dashboard
  */
 export async function getAllVideoRequests(): Promise<VideoGenerationRequest[]> {
@@ -591,10 +629,13 @@ export async function publishToFacebook(
  * - `failed` with error details in every other case.
  */
 export async function processVideoGenerationRequest(
-  request: VideoGenerationRequest
+  request: VideoGenerationRequest,
+  options: { alreadyClaimed?: boolean } = {}
 ): Promise<boolean> {
   try {
-    await updateVideoRequestStatus(request.id, 'processing');
+    if (!options.alreadyClaimed) {
+      await updateVideoRequestStatus(request.id, 'processing');
+    }
 
     // 1. Generate the video — no fabricated fallback URLs.
     const generationResult = await generateVideoWithHeyGen(request);

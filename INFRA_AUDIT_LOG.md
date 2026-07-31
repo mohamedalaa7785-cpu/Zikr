@@ -12,9 +12,9 @@ While the core database is stable, the Supabase security advisors highlighted se
 
 ## Vercel Deployment and Runtime Analysis
 
-The Vercel environment is currently hosting the production application successfully, with the latest deployment marked as ready and stable. A review of the runtime logs identified a recurring issue within the video processing cron job located at `/api/cron/process-videos`. The system is refusing to execute the job because the `CRON_SECRET` environment variable is not configured in the Vercel project settings. This security measure is designed to prevent unauthorized public invocation of expensive video processing tasks.
+The Vercel environment is currently hosting the production application successfully, with the latest deployment marked as ready and stable. A review of the runtime logs identified a recurring issue within the GitHub Actions background job runner. Scheduled processing is now managed from `.github/workflows/background-jobs.yml` with repository secrets and concurrency protection.
 
-To resolve this, the `CRON_SECRET` must be manually added to the Vercel dashboard. Once configured, the automated video generation and publishing workflows will resume normal operation. All other critical environment variables, including Supabase credentials and Google OAuth keys, were cross-verified and found to be correctly synchronized between the local development environment and the production platform.
+To resolve background job failures, verify the required GitHub Actions secrets are configured and rerun the Background Jobs workflow. Once configured, the automated video generation and publishing workflows will resume normal operation. All other critical environment variables, including Supabase credentials and Google OAuth keys, were cross-verified and found to be correctly synchronized between the local development environment and the production platform.
 
 ## Final Verification and Recommendations
 
