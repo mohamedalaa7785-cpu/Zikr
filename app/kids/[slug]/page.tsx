@@ -179,7 +179,7 @@ export default function KidsDetailPage() {
       </Container>
     );
   }
-  if (!content) {
+  if (!slug || !content) {
     return (
       <Container className="py-12">
         <p className="text-center text-brand-cream/70">
