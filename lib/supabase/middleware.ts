@@ -14,27 +14,31 @@ export function createMiddlewareClient(
   const env = getPublicEnv();
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const configured = Boolean(supabaseUrl && supabaseAnonKey);
+  const configured = Boolean(supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith('http'));
 
   if (!configured) {
     return { supabase: null, response, configured } as const;
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
+  try {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value)
-        );
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        );
-      },
-    },
-  });
+    });
 
-  return { supabase, response, configured } as const;
+    return { supabase, response, configured } as const;
+  } catch (error) {
+    return { supabase: null, response, configured: false } as const;
+  }
 }
