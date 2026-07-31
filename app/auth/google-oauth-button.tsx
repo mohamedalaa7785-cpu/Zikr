@@ -34,8 +34,6 @@ export function GoogleOAuthButton({
 
       const redirectUri = buildOAuthRedirectUri(siteUrl, safeNext);
 
-      console.log('[v0] GoogleOAuth: Starting OAuth flow', { redirectUri });
-
       const client = createBrowserSupabaseClient();
 
       const { error: oauthError } =
@@ -52,16 +50,13 @@ export function GoogleOAuthButton({
         });
 
       if (oauthError) {
-        console.error('[v0] GoogleOAuth error:', oauthError);
         throw oauthError;
       }
 
-      console.log('[v0] GoogleOAuth: OAuth initiated, awaiting redirect');
       // The redirect to Google happens automatically after signInWithOAuth
       // The page will unload and redirect to Google, so we don't set loading to false
 
     } catch (err) {
-      console.error('[v0] GoogleOAuth exception:', err);
       const message =
         err instanceof Error
           ? err.message
