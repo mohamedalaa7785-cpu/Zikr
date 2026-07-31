@@ -20,6 +20,23 @@ function getEnv() {
 }
 
 /**
+ * Service-role client — bypasses RLS.
+ * Use only in server-only code (route handlers, server actions) where you need
+ * to write data for a user who may not yet have an active session cookie
+ * (e.g. right after an OAuth code exchange before cookies are flushed).
+ */
+export function createAdminClient() {
+  const { url, serviceKey } = getEnv();
+  if (!serviceKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for admin Supabase client.');
+  }
+  return createServerClient(url, serviceKey, {
+    cookies: { getAll: () => [], setAll: () => {} },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+/**
  * Do NOT put this client in a global variable.
  * Always create a new client within each function call.
  */
