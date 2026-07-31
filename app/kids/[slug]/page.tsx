@@ -99,6 +99,7 @@ export default function KidsDetailPage() {
   const params = useParams();
   const rawSlug = params.slug;
   const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+  const contentSlug = slug ?? "";
   const [content, setContent] = useState<KidsContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
@@ -368,7 +369,7 @@ export default function KidsDetailPage() {
       <KidsShare
         title={content.title_ar}
         description={content.content_ar?.substring(0, 100)}
-        slug={slug}
+        slug={contentSlug}
         type={content.type}
         imageUrl={content.featured_image_url}
       />
