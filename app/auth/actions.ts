@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getServerEnv } from '@/lib/env';
 import { getCanonicalAuthBaseUrl } from '@/lib/auth-enhanced';
 
@@ -57,19 +57,24 @@ export async function registerAction(formData: FormData) {
   }
 
   if (data.user && data.session) {
-    await supabase.from('profiles').upsert({
-      id: data.user.id,
-      email: data.user.email ?? email,
-      display_name:
-        typeof data.user.user_metadata?.full_name === 'string'
-          ? data.user.user_metadata.full_name
-          : null,
-      avatar_url:
-        typeof data.user.user_metadata?.avatar_url === 'string'
-          ? data.user.user_metadata.avatar_url
-          : null,
-      updated_at: new Date().toISOString(),
-    });
+    // Use the service-role client to bypass RLS for new profile creation
+    const adminClient = createAdminClient();
+    await adminClient.from('profiles').upsert(
+      {
+        id: data.user.id,
+        email: data.user.email ?? email,
+        display_name:
+          typeof data.user.user_metadata?.full_name === 'string'
+            ? data.user.user_metadata.full_name
+            : null,
+        avatar_url:
+          typeof data.user.user_metadata?.avatar_url === 'string'
+            ? data.user.user_metadata.avatar_url
+            : null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'id' }
+    );
 
     redirect('/profile');
   }

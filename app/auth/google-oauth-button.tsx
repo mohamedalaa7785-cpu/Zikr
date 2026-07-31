@@ -34,8 +34,6 @@ export function GoogleOAuthButton({
 
       const redirectUri = buildOAuthRedirectUri(siteUrl, safeNext);
 
-      console.log('[oauth] Starting Google login with redirectUri:', redirectUri);
-
       const client = createBrowserSupabaseClient();
 
       const { data, error: oauthError } =
@@ -55,7 +53,6 @@ export function GoogleOAuthButton({
         throw oauthError;
       }
 
-      console.log('[oauth] Google OAuth initiated successfully', data);
     } catch (err) {
       const message =
         err instanceof Error
@@ -64,11 +61,6 @@ export function GoogleOAuthButton({
 
       setError(message);
       setLoading(false);
-
-      console.error(
-        '[oauth] Google login failed:',
-        message
-      );
     }
   };
 
