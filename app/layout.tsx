@@ -1,6 +1,23 @@
 import type { Metadata } from "next";
+import { Noto_Naskh_Arabic, Amiri } from "next/font/google";
 import "./globals.css";
 import { SiteShell } from "@/components/layout/site-shell";
+
+const notoNaskhArabic = Noto_Naskh_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-arabic",
+  display: "swap",
+  preload: true,
+});
+
+const amiri = Amiri({
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+  variable: "--font-amiri",
+  display: "swap",
+  preload: false,
+});
 import { defaultOgImage, siteConfig } from "@/lib/site";
 import { Analytics } from "@/components/layout/analytics";
 import { ServiceWorkerRegister } from "@/components/layout/service-worker-register";
@@ -85,7 +102,7 @@ export default function RootLayout({
       lang="ar"
       dir={siteConfig.dir}
       data-scroll-behavior="smooth"
-      className="bg-black"
+      className={`bg-black ${notoNaskhArabic.variable} ${amiri.variable}`}
       suppressHydrationWarning={true}
     >
       <head>
