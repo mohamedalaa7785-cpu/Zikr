@@ -100,13 +100,13 @@ const rawEnv: Record<string, string | undefined> = {
     e.NEXT_PUBLIC_SITE_URL_19,
     PRODUCTION_URL
   ),
-  // AUTH_CALLBACK_URL is the OAuth provider callback registered with Google/Facebook.
-  // Supabase expects this to be the project auth endpoint, while in-app redirects
-  // continue to use NEXT_PUBLIC_SITE_URL + /auth/callback.
+  // AUTH_CALLBACK_URL is this app's callback route used as Supabase redirectTo.
+  // The Supabase provider callback (https://<project>.supabase.co/auth/v1/callback)
+  // belongs in Google Cloud/Supabase provider settings, not in Vercel app env.
   AUTH_CALLBACK_URL: r(
     e.AUTH_CALLBACK_URL,
     e.AUTH_CALLBACK_URL_19,
-    `${r(e.SUPABASE_URL, e.NEXT_PUBLIC_SUPABASE_URL, "https://eydxvcamhjhajxjrsgym.supabase.co")}/auth/v1/callback`
+    `${(r(e.NEXT_PUBLIC_SITE_URL, e.NEXT_PUBLIC_SITE_URL_19, PRODUCTION_URL) || PRODUCTION_URL).replace(/\/$/, "")}/auth/callback`
   ),
 
   // ── Google OAuth ──────────────────────────────────────────────────────────

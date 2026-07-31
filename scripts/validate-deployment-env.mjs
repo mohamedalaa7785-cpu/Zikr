@@ -91,10 +91,8 @@ function getEnv(name) {
   }
 
   if (name === "AUTH_CALLBACK_URL") {
-    const supabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
-    if (supabaseUrl)
-      return `${supabaseUrl.replace(/\/$/, "")}/auth/v1/callback`;
-    return "https://eydxvcamhjhajxjrsgym.supabase.co/auth/v1/callback";
+    const siteUrl = getEnv("NEXT_PUBLIC_SITE_URL") || "https://zikrmediaofficial.vercel.app";
+    return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
   }
 
   return undefined;
@@ -158,11 +156,17 @@ function validateUrls() {
       callbackUrl.hostname.endsWith(".supabase.co") &&
       (!supabaseUrl || callbackUrl.origin === supabaseUrl.origin);
 
-    if (!isAppCallback && !isSupabaseProviderCallback) {
+    if (isSupabaseProviderCallback) {
       addResult(
         "fail",
         "AUTH_CALLBACK_URL",
-        "must be either the Supabase provider callback (/auth/v1/callback) or this app's /auth/callback URL"
+        "must be the app callback URL (for example https://zikrmediaofficial.vercel.app/auth/callback); keep the Supabase /auth/v1/callback URL only in Google Cloud's authorized redirect URIs"
+      );
+    } else if (!isAppCallback) {
+      addResult(
+        "fail",
+        "AUTH_CALLBACK_URL",
+        "must match NEXT_PUBLIC_SITE_URL plus /auth/callback"
       );
     }
   }
