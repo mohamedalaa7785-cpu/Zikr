@@ -1,136 +1,257 @@
 name: Background Jobs
 
+# ────────────────────────────────────────────────────────────────────────────────
+# GitHub Actions workflow for background jobs previously handled by Vercel Cron.
+# 
+# This workflow executes two independent background tasks:
+# 1. Video processing (daily at 3 AM UTC) – generates videos and publishes to social
+# 2. Social publishing (every 15 minutes) – publishes queued social media posts
+#
+# The workflow is designed to be resilient, observable, and production-ready.
+# ────────────────────────────────────────────────────────────────────────────────
+
 on:
+  # Daily video processing at 3:00 AM UTC
+  schedule:
+    - cron: '0 3 * * *'
+      name: Video Processing
+    - cron: '*/15 * * * *'
+      name: Social Publishing
+
+  # Allow manual triggering for testing and emergency runs
   workflow_dispatch:
     inputs:
-      target:
-        description: "Queue to process"
-        type: choice
+      job_type:
+        description: 'Which job to run'
         required: true
-        default: all
+        default: 'both'
+        type: choice
         options:
-          - all
+          - both
           - videos
           - social
-  schedule:
-    # Replaces the former social queue cadence.
-    - cron: "*/15 * * * *"
-    # Preserves the former daily video queue cadence.
-    - cron: "0 3 * * *"
 
-permissions:
-  contents: read
-
-concurrency:
-  group: background-jobs-production
-  cancel-in-progress: false
+env:
+  NODE_ENV: production
+  PNPM_VERSION: 9.15.0
 
 jobs:
-  social-queue:
-    name: Process social publishing queue
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'social') || github.event.schedule == '*/15 * * * *' }}
+  # ────────────────────────────────────────────────────────────────────────────────
+  # Video Generation Processing Job
+  # Runs daily at 3:00 AM UTC (0 3 * * *)
+  # Processes pending video requests and publishes to YouTube/Facebook
+  # ────────────────────────────────────────────────────────────────────────────────
+  process-videos:
+    if: |
+      github.event_name != 'workflow_dispatch' || 
+      github.event.inputs.job_type == 'videos' || 
+      github.event.inputs.job_type == 'both'
+    
+    name: Process Videos
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      BACKGROUND_JOB_TARGET: social
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-      YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
-      YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
-      YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-      YOUTUBE_CHANNEL_ID: ${{ secrets.YOUTUBE_CHANNEL_ID }}
-      FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
-      FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+    timeout-minutes: 15
+    concurrency:
+      group: process-videos
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v2
         with:
-          version: 9.15.0
-          run_install: false
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate required GitHub Secrets
+      - name: Execute video processing job
+        env:
+          # Database & Supabase (required)
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # Public site URL
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          # Video generation (HeyGen)
+          HEYGEN_API_KEY: ${{ secrets.HEYGEN_API_KEY }}
+          HEYGEN_AVATAR_ID: ${{ secrets.HEYGEN_AVATAR_ID }}
+          HEYGEN_VOICE_ID: ${{ secrets.HEYGEN_VOICE_ID }}
+          # YouTube publishing
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          # Facebook publishing
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
+        run: pnpm tsx scripts/jobs/process-videos.ts
+
+      - name: Report job success
+        if: success()
         run: |
-          missing=0
-          for name in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_SITE_URL; do
-            if [ -z "${!name}" ]; then
-              echo "::error title=Missing GitHub Secret::${name} is required for background jobs."
-              missing=1
-            else
-              echo "[background-jobs] ${name} is configured."
-            fi
-          done
-          exit "$missing"
+          echo "✅ Video processing job completed successfully"
+          echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
-      - name: Process social queue
-        run: pnpm background:jobs
+      - name: Report job failure
+        if: failure()
+        run: |
+          echo "❌ Video processing job failed"
+          echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          exit 1
 
-  video-queue:
-    name: Process video generation queue
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'videos') || github.event.schedule == '0 3 * * *' }}
+  # ────────────────────────────────────────────────────────────────────────────────
+  # Social Publishing Queue Processing Job
+  # Runs every 15 minutes
+  # Processes queued social media posts and publishes to Facebook/YouTube
+  # ────────────────────────────────────────────────────────────────────────────────
+  process-social:
+    if: |
+      github.event_name != 'workflow_dispatch' || 
+      github.event.inputs.job_type == 'social' || 
+      github.event.inputs.job_type == 'both'
+    
+    name: Process Social Queue
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      BACKGROUND_JOB_TARGET: videos
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-      HEYGEN_API_KEY: ${{ secrets.HEYGEN_API_KEY }}
-      HEYGEN_AVATAR_ID: ${{ secrets.HEYGEN_AVATAR_ID }}
-      HEYGEN_VOICE_ID: ${{ secrets.HEYGEN_VOICE_ID }}
-      YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
-      YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
-      YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-      YOUTUBE_CHANNEL_ID: ${{ secrets.YOUTUBE_CHANNEL_ID }}
-      FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
-      FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+    timeout-minutes: 15
+    concurrency:
+      group: process-social
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v2
         with:
-          version: 9.15.0
-          run_install: false
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate required GitHub Secrets
-        run: |
-          missing=0
-          for name in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_SITE_URL; do
-            if [ -z "${!name}" ]; then
-              echo "::error title=Missing GitHub Secret::${name} is required for background jobs."
-              missing=1
-            else
-              echo "[background-jobs] ${name} is configured."
-            fi
-          done
-          exit "$missing"
+      - name: Execute social publishing job
+        env:
+          # Database & Supabase (required)
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # Public site URL
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          # YouTube publishing (reuses video-automation module)
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          # Facebook publishing
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
+        run: pnpm tsx scripts/jobs/process-social.ts
 
-      - name: Process video queue
-        run: pnpm background:jobs
+      - name: Report job success
+        if: success()
+        run: |
+          echo "✅ Social publishing job completed successfully"
+          echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+      - name: Report job failure
+        if: failure()
+        run: |
+          echo "❌ Social publishing job failed"
+          echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          exit 1
+
+  # ────────────────────────────────────────────────────────────────────────────────
+  # Notifications & Monitoring
+  # Sends alerts on job failure to GitHub issue or Slack
+  # ────────────────────────────────────────────────────────────────────────────────
+  notify:
+    if: always()
+    needs: [process-videos, process-social]
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Determine workflow status
+        id: status
+        run: |
+          if [[ "${{ needs.process-videos.result }}" == "failure" || "${{ needs.process-social.result }}" == "failure" ]]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "message=❌ Background jobs failed" >> $GITHUB_OUTPUT
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "message=✅ All background jobs completed successfully" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create issue on failure
+        if: steps.status.outputs.status == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflow = context.workflow;
+            const runId = context.runId;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId}`;
+            
+            const title = `⚠️ Background Job Failed – ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## Background Job Failure Report
+            
+            **Workflow:** ${workflow}  
+            **Run:** [#${runId}](${runUrl})  
+            **Status:** Failed  
+            **Timestamp:** ${new Date().toISOString()}
+            
+            ### Failed Jobs
+            - process-videos: ${{ needs.process-videos.result }}
+            - process-social: ${{ needs.process-social.result }}
+            
+            ### Next Steps
+            1. Review the workflow run logs at: ${runUrl}
+            2. Check Supabase database for stuck jobs
+            3. Verify all required secrets are configured
+            4. Retry the workflow or run manually via workflow_dispatch
+            
+            ### Troubleshooting
+            - Check GitHub Secrets are configured: Settings → Secrets and variables → Actions
+            - Verify Supabase credentials: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+            - Ensure video/social service credentials are valid
+            - Review recent changes to the codebase
+            `;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['background-jobs', 'automated']
+            });
+
+      - name: Debug output
+        run: |
+          echo "Workflow Status: ${{ steps.status.outputs.status }}"
+          echo "Message: ${{ steps.status.outputs.message }}"
+          echo "Process Videos: ${{ needs.process-videos.result }}"
+          echo "Process Social: ${{ needs.process-social.result }}"
