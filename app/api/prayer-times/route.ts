@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const ALADHAN_API_BASE = 'https://api.aladhan.com/v1';
 
+export const dynamic = 'force-dynamic'; // This route uses query parameters and must be dynamic
 export const revalidate = 3600; // Cache for 1 hour
 
 /**
