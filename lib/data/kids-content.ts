@@ -29,6 +29,8 @@ export interface KidsItem {
   quiz_data?: { questions: KidsQuizQuestion[] };
   featured_image_url?: string;
   video_url?: string;
+  youtube_video_id?: string;
+  facebook_share_enabled?: boolean;
   metadata?: {
     reward?: string;
     memorizationTarget?: string;
@@ -37,6 +39,9 @@ export interface KidsItem {
     reviewPlan?: string[];
     gameType?: string;
     objective?: string;
+    shareMessage?: string;
+    likes?: number;
+    shares?: number;
   };
 }
 
@@ -62,6 +67,11 @@ function ageRangeToGroup(ageMin?: number | null, ageMax?: number | null) {
   if (min <= 8 && max <= 10) return "6-8";
   if (min <= 12 && max <= 12) return "9-12";
   return "13-15";
+}
+
+export function getKidsItemBySlug(slug: string): KidsItem | null {
+  if (!slug || typeof slug !== 'string') return null;
+  return kidsContent.find(item => item.slug.toLowerCase() === slug.toLowerCase()) ?? null;
 }
 
 export function normalizeKidsContentRow(row: KidsLegacyRow): KidsItem | null {
@@ -339,7 +349,7 @@ export const kidsContent: KidsItem[] = [
         },
         {
           text: "ما هو الركن الأول من أركان الإسلام؟",
-          options: ["الصلاة", "الشهادتان", "الصوم", "الزكاة"],
+          options: ["الصلاة", "الشهاد��ان", "الصوم", "الزكاة"],
           correctAnswer: 1,
         },
         {
@@ -822,7 +832,3 @@ export const kidsContent: KidsItem[] = [
 أنت أيضًا يمكنك التدرب على الصيام ساعات قليلة، وكل سنة تزيد حتى تصوم اليوم كله!`,
   },
 ];
-
-export function getKidsItemBySlug(slug: string): KidsItem | undefined {
-  return kidsContent.find(item => item.slug === slug);
-}

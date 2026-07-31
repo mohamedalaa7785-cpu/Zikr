@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { KidsShare } from "@/components/kids/kids-share";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import {
   getKidsItemBySlug,
@@ -363,6 +364,14 @@ export default function KidsDetailPage() {
           )}
         </Card>
       )}
+
+      <KidsShare
+        title={content.title_ar}
+        description={content.content_ar?.substring(0, 100)}
+        slug={slug}
+        type={content.type}
+        imageUrl={content.featured_image_url}
+      />
 
       <Card className="p-6 text-center space-y-3 bg-brand-gold/10">
         <h3 className="text-xl font-bold text-brand-gold">تعلم بسهولة</h3>
