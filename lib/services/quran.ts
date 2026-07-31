@@ -1,4 +1,5 @@
 import { safeApiFetch } from "@/lib/services/http";
+import { getPublicEnv } from "@/lib/env";
 import { ServiceError } from "@/lib/types/common";
 import type { Ayah, Juz, QuranApiResponse, Surah, Reciter } from "@/lib/types/quran";
 import { surahs as fallbackSurahs, reciters as fallbackReciters } from "@/lib/data/content";
@@ -223,8 +224,10 @@ export async function searchQuran(
 export async function getReciters(): Promise<Reciter[]> {
   try {
     // Try DB via Supabase REST (array response, works client + server)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const {
+      NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseKey,
+    } = getPublicEnv();
     if (supabaseUrl && supabaseKey) {
       const { data: rows } = await safeApiFetch<DbReciter[]>(
         `${supabaseUrl}/rest/v1/quran_reciters?select=id,code,name_ar,name_en,base_url_template&order=name_en.asc`,

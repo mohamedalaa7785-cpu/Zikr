@@ -7,7 +7,11 @@ const DISMISSED_KEY = 'zikr_notif_banner_dismissed';
 
 /**
  * Shows a one-time banner asking the user to allow notifications.
- * Hides if permission is already granted/denied, or the user dismisses it.
+ *
+ * The banner is intentionally not opened automatically on page load because
+ * permission prompts are disruptive and can hide the home page section grid in
+ * visual previews. Dispatch `zikr:show-notification-banner` from an explicit
+ * user action when the app wants to surface this opt-in.
  */
 export function NotificationPermissionBanner() {
   const [show, setShow] = useState(false);
@@ -22,11 +26,14 @@ export function NotificationPermissionBanner() {
     const alreadyDenied = Notification.permission === 'denied';
     const dismissed = sessionStorage.getItem(DISMISSED_KEY) === '1';
 
-    if (!alreadyGranted && !alreadyDenied && !dismissed) {
-      // Small delay so it doesn't flash immediately on page load
-      const t = setTimeout(() => setShow(true), 3000);
-      return () => clearTimeout(t);
-    }
+    const showBanner = () => {
+      if (!alreadyGranted && !alreadyDenied && !dismissed) {
+        setShow(true);
+      }
+    };
+
+    window.addEventListener('zikr:show-notification-banner', showBanner);
+    return () => window.removeEventListener('zikr:show-notification-banner', showBanner);
   }, []);
 
   const handleAllow = async () => {
@@ -50,7 +57,8 @@ export function NotificationPermissionBanner() {
 
   return (
     <div
-      role="dialog"
+      role="status"
+      aria-live="polite"
       aria-label="طلب إذن الإشعارات"
       className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-sm"
     >

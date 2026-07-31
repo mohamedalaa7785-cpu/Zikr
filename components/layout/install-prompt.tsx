@@ -70,7 +70,7 @@ export function InstallPrompt() {
 
   return (
     <div
-      role="dialog"
+      role="region"
       aria-label="تثبيت التطبيق"
       className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2"
     >
