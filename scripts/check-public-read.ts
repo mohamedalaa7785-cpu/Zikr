@@ -2,8 +2,11 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const anonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_PUBLISHABLE_KEY;
 
 async function main() {
   if (!supabaseUrl || !anonKey) {
@@ -11,7 +14,17 @@ async function main() {
     process.exit(1);
   }
 
-  const tables = ['quran_surahs', 'quran_ayahs', 'hadith_books', 'hadiths'];
+  const tables = [
+    'quran_chapters',
+    'verses',
+    'hadith_books',
+    'hadith_collection',
+    'duas',
+    'videos',
+    'video_generation_requests',
+    'social_publish_queue',
+  ];
+  let failures = 0;
 
   for (const table of tables) {
     try {
@@ -30,13 +43,19 @@ async function main() {
         const data = await response.json();
         console.log(`Successfully read from ${table}. Rows found: ${Array.isArray(data) ? data.length : 'unknown'}`);
       } else {
+        failures += 1;
         const errorText = await response.text();
         console.error(`Read from ${table} failed:`, errorText);
       }
     } catch (error) {
+      failures += 1;
       console.error(`Error checking ${table}:`, error);
     }
     console.log('---');
+  }
+
+  if (failures > 0) {
+    process.exitCode = 1;
   }
 }
 

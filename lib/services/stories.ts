@@ -1,4 +1,5 @@
 import { supabaseServerAnonRequest } from "@/lib/supabase/server";
+import { getPublicEnv } from "@/lib/env";
 import { ServiceError } from "@/lib/types/common";
 
 export type StoryCategory = "prophets" | "sahaba" | "documentaries" | "history";
@@ -103,14 +104,25 @@ function isStoryRow(item: unknown): item is StoryRow {
 }
 
 function hasSupabaseConfig() {
+  const env = getPublicEnv();
   return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    env.NEXT_PUBLIC_SUPABASE_URL &&
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 }
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 let cachedStories: { data: Story[]; timestamp: number } | null = null;
+
+function isExpectedNetworkFallback(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("fetch failed") ||
+    message.includes("EAI_AGAIN") ||
+    message.includes("AbortError") ||
+    message.includes("This operation was aborted")
+  );
+}
 
 export async function getStories(limit = 100): Promise<Story[]> {
   try {
@@ -132,6 +144,11 @@ export async function getStories(limit = 100): Promise<Story[]> {
         { cache: "force-cache", next: { revalidate: 1800 } }
       );
     } catch (summaryError) {
+      if (isExpectedNetworkFallback(summaryError)) {
+        cachedStories = { data: FALLBACK_STORIES, timestamp: Date.now() };
+        return FALLBACK_STORIES;
+      }
+
       console.warn("[stories] Summary column may not exist, trying without it:", summaryError);
       response = await supabaseServerAnonRequest<StoryRow[]>(
         `/rest/v1/stories?select=id,slug,title,category,published,created_at,updated_at&published=eq.true&limit=${limit}&order=created_at.desc`,
@@ -168,6 +185,11 @@ export async function getStories(limit = 100): Promise<Story[]> {
     cachedStories = { data: mapped, timestamp: Date.now() };
     return mapped;
   } catch (error) {
+    if (isExpectedNetworkFallback(error)) {
+      cachedStories = { data: FALLBACK_STORIES, timestamp: Date.now() };
+      return FALLBACK_STORIES;
+    }
+
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error("[stories] Failed to fetch from Supabase:", errorMsg);
 

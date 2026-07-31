@@ -3,7 +3,11 @@ import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.POSTGRES_URL_NON_POOLING;
 
 if (!connectionString) {
   console.error("DATABASE_URL is not set");
@@ -25,6 +29,7 @@ async function checkDb() {
     console.log(`Total users: ${usersCount[0].count}`);
   } catch (error) {
     console.error("Database check failed:", error);
+    process.exitCode = 1;
   } finally {
     await sql.end();
   }

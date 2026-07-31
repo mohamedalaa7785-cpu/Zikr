@@ -1,4 +1,5 @@
 import { supabaseServerAnonRequest } from "@/lib/supabase/server";
+import { getPublicEnv } from "@/lib/env";
 import { ServiceError } from "@/lib/types/common";
 
 export interface Scholar {
@@ -125,14 +126,25 @@ function isScholarRow(item: unknown): item is ScholarRow {
 }
 
 function hasSupabaseConfig() {
+  const env = getPublicEnv();
   return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    env.NEXT_PUBLIC_SUPABASE_URL &&
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 }
 
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 let cachedScholars: { data: Scholar[]; timestamp: number } | null = null;
+
+function isExpectedNetworkFallback(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("fetch failed") ||
+    message.includes("EAI_AGAIN") ||
+    message.includes("AbortError") ||
+    message.includes("This operation was aborted")
+  );
+}
 
 export async function getAllScholars(): Promise<Scholar[]> {
   try {
@@ -177,6 +189,10 @@ export async function getAllScholars(): Promise<Scholar[]> {
     cachedScholars = { data: mapped, timestamp: Date.now() };
     return mapped;
   } catch (error) {
+    if (isExpectedNetworkFallback(error)) {
+      return FALLBACK_SCHOLARS;
+    }
+
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error("[scholars] Failed to fetch from Supabase:", errorMsg);
 
@@ -210,6 +226,10 @@ export async function getScholarBySlug(slug: string): Promise<Scholar | null> {
       return mapScholarRow(response[0]);
     }
   } catch (error) {
+    if (isExpectedNetworkFallback(error)) {
+      return FALLBACK_SCHOLARS.find(scholar => scholar.slug === slug) ?? null;
+    }
+
     console.error("[scholars] Error fetching by slug:", slug, error);
   }
 
