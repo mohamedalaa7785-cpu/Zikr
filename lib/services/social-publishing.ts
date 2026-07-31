@@ -79,6 +79,38 @@ export async function getPendingSocialPublishItems(
   }
 }
 
+export async function claimPendingSocialPublishItems(
+  limit = 10
+): Promise<SocialPublishQueueItem[]> {
+  const items = await getPendingSocialPublishItems(limit);
+  const claimed: SocialPublishQueueItem[] = [];
+
+  for (const item of items) {
+    try {
+      const result = await supabaseServerAdminRequest<SocialPublishQueueItem[]>(
+        `/rest/v1/social_publish_queue?id=eq.${encodeURIComponent(item.id)}&status=eq.queued`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Prefer: "return=representation",
+          },
+          body: JSON.stringify({
+            status: "processing",
+            error_message: null,
+            updated_at: new Date().toISOString(),
+          }),
+        }
+      );
+      if (Array.isArray(result) && result[0]) claimed.push(result[0]);
+    } catch (error) {
+      console.error(`[social-publishing] Failed to claim queue item ${item.id}:`, error);
+    }
+  }
+
+  return claimed;
+}
+
 async function publishFacebookPost(
   item: SocialPublishQueueItem
 ): Promise<string | null> {
@@ -150,9 +182,12 @@ async function publishPlatform(
 }
 
 export async function processSocialPublishItem(
-  item: SocialPublishQueueItem
+  item: SocialPublishQueueItem,
+  options: { alreadyClaimed?: boolean } = {}
 ): Promise<boolean> {
-  await markQueueItem(item.id, "processing");
+  if (!options.alreadyClaimed) {
+    await markQueueItem(item.id, "processing");
+  }
   const platforms = item.target_platforms.filter(
     (p): p is SocialPlatform => p === "facebook" || p === "youtube"
   );
