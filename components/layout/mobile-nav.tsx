@@ -60,8 +60,9 @@ export function MobileNav() {
 
       {/* Slide-in Drawer */}
       <nav
-        className={`fixed top-0 end-0 z-40 h-full w-72 bg-brand-emeraldDeep border-s border-brand-gold/15 shadow-xl md:hidden transition-transform duration-300 ease-in-out overflow-y-auto ${open ? 'translate-x-0' : dir === 'rtl' ? 'translate-x-full' : '-translate-x-full'}`}
+        className={`fixed top-0 end-0 z-40 h-full w-72 bg-brand-emeraldDeep border-s border-brand-gold/15 shadow-xl md:hidden transition-all duration-300 ease-in-out overflow-y-auto ${open ? 'translate-x-0 visible' : dir === 'rtl' ? 'translate-x-full invisible' : '-translate-x-full invisible'}`}
         aria-label={isEnglish ? 'Primary navigation' : 'القائمة الرئيسية'}
+        aria-hidden={!open}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-brand-gold/15">
           <span className="text-xl font-bold text-brand-gold">ذِكرٌ</span>

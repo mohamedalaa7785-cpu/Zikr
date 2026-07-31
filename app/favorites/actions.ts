@@ -129,11 +129,11 @@ export async function getFavoritedRefs(
   itemType: FavoriteItemType = "quran"
 ): Promise<Set<string>> {
   if (!itemRefs.length) return new Set();
-  const user = await getSupabaseUser();
-  const token = await getServerSessionToken();
-  if (!user || !token) return new Set();
-
   try {
+    const user = await getSupabaseUser();
+    const token = await getServerSessionToken();
+    if (!user || !token) return new Set();
+
     const userFilter = encodeURIComponent(user.id);
     const typeFilter = encodeURIComponent(itemType);
     const refList = itemRefs.map(encodeURIComponent).join(",");

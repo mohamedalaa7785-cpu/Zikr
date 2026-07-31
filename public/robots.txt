@@ -1,0 +1,32 @@
+# Robots.txt for Zikr Media - Islamic Knowledge Platform
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+Allow: /quran
+Allow: /hadith
+Allow: /dua
+Allow: /adhkar
+Allow: /search
+Allow: /prayer-times
+Allow: /tafsir
+Allow: /prophets
+Allow: /scholars
+Disallow: /admin
+Disallow: /api/internal
+Disallow: /*.json$
+Disallow: /auth/
+
+# Google
+User-agent: Googlebot
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://zikrmediaofficial.vercel.app/sitemap.xml
