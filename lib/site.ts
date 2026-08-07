@@ -2,7 +2,7 @@
  * Canonical production origin. Single source of truth for every fallback —
  * override per environment with NEXT_PUBLIC_SITE_URL.
  */
-export const PRODUCTION_URL = 'https://zikrmediaofficial.vercel.app';
+export const PRODUCTION_URL = 'https://zikr-180ubk80r-hamo-projects.vercel.app';
 
 export const siteConfig = {
   name: 'ZIKR | ذِكرٌ',
