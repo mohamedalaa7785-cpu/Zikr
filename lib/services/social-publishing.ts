@@ -1,5 +1,6 @@
 import { supabaseServerAdminRequest } from "@/lib/supabase/server";
 import { publishToYoutube } from "@/lib/services/video-automation";
+import { getServerEnv } from "@/lib/env";
 
 export type SocialPlatform = "facebook" | "youtube";
 export type SocialQueueStatus =
@@ -114,8 +115,9 @@ export async function claimPendingSocialPublishItems(
 async function publishFacebookPost(
   item: SocialPublishQueueItem
 ): Promise<string | null> {
-  const pageId = process.env.FACEBOOK_PAGE_ID;
-  const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+  const env = getServerEnv();
+  const pageId = env.FACEBOOK_PAGE_ID;
+  const pageAccessToken = env.FACEBOOK_PAGE_ACCESS_TOKEN;
   if (!pageId || !pageAccessToken)
     throw new Error(
       "FACEBOOK_PAGE_ID / FACEBOOK_PAGE_ACCESS_TOKEN are not configured"

@@ -54,27 +54,27 @@ function addResult(status, label, detail) {
   results.push({ status, label, detail });
 }
 
+const SUFFIXES = ["", "_2", "_3", "_19", "_20", "_22"];
+
 function withNumberedAliases(names) {
-  return names.flatMap(name => [
-    name,
-    `${name}_19`,
-    `${name}_20`,
-    `${name}_22`,
-  ]);
+  return names.flatMap(name => SUFFIXES.map(suffix => `${name}${suffix}`));
 }
 
 function getEnv(name) {
   const aliases = {
-    NEXT_PUBLIC_SUPABASE_URL: ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"],
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: [
+    NEXT_PUBLIC_SUPABASE_URL: withNumberedAliases([
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "SUPABASE_URL",
+    ]),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: withNumberedAliases([
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "SUPABASE_ANON_KEY",
       "SUPABASE_PUBLISHABLE_KEY",
-    ],
-    SUPABASE_SERVICE_ROLE_KEY: [
+    ]),
+    SUPABASE_SERVICE_ROLE_KEY: withNumberedAliases([
       "SUPABASE_SERVICE_ROLE_KEY",
       "SUPABASE_SECRET_KEY",
-    ],
+    ]),
     DATABASE_URL: withNumberedAliases([
       "DATABASE_URL",
       "POSTGRES_URL",
@@ -83,11 +83,31 @@ function getEnv(name) {
     ]),
   };
 
-  for (const key of aliases[name] || [name]) {
+  for (const key of aliases[name] || withNumberedAliases([name])) {
     const value = process.env[key]?.trim();
     if (!value) continue;
 
+    // Ignore a mis-provisioned Supabase provider callback set on
+    // AUTH_CALLBACK_URL — it must be the app callback, so fall through.
+    if (name === "AUTH_CALLBACK_URL") {
+      try {
+        const url = new URL(value);
+        if (
+          url.hostname.endsWith(".supabase.co") &&
+          url.pathname === "/auth/v1/callback"
+        ) {
+          continue;
+        }
+      } catch {
+        continue;
+      }
+    }
+
     return value;
+  }
+
+  if (name === "NEXT_PUBLIC_SITE_URL") {
+    return "https://zikrmediaofficial.vercel.app";
   }
 
   if (name === "AUTH_CALLBACK_URL") {
@@ -226,8 +246,11 @@ async function validateSupabaseRest() {
   if (!supabaseUrl || !anonKey) return;
 
   try {
+    // Use the auth settings endpoint: it returns 200 for a valid anon key and
+    // does not depend on any table or RLS policy (the bare /rest/v1/ root can
+    // return 401 even with a valid key on some projects).
     const response = await fetchWithTimeout(
-      `${supabaseUrl.replace(/\/$/, "")}/rest/v1/`,
+      `${supabaseUrl.replace(/\/$/, "")}/auth/v1/settings`,
       {
         headers: {
           apikey: anonKey,
@@ -239,20 +262,20 @@ async function validateSupabaseRest() {
     if (response.ok) {
       addResult(
         "pass",
-        "Supabase REST",
+        "Supabase Auth",
         "reachable with NEXT_PUBLIC_SUPABASE_ANON_KEY"
       );
     } else {
       addResult(
         "fail",
-        "Supabase REST",
+        "Supabase Auth",
         `returned HTTP ${response.status}; check project URL and anon key`
       );
     }
   } catch (error) {
     addResult(
       "fail",
-      "Supabase REST",
+      "Supabase Auth",
       error instanceof Error ? error.message : "request failed"
     );
   }

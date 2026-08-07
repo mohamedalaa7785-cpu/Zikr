@@ -2,6 +2,7 @@
 
 import { generateText, streamText } from 'ai';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory, type GenerationConfig } from '@google/generative-ai';
+import { getServerEnv } from '@/lib/env';
 
 /**
  * Gemini client with:
@@ -11,7 +12,7 @@ import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory, type GenerationCo
 
 // ── AI Gateway ───────────────────────────────────────────────────────────────
 function getGatewayModelId(): string {
-  const raw = (process.env.GEMINI_MODEL ?? 'gemini-2.5-flash').trim();
+  const raw = (getServerEnv().GEMINI_MODEL ?? 'gemini-2.5-flash').trim();
   if (raw.includes('/')) return raw;
   if (raw.startsWith('gemini-1.5')) return 'google/gemini-2.5-flash';
   return `google/${raw}`;
@@ -34,11 +35,14 @@ let keyIndex = 0;
 function getAvailableKeys(): string[] {
   if (cachedKeys) return cachedKeys;
   const keys: string[] = [];
+  // Resolved primary key (handles bare name or numbered-suffix provisioning)
+  const primary = getServerEnv().GEMINI_API_KEY?.trim();
+  if (primary) keys.push(primary);
   const plain = process.env.GEMINI_API_KEY?.trim();
-  if (plain) keys.push(plain);
+  if (plain && !keys.includes(plain)) keys.push(plain);
   for (let i = 1; i <= 30; i++) {
     const key = process.env[`GEMINI_API_KEY_${i}`]?.trim();
-    if (key) keys.push(key);
+    if (key && !keys.includes(key)) keys.push(key);
   }
   cachedKeys = keys;
   return keys;
@@ -53,7 +57,7 @@ function getNextApiKey(): string | null {
 }
 
 function getDirectModel(): string {
-  return process.env.GEMINI_MODEL?.replace(/^google\\/, '') ?? 'gemini-2.5-flash';
+  return getServerEnv().GEMINI_MODEL?.replace(/^google\//, '') ?? 'gemini-2.5-flash';
 }
 
 // BLOCK_ONLY_HIGH exists at runtime but some TS type versions omit it — cast
