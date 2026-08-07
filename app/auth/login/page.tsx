@@ -17,7 +17,10 @@ const GOOGLE_OAUTH_ENABLED = true;
 const MESSAGE_MAP: Record<string, string> = {
   check_email: 'تم التسجيل! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
   reset_sent: 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.',
-  auth_callback_failed: 'فشل تسجيل الدخول عبر OAuth. حاول مرة أخرى.',
+  auth_callback_failed: 'فشل تسجيل الدخول عبر Google. حاول مرة أخرى.',
+  auth_session_missing: 'لم تكتمل جلسة تسجيل الدخول. حاول مرة أخرى.',
+  google_oauth_unavailable: 'تسجيل الدخول عبر Google غير متاح حاليًا.',
+  google_oauth_failed: 'تعذر بدء تسجيل الدخول عبر Google. حاول مرة أخرى.',
   password_updated: 'تم تحديث كلمة المرور بنجاح. يمكنك الدخول الآن.',
 };
 
@@ -36,7 +39,12 @@ function LoginForm() {
     if (!isClient) return;
     const errorParam = searchParams.get('error');
     const msgParam = searchParams.get('message');
-    if (errorParam) setError(decodeURIComponent(errorParam));
+    if (errorParam) {
+      setError(
+        MESSAGE_MAP[errorParam] ??
+          'تعذر تسجيل الدخول. تحقق من إعدادات الحساب وحاول مرة أخرى.',
+      );
+    }
     if (msgParam) setMessage(MESSAGE_MAP[msgParam] ?? decodeURIComponent(msgParam));
   }, [searchParams, isClient]);
 

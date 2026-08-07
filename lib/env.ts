@@ -54,8 +54,13 @@ const rawEnv: Record<string, string | undefined> = {
   ),
   POSTGRES_DATABASE: r(
     e.POSTGRES_DATABASE,
+    e.POSTGRES_DATABASE_2,
     e.POSTGRES_DATABASE_19,
+    e.POSTGRES_DATABASE_20,
+    e.POSTGRES_DATABASE_22,
     // fallback to user name (common in Supabase)
+    e.POSTGRES_USER,
+    e.POSTGRES_USER_2,
     e.POSTGRES_USER_19,
     e.POSTGRES_USER_20,
     e.POSTGRES_USER_22
@@ -82,14 +87,27 @@ const rawEnv: Record<string, string | undefined> = {
   // The public URL and anon key are intentionally public; the service-role key
   // remains server-only and is never returned by getPublicEnv(). Accept both
   // app-facing NEXT_PUBLIC_* names and Supabase integration names.
-  NEXT_PUBLIC_SUPABASE_URL: r(e.NEXT_PUBLIC_SUPABASE_URL, e.SUPABASE_URL),
+  NEXT_PUBLIC_SUPABASE_URL: r(
+    e.NEXT_PUBLIC_SUPABASE_URL,
+    e.SUPABASE_URL,
+    e.SUPABASE_URL_2,
+    e.SUPABASE_URL_19,
+    e.SUPABASE_URL_20,
+    e.SUPABASE_URL_22
+  ),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: r(
     e.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     e.SUPABASE_ANON_KEY,
+    e.SUPABASE_ANON_KEY_2,
+    e.SUPABASE_ANON_KEY_19,
+    e.SUPABASE_ANON_KEY_20,
+    e.SUPABASE_ANON_KEY_22,
     e.SUPABASE_PUBLISHABLE_KEY
   ),
   SUPABASE_SERVICE_ROLE_KEY: r(
     e.SUPABASE_SERVICE_ROLE_KEY,
+    e.SUPABASE_SERVICE_ROLE_KEY_2,
+    e.SUPABASE_SERVICE_ROLE_KEY_19,
     e.SUPABASE_SECRET_KEY
   ),
 
@@ -105,6 +123,7 @@ const rawEnv: Record<string, string | undefined> = {
   // belongs in Google Cloud/Supabase provider settings, not in Vercel app env.
   AUTH_CALLBACK_URL: r(
     e.AUTH_CALLBACK_URL,
+    e.AUTH_CALLBACK_URL_3,
     e.AUTH_CALLBACK_URL_19,
     `${(r(e.NEXT_PUBLIC_SITE_URL, e.NEXT_PUBLIC_SITE_URL_19, PRODUCTION_URL) || PRODUCTION_URL).replace(/\/$/, "")}/auth/callback`
   ),
