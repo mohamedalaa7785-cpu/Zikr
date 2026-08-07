@@ -56,6 +56,14 @@ function formatDate(value: string | null | undefined) {
   });
 }
 
+function getUserMetadataValue(metadata: Record<string, unknown>, ...keys: string[]) {
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 export default async function ProfilePage() {
   const supabase = await createClient();
   const {
@@ -99,6 +107,13 @@ export default async function ProfilePage() {
   const progressCount = progressCountRes.count ?? progressList.length;
 
   const isAdmin = profile?.role === 'admin';
+  const userMetadata = user.user_metadata ?? {};
+  const displayName =
+    profile?.display_name ??
+    getUserMetadataValue(userMetadata, 'full_name', 'name', 'display_name') ??
+    user.email?.split('@')[0] ??
+    null;
+  const avatarUrl = profile?.avatar_url ?? getUserMetadataValue(userMetadata, 'avatar_url', 'picture');
   const memberSince = profile?.created_at ?? user.created_at;
   const lastSignIn = user.last_sign_in_at;
   const emailVerified = Boolean(user.email_confirmed_at);
@@ -142,13 +157,13 @@ export default async function ProfilePage() {
 
         <div className="flex flex-wrap items-center gap-5">
           <AvatarUpload
-            currentAvatarUrl={profile?.avatar_url ?? null}
-            displayName={profile?.display_name ?? null}
+            currentAvatarUrl={avatarUrl}
+            displayName={displayName}
             email={user.email ?? null}
           />
           <div className="space-y-1">
             <p className="text-lg font-semibold text-brand-cream">
-              {profile?.display_name ?? 'لم يتم إعداد الاسم بعد'}
+              {displayName ?? 'لم يتم إعداد الاسم بعد'}
             </p>
             <p className="text-sm arabic-muted">{user.email ?? 'البريد غير متاح'}</p>
             <p className="text-xs arabic-muted">
