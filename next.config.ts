@@ -1,21 +1,35 @@
 import type { NextConfig } from 'next';
 
+// Resolve a bare name across the numeric suffixes Vercel may use when multiple
+// projects share an account (kept in sync with lib/env.ts).
+function bridgeEnv(...bases: string[]): string {
+  const suffixes = ['', '_2', '_3', '_19', '_20', '_22'];
+  for (const base of bases) {
+    for (const suffix of suffixes) {
+      const value = process.env[`${base}${suffix}`];
+      if (value) return value;
+    }
+  }
+  return '';
+}
+
 const nextConfig: NextConfig = {
   // Bridge Supabase integration env vars (SUPABASE_URL / SUPABASE_ANON_KEY)
   // to their NEXT_PUBLIC_* counterparts so the browser Supabase client gets
   // the correct values even when only the non-public names are set in Vercel.
+  // Vercel may provision integration vars with numeric suffixes (_2, _19, ...)
+  // when several projects share one account, so probe those too.
   env: {
     NEXT_PUBLIC_SUPABASE_URL:
-      process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      process.env.SUPABASE_URL ||
-      '',
+      bridgeEnv('NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_URL'),
     NEXT_PUBLIC_SUPABASE_ANON_KEY:
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      process.env.SUPABASE_ANON_KEY ||
-      process.env.SUPABASE_PUBLISHABLE_KEY ||
-      '',
+      bridgeEnv(
+        'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+        'SUPABASE_ANON_KEY',
+        'SUPABASE_PUBLISHABLE_KEY'
+      ),
     NEXT_PUBLIC_SITE_URL:
-      process.env.NEXT_PUBLIC_SITE_URL ||
+      bridgeEnv('NEXT_PUBLIC_SITE_URL') ||
       'https://zikrmediaofficial.vercel.app',
   },
   reactStrictMode: true,

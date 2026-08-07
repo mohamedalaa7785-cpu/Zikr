@@ -3,6 +3,20 @@ import type { VideoGenerationRequest } from '@/lib/types/video';
 
 export type { VideoGenerationRequest };
 
+// Resolve env vars with numbered-suffix fallback (matches lib/env.ts).
+// YouTube upload OAuth reuses the Google OAuth client when no dedicated
+// YOUTUBE_CLIENT_* is provisioned.
+function pickEnv(...bases: string[]): string | undefined {
+  const suffixes = ['', '_2', '_3', '_19', '_20', '_22'];
+  for (const base of bases) {
+    for (const suffix of suffixes) {
+      const value = process.env[`${base}${suffix}`];
+      if (value) return value;
+    }
+  }
+  return undefined;
+}
+
 /**
  * Create a new video generation request
  */
@@ -465,9 +479,9 @@ export async function generateVideoWithHeyGen(
  * YouTube uploads REQUIRE OAuth2 — an API key alone cannot upload videos.
  */
 async function getYoutubeAccessToken(): Promise<string | null> {
-  const clientId = process.env.YOUTUBE_CLIENT_ID;
-  const clientSecret = process.env.YOUTUBE_CLIENT_SECRET;
-  const refreshToken = process.env.YOUTUBE_REFRESH_TOKEN;
+  const clientId = pickEnv('YOUTUBE_CLIENT_ID', 'GOOGLE_CLIENT_ID');
+  const clientSecret = pickEnv('YOUTUBE_CLIENT_SECRET', 'GOOGLE_CLIENT_SECRET');
+  const refreshToken = pickEnv('YOUTUBE_REFRESH_TOKEN');
   if (!clientId || !clientSecret || !refreshToken) return null;
 
   try {
@@ -583,7 +597,7 @@ export async function publishToFacebook(
   pageId: string
 ): Promise<string | null> {
   try {
-    const pageAccessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+    const pageAccessToken = pickEnv('FACEBOOK_PAGE_ACCESS_TOKEN');
     if (!pageAccessToken) {
       console.warn('[video-automation] FACEBOOK_PAGE_ACCESS_TOKEN not configured');
       return null;
@@ -727,18 +741,18 @@ export async function processVideoGenerationRequest(
  */
 export async function getVideoPublishingConfig() {
   const youtubeEnabled = Boolean(
-    process.env.YOUTUBE_CLIENT_ID &&
-      process.env.YOUTUBE_CLIENT_SECRET &&
-      process.env.YOUTUBE_REFRESH_TOKEN
+    pickEnv('YOUTUBE_CLIENT_ID', 'GOOGLE_CLIENT_ID') &&
+      pickEnv('YOUTUBE_CLIENT_SECRET', 'GOOGLE_CLIENT_SECRET') &&
+      pickEnv('YOUTUBE_REFRESH_TOKEN')
   );
   return {
     youtubeEnabled,
-    youtubeChannelId: process.env.YOUTUBE_CHANNEL_ID,
+    youtubeChannelId: pickEnv('YOUTUBE_CHANNEL_ID'),
     facebookEnabled: Boolean(
-      process.env.FACEBOOK_PAGE_ACCESS_TOKEN && process.env.FACEBOOK_PAGE_ID
+      pickEnv('FACEBOOK_PAGE_ACCESS_TOKEN') && pickEnv('FACEBOOK_PAGE_ID')
     ),
-    facebookPageId: process.env.FACEBOOK_PAGE_ID,
-    autoPublish: process.env.VIDEO_AUTO_PUBLISH === 'true',
-    publishSchedule: process.env.VIDEO_PUBLISH_SCHEDULE,
+    facebookPageId: pickEnv('FACEBOOK_PAGE_ID'),
+    autoPublish: pickEnv('VIDEO_AUTO_PUBLISH') === 'true',
+    publishSchedule: pickEnv('VIDEO_PUBLISH_SCHEDULE'),
   };
 }

@@ -1,12 +1,12 @@
 import { defineConfig } from "drizzle-kit";
 
 function resolveEnv(name: string): string | undefined {
-  return (
-    process.env[name] ||
-    process.env[`${name}_19`] ||
-    process.env[`${name}_20`] ||
-    process.env[`${name}_22`]
-  );
+  const suffixes = ["", "_2", "_3", "_19", "_20", "_22"];
+  for (const suffix of suffixes) {
+    const value = process.env[`${name}${suffix}`];
+    if (value) return value;
+  }
+  return undefined;
 }
 
 // For Supabase + Drizzle migrations, use the non-pooling (direct) connection URL.
