@@ -21,5 +21,11 @@ $$;
 
 -- For is_admin_user: revoke from anon (no valid session), keep
 -- authenticated only (already granted in the previous migration,
--- but revoke from anon explicitly).
-REVOKE EXECUTE ON FUNCTION public.is_admin_user() FROM anon;
+-- but revoke from anon explicitly). Guard this for partial local replays.
+DO $$
+BEGIN
+  IF to_regprocedure('public.is_admin_user()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.is_admin_user() FROM anon;
+  END IF;
+END;
+$$;

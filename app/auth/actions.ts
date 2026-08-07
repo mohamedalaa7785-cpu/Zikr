@@ -22,9 +22,20 @@ export async function loginAction(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    const normalizedError = error.message.toLowerCase();
+    if (
+      normalizedError.includes('logins are disabled') ||
+      normalizedError.includes('email_provider_disabled')
+    ) {
+      redirect(
+        `/auth/login?error=${encodeURIComponent(
+          'الدخول بالبريد الإلكتروني غير مُفعّل حالياً. فعّل مزوّد Email في إعدادات المصادقة بمشروع Supabase أو استخدم الدخول عبر Google.',
+        )}`,
+      );
+    }
     const isActionable =
-      error.message.toLowerCase().includes('email not confirmed') ||
-      error.message.toLowerCase().includes('rate limit');
+      normalizedError.includes('email not confirmed') ||
+      normalizedError.includes('rate limit');
     const message = isActionable
       ? error.message
       : 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
@@ -58,10 +69,26 @@ export async function registerAction(formData: FormData) {
 
   if (error) {
     const normalizedError = error.message.toLowerCase();
+    // Configuration-level failure: the Email provider is turned off in the
+    // Supabase project's Auth settings. Surface a clear, actionable message
+    // instead of a generic "try again" that hides the real cause.
+    if (
+      normalizedError.includes('signups are disabled') ||
+      normalizedError.includes('email_provider_disabled') ||
+      normalizedError.includes('email logins are disabled')
+    ) {
+      redirect(
+        `/auth/register?error=${encodeURIComponent(
+          'تسجيل الحساب بالبريد الإلكتروني غير مُفعّل حالياً. فعّل مزوّد Email في إعدادات المصادقة بمشروع Supabase أو استخدم الدخول عبر Google.',
+        )}`,
+      );
+    }
     const isActionable =
       normalizedError.includes('password') ||
       normalizedError.includes('rate limit') ||
-      normalizedError.includes('email not authorized');
+      normalizedError.includes('email not authorized') ||
+      normalizedError.includes('already registered') ||
+      normalizedError.includes('invalid email');
     const message = isActionable
       ? error.message
       : 'تعذر إنشاء الحساب. تحقق من البيانات وحاول مرة أخرى.';
