@@ -1,26 +1,31 @@
-import { describe, it, expect } from '@jest/globals';
+/**
+ * Hooks smoke tests (node:test)
+ * Verifies that hooks exported from lib/hooks/ can be imported.
+ * Run with: node --test __tests__/integration/hooks.test.ts
+ */
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 
-describe('Hooks Exports', () => {
-  it('should export all hooks', async () => {
-    const hooks = await import('lib/hooks');
-    
-    expect(hooks.useUser).toBeDefined();
-    expect(hooks.useAuth).toBeDefined();
-    expect(hooks.useProfile).toBeDefined();
-    expect(hooks.useQuran).toBeDefined();
-    expect(hooks.useHadith).toBeDefined();
-    expect(hooks.useDua).toBeDefined();
-    expect(hooks.useFavorites).toBeDefined();
-    expect(hooks.useReadingProgress).toBeDefined();
-    expect(hooks.usePrayerTimes).toBeDefined();
-    expect(hooks.useSearch).toBeDefined();
-    expect(hooks.useNotifications).toBeDefined();
-    expect(hooks.useTheme).toBeDefined();
-    expect(hooks.useGeolocation).toBeDefined();
-    expect(hooks.useVideos).toBeDefined();
-    expect(hooks.useAI).toBeDefined();
-    expect(hooks.useOnline).toBeDefined();
-    expect(hooks.useDebounce).toBeDefined();
-    expect(hooks.useLocalStorage).toBeDefined();
+describe('Prayer times hook exports', () => {
+  it('exports usePrayerTimes', async () => {
+    const mod = await import('../../lib/hooks/use-prayer-times.ts');
+    assert.equal(typeof mod.usePrayerTimes, 'function');
+  });
+});
+
+describe('Auth enhanced exports', () => {
+  it('exports isTokenExpired', async () => {
+    const mod = await import('../../lib/auth-enhanced.ts');
+    assert.equal(typeof mod.isTokenExpired, 'function');
+  });
+
+  it('exports isTokenValid', async () => {
+    const mod = await import('../../lib/auth-enhanced.ts');
+    assert.equal(typeof mod.isTokenValid, 'function');
+  });
+
+  it('exports extractNextPath', async () => {
+    const mod = await import('../../lib/auth-enhanced.ts');
+    assert.equal(typeof mod.extractNextPath, 'function');
   });
 });

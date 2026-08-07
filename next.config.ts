@@ -1,6 +1,23 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Bridge Supabase integration env vars (SUPABASE_URL / SUPABASE_ANON_KEY)
+  // to their NEXT_PUBLIC_* counterparts so the browser Supabase client gets
+  // the correct values even when only the non-public names are set in Vercel.
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL:
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      process.env.SUPABASE_URL ||
+      '',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY:
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.SUPABASE_PUBLISHABLE_KEY ||
+      '',
+    NEXT_PUBLIC_SITE_URL:
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      'https://zikrmediaofficial.vercel.app',
+  },
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
