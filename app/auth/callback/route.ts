@@ -2,6 +2,14 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { extractNextPath, getTrustedAuthOrigin } from '@/lib/auth-enhanced';
 import { NextRequest, NextResponse } from 'next/server';
 
+function getOAuthProfileValue(metadata: Record<string, unknown>, ...keys: string[]) {
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const origin = getTrustedAuthOrigin(request);
@@ -37,6 +45,13 @@ export async function GET(request: NextRequest) {
         console.debug('[auth/callback] User authenticated:', user.id);
 
         try {
+          const metadata = user.user_metadata ?? {};
+          const displayName =
+            getOAuthProfileValue(metadata, 'full_name', 'name', 'display_name') ??
+            user.email?.split('@')[0] ??
+            null;
+          const avatarUrl = getOAuthProfileValue(metadata, 'avatar_url', 'picture');
+
           // Use the service-role admin client to bypass RLS for the upsert.
           // The anon-key client bound to the just-exchanged session may not yet
           // have its cookies flushed to the response, so RLS checks can fail for
@@ -46,14 +61,8 @@ export async function GET(request: NextRequest) {
             {
               id: user.id,
               email: user.email ?? null,
-              display_name:
-                typeof user.user_metadata?.full_name === 'string'
-                  ? user.user_metadata.full_name
-                  : null,
-              avatar_url:
-                typeof user.user_metadata?.avatar_url === 'string'
-                  ? user.user_metadata.avatar_url
-                  : null,
+              display_name: displayName,
+              avatar_url: avatarUrl,
               updated_at: new Date().toISOString(),
             },
             { onConflict: 'id' }

@@ -200,7 +200,7 @@ export function buildOAuthRedirectUri(
 ): string {
   const url = new URL("/auth/callback", getCanonicalAuthBaseUrl(baseUrl));
   if (nextPath) {
-    url.searchParams.set("next", nextPath);
+    url.searchParams.set("next", extractNextPath(new URLSearchParams({ next: nextPath })));
   }
   return url.toString();
 }
@@ -214,7 +214,10 @@ export function buildOAuthRedirectUri(
  * different link. Localhost is preserved for development.
  */
 export function getCanonicalAuthBaseUrl(baseUrl?: string | null): string {
-  if (!baseUrl) return PRODUCTION_URL;
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const canonicalProductionUrl = configuredSiteUrl || PRODUCTION_URL;
+
+  if (!baseUrl) return canonicalProductionUrl;
 
   try {
     const url = new URL(baseUrl);
@@ -224,9 +227,18 @@ export function getCanonicalAuthBaseUrl(baseUrl?: string | null): string {
       return url.origin;
     }
 
-    return PRODUCTION_URL;
+    // OAuth redirect URIs must always point to this app, not to Supabase's
+    // provider callback URL (https://<project>.supabase.co/auth/v1/callback).
+    // If a Supabase/Auth URL is accidentally supplied by environment config or
+    // copied from Google Cloud settings, fall back to the public app origin so
+    // the session exchange happens on /auth/callback and /profile can mount.
+    if (host.endsWith(".supabase.co") || url.pathname.startsWith("/auth/v1/")) {
+      return canonicalProductionUrl;
+    }
+
+    return canonicalProductionUrl;
   } catch {
-    return PRODUCTION_URL;
+    return canonicalProductionUrl;
   }
 }
 

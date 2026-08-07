@@ -1,6 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
+function getUserMetadataValue(metadata: Record<string, unknown>, ...keys: string[]) {
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -17,14 +25,23 @@ export async function GET() {
 
     if (error && error.code !== 'PGRST116') throw error;
 
-    return NextResponse.json(profile || {
+    if (profile) return NextResponse.json(profile);
+
+    const metadata = user.user_metadata ?? {};
+    const now = new Date().toISOString();
+
+    return NextResponse.json({
       id: user.id,
-      display_name: user.user_metadata?.display_name || null,
-      avatar_url: user.user_metadata?.avatar_url || null,
+      email: user.email ?? null,
+      display_name:
+        getUserMetadataValue(metadata, 'display_name', 'full_name', 'name') ??
+        user.email?.split('@')[0] ??
+        null,
+      avatar_url: getUserMetadataValue(metadata, 'avatar_url', 'picture'),
       locale: 'ar',
       role: 'user',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: user.created_at ?? now,
+      updated_at: now,
     });
   } catch (error) {
     console.error('[api/user/profile] GET error:', error);
@@ -43,12 +60,13 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { data: profile, error } = await supabase
       .from('profiles')
-      .update({
+      .upsert({
+        id: user.id,
+        email: user.email ?? null,
         display_name: body.display_name ?? body.displayName,
         locale: body.locale,
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id)
+      }, { onConflict: 'id' })
       .select()
       .single();
 
