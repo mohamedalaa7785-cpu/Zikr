@@ -30,10 +30,7 @@ const REQUIRED_RUNTIME_VARS = [
   "NEXT_PUBLIC_SITE_URL",
 ];
 
-const REQUIRED_MIGRATION_VARS = [
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "DATABASE_URL",
-];
+const REQUIRED_MIGRATION_VARS = ["SUPABASE_SERVICE_ROLE_KEY", "DATABASE_URL"];
 const OPTIONAL_INTEGRATIONS = [
   "AUTH_CALLBACK_URL",
   "GEMINI_API_KEY",
@@ -45,6 +42,11 @@ const OPTIONAL_INTEGRATIONS = [
   "HADITH_API_BASE_URL",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
+  "FACEBOOK_APP_ID",
+  "FACEBOOK_APP_SECRET",
+  "FACEBOOK_PAGE_ACCESS_TOKEN",
+  "FACEBOOK_PAGE_ID",
+  "YOUTUBE_REFRESH_TOKEN",
 ];
 
 const TIMEOUT_MS = 8000;
@@ -85,8 +87,8 @@ function getEnv(name) {
     DATABASE_URL: withNumberedAliases([
       "DATABASE_URL",
       "POSTGRES_URL",
-      "POSTGRES_URL_NON_POOLING",
       "POSTGRES_PRISMA_URL",
+      "POSTGRES_URL_NON_POOLING",
     ]),
   };
 
@@ -118,7 +120,8 @@ function getEnv(name) {
   }
 
   if (name === "AUTH_CALLBACK_URL") {
-    const siteUrl = getEnv("NEXT_PUBLIC_SITE_URL") || "https://zikrmediaofficial.vercel.app";
+    const siteUrl =
+      getEnv("NEXT_PUBLIC_SITE_URL") || "https://zikrmediaofficial.vercel.app";
     return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
   }
 
@@ -237,6 +240,48 @@ function validateDatabaseUrl() {
   }
 }
 
+function validatePostgresUrls() {
+  const pooledUrl = getEnv("POSTGRES_PRISMA_URL") || getEnv("POSTGRES_URL");
+  const directUrl = getEnv("POSTGRES_URL_NON_POOLING");
+
+  if (pooledUrl) {
+    try {
+      const parsed = new URL(pooledUrl);
+      if (
+        parsed.port === "6543" &&
+        parsed.searchParams.get("pgbouncer") !== "true"
+      ) {
+        addResult(
+          "warn",
+          "POSTGRES_PRISMA_URL",
+          "Supabase pooler URLs on port 6543 should include pgbouncer=true"
+        );
+      }
+    } catch {
+      addResult("fail", "POSTGRES_PRISMA_URL", "must be a valid Postgres URL");
+    }
+  }
+
+  if (directUrl) {
+    try {
+      const parsed = new URL(directUrl);
+      if (parsed.hostname.includes("pooler.supabase.com")) {
+        addResult(
+          "warn",
+          "POSTGRES_URL_NON_POOLING",
+          "appears to use a Supabase pooler host; direct/non-pooling URLs normally use db.<project-ref>.supabase.co:5432"
+        );
+      }
+    } catch {
+      addResult(
+        "fail",
+        "POSTGRES_URL_NON_POOLING",
+        "must be a valid Postgres URL"
+      );
+    }
+  }
+}
+
 async function fetchWithTimeout(url, init = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -348,6 +393,7 @@ function printResults() {
 validatePresence();
 validateUrls();
 validateDatabaseUrl();
+validatePostgresUrls();
 await validateSupabaseRest();
 await validateYoutube();
 printResults();
