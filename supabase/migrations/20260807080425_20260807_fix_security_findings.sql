@@ -7,8 +7,34 @@
 
 CREATE SCHEMA IF NOT EXISTS extensions;
 
-ALTER EXTENSION pg_trgm  SET SCHEMA extensions;
-ALTER EXTENSION unaccent SET SCHEMA extensions;
+-- Supabase exposes these extensions as installable extensions, but they may
+-- not be enabled in a fresh project. Enable them first, then relocate any
+-- existing installation safely. This is intentionally idempotent because a
+-- failed migration may have already moved pg_trgm before failing on unaccent.
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA extensions;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = 'pg_trgm'
+      AND extnamespace <> 'extensions'::regnamespace
+  ) THEN
+    ALTER EXTENSION pg_trgm SET SCHEMA extensions;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = 'unaccent'
+      AND extnamespace <> 'extensions'::regnamespace
+  ) THEN
+    ALTER EXTENSION unaccent SET SCHEMA extensions;
+  END IF;
+END;
+$$;
 
 -- ============================================================
 -- 2. Lock down trigger SECURITY DEFINER functions
