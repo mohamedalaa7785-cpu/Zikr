@@ -60,11 +60,11 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- 2. Auto-create profile on new auth user
--- Replace existing function if it exists with correct search_path
+-- Use CREATE OR REPLACE so this migration is safe even when run on a DB
+-- where the function already exists (e.g. after the Supabase security advisor
+-- has already injected an ALTER FUNCTION ... SET search_path statement).
 -- ---------------------------------------------------------------------------
-DROP FUNCTION IF EXISTS public.handle_new_user();
-
-CREATE FUNCTION public.handle_new_user()
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -83,7 +83,7 @@ BEGIN
 END;
 $$;
 
--- Drop and recreate trigger
+-- Drop and recreate trigger (idempotent)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
