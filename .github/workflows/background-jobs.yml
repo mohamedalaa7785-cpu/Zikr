@@ -1,9 +1,7 @@
 name: Background Jobs
 
 on:
-  schedule:
-    - cron: "0 3 * * *"
-    - cron: "*/15 * * * *"
+  # Background jobs are manual-only until their external paid providers are enabled.
   workflow_dispatch:
     inputs:
       job_type:
