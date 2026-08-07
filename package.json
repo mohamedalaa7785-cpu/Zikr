@@ -19,8 +19,9 @@
     "cap:ios": "pnpm dlx @capacitor/cli open ios",
     "mobile:build": "pnpm build && pnpm cap:sync",
     "mobile:check": "node scripts/verify-mobile-readiness.mjs",
+    "supabase:migrations:check": "node scripts/check-supabase-migrations.mjs",
     "routes:check": "node scripts/verify-platform-routes.mjs",
-    "verify": "pnpm routes:check && pnpm imports:check && pnpm mobile:check && pnpm lint && pnpm check && pnpm build",
+    "verify": "pnpm supabase:migrations:check && pnpm routes:check && pnpm imports:check && pnpm mobile:check && pnpm lint && pnpm check && pnpm build",
     "imports:check": "node scripts/verify-local-imports.mjs",
     "background:jobs": "tsx scripts/run-background-jobs.ts",
     "launch:smoke": "node scripts/production-smoke-test.mjs"

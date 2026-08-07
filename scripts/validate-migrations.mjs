@@ -99,6 +99,15 @@ if (process.env.SIMULATE_LEGACY === '1') {
 }
 
 const files = readdirSync(MIG_DIR).filter((f) => f.endsWith('.sql')).sort();
+const versions = new Map();
+for (const file of files) {
+  const match = /^(\\d+)_/.exec(file);
+  if (match && versions.has(match[1])) {
+    throw new Error(`Duplicate migration version ${match[1]}: ${versions.get(match[1])} and ${file}`);
+  }
+  if (match) versions.set(match[1], file);
+}
+if (files.length === 0) throw new Error(`No migrations found in ${MIG_DIR}`);
 console.log('Applying', files.length, 'migrations in order');
 
 let failed = 0;
