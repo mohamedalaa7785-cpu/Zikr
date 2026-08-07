@@ -78,7 +78,7 @@ async function checkSupabaseTable(supabaseUrl, anonKey, table) {
   }
 }
 
-const siteUrl = env("NEXT_PUBLIC_SITE_URL");
+const siteUrl = env("NEXT_PUBLIC_SITE_URL") || "https://zikrmediaofficial.vercel.app";
 const supabaseUrl = env("NEXT_PUBLIC_SUPABASE_URL", ["SUPABASE_URL"]);
 const anonKey = env("NEXT_PUBLIC_SUPABASE_ANON_KEY", ["SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY"]);
 
@@ -93,7 +93,7 @@ if (siteUrl) {
 }
 
 if (supabaseUrl && anonKey) {
-  for (const table of ["quran_chapters", "verses", "hadith_books", "hadith_collection", "duas", "videos", "video_generation_requests", "social_publish_queue"]) {
+  for (const table of ["quran_surahs", "quran_ayahs", "hadith_books", "hadiths", "duas", "videos", "video_generation_requests", "social_publish_queue"]) {
     await checkSupabaseTable(supabaseUrl, anonKey, table);
   }
 }

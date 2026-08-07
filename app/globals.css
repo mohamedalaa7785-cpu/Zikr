@@ -4,7 +4,8 @@
 @tailwind utilities;
 
 :root {
-  --font-amiri: "Amiri", "Times New Roman", serif;
+  --font-amiri:
+    var(--font-noto-arabic), "Amiri", "Times New Roman", serif;
   --font-arabic:
     var(--font-noto-arabic), var(--font-amiri), "Scheherazade New", "Segoe UI",
     Tahoma, Arial, sans-serif;
