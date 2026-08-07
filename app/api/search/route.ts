@@ -8,13 +8,16 @@ interface SearchRow {
 
 export async function GET(request: NextRequest) {
   try {
-    const query = request.nextUrl.searchParams.get('q');
-    if (!query || query.trim().length < 2) {
+    const query = request.nextUrl.searchParams.get('q')?.trim();
+    if (!query || query.length < 2) {
       return NextResponse.json([]);
+    }
+    if (query.length > 100) {
+      return NextResponse.json({ error: 'Search query is too long.' }, { status: 400 });
     }
 
     const supabase = await createClient();
-    const searchTerm = `%${query.trim()}%`;
+    const searchTerm = `%${query}%`;
 
     const [quranResults, hadithResults, duaResults, storyResults, articleResults] = await Promise.all([
       supabase.from('quran_surahs').select('id, title:name_ar').ilike('name_ar', searchTerm).limit(5),

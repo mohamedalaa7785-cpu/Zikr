@@ -11,8 +11,11 @@ export async function POST(req: NextRequest) {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email) || email.trim().length > 254) {
       return NextResponse.json({ error: 'البريد الإلكتروني غير صالح.' }, { status: 400 });
+    }
+    if (name.trim().length > 120 || message.trim().length > 5000 || (subject?.trim().length ?? 0) > 200) {
+      return NextResponse.json({ error: 'البيانات المدخلة طويلة جداً.' }, { status: 400 });
     }
 
     const supabase = await createClient();

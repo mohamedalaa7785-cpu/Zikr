@@ -7,6 +7,14 @@ import { Analytics } from "@/components/layout/analytics";
 import { ServiceWorkerRegister } from "@/components/layout/service-worker-register";
 import { NativeCapacitorBridge } from "@/components/layout/native-capacitor-bridge";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Noto_Naskh_Arabic } from "next/font/google";
+
+const notoArabic = Noto_Naskh_Arabic({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-noto-arabic",
+  weight: ["400", "500", "600", "700"],
+});
 
 const ADSENSE_CLIENT =
   process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-2457467624248791";
@@ -86,7 +94,7 @@ export default function RootLayout({
       lang="ar"
       dir={siteConfig.dir}
       data-scroll-behavior="smooth"
-      className="bg-black"
+      className={`bg-black ${notoArabic.variable}`}
       suppressHydrationWarning={true}
     >
       <head>

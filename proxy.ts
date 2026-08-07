@@ -47,9 +47,14 @@ export async function proxy(request: NextRequest) {
   // getUser() validates the JWT and refreshes tokens when needed.
   // The refreshed session cookies are written onto `response` by the
   // cookie callbacks inside createMiddlewareClient.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    // Malformed or stale cookies must not turn every request into a 500.
+    user = null;
+  }
 
   if (!user && isProtected) {
     return redirectToLogin(request);

@@ -11,7 +11,7 @@ import { getCanonicalAuthBaseUrl } from '@/lib/auth-enhanced';
 // Supabase's native chunked format and are visible to every server component
 // that calls createClient().
 export async function loginAction(formData: FormData) {
-  const email = String(formData.get('email') || '');
+  const email = String(formData.get('email') || '').trim().toLowerCase();
   const password = String(formData.get('password') || '');
   let next = String(formData.get('next') || '/profile');
   if (!next.startsWith('/') || next.startsWith('//')) {
@@ -22,12 +22,13 @@ export async function loginAction(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    const msg = encodeURIComponent(
-      error.message === 'Invalid login credentials'
-        ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.'
-        : error.message,
-    );
-    redirect(`/auth/login?error=${msg}`);
+    const isActionable =
+      error.message.toLowerCase().includes('email not confirmed') ||
+      error.message.toLowerCase().includes('rate limit');
+    const message = isActionable
+      ? error.message
+      : 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    redirect(`/auth/login?error=${encodeURIComponent(message)}`);
   }
 
   redirect(next);
@@ -35,8 +36,12 @@ export async function loginAction(formData: FormData) {
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 export async function registerAction(formData: FormData) {
-  const email = String(formData.get('email') || '');
+  const email = String(formData.get('email') || '').trim().toLowerCase();
   const password = String(formData.get('password') || '');
+
+  if (email.length > 254 || password.length > 128) {
+    redirect('/auth/register?error=بيانات التسجيل غير صالحة.');
+  }
 
   const supabase = await createClient();
   const requestOrigin = (await headers()).get('origin');
@@ -52,8 +57,15 @@ export async function registerAction(formData: FormData) {
   });
 
   if (error) {
-    const msg = encodeURIComponent(error.message);
-    redirect(`/auth/register?error=${msg}`);
+    const normalizedError = error.message.toLowerCase();
+    const isActionable =
+      normalizedError.includes('password') ||
+      normalizedError.includes('rate limit') ||
+      normalizedError.includes('email not authorized');
+    const message = isActionable
+      ? error.message
+      : 'تعذر إنشاء الحساب. تحقق من البيانات وحاول مرة أخرى.';
+    redirect(`/auth/register?error=${encodeURIComponent(message)}`);
   }
 
   if (data.user && data.session) {
