@@ -14,18 +14,18 @@ describe('Prayer times hook exports', () => {
 });
 
 describe('Auth enhanced exports', () => {
-  it('exports isTokenExpired', async () => {
-    const mod = await import('../../lib/auth-enhanced.ts');
-    assert.equal(typeof mod.isTokenExpired, 'function');
-  });
-
-  it('exports isTokenValid', async () => {
-    const mod = await import('../../lib/auth-enhanced.ts');
-    assert.equal(typeof mod.isTokenValid, 'function');
-  });
-
   it('exports extractNextPath', async () => {
     const mod = await import('../../lib/auth-enhanced.ts');
     assert.equal(typeof mod.extractNextPath, 'function');
+  });
+
+  it('exports getCanonicalAuthBaseUrl', async () => {
+    const mod = await import('../../lib/auth-enhanced.ts');
+    assert.equal(typeof mod.getCanonicalAuthBaseUrl, 'function');
+  });
+
+  it('exports buildOAuthRedirectUri', async () => {
+    const mod = await import('../../lib/auth-enhanced.ts');
+    assert.equal(typeof mod.buildOAuthRedirectUri, 'function');
   });
 });
