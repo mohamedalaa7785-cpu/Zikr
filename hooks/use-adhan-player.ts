@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState, useEffect } from 'react';
+import { playAzanTone, unlockAudioContext } from '@/lib/audio/spiritual-tones';
 
 export type AdhanVoice = 'makkah' | 'madinah';
 
@@ -76,18 +77,23 @@ export function useAdhanPlayer(): UseAdhanPlayerReturn {
     const audio = audioRef.current;
     const audioPath = `/audio/adhan/${voice}.mp3`;
 
+    // Unlock the guaranteed Web Audio fallback from the same user gesture.
+    unlockAudioContext();
+
     try {
-      // If different voice, load new audio
-      if (audio.src !== audioPath) {
+      // Use a data attribute because HTMLAudioElement.src becomes absolute.
+      if (audio.dataset.voice !== voice) {
+        audio.dataset.voice = voice;
         audio.src = audioPath;
         audio.load();
       }
 
-      // Play the audio
       await audio.play();
       setIsPlaying(true);
-    } catch (error) {
-      console.error('[useAdhanPlayer] Failed to play audio:', error);
+    } catch {
+      // The optional MP3 files may not be packaged in every deployment.
+      // Keep the feature usable with the built-in, offline-safe tone.
+      playAzanTone();
       setIsPlaying(false);
     }
   }, [currentVoice]);
@@ -123,11 +129,13 @@ export function useAdhanPlayer(): UseAdhanPlayerReturn {
       const wasPlaying = true;
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      audioRef.current.dataset.voice = voice;
       audioRef.current.src = `/audio/adhan/${voice}.mp3`;
       audioRef.current.load();
       if (wasPlaying) {
-        audioRef.current.play().catch((error) => {
-          console.error('[useAdhanPlayer] Failed to play new voice:', error);
+        audioRef.current.play().catch(() => {
+          playAzanTone();
+          setIsPlaying(false);
         });
       }
     }

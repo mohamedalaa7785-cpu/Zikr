@@ -76,8 +76,7 @@ const requiredRoutes = [
   'public/offline.html',
   'public/icons/icon-192.svg',
   'public/icons/icon-512.svg',
-  'public/audio/adhan/makkah.mp3',
-  'public/audio/adhan/madinah.mp3',
+  // Adhan MP3 files are optional: the player has an offline Web Audio fallback.
 ];
 
 const missing = requiredRoutes.filter((route) => !existsSync(route));
