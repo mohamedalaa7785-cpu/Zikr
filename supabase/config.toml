@@ -14,7 +14,6 @@ site_url = "env(NEXT_PUBLIC_SITE_URL)"
 additional_redirect_urls = [
   "https://zikrmediaofficial.vercel.app/auth/callback",
   "https://eydxvcamhjhajxjrsgym.supabase.co/auth/v1/callback",
-  "env(AUTH_CALLBACK_URL)",
   "http://localhost:3000/auth/callback",
 ]
 jwt_expiry = 3600
