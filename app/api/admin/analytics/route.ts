@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseAdmin } from '@/lib/supabase/guard';
 import { NextResponse } from 'next/server';
 
 interface DatedRow { created_at?: string | null }
@@ -6,6 +7,9 @@ interface BehaviorRow extends DatedRow { user_id?: string | null }
 interface FavoriteRow { item_type?: string | null; item_ref?: string | null }
 
 export async function GET() {
+  const unavailable = requireSupabaseAdmin();
+  if (unavailable) return unavailable;
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();

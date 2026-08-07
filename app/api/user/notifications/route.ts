@@ -1,7 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseAuth } from '@/lib/supabase/guard';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  const unauthenticated = requireSupabaseAuth();
+  if (unauthenticated) return unauthenticated;
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
