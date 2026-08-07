@@ -28,9 +28,7 @@ const nextConfig: NextConfig = {
         'SUPABASE_ANON_KEY',
         'SUPABASE_PUBLISHABLE_KEY'
       ),
-    NEXT_PUBLIC_SITE_URL:
-      bridgeEnv('NEXT_PUBLIC_SITE_URL') ||
-      'https://zikrmediaofficial.vercel.app',
+    NEXT_PUBLIC_SITE_URL: 'https://zikrmediaofficial.vercel.app',
   },
   reactStrictMode: true,
   poweredByHeader: false,
