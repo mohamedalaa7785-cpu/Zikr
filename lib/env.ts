@@ -13,10 +13,10 @@ const e = process.env;
 // Resolve the bare key first, then deterministic numeric aliases that actually
 // exist in the project instead of maintaining a stale hand-written list.
 const SUFFIXES = Object.keys(e)
-  .map((key) => key.match(/_(\d+)$/)?.[1])
+  .map(key => key.match(/_(\d+)$/)?.[1])
   .filter((suffix): suffix is string => Boolean(suffix))
   .sort((a, b) => Number(a) - Number(b))
-  .map((suffix) => `_${suffix}`);
+  .map(suffix => `_${suffix}`);
 
 /** Resolve the first non-empty value across the given base names + suffixes. */
 function pick(...bases: string[]): string | undefined {
@@ -75,8 +75,8 @@ const rawEnv: Record<string, string | undefined> = {
   DATABASE_URL: pick(
     "DATABASE_URL",
     "POSTGRES_URL",
-    "POSTGRES_URL_NON_POOLING",
-    "POSTGRES_PRISMA_URL"
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL_NON_POOLING"
   ),
 
   // ── Supabase ──────────────────────────────────────────────────────────────
@@ -105,7 +105,10 @@ const rawEnv: Record<string, string | undefined> = {
   AUTH_CALLBACK_URL: resolveAppCallbackUrl(pick("AUTH_CALLBACK_URL"), siteUrl),
 
   // ── Google OAuth ──────────────────────────────────────────────────────────
-  GOOGLE_CLIENT_ID: pick("GOOGLE_CLIENT_ID"),
+  // Supabase hosts the actual OAuth provider, but keeping these values in the
+  // app env lets deployment checks catch mismatched Google/Supabase settings
+  // before users hit /auth/google.
+  GOOGLE_CLIENT_ID: pick("GOOGLE_CLIENT_ID", "NEXT_PUBLIC_GOOGLE_CLIENT_ID"),
   GOOGLE_CLIENT_SECRET: pick("GOOGLE_CLIENT_SECRET"),
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: pick(
     "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
@@ -138,7 +141,6 @@ const rawEnv: Record<string, string | undefined> = {
   FACEBOOK_APP_SECRET: pick("FACEBOOK_APP_SECRET"),
   FACEBOOK_PAGE_ACCESS_TOKEN: pick("FACEBOOK_PAGE_ACCESS_TOKEN"),
   FACEBOOK_PAGE_ID: pick("FACEBOOK_PAGE_ID"),
-
 };
 
 const validatedEnv = rawEnv;
@@ -195,10 +197,7 @@ export function getEnvAudit() {
       "NEXT_PUBLIC_SITE_URL",
       "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
     ],
-    serverOnly: [
-      "SUPABASE_SERVICE_ROLE_KEY",
-      "GOOGLE_CLIENT_SECRET",
-    ],
+    serverOnly: ["SUPABASE_SERVICE_ROLE_KEY", "GOOGLE_CLIENT_SECRET"],
     runtimeServer: [
       "NEXT_PUBLIC_SUPABASE_URL",
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",

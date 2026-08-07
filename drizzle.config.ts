@@ -1,9 +1,17 @@
 import { defineConfig } from "drizzle-kit";
 
+const suffixes = [
+  "",
+  ...Object.keys(process.env)
+    .map(key => key.match(/_(\d+)$/)?.[1])
+    .filter((suffix): suffix is string => Boolean(suffix))
+    .sort((a, b) => Number(a) - Number(b))
+    .map(suffix => `_${suffix}`),
+];
+
 function resolveEnv(name: string): string | undefined {
-  const suffixes = ["", "_2", "_3", "_19", "_20", "_22"];
   for (const suffix of suffixes) {
-    const value = process.env[`${name}${suffix}`];
+    const value = process.env[`${name}${suffix}`]?.trim();
     if (value) return value;
   }
   return undefined;

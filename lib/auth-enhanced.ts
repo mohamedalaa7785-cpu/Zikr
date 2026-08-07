@@ -4,6 +4,7 @@
  */
 
 import { jwtDecode } from "jwt-decode";
+import { getServerEnv } from "@/lib/env";
 import { PRODUCTION_URL } from "@/lib/site";
 
 interface DecodedToken {
@@ -200,7 +201,10 @@ export function buildOAuthRedirectUri(
 ): string {
   const url = new URL("/auth/callback", getCanonicalAuthBaseUrl(baseUrl));
   if (nextPath) {
-    url.searchParams.set("next", extractNextPath(new URLSearchParams({ next: nextPath })));
+    url.searchParams.set(
+      "next",
+      extractNextPath(new URLSearchParams({ next: nextPath }))
+    );
   }
   return url.toString();
 }
@@ -240,6 +244,36 @@ export function getCanonicalAuthBaseUrl(baseUrl?: string | null): string {
   } catch {
     return canonicalProductionUrl;
   }
+}
+
+export function getGoogleOAuthConfigStatus() {
+  const env = getServerEnv();
+  const missing = [
+    ["NEXT_PUBLIC_SUPABASE_URL", env.NEXT_PUBLIC_SUPABASE_URL],
+    ["NEXT_PUBLIC_SUPABASE_ANON_KEY", env.NEXT_PUBLIC_SUPABASE_ANON_KEY],
+    ["NEXT_PUBLIC_SITE_URL", env.NEXT_PUBLIC_SITE_URL],
+    ["GOOGLE_CLIENT_ID", env.GOOGLE_CLIENT_ID],
+    ["GOOGLE_CLIENT_SECRET", env.GOOGLE_CLIENT_SECRET],
+  ]
+    .filter(([, value]) => !value)
+    .map(([name]) => name);
+
+  const appCallbackUrl = buildOAuthRedirectUri(env.NEXT_PUBLIC_SITE_URL);
+  const configuredCallbackUrl = env.AUTH_CALLBACK_URL || appCallbackUrl;
+  const normalizedConfiguredCallbackUrl = configuredCallbackUrl.replace(
+    /\/$/,
+    ""
+  );
+  const normalizedAppCallbackUrl = appCallbackUrl.replace(/\/$/, "");
+
+  return {
+    isReady:
+      missing.length === 0 &&
+      normalizedConfiguredCallbackUrl === normalizedAppCallbackUrl,
+    missing,
+    appCallbackUrl,
+    configuredCallbackUrl,
+  };
 }
 
 /**
