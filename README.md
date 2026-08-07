@@ -140,9 +140,10 @@ pnpm build
 
 #### Database Migrations
 
-Supabase SQL migrations are the official migration path:
+`supabase/migrations/` is the only canonical deployment migration chain. The `drizzle/` directory contains the type-safe schema and historical ORM metadata; do not apply both migration systems to the same database.
 
 ```bash
+pnpm supabase:migrations:check
 pnpm db:migrate:supabase
 ```
 
