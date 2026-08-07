@@ -27,9 +27,15 @@ export async function POST(request: Request) {
   try {
     const { poem, title } = await request.json();
 
-    if (!poem || !title) {
+    if (typeof poem !== 'string' || typeof title !== 'string' || !poem.trim() || !title.trim()) {
       return Response.json(
         { error: 'Missing poem or title' },
+        { status: 400 }
+      );
+    }
+    if (title.length > 200 || poem.length > 12000) {
+      return Response.json(
+        { error: 'The poem or title is too long.' },
         { status: 400 }
       );
     }
