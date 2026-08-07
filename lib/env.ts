@@ -21,6 +21,9 @@ const SUFFIXES = Object.keys(e)
 /** Resolve the first non-empty value across the given base names + suffixes. */
 function pick(...bases: string[]): string | undefined {
   for (const base of bases) {
+    const bareValue = e[base];
+    if (bareValue !== undefined && bareValue !== "") return bareValue;
+
     for (const suffix of SUFFIXES) {
       const value = e[`${base}${suffix}`];
       if (value !== undefined && value !== "") return value;
