@@ -17,13 +17,13 @@ CREATE TABLE IF NOT EXISTS public.admin_actions_audit (
 INSERT INTO public.admin_actions_audit (user_id, action, meta)
 VALUES (NULL, 'cancel_billing_globally', jsonb_build_object('reason','requested-by-owner','timestamp', now()));
 
--- 1) Disable auto-renew and deactivate all user_subscriptions, set plan to free
+-- 1) Reset all user_subscriptions to the canonical free plan.
+-- The deployed schema contains plan/credits/expires_at, but does not contain
+-- the legacy auto_renew or is_active columns.
 UPDATE public.user_subscriptions
-SET auto_renew = false,
-    is_active = false,
-    plan = 'free',
+SET plan = 'free',
     updated_at = now()
-WHERE (auto_renew IS DISTINCT FROM false) OR (is_active IS DISTINCT FROM false) OR (plan IS DISTINCT FROM 'free');
+WHERE plan IS DISTINCT FROM 'free';
 
 -- 2) Mark all pending payments as rejected so they no longer count as outstanding
 UPDATE public.payments
