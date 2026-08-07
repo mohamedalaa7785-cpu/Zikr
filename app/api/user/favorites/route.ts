@@ -1,7 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseAuth } from '@/lib/supabase/guard';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
+  const unauthenticated = requireSupabaseAuth();
+  if (unauthenticated) return unauthenticated;
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -24,6 +28,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const unauthenticated = requireSupabaseAuth();
+  if (unauthenticated) return unauthenticated;
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -54,6 +61,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const unauthenticated = requireSupabaseAuth();
+  if (unauthenticated) return unauthenticated;
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();

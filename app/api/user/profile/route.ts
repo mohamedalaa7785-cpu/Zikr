@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseAuth } from '@/lib/supabase/guard';
 import { NextRequest, NextResponse } from 'next/server';
 
 function getUserMetadataValue(metadata: Record<string, unknown>, ...keys: string[]) {
@@ -10,6 +11,9 @@ function getUserMetadataValue(metadata: Record<string, unknown>, ...keys: string
 }
 
 export async function GET() {
+  const unauthenticated = requireSupabaseAuth();
+  if (unauthenticated) return unauthenticated;
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -50,6 +54,9 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const unauthenticated = requireSupabaseAuth();
+  if (unauthenticated) return unauthenticated;
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();

@@ -146,6 +146,30 @@ export function showZakatNotification(daysLeft: number): void {
   });
 }
 
+/** Show a browser/native notification with a rotating dhikr phrase. */
+export function showDhikrNotification(text: string): void {
+  if (typeof window === 'undefined') return;
+
+  const title = 'تذكير بالذكر';
+  const tag = 'dhikr-reminder';
+
+  void showNativeNotification(title, text, tag).then((handled) => {
+    if (handled) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    try {
+      new Notification(title, {
+        body: text,
+        icon: '/icons/icon-192.svg',
+        tag,
+      });
+    } catch {
+      // ignore
+    }
+  });
+}
+
 /** Show a browser/native notification for the Salawat reminder. */
 export function showSalawatNotification(): void {
   if (typeof window === 'undefined') return;

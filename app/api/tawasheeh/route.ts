@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 // Uses request.url and cookies — can never be statically rendered.
@@ -12,6 +12,15 @@ export async function GET(request: Request) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
     const offset = parseInt(searchParams.get('offset') || '0');
     const featured = searchParams.get('featured') === 'true';
+
+    // No database connected — return an empty page so the UI shows its
+    // empty state instead of an error.
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json({
+        data: [],
+        pagination: { total: 0, limit, offset, hasMore: false },
+      });
+    }
 
     const supabase = await createClient();
 
