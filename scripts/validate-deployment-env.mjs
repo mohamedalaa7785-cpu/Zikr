@@ -54,7 +54,14 @@ function addResult(status, label, detail) {
   results.push({ status, label, detail });
 }
 
-const SUFFIXES = ["", "_2", "_3", "_19", "_20", "_22"];
+const SUFFIXES = [
+  "",
+  ...Object.keys(process.env)
+    .map(key => key.match(/_(\d+)$/)?.[1])
+    .filter(Boolean)
+    .sort((a, b) => Number(a) - Number(b))
+    .map(suffix => `_${suffix}`),
+];
 
 function withNumberedAliases(names) {
   return names.flatMap(name => SUFFIXES.map(suffix => `${name}${suffix}`));

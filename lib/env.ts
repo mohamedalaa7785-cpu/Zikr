@@ -7,9 +7,16 @@ import { PRODUCTION_URL } from "@/lib/site";
 // the app always sees clean names regardless of how Vercel provisioned them.
 // Priority: bare name → _2 → _3 → _19 → _20 → _22
 
-const SUFFIXES = ["", "_2", "_3", "_19", "_20", "_22"] as const;
-
 const e = process.env;
+
+// Vercel can suffix duplicated integration variables with any numeric suffix.
+// Resolve the bare key first, then deterministic numeric aliases that actually
+// exist in the project instead of maintaining a stale hand-written list.
+const SUFFIXES = Object.keys(e)
+  .map((key) => key.match(/_(\d+)$/)?.[1])
+  .filter((suffix): suffix is string => Boolean(suffix))
+  .sort((a, b) => Number(a) - Number(b))
+  .map((suffix) => `_${suffix}`);
 
 /** Resolve the first non-empty value across the given base names + suffixes. */
 function pick(...bases: string[]): string | undefined {

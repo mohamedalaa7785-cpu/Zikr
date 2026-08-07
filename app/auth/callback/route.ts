@@ -10,6 +10,13 @@ function getOAuthProfileValue(metadata: Record<string, unknown>, ...keys: string
   return null;
 }
 
+function loginRedirect(origin: string, code: string, next?: string) {
+  const url = new URL('/auth/login', origin);
+  url.searchParams.set('error', code);
+  if (next) url.searchParams.set('next', next);
+  return NextResponse.redirect(url);
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const origin = getTrustedAuthOrigin(request);
@@ -21,8 +28,7 @@ export async function GET(request: NextRequest) {
   const oauthErrorDesc = searchParams.get('error_description');
   if (oauthError) {
     console.error('[auth/callback] OAuth error:', oauthError, oauthErrorDesc);
-    const msg = encodeURIComponent(oauthErrorDesc || oauthError);
-    return NextResponse.redirect(`${origin}/auth/login?error=${msg}`);
+    return loginRedirect(origin, 'google_oauth_failed', safePath);
   }
 
   if (code) {
@@ -32,8 +38,7 @@ export async function GET(request: NextRequest) {
       
       if (error) {
         console.error('[auth/callback] exchangeCodeForSession error:', error.message, error.status);
-        const msg = encodeURIComponent(error.message || 'تعذر تسجيل الدخول');
-        return NextResponse.redirect(`${origin}/auth/login?error=${msg}`);
+        return loginRedirect(origin, 'google_oauth_failed', safePath);
       }
 
       const user = data.user;
@@ -82,13 +87,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}${safePath}`);
     } catch (err) {
       console.error('[auth/callback] Unexpected error:', err);
-      const msg = encodeURIComponent(
-        err instanceof Error ? err.message : 'حدث خطأ غير متوقع'
-      );
-      return NextResponse.redirect(`${origin}/auth/login?error=${msg}`);
+      return loginRedirect(origin, 'google_oauth_failed', safePath);
     }
   }
 
   console.warn('[auth/callback] No code provided in callback');
-  return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_failed`);
+  return loginRedirect(origin, 'auth_callback_failed', safePath);
 }
