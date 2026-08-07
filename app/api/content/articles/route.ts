@@ -1,7 +1,11 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  // No database connected — return an empty collection so the UI shows its
+  // empty state instead of an error.
+  if (!isSupabaseConfigured()) return NextResponse.json([]);
+
   try {
     const supabase = await createClient();
     const { data: articles, error } = await supabase

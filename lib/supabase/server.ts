@@ -20,6 +20,19 @@ function getEnv() {
 }
 
 /**
+ * True when the Supabase URL + anon key are present.
+ * Route handlers and server components use this to degrade gracefully
+ * (empty content, disabled account features) instead of throwing 500s
+ * when the database is not connected.
+ */
+export function isSupabaseConfigured(): boolean {
+  const env = getServerEnv();
+  return Boolean(
+    env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
+
+/**
  * Service-role client — bypasses RLS.
  * Use only in server-only code (route handlers, server actions) where you need
  * to write data for a user who may not yet have an active session cookie

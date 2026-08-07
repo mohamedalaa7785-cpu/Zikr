@@ -1,7 +1,9 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
+  if (!isSupabaseConfigured()) return NextResponse.json([]);
+
   try {
     const supabase = await createClient();
     const categoryId = request.nextUrl.searchParams.get('category');

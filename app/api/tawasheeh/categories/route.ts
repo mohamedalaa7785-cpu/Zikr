@@ -1,10 +1,12 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 // Uses cookies via the server Supabase client — can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  if (!isSupabaseConfigured()) return NextResponse.json({ data: [] });
+
   try {
     const supabase = await createClient();
 
