@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase/client';
-import { buildOAuthRedirectUri } from '@/lib/auth-enhanced';
 import { Button } from '@/components/ui/button';
 
 type GoogleOAuthButtonProps = {
@@ -27,34 +25,11 @@ export function GoogleOAuthButton({
           ? next
           : '/profile';
 
-      // Build the callback on the canonical production domain to avoid Vercel
-      // deployment/preview hosts taking over after Google redirects back.
-      const siteUrl =
-        typeof window !== 'undefined' ? window.location.origin : '';
-
-      const redirectUri = buildOAuthRedirectUri(siteUrl, safeNext);
-
-      const client = createBrowserSupabaseClient();
-
-      const { error: oauthError } =
-        await client.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: redirectUri,
-            scopes: 'email profile',
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            },
-          },
-        });
-
-      if (oauthError) {
-        throw oauthError;
-      }
-
-      // The redirect to Google happens automatically after signInWithOAuth
-      // The page will unload and redirect to Google, so we don't set loading to false
+      // The Route Handler creates the Supabase OAuth URL server-side, avoiding
+      // missing/placeholder public keys in the browser.
+      window.location.assign(
+        `/auth/google?next=${encodeURIComponent(safeNext)}`,
+      );
 
     } catch (err) {
       const message =

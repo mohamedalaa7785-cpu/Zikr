@@ -41,9 +41,16 @@ export async function GET(request: NextRequest) {
       }
 
       const user = data.user;
-      if (user) {
-        console.debug('[auth/callback] User authenticated:', user.id);
+      if (!user) {
+        const sessionCheck = await supabase.auth.getUser();
+        if (!sessionCheck.data.user) {
+          return NextResponse.redirect(
+            `${origin}/auth/login?error=auth_session_missing`,
+          );
+        }
+      }
 
+      if (user) {
         try {
           const metadata = user.user_metadata ?? {};
           const displayName =
