@@ -7,12 +7,19 @@
 
 CREATE SCHEMA IF NOT EXISTS extensions;
 
--- Supabase exposes these extensions as installable extensions, but they may
--- not be enabled in a fresh project. Enable them first, then relocate any
--- existing installation safely. This is intentionally idempotent because a
--- failed migration may have already moved pg_trgm before failing on unaccent.
+-- Supabase exposes these extensions as installable extensions, but local
+-- validation environments may not ship every optional extension. Enable only
+-- extensions advertised by PostgreSQL, then relocate existing installations.
 CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;
-CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA extensions;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_available_extensions WHERE name = 'unaccent'
+  ) THEN
+    EXECUTE 'CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA extensions';
+  END IF;
+END;
+$$;
 
 DO $$
 BEGIN
