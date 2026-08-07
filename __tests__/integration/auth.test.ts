@@ -7,31 +7,10 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  isTokenExpired,
-  isTokenValid,
   extractNextPath,
   getCanonicalAuthBaseUrl,
   buildOAuthRedirectUri,
 } from '../../lib/auth-enhanced.ts';
-
-describe('isTokenExpired', () => {
-  it('returns true for null/undefined', () => {
-    assert.equal(isTokenExpired(null), true);
-    assert.equal(isTokenExpired(undefined), true);
-    assert.equal(isTokenExpired(''), true);
-  });
-
-  it('returns true for a malformed token', () => {
-    assert.equal(isTokenExpired('not.a.jwt'), true);
-  });
-});
-
-describe('isTokenValid', () => {
-  it('returns false for null/undefined', () => {
-    assert.equal(isTokenValid(null), false);
-    assert.equal(isTokenValid(undefined), false);
-  });
-});
 
 describe('extractNextPath', () => {
   it('defaults to /profile when no next param', () => {

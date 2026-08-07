@@ -3,9 +3,21 @@
 -- was not sufficient because Supabase grants EXECUTE to anon and
 -- authenticated explicitly (not just via PUBLIC inheritance).
 
-REVOKE EXECUTE ON FUNCTION public.create_profile_for_new_user() FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.create_profile_on_login()    FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.ensure_profile_for_user()    FROM anon, authenticated;
+DO $$
+BEGIN
+  IF to_regprocedure('public.create_profile_for_new_user()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.create_profile_for_new_user() FROM anon, authenticated;
+  END IF;
+
+  IF to_regprocedure('public.create_profile_on_login()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.create_profile_on_login() FROM anon, authenticated;
+  END IF;
+
+  IF to_regprocedure('public.ensure_profile_for_user()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.ensure_profile_for_user() FROM anon, authenticated;
+  END IF;
+END;
+$$;
 
 -- For is_admin_user: revoke from anon (no valid session), keep
 -- authenticated only (already granted in the previous migration,

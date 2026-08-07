@@ -7,8 +7,34 @@
 
 CREATE SCHEMA IF NOT EXISTS extensions;
 
-ALTER EXTENSION pg_trgm  SET SCHEMA extensions;
-ALTER EXTENSION unaccent SET SCHEMA extensions;
+-- Supabase exposes these extensions as installable extensions, but they may
+-- not be enabled in a fresh project. Enable them first, then relocate any
+-- existing installation safely. This is intentionally idempotent because a
+-- failed migration may have already moved pg_trgm before failing on unaccent.
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA extensions;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = 'pg_trgm'
+      AND extnamespace <> 'extensions'::regnamespace
+  ) THEN
+    ALTER EXTENSION pg_trgm SET SCHEMA extensions;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = 'unaccent'
+      AND extnamespace <> 'extensions'::regnamespace
+  ) THEN
+    ALTER EXTENSION unaccent SET SCHEMA extensions;
+  END IF;
+END;
+$$;
 
 -- ============================================================
 -- 2. Lock down trigger SECURITY DEFINER functions
@@ -21,9 +47,21 @@ ALTER EXTENSION unaccent SET SCHEMA extensions;
 -- PUBLIC (inherited by anon and authenticated) so they can only be
 -- invoked by the trigger mechanism.
 
-REVOKE EXECUTE ON FUNCTION public.create_profile_for_new_user() FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.create_profile_on_login()    FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.ensure_profile_for_user()    FROM PUBLIC;
+DO $$
+BEGIN
+  IF to_regprocedure('public.create_profile_for_new_user()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.create_profile_for_new_user() FROM PUBLIC;
+  END IF;
+
+  IF to_regprocedure('public.create_profile_on_login()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.create_profile_on_login() FROM PUBLIC;
+  END IF;
+
+  IF to_regprocedure('public.ensure_profile_for_user()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.ensure_profile_for_user() FROM PUBLIC;
+  END IF;
+END;
+$$;
 
 -- ============================================================
 -- 3. Switch is_admin_user to SECURITY INVOKER + restrict EXECUTE

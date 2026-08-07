@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getAllSurahs } from '@/lib/services/quran';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -9,10 +10,17 @@ export async function GET() {
       .select('*')
       .order('id', { ascending: true }); // id = surah number
 
-    if (error) throw error;
-    return NextResponse.json(surahs || []);
+    if (!error && surahs?.length) {
+      return NextResponse.json(surahs);
+    }
   } catch (error) {
-    console.error('[api/quran/surahs] GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch surahs' }, { status: 500 });
+    console.warn('[api/quran/surahs] Supabase unavailable; using Quran API fallback:', error);
+  }
+
+  try {
+    return NextResponse.json(await getAllSurahs('ar'));
+  } catch (error) {
+    console.error('[api/quran/surahs] fallback failed:', error);
+    return NextResponse.json({ error: 'Failed to fetch surahs' }, { status: 503 });
   }
 }

@@ -161,12 +161,6 @@ export async function supabaseServerAdminCount(table: string): Promise<number> {
   }
 }
 
-/** Legacy: read the access token from the cookie store. */
-export async function getServerSessionToken() {
-  const store = await cookies();
-  return store.get('sb-access-token')?.value ?? store.get('sb_access_token')?.value ?? null;
-}
-
 /** Legacy: check Supabase connectivity. */
 export async function assertSupabaseConnection() {
   try {
