@@ -47,9 +47,21 @@ $$;
 -- PUBLIC (inherited by anon and authenticated) so they can only be
 -- invoked by the trigger mechanism.
 
-REVOKE EXECUTE ON FUNCTION public.create_profile_for_new_user() FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.create_profile_on_login()    FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.ensure_profile_for_user()    FROM PUBLIC;
+DO $$
+BEGIN
+  IF to_regprocedure('public.create_profile_for_new_user()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.create_profile_for_new_user() FROM PUBLIC;
+  END IF;
+
+  IF to_regprocedure('public.create_profile_on_login()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.create_profile_on_login() FROM PUBLIC;
+  END IF;
+
+  IF to_regprocedure('public.ensure_profile_for_user()') IS NOT NULL THEN
+    REVOKE EXECUTE ON FUNCTION public.ensure_profile_for_user() FROM PUBLIC;
+  END IF;
+END;
+$$;
 
 -- ============================================================
 -- 3. Switch is_admin_user to SECURITY INVOKER + restrict EXECUTE
