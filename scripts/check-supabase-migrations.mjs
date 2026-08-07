@@ -24,27 +24,8 @@ for (const file of files) {
   }
 }
 
-const forbiddenLegacyReplays = [
-  "20260705070523_initial_schema",
-  "20260705070652_rls_triggers_storage",
-];
-if (files.some((file) => forbiddenLegacyReplays.some((legacyName) => file.includes(legacyName)))) {
-  errors.push("legacy duplicate initial/RLS migrations must remain in migrations_archive only; use no-op remote history placeholders instead");
-}
-
-const remoteHistoryPlaceholders = [
-  "20240705000001_remote_history_placeholder.sql",
-  "20240705000002_remote_history_placeholder.sql",
-  "20240705000003_remote_history_placeholder.sql",
-  "20250705000001_remote_history_placeholder.sql",
-  "20250705000002_remote_history_placeholder.sql",
-  "20260705070523_remote_history_placeholder.sql",
-  "20260705070652_remote_history_placeholder.sql",
-];
-for (const placeholder of remoteHistoryPlaceholders) {
-  if (!files.includes(placeholder)) {
-    errors.push(`${placeholder}: required so Supabase Preview can match linked-project migration history`);
-  }
+if (files.some((file) => file.includes("20260705070523_initial_schema") || file.includes("20260705070652_rls_triggers_storage"))) {
+  errors.push("legacy duplicate initial/RLS migrations must remain in migrations_archive only");
 }
 
 if (!statSync(archiveDir).isDirectory()) errors.push("supabase/migrations_archive is missing");

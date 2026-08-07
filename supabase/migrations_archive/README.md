@@ -18,17 +18,18 @@ conflicting, or superseded. They are kept here for historical reference only.
 
 ## Canonical migration chain
 
-The authoritative schema-changing history is the ordered 2026 chain in
-`supabase/migrations/`, starting at `20260530000000_0000_young_rattler.sql`.
-The directory also keeps small `*_remote_history_placeholder.sql` no-op files for
-legacy versions that are already recorded in the linked Supabase project. These
-placeholders prevent Supabase Preview from failing with "Remote migration versions
-not found in local migrations directory" while avoiding replay of superseded SQL
-on fresh databases.
+The authoritative history is now the single ordered chain in
+`supabase/migrations/`, starting at `20260530000000_0000_young_rattler.sql`
+and ending at `20260705070652_rls_triggers_storage.sql`.
 
 ## If `supabase db push` reports history mismatch
 
-If Supabase Preview reports a remote version missing locally, add a no-op
-placeholder with that exact numeric version instead of restoring archived legacy
-SQL. Do not run migration repair against production unless you have a verified
-backup and explicitly intend to rewrite migration history.
+If the remote database has any of the archived versions recorded in
+`supabase_migrations.schema_migrations`, mark them as reverted locally
+(this only edits the history table, it does not change schema):
+
+```bash
+supabase migration repair --status reverted 20240705000001 20240705000002 20240705000003 20250705000001 20250705000002
+```
+
+Then re-run `supabase db push`. Always take a backup (`pg_dump`) first.
