@@ -75,7 +75,11 @@ export function useAdhanPlayer(): UseAdhanPlayerReturn {
     if (!audioRef.current) return;
 
     const audio = audioRef.current;
-    const audioPath = `/audio/adhan/${voice}.mp3`;
+    const audioSources: Record<AdhanVoice, string> = {
+      makkah: 'https://www.islamcan.com/audio/adhan/azan1.mp3',
+      madinah: 'https://www.islamcan.com/audio/adhan/azan2.mp3',
+    };
+    const audioPath = audioSources[voice];
 
     // Unlock the guaranteed Web Audio fallback from the same user gesture.
     unlockAudioContext();
@@ -130,7 +134,11 @@ export function useAdhanPlayer(): UseAdhanPlayerReturn {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current.dataset.voice = voice;
-      audioRef.current.src = `/audio/adhan/${voice}.mp3`;
+      const audioSources: Record<AdhanVoice, string> = {
+        makkah: 'https://www.islamcan.com/audio/adhan/azan1.mp3',
+        madinah: 'https://www.islamcan.com/audio/adhan/azan2.mp3',
+      };
+      audioRef.current.src = audioSources[voice];
       audioRef.current.load();
       if (wasPlaying) {
         audioRef.current.play().catch(() => {
