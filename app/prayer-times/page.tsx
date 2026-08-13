@@ -46,6 +46,21 @@ export default function PrayerTimesPage() {
       if (data) {
         setPrayerData(data);
         setError(null);
+        try {
+          localStorage.setItem(
+            'zikr_prayer_location',
+            JSON.stringify({
+              lat,
+              lon,
+              city,
+              timings: data.data.timings,
+              date: data.data.date,
+              cachedAt: Date.now(),
+            }),
+          );
+        } catch {
+          // Offline cache can be unavailable in private browsing contexts.
+        }
       } else {
         setError('فشل في جلب مواقيت الصلاة');
       }
@@ -92,6 +107,21 @@ export default function PrayerTimesPage() {
       if (data) {
         setPrayerData(data);
         setCurrentLocation({ lat: data.data.meta.latitude, lon: data.data.meta.longitude, city });
+        try {
+          localStorage.setItem(
+            'zikr_prayer_location',
+            JSON.stringify({
+              lat: data.data.meta.latitude,
+              lon: data.data.meta.longitude,
+              city,
+              timings: data.data.timings,
+              date: data.data.date,
+              cachedAt: Date.now(),
+            }),
+          );
+        } catch {
+          // Offline cache can be unavailable in private browsing contexts.
+        }
       } else {
         setError('لم يتم العثور على المدينة');
       }
@@ -118,8 +148,27 @@ export default function PrayerTimesPage() {
     return () => clearInterval(interval);
   }, [prayerData]);
 
-  // Request location on mount
+  // Restore the last successful schedule immediately, then refresh it online.
   useEffect(() => {
+    try {
+      const cached = localStorage.getItem('zikr_prayer_location');
+      if (!cached) return;
+      const parsed = JSON.parse(cached) as { lat: number; lon: number; city: string; timings: PrayerTimesResponse['data']['timings']; date: PrayerTimesResponse['data']['date'] };
+      if (!parsed.timings || !parsed.date) return;
+      setPrayerData({
+        code: 200,
+        status: 'OK',
+        data: {
+          timings: parsed.timings,
+          date: parsed.date,
+          meta: { latitude: parsed.lat, longitude: parsed.lon, timezone: '', method: { id: 4, name: 'Cached', params: {} }, latitudeAdjustmentMethod: '', midnightMethod: '', school: '', offset: {} },
+        },
+      });
+      setCurrentLocation({ lat: parsed.lat, lon: parsed.lon, city: parsed.city });
+      setLoading(false);
+    } catch {
+      // Ignore malformed or unavailable offline cache.
+    }
     requestLocation();
   }, [requestLocation]);
 
@@ -277,7 +326,7 @@ export default function PrayerTimesPage() {
                         ? 'bg-brand-gold/15 text-brand-gold hover:bg-brand-gold/25'
                         : 'bg-brand-cream/5 text-brand-cream/30 hover:bg-brand-cream/10'
                     }`}
-                    aria-label={`${azanSettings.enabledPrayers[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey] ? 'تعطيل' : 'تفعيل'} أذان ${PRAYER_NAMES_AR[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey]}`}
+                    aria-label={`${azanSettings.enabledPrayers[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey] ? 'تع��يل' : 'تفعيل'} أذان ${PRAYER_NAMES_AR[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey]}`}
                   >
                     <span>{azanSettings.enabledPrayers[prayer.name as import('@/hooks/use-prayer-alert').PrayerKey] ? 'الأذان مفعّل' : 'الأذان معطّل'}</span>
                   </button>

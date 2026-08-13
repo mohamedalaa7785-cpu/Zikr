@@ -7,6 +7,7 @@
     "cleartext": false,
     "allowNavigation": [
       "zikrmediaofficial.vercel.app",
+      "www.islamcan.com",
       "*.supabase.co",
       "accounts.google.com",
       "*.googleusercontent.com",

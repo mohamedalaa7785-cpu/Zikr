@@ -98,16 +98,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API calls - let them go directly to network
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/')) {
+  // Prayer times use network-first with a cached response so the last
+  // successful schedule remains available when the user is offline.
+  if (url.pathname === '/api/prayer-times') {
     event.respondWith(
-      fetch(request).catch(() => {
-        return new Response(
-          JSON.stringify({ error: 'Network error' }),
-          { status: 503, headers: { 'Content-Type': 'application/json' } }
-        );
-      })
+      fetch(request).then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      }).catch(() => caches.match(request).then((cached) => cached || new Response(
+        JSON.stringify({ error: 'Network error' }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } },
+      )))
     );
+    return;
+  }
+
+  // Other API and auth calls remain network-only.
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/')) {
+    event.respondWith(fetch(request).catch(() => new Response(
+      JSON.stringify({ error: 'Network error' }),
+      { status: 503, headers: { 'Content-Type': 'application/json' } },
+    )));
     return;
   }
 
