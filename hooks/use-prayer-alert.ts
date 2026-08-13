@@ -72,6 +72,31 @@ function markFired(prayer: PrayerKey): void {
   sessionStorage.setItem(getAlertKey(prayer), '1');
 }
 
+function scheduleNativePrayerNotifications(settings: AzanSettings, timings: Record<string, string>): void {
+  if (typeof window === 'undefined') return;
+  const native = (window as Window & { zikrNative?: { scheduleLocalNotification?: (notification: { id: number; title: string; body: string; scheduleAt: string; sound?: string }) => Promise<void> } }).zikrNative;
+  if (!native?.scheduleLocalNotification) return;
+
+  const now = new Date();
+  for (const prayer of PRAYERS) {
+    if (!settings.enabledPrayers[prayer]) continue;
+    const time = timings[prayer];
+    if (!time) continue;
+    const [hours, minutes] = time.split(':').map(Number);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) continue;
+    const scheduled = new Date(now);
+    scheduled.setHours(hours, minutes, 0, 0);
+    if (scheduled <= now) scheduled.setDate(scheduled.getDate() + 1);
+    void native.scheduleLocalNotification({
+      id: 7000 + PRAYERS.indexOf(prayer),
+      title: `حان وقت صلاة ${PRAYER_NAMES_AR[prayer]}`,
+      body: 'الصلاة خير من النوم — حافظ على صلاتك',
+      scheduleAt: scheduled.toISOString(),
+      sound: 'adhan.wav',
+    });
+  }
+}
+
 export interface PrayerAlertReturn {
   settings: AzanSettings;
   notificationPermission: PermResult;
@@ -131,6 +156,8 @@ export function usePrayerAlert(): PrayerAlertReturn {
       }
     };
 
+    const timings = getTimings();
+    if (timings) scheduleNativePrayerNotifications(settings, timings);
     check(); // run immediately on mount / settings change
     const interval = setInterval(check, 30_000);
     return () => clearInterval(interval);
