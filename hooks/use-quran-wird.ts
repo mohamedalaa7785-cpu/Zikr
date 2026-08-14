@@ -7,6 +7,7 @@ import {
   fromAbsoluteAyah,
   percentComplete,
 } from '@/lib/utils/quran-progress';
+import { getWirdProgress, saveWirdProgress } from '@/app/wird/actions';
 
 const STORAGE_KEY = 'zikr_quran_wird';
 
@@ -83,22 +84,46 @@ export function useQuranWird(): WirdReturn {
   const [state, setState] = useState<WirdState>(DEFAULT_STATE);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    const s = load();
-    // Roll over the day: if todayDate is stale, reset today's count.
+    useEffect(() => {
+    let cancelled = false;
+    const localState = load();
     const today = todayISO();
-    if (s.todayDate !== today) {
-      s.todayCount = 0;
-      s.todayDate = today;
+    if (localState.todayDate !== today) {
+      localState.todayCount = 0;
+      localState.todayDate = today;
     }
-    setState(s);
-    setLoaded(true);
-  }, []);
+    setState(localState);
 
+    // Local storage remains the offline cache, while the account is the source
+    // of truth whenever the user is signed in.
+    void getWirdProgress().then(({ loggedIn, state: remoteState }) => {
+      if (cancelled) return;
+      if (remoteState) {
+        const merged = { ...DEFAULT_STATE, ...remoteState };
+        if (merged.todayDate !== today) {
+          merged.todayCount = 0;
+          merged.todayDate = today;
+        }
+        save(merged);
+        setState(merged);
+      } else if (loggedIn && localState.position > 0) {
+        void saveWirdProgress(localState);
+      }
+      setLoaded(true);
+    }).catch(() => {
+      if (!cancelled) setLoaded(true);
+    });
+
+    return () => { cancelled = true; };
+  }, []);
+  const syncRemote = useCallback((next: WirdState) => {
+    void saveWirdProgress(next);
+  }, []);
   const persist = useCallback((next: WirdState) => {
     save(next);
     setState(next);
-  }, []);
+    syncRemote(next);
+  }, [syncRemote]);
 
   /** Credit the streak for hitting the daily target today (idempotent per day). */
   const creditStreak = useCallback((s: WirdState): WirdState => {
@@ -146,6 +171,7 @@ export function useQuranWird(): WirdReturn {
       setState((prev) => {
         const next = applyProgress(prev, newAbsolute);
         save(next);
+        syncRemote(next);
         return next;
       });
     },
@@ -158,6 +184,7 @@ export function useQuranWird(): WirdReturn {
         const target = Math.min(prev.position + count, TOTAL_AYAHS);
         const next = applyProgress(prev, target);
         save(next);
+        syncRemote(next);
         return next;
       });
     },

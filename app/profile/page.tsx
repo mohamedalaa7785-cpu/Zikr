@@ -293,7 +293,9 @@ export default async function ProfilePage() {
                   className="flex items-center justify-between rounded-lg bg-black/20 p-3 text-sm"
                 >
                   <span className="text-brand-cream/90">
-                    {scopeLabels[rp.scope] ?? rp.scope} — {rp.ref}
+                    {rp.ref === 'wird'
+                      ? 'الورد اليومي'
+                      : `${scopeLabels[rp.scope] ?? rp.scope} — ${String(rp.progress_json?.surah_name ?? rp.ref).replace('surah:', 'سورة ')}`}
                   </span>
                   <span className="text-xs arabic-muted">{formatDate(rp.updated_at)}</span>
                 </div>
