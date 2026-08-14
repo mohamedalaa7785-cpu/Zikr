@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -12,6 +13,7 @@ export function GoogleOAuthButton({
   next,
   label,
 }: GoogleOAuthButtonProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,9 +29,7 @@ export function GoogleOAuthButton({
 
       // The Route Handler creates the Supabase OAuth URL server-side, avoiding
       // missing/placeholder public keys in the browser.
-      window.location.assign(
-        `/auth/google?next=${encodeURIComponent(safeNext)}`,
-      );
+      router.push(`/auth/google?next=${encodeURIComponent(safeNext)}`);
 
     } catch (err) {
       const message =
