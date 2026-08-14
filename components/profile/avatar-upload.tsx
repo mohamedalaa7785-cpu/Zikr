@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { uploadAvatarAction } from '@/app/profile/avatar-actions';
 
 const ALLOWED_AVATAR_TYPES = new Set([
@@ -17,10 +18,15 @@ interface AvatarUploadProps {
 }
 
 export function AvatarUpload({ currentAvatarUrl, displayName, email }: AvatarUploadProps) {
+  const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(currentAvatarUrl);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setPreview(currentAvatarUrl);
+  }, [currentAvatarUrl]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -36,13 +42,20 @@ export function AvatarUpload({ currentAvatarUrl, displayName, email }: AvatarUpl
     }
 
     setError(null);
-    setPreview(URL.createObjectURL(file));
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
     const formData = new FormData();
     formData.append('avatarFile', file);
-    startTransition(() => {
-      uploadAvatarAction(formData).catch(() => {
+    startTransition(async () => {
+      try {
+        await uploadAvatarAction(formData);
+        router.refresh();
+      } catch {
+        setPreview(currentAvatarUrl);
         setError('فشل رفع الصورة، حاول مرة أخرى');
-      });
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
     });
   }
 

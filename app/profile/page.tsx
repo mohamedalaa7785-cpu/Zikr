@@ -64,13 +64,25 @@ function getUserMetadataValue(metadata: Record<string, unknown>, ...keys: string
   return null;
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string; success?: string }>;
+}) {
+  const params = (await searchParams) ?? {};
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) redirect('/auth/login?next=/profile');
+
+  // Repair older accounts that authenticated successfully but never received a
+  // profiles row, without touching an existing name or avatar.
+  await supabase.from('profiles').upsert(
+    { id: user.id, email: user.email ?? null },
+    { onConflict: 'id', ignoreDuplicates: true }
+  );
 
   const [profileRes, favoritesRes, favCountRes, progressRes, progressCountRes] = await Promise.all([
     supabase
@@ -129,7 +141,17 @@ export default async function ProfilePage() {
   const favTypes = new Set(favList.map((f) => f.item_type));
 
   return (
-    <Container className="py-16 space-y-6">
+    <Container className="space-y-5 py-8 sm:py-12 lg:py-16">
+      {params.success === 'profile_saved' && (
+        <div role="status" className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          تم حفظ بيانات الحساب بنجاح.
+        </div>
+      )}
+      {params.error && (
+        <div role="alert" className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          {params.error}
+        </div>
+      )}
       {/* Header card: identity + account details */}
       <Card className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -155,7 +177,7 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-5">
+        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
           <AvatarUpload
             currentAvatarUrl={avatarUrl}
             displayName={displayName}
@@ -175,7 +197,7 @@ export default async function ProfilePage() {
         </div>
 
         {/* Account details grid */}
-        <div className="grid gap-3 rounded-xl bg-black/15 p-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 rounded-xl bg-black/15 p-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="arabic-muted text-xs">عضو منذ</p>
             <p className="text-brand-cream/90">{formatDate(memberSince)}</p>

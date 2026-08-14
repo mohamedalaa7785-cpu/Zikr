@@ -147,8 +147,6 @@ export async function logoutAction() {
 // ─── Update profile ───────────────────────────────────────────────────────────
 export async function updateProfileAction(formData: FormData) {
   const displayName = String(formData.get('displayName') || '').trim();
-  const avatarUrl = String(formData.get('avatarUrl') || '').trim();
-
   const supabase = await createClient();
   const {
     data: { user },
@@ -156,17 +154,20 @@ export async function updateProfileAction(formData: FormData) {
 
   if (!user) redirect('/auth/login');
 
-  // Only allow http(s) URLs for the avatar to avoid javascript:/data: injection
-  const safeAvatarUrl = /^https?:\/\//i.test(avatarUrl) ? avatarUrl : null;
-
-  await supabase
-    .from('profiles')
-    .upsert({
+  const { error } = await supabase.from('profiles').upsert(
+    {
       id: user.id,
+      email: user.email ?? null,
       display_name: displayName || null,
-      avatar_url: safeAvatarUrl,
       updated_at: new Date().toISOString(),
-    });
+    },
+    { onConflict: 'id' }
+  );
 
-  redirect('/profile');
+  if (error) {
+    console.error('[auth] updateProfileAction error:', error);
+    redirect(`/profile?error=${encodeURIComponent('تعذر حفظ البيانات. حاول مرة أخرى.')}`);
+  }
+
+  redirect('/profile?success=profile_saved');
 }
