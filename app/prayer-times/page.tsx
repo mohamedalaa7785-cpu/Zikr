@@ -152,24 +152,45 @@ export default function PrayerTimesPage() {
   useEffect(() => {
     try {
       const cached = localStorage.getItem('zikr_prayer_location');
-      if (!cached) return;
-      const parsed = JSON.parse(cached) as { lat: number; lon: number; city: string; timings: PrayerTimesResponse['data']['timings']; date: PrayerTimesResponse['data']['date'] };
-      if (!parsed.timings || !parsed.date) return;
-      setPrayerData({
-        code: 200,
-        status: 'OK',
-        data: {
-          timings: parsed.timings,
-          date: parsed.date,
-          meta: { latitude: parsed.lat, longitude: parsed.lon, timezone: '', method: { id: 4, name: 'Cached', params: {} }, latitudeAdjustmentMethod: '', midnightMethod: '', school: '', offset: {} },
-        },
-      });
-      setCurrentLocation({ lat: parsed.lat, lon: parsed.lon, city: parsed.city });
-      setLoading(false);
+      if (cached) {
+        const parsed = JSON.parse(cached) as {
+          lat: number;
+          lon: number;
+          city: string;
+          timings: PrayerTimesResponse['data']['timings'];
+          date: PrayerTimesResponse['data']['date'];
+        };
+        if (parsed.timings && parsed.date) {
+          setPrayerData({
+            code: 200,
+            status: 'OK',
+            data: {
+              timings: parsed.timings,
+              date: parsed.date,
+              meta: {
+                latitude: parsed.lat,
+                longitude: parsed.lon,
+                timezone: '',
+                method: { id: 4, name: 'Cached', params: {} },
+                latitudeAdjustmentMethod: '',
+                midnightMethod: '',
+                school: '',
+                offset: {},
+              },
+            },
+          });
+          setCurrentLocation({ lat: parsed.lat, lon: parsed.lon, city: parsed.city });
+          setLoading(false);
+        }
+      }
     } catch {
       // Ignore malformed or unavailable offline cache.
     }
-    requestLocation();
+
+    // Always fetch after attempting cache restoration. Previously, an empty
+    // cache returned from the effect before this call and left first-time
+    // visitors in the loading state forever.
+    void requestLocation();
   }, [requestLocation]);
 
   const timings = prayerData?.data?.timings;
