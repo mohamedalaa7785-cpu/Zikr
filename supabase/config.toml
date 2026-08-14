@@ -57,3 +57,7 @@ verify_jwt = false
 
 [functions.spiritual-ai]
 verify_jwt = true
+
+[functions.prayer-notification-worker]
+# pg_cron authenticates this worker with a private database-backed bearer token.
+verify_jwt = false

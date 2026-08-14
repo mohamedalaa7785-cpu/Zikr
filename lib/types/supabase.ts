@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      adhkar_completions: {
+        Row: {
+          adhkar_id: string
+          completed_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          adhkar_id: string
+          completed_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          adhkar_id?: string
+          completed_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      adhkar_streaks: {
+        Row: {
+          id: string
+          last_completed_at: string | null
+          streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_completed_at?: string | null
+          streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_completed_at?: string | null
+          streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_history: {
         Row: {
           created_at: string | null
@@ -44,6 +89,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          fontSize: string
+          id: string
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          fontSize?: string
+          id?: string
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          fontSize?: string
+          id?: string
+          theme?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       article_categories: {
         Row: {
           created_at: string | null
@@ -51,7 +120,7 @@ export type Database = {
           description_en: string | null
           icon: string | null
           id: string
-          is_active: boolean | null
+          is_active: boolean
           name_ar: string
           name_en: string
           published: boolean | null
@@ -64,7 +133,7 @@ export type Database = {
           description_en?: string | null
           icon?: string | null
           id?: string
-          is_active?: boolean | null
+          is_active?: boolean
           name_ar: string
           name_en: string
           published?: boolean | null
@@ -77,7 +146,7 @@ export type Database = {
           description_en?: string | null
           icon?: string | null
           id?: string
-          is_active?: boolean | null
+          is_active?: boolean
           name_ar?: string
           name_en?: string
           published?: boolean | null
@@ -94,7 +163,7 @@ export type Database = {
           content_ar: string
           content_en: string | null
           created_at: string | null
-          featured: boolean | null
+          featured: boolean
           featured_image_url: string | null
           id: string
           metadata: Json | null
@@ -118,7 +187,7 @@ export type Database = {
           content_ar: string
           content_en?: string | null
           created_at?: string | null
-          featured?: boolean | null
+          featured?: boolean
           featured_image_url?: string | null
           id?: string
           metadata?: Json | null
@@ -142,7 +211,7 @@ export type Database = {
           content_ar?: string
           content_en?: string | null
           created_at?: string | null
-          featured?: boolean | null
+          featured?: boolean
           featured_image_url?: string | null
           id?: string
           metadata?: Json | null
@@ -221,7 +290,6 @@ export type Database = {
           created_at: string | null
           date_gregorian: string | null
           date_hijri: string | null
-          year_hijri: number | null
           description_ar: string | null
           description_en: string | null
           featured_image_url: string | null
@@ -236,12 +304,12 @@ export type Database = {
           slug: string
           thumbnail_url: string | null
           updated_at: string | null
+          year_hijri: number | null
         }
         Insert: {
           created_at?: string | null
           date_gregorian?: string | null
           date_hijri?: string | null
-          year_hijri?: number | null
           description_ar?: string | null
           description_en?: string | null
           featured_image_url?: string | null
@@ -256,12 +324,12 @@ export type Database = {
           slug: string
           thumbnail_url?: string | null
           updated_at?: string | null
+          year_hijri?: number | null
         }
         Update: {
           created_at?: string | null
           date_gregorian?: string | null
           date_hijri?: string | null
-          year_hijri?: number | null
           description_ar?: string | null
           description_en?: string | null
           featured_image_url?: string | null
@@ -276,6 +344,34 @@ export type Database = {
           slug?: string
           thumbnail_url?: string | null
           updated_at?: string | null
+          year_hijri?: number | null
+        }
+        Relationships: []
+      }
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          item_ref: string
+          item_type: string
+          label: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_ref: string
+          item_type: string
+          label?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_ref?: string
+          item_type?: string
+          label?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -330,12 +426,11 @@ export type Database = {
         Row: {
           bio_ar: string | null
           bio_en: string | null
-          title_ar: string | null
           birth_place_ar: string | null
-          death_place_ar: string | null
-          death_year: string | null
           category: string | null
           created_at: string | null
+          death_place_ar: string | null
+          death_year: string | null
           featured_image_url: string | null
           id: string
           metadata: Json | null
@@ -345,17 +440,17 @@ export type Database = {
           published: boolean | null
           slug: string
           thumbnail_url: string | null
+          title_ar: string | null
           updated_at: string | null
         }
         Insert: {
           bio_ar?: string | null
           bio_en?: string | null
-          title_ar?: string | null
           birth_place_ar?: string | null
-          death_place_ar?: string | null
-          death_year?: string | null
           category?: string | null
           created_at?: string | null
+          death_place_ar?: string | null
+          death_year?: string | null
           featured_image_url?: string | null
           id?: string
           metadata?: Json | null
@@ -365,17 +460,17 @@ export type Database = {
           published?: boolean | null
           slug: string
           thumbnail_url?: string | null
+          title_ar?: string | null
           updated_at?: string | null
         }
         Update: {
           bio_ar?: string | null
           bio_en?: string | null
-          title_ar?: string | null
           birth_place_ar?: string | null
-          death_place_ar?: string | null
-          death_year?: string | null
           category?: string | null
           created_at?: string | null
+          death_place_ar?: string | null
+          death_year?: string | null
           featured_image_url?: string | null
           id?: string
           metadata?: Json | null
@@ -385,6 +480,7 @@ export type Database = {
           published?: boolean | null
           slug?: string
           thumbnail_url?: string | null
+          title_ar?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -585,7 +681,6 @@ export type Database = {
           created_at: string | null
           icon: string | null
           id: string
-          is_active: boolean | null
           name_ar: string
           name_en: string
           published: boolean | null
@@ -596,7 +691,6 @@ export type Database = {
           created_at?: string | null
           icon?: string | null
           id?: string
-          is_active?: boolean | null
           name_ar: string
           name_en: string
           published?: boolean | null
@@ -607,7 +701,6 @@ export type Database = {
           created_at?: string | null
           icon?: string | null
           id?: string
-          is_active?: boolean | null
           name_ar?: string
           name_en?: string
           published?: boolean | null
@@ -627,6 +720,7 @@ export type Database = {
           occasion_ar: string | null
           occasion_en: string | null
           published: boolean | null
+          searchable: unknown
           slug: string
           source_ar: string | null
           source_en: string | null
@@ -646,6 +740,7 @@ export type Database = {
           occasion_ar?: string | null
           occasion_en?: string | null
           published?: boolean | null
+          searchable?: unknown
           slug: string
           source_ar?: string | null
           source_en?: string | null
@@ -665,6 +760,7 @@ export type Database = {
           occasion_ar?: string | null
           occasion_en?: string | null
           published?: boolean | null
+          searchable?: unknown
           slug?: string
           source_ar?: string | null
           source_en?: string | null
@@ -945,6 +1041,7 @@ export type Database = {
           narrator_en: string | null
           published: boolean
           ref: string | null
+          searchable: unknown
           text_ar: string
           text_en: string | null
           updated_at: string
@@ -961,6 +1058,7 @@ export type Database = {
           narrator_en?: string | null
           published?: boolean
           ref?: string | null
+          searchable?: unknown
           text_ar: string
           text_en?: string | null
           updated_at?: string
@@ -977,6 +1075,7 @@ export type Database = {
           narrator_en?: string | null
           published?: boolean
           ref?: string | null
+          searchable?: unknown
           text_ar?: string
           text_en?: string | null
           updated_at?: string
@@ -994,60 +1093,87 @@ export type Database = {
       kids_content: {
         Row: {
           age_group: string
+          age_max: number | null
+          age_min: number | null
           content_ar: string | null
           content_en: string | null
+          content_type: string | null
           created_at: string | null
+          facebook_share_enabled: boolean
+          featured: boolean
           featured_image_url: string | null
           id: string
           is_active: boolean
+          likes: number
           metadata: Json | null
-          published: boolean
+          published: boolean | null
           quiz_data: Json | null
           shares: number
           slug: string
+          summary_ar: string | null
+          summary_en: string | null
           title_ar: string
           title_en: string
           type: string
           updated_at: string
           video_url: string | null
+          youtube_video_id: string | null
         }
         Insert: {
           age_group?: string
+          age_max?: number | null
+          age_min?: number | null
           content_ar?: string | null
           content_en?: string | null
+          content_type?: string | null
           created_at?: string | null
+          facebook_share_enabled?: boolean
+          featured?: boolean
           featured_image_url?: string | null
           id?: string
           is_active?: boolean
+          likes?: number
           metadata?: Json | null
-          published?: boolean
+          published?: boolean | null
           quiz_data?: Json | null
           shares?: number
           slug: string
+          summary_ar?: string | null
+          summary_en?: string | null
           title_ar: string
           title_en: string
           type?: string
           updated_at?: string
           video_url?: string | null
+          youtube_video_id?: string | null
         }
         Update: {
           age_group?: string
+          age_max?: number | null
+          age_min?: number | null
           content_ar?: string | null
           content_en?: string | null
+          content_type?: string | null
           created_at?: string | null
+          facebook_share_enabled?: boolean
+          featured?: boolean
           featured_image_url?: string | null
           id?: string
           is_active?: boolean
+          likes?: number
           metadata?: Json | null
-          published?: boolean
+          published?: boolean | null
           quiz_data?: Json | null
           shares?: number
           slug?: string
+          summary_ar?: string | null
+          summary_en?: string | null
           title_ar?: string
           title_en?: string
           type?: string
           updated_at?: string
           video_url?: string | null
+          youtube_video_id?: string | null
         }
         Relationships: []
       }
@@ -1150,6 +1276,30 @@ export type Database = {
           surah_id?: number
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          emailNotifications: boolean
+          id: string
+          pushNotifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          emailNotifications?: boolean
+          id?: string
+          pushNotifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          emailNotifications?: boolean
+          id?: string
+          pushNotifications?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1313,6 +1463,75 @@ export type Database = {
           },
         ]
       }
+      prayer_notification_deliveries: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          error_message: string | null
+          failed_at: string | null
+          id: string
+          prayer_name: string
+          processed_at: string | null
+          processing_at: string | null
+          push_subscription_id: string
+          retry_after: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          prayer_name: string
+          processed_at?: string | null
+          processing_at?: string | null
+          push_subscription_id: string
+          retry_after?: string | null
+          scheduled_at: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          prayer_name?: string
+          processed_at?: string | null
+          processing_at?: string | null
+          push_subscription_id?: string
+          retry_after?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_notification_deliveries_push_subscription_id_fkey"
+            columns: ["push_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prayer_notification_deliveries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prayer_notifications: {
         Row: {
           created_at: string | null
@@ -1363,6 +1582,9 @@ export type Database = {
           madhab: string | null
           midnight_method: string | null
           notifications_enabled: boolean | null
+          prayer_reminders: Json
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
           updated_at: string | null
           user_id: string
         }
@@ -1377,6 +1599,9 @@ export type Database = {
           madhab?: string | null
           midnight_method?: string | null
           notifications_enabled?: boolean | null
+          prayer_reminders?: Json
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -1391,6 +1616,9 @@ export type Database = {
           madhab?: string | null
           midnight_method?: string | null
           notifications_enabled?: boolean | null
+          prayer_reminders?: Json
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1400,6 +1628,56 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_schedule_cache: {
+        Row: {
+          calculation_method: string
+          created_at: string
+          id: string
+          latitude: number
+          location_id: string
+          longitude: number
+          madhab: string
+          prayer_date: string
+          timezone: string
+          timings: Json
+          updated_at: string
+        }
+        Insert: {
+          calculation_method: string
+          created_at?: string
+          id?: string
+          latitude: number
+          location_id: string
+          longitude: number
+          madhab: string
+          prayer_date: string
+          timezone: string
+          timings: Json
+          updated_at?: string
+        }
+        Update: {
+          calculation_method?: string
+          created_at?: string
+          id?: string
+          latitude?: number
+          location_id?: string
+          longitude?: number
+          madhab?: string
+          prayer_date?: string
+          timezone?: string
+          timings?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_schedule_cache_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "prayer_locations"
             referencedColumns: ["id"]
           },
         ]
@@ -1436,7 +1714,9 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
+          last_login_at: string | null
           locale: string
           role: Database["public"]["Enums"]["role"]
           updated_at: string
@@ -1445,7 +1725,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id: string
+          last_login_at?: string | null
           locale?: string
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string
@@ -1454,10 +1736,36 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
+          last_login_at?: string | null
           locale?: string
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      prophet_notes: {
+        Row: {
+          id: string
+          note: string
+          prophet_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          note: string
+          prophet_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          note?: string
+          prophet_id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1562,6 +1870,80 @@ export type Database = {
         }
         Relationships: []
       }
+      push_runtime_settings: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          device_id: string | null
+          endpoint: string
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          p256dh: string
+          platform: string | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          device_id?: string | null
+          endpoint: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          p256dh: string
+          platform?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          device_id?: string | null
+          endpoint?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          p256dh?: string
+          platform?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quran_audio: {
         Row: {
           audio_url: string
@@ -1665,6 +2047,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      quran_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          surah_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          surah_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          surah_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      quran_reads: {
+        Row: {
+          ayah_number: number
+          id: string
+          read_at: string
+          surah_id: number
+          user_id: string
+        }
+        Insert: {
+          ayah_number: number
+          id?: string
+          read_at?: string
+          surah_id: number
+          user_id: string
+        }
+        Update: {
+          ayah_number?: number
+          id?: string
+          read_at?: string
+          surah_id?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       quran_reciters: {
         Row: {
@@ -1779,26 +2206,38 @@ export type Database = {
       }
       reading_progress: {
         Row: {
+          content_id: string
+          content_type: string
           id: string
+          metadata: Json | null
+          position: number | null
           progress_json: Json
-          ref: string
-          scope: Database["public"]["Enums"]["progress_scope"]
+          ref: string | null
+          scope: Database["public"]["Enums"]["progress_scope"] | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          content_id: string
+          content_type: string
           id?: string
+          metadata?: Json | null
+          position?: number | null
           progress_json?: Json
-          ref: string
-          scope: Database["public"]["Enums"]["progress_scope"]
+          ref?: string | null
+          scope?: Database["public"]["Enums"]["progress_scope"] | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          content_id?: string
+          content_type?: string
           id?: string
+          metadata?: Json | null
+          position?: number | null
           progress_json?: Json
-          ref?: string
-          scope?: Database["public"]["Enums"]["progress_scope"]
+          ref?: string | null
+          scope?: Database["public"]["Enums"]["progress_scope"] | null
           updated_at?: string
           user_id?: string
         }
@@ -1921,6 +2360,71 @@ export type Database = {
           },
         ]
       }
+      render_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          external_job_id: string | null
+          id: string
+          input_data: Json | null
+          job_type: string
+          max_retries: number | null
+          output_data: Json | null
+          priority: number | null
+          provider: string | null
+          retry_count: number | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          video_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          external_job_id?: string | null
+          id?: string
+          input_data?: Json | null
+          job_type?: string
+          max_retries?: number | null
+          output_data?: Json | null
+          priority?: number | null
+          provider?: string | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          video_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          external_job_id?: string | null
+          id?: string
+          input_data?: Json | null
+          job_type?: string
+          max_retries?: number | null
+          output_data?: Json | null
+          priority?: number | null
+          provider?: string | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_jobs_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       research_requests: {
         Row: {
           created_at: string
@@ -1999,6 +2503,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "saved_stories_user_id_profiles_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       scholars: {
@@ -2049,6 +2560,27 @@ export type Database = {
         }
         Relationships: []
       }
+      search_history: {
+        Row: {
+          id: string
+          query: string
+          searched_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          query: string
+          searched_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          query?: string
+          searched_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           created_at: string
@@ -2073,288 +2605,6 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
-        }
-        Relationships: []
-      }
-      stories: {
-        Row: {
-          category: Database["public"]["Enums"]["category"]
-          content: string
-          created_at: string
-          id: string
-          metadata: Json | null
-          mood: string | null
-          published: boolean | null
-          slug: string
-          summary: string | null
-          title: string
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          category?: Database["public"]["Enums"]["category"]
-          content: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          mood?: string | null
-          published?: boolean | null
-          slug: string
-          summary?: string | null
-          title: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          category?: Database["public"]["Enums"]["category"]
-          content?: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          mood?: string | null
-          published?: boolean | null
-          slug?: string
-          summary?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "stories_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      story_progress: {
-        Row: {
-          completed: boolean
-          id: string
-          progress: number
-          story_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completed?: boolean
-          id?: string
-          progress?: number
-          story_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completed?: boolean
-          id?: string
-          progress?: number
-          story_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "story_progress_story_id_fkey"
-            columns: ["story_id"]
-            isOneToOne: false
-            referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "story_progress_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      subscriptions: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          language: string
-          subscribed_at: string
-          unsubscribed_at: string | null
-          updated_at: string
-          verificationtoken: string | null
-          verified: boolean
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          language?: string
-          subscribed_at?: string
-          unsubscribed_at?: string | null
-          updated_at?: string
-          verificationtoken?: string | null
-          verified?: boolean
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          language?: string
-          subscribed_at?: string
-          unsubscribed_at?: string | null
-          updated_at?: string
-          verificationtoken?: string | null
-          verified?: boolean
-        }
-        Relationships: []
-      }
-      tasks: {
-        Row: {
-          created_at: string
-          id: string
-          input: string
-          result: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          input: string
-          result: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          input?: string
-          result?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tasks_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tawasheeh: {
-        Row: {
-          artist_ar: string | null
-          artist_en: string | null
-          audio_url: string | null
-          category_id: string | null
-          created_at: string | null
-          description_ar: string | null
-          description_en: string | null
-          duration: number | null
-          featured: boolean | null
-          id: string
-          is_active: boolean | null
-          metadata: Json | null
-          published: boolean | null
-          slug: string
-          thumbnail_url: string | null
-          title_ar: string
-          title_en: string
-          updated_at: string | null
-          views: number | null
-        }
-        Insert: {
-          artist_ar?: string | null
-          artist_en?: string | null
-          audio_url?: string | null
-          category_id?: string | null
-          created_at?: string | null
-          description_ar?: string | null
-          description_en?: string | null
-          duration?: number | null
-          featured?: boolean | null
-          id?: string
-          is_active?: boolean | null
-          metadata?: Json | null
-          published?: boolean | null
-          slug: string
-          thumbnail_url?: string | null
-          title_ar: string
-          title_en: string
-          updated_at?: string | null
-          views?: number | null
-        }
-        Update: {
-          artist_ar?: string | null
-          artist_en?: string | null
-          audio_url?: string | null
-          category_id?: string | null
-          created_at?: string | null
-          description_ar?: string | null
-          description_en?: string | null
-          duration?: number | null
-          featured?: boolean | null
-          id?: string
-          is_active?: boolean | null
-          metadata?: Json | null
-          published?: boolean | null
-          slug?: string
-          thumbnail_url?: string | null
-          title_ar?: string
-          title_en?: string
-          updated_at?: string | null
-          views?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tawasheeh_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "tawasheeh_categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tawasheeh_categories: {
-        Row: {
-          created_at: string | null
-          description_ar: string | null
-          description_en: string | null
-          icon: string | null
-          id: string
-          is_active: boolean | null
-          name_ar: string
-          name_en: string
-          order_num: number | null
-          published: boolean | null
-          slug: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description_ar?: string | null
-          description_en?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          name_ar: string
-          name_en: string
-          order_num?: number | null
-          published?: boolean | null
-          slug: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description_ar?: string | null
-          description_en?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          name_ar?: string
-          name_en?: string
-          order_num?: number | null
-          published?: boolean | null
-          slug?: string
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -2409,6 +2659,429 @@ export type Database = {
           title?: string
           updated_at?: string
           video_url?: string | null
+        }
+        Relationships: []
+      }
+      social_shares: {
+        Row: {
+          content_id: string
+          content_type: string
+          id: string
+          platform: string | null
+          shared_at: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          id?: string
+          platform?: string | null
+          shared_at?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          id?: string
+          platform?: string | null
+          shared_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stories: {
+        Row: {
+          category: Database["public"]["Enums"]["category"]
+          content: string
+          created_at: string
+          id: string
+          is_approved: boolean
+          metadata: Json | null
+          mood: string | null
+          published: boolean | null
+          slug: string
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["category"]
+          content: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          metadata?: Json | null
+          mood?: string | null
+          published?: boolean | null
+          slug: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["category"]
+          content?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          metadata?: Json | null
+          mood?: string | null
+          published?: boolean | null
+          slug?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stories_user_id_profiles_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_favorites_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_progress: {
+        Row: {
+          completed: boolean
+          id: string
+          progress: number
+          story_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          id?: string
+          progress?: number
+          story_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          id?: string
+          progress?: number
+          story_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_progress_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_progress_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_progress_user_id_profiles_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_ratings: {
+        Row: {
+          comment: string | null
+          id: string
+          rating: number
+          story_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          id?: string
+          rating: number
+          story_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          id?: string
+          rating?: number
+          story_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_ratings_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_reads: {
+        Row: {
+          id: string
+          read_at: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          read_at?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          read_at?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_reads_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          language: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          updated_at: string
+          verification_token: string | null
+          verificationtoken: string | null
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          language?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          verification_token?: string | null
+          verificationtoken?: string | null
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          language?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          verification_token?: string | null
+          verificationtoken?: string | null
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          id: string
+          input: string
+          result: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input: string
+          result: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input?: string
+          result?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tawasheeh: {
+        Row: {
+          artist_ar: string | null
+          artist_en: string | null
+          audio_url: string | null
+          category_id: string | null
+          created_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          duration: number | null
+          featured: boolean | null
+          id: string
+          metadata: Json | null
+          published: boolean | null
+          slug: string
+          thumbnail_url: string | null
+          title_ar: string
+          title_en: string
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          artist_ar?: string | null
+          artist_en?: string | null
+          audio_url?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration?: number | null
+          featured?: boolean | null
+          id?: string
+          metadata?: Json | null
+          published?: boolean | null
+          slug: string
+          thumbnail_url?: string | null
+          title_ar: string
+          title_en: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          artist_ar?: string | null
+          artist_en?: string | null
+          audio_url?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration?: number | null
+          featured?: boolean | null
+          id?: string
+          metadata?: Json | null
+          published?: boolean | null
+          slug?: string
+          thumbnail_url?: string | null
+          title_ar?: string
+          title_en?: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tawasheeh_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "tawasheeh_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tawasheeh_categories: {
+        Row: {
+          created_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          icon: string | null
+          id: string
+          name_ar: string
+          name_en: string
+          order_num: number | null
+          published: boolean | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          name_ar: string
+          name_en: string
+          order_num?: number | null
+          published?: boolean | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          icon?: string | null
+          id?: string
+          name_ar?: string
+          name_en?: string
+          order_num?: number | null
+          published?: boolean | null
+          slug?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -2646,7 +3319,7 @@ export type Database = {
           description_en: string | null
           icon: string | null
           id: string
-          is_active: boolean | null
+          is_active: boolean
           name_ar: string
           name_en: string
           published: boolean | null
@@ -2659,7 +3332,7 @@ export type Database = {
           description_en?: string | null
           icon?: string | null
           id?: string
-          is_active?: boolean | null
+          is_active?: boolean
           name_ar: string
           name_en: string
           published?: boolean | null
@@ -2672,7 +3345,7 @@ export type Database = {
           description_en?: string | null
           icon?: string | null
           id?: string
-          is_active?: boolean | null
+          is_active?: boolean
           name_ar?: string
           name_en?: string
           published?: boolean | null
@@ -2691,6 +3364,10 @@ export type Database = {
           error_details: string | null
           error_message: string | null
           facebook_id: string | null
+          heygen_last_polled_at: string | null
+          heygen_status: string | null
+          heygen_submitted_at: string | null
+          heygen_video_id: string | null
           id: string
           status: string
           thumbnail_url: string | null
@@ -2708,6 +3385,10 @@ export type Database = {
           error_details?: string | null
           error_message?: string | null
           facebook_id?: string | null
+          heygen_last_polled_at?: string | null
+          heygen_status?: string | null
+          heygen_submitted_at?: string | null
+          heygen_video_id?: string | null
           id?: string
           status?: string
           thumbnail_url?: string | null
@@ -2725,6 +3406,10 @@ export type Database = {
           error_details?: string | null
           error_message?: string | null
           facebook_id?: string | null
+          heygen_last_polled_at?: string | null
+          heygen_status?: string | null
+          heygen_submitted_at?: string | null
+          heygen_video_id?: string | null
           id?: string
           status?: string
           thumbnail_url?: string | null
@@ -2738,37 +3423,46 @@ export type Database = {
       video_publish_log: {
         Row: {
           created_at: string
-          facebook_id: string | null
+          error_message: string | null
           id: string
-          published_at: string
+          platform: string
+          platform_id: string | null
+          platform_url: string | null
+          published_at: string | null
+          response_data: Json | null
           status: string
           video_id: string | null
-          youtube_id: string | null
         }
         Insert: {
           created_at?: string
-          facebook_id?: string | null
+          error_message?: string | null
           id?: string
-          published_at?: string
+          platform: string
+          platform_id?: string | null
+          platform_url?: string | null
+          published_at?: string | null
+          response_data?: Json | null
           status?: string
           video_id?: string | null
-          youtube_id?: string | null
         }
         Update: {
           created_at?: string
-          facebook_id?: string | null
+          error_message?: string | null
           id?: string
-          published_at?: string
+          platform?: string
+          platform_id?: string | null
+          platform_url?: string | null
+          published_at?: string | null
+          response_data?: Json | null
           status?: string
           video_id?: string | null
-          youtube_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "video_publish_log_video_id_fkey"
             columns: ["video_id"]
             isOneToOne: false
-            referencedRelation: "video_generation_requests"
+            referencedRelation: "videos"
             referencedColumns: ["id"]
           },
         ]
@@ -2812,45 +3506,87 @@ export type Database = {
       videos: {
         Row: {
           category_id: string | null
+          content_ref: string | null
+          content_source: string | null
           created_at: string | null
           description: string | null
           duration: number | null
+          facebook_id: string | null
+          facebook_url: string | null
           id: string
+          language: string | null
+          metadata: Json | null
           published: boolean | null
+          published_at: string | null
+          render_completed_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_started_at: string | null
+          render_status: string | null
           slug: string
+          tags: string[] | null
           thumbnail_url: string | null
           title: string
           updated_at: string | null
           views: number | null
           youtube_id: string | null
+          youtube_url: string | null
         }
         Insert: {
           category_id?: string | null
+          content_ref?: string | null
+          content_source?: string | null
           created_at?: string | null
           description?: string | null
           duration?: number | null
+          facebook_id?: string | null
+          facebook_url?: string | null
           id?: string
+          language?: string | null
+          metadata?: Json | null
           published?: boolean | null
+          published_at?: string | null
+          render_completed_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_started_at?: string | null
+          render_status?: string | null
           slug: string
+          tags?: string[] | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string | null
           views?: number | null
           youtube_id?: string | null
+          youtube_url?: string | null
         }
         Update: {
           category_id?: string | null
+          content_ref?: string | null
+          content_source?: string | null
           created_at?: string | null
           description?: string | null
           duration?: number | null
+          facebook_id?: string | null
+          facebook_url?: string | null
           id?: string
+          language?: string | null
+          metadata?: Json | null
           published?: boolean | null
+          published_at?: string | null
+          render_completed_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_started_at?: string | null
+          render_status?: string | null
           slug?: string
+          tags?: string[] | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string | null
           views?: number | null
           youtube_id?: string | null
+          youtube_url?: string | null
         }
         Relationships: [
           {
@@ -2862,381 +3598,33 @@ export type Database = {
           },
         ]
       }
-      adhkar_completions: {
-        Row: {
-          adhkar_id: string
-          completed_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          adhkar_id: string
-          completed_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          adhkar_id?: string
-          completed_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      adhkar_streaks: {
-        Row: {
-          id: string
-          last_completed_at: string | null
-          streak: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          last_completed_at?: string | null
-          streak?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          last_completed_at?: string | null
-          streak?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      app_settings: {
-        Row: {
-          font_size: string
-          id: string
-          theme: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          font_size?: string
-          id?: string
-          theme?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          font_size?: string
-          id?: string
-          theme?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      bookmarks: {
-        Row: {
-          created_at: string
-          id: string
-          item_ref: string
-          item_type: string
-          label: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          item_ref: string
-          item_type: string
-          label?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          item_ref?: string
-          item_type?: string
-          label?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      notification_settings: {
-        Row: {
-          emailnotifications: boolean
-          id: string
-          pushnotifications: boolean
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          emailnotifications?: boolean
-          id?: string
-          pushnotifications?: boolean
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          emailnotifications?: boolean
-          id?: string
-          pushnotifications?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      prophet_notes: {
-        Row: {
-          id: string
-          note: string
-          prophet_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          note: string
-          prophet_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          note?: string
-          prophet_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      quran_favorites: {
-        Row: {
-          created_at: string
-          id: string
-          surah_id: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          surah_id: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          surah_id?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      quran_reads: {
-        Row: {
-          ayah_number: number
-          id: string
-          read_at: string
-          surah_id: number
-          user_id: string
-        }
-        Insert: {
-          ayah_number: number
-          id?: string
-          read_at?: string
-          surah_id: number
-          user_id: string
-        }
-        Update: {
-          ayah_number?: number
-          id?: string
-          read_at?: string
-          surah_id?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      search_history: {
-        Row: {
-          id: string
-          query: string
-          searched_at: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          query: string
-          searched_at?: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          query?: string
-          searched_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      social_shares: {
-        Row: {
-          content_id: string
-          content_type: string
-          id: string
-          platform: string | null
-          shared_at: string
-          user_id: string
-        }
-        Insert: {
-          content_id: string
-          content_type: string
-          id?: string
-          platform?: string | null
-          shared_at?: string
-          user_id: string
-        }
-        Update: {
-          content_id?: string
-          content_type?: string
-          id?: string
-          platform?: string | null
-          shared_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      story_favorites: {
-        Row: {
-          created_at: string
-          id: string
-          story_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          story_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          story_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "story_favorites_story_id_stories_id_fk"
-            columns: ["story_id"]
-            isOneToOne: false
-            referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      story_ratings: {
-        Row: {
-          comment: string | null
-          id: string
-          rating: number
-          story_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          comment?: string | null
-          id?: string
-          rating: number
-          story_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          comment?: string | null
-          id?: string
-          rating?: number
-          story_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "story_ratings_story_id_stories_id_fk"
-            columns: ["story_id"]
-            isOneToOne: false
-            referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      story_reads: {
-        Row: {
-          id: string
-          read_at: string
-          story_id: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          read_at?: string
-          story_id: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          read_at?: string
-          story_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "story_reads_story_id_stories_id_fk"
-            columns: ["story_id"]
-            isOneToOne: false
-            referencedRelation: "stories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      users: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: string
-          last_signed_in: string
-          login_method: string | null
-          name: string | null
-          open_id: string | null
-          role: Database["public"]["Enums"]["role"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          last_signed_in?: string
-          login_method?: string | null
-          name?: string | null
-          open_id?: string | null
-          role?: Database["public"]["Enums"]["role"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          last_signed_in?: string
-          login_method?: string | null
-          name?: string | null
-          open_id?: string | null
-          role?: Database["public"]["Enums"]["role"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      ensure_push_vapid_bundle: { Args: { candidate: Json }; Returns: Json }
+      get_push_scheduler_secret: { Args: never; Returns: string }
+      get_push_vapid_bundle: { Args: never; Returns: Json }
+      get_push_vapid_public_key: { Args: never; Returns: string }
+      increment_kids_content_shares: {
+        Args: { p_slug: string }
+        Returns: {
+          shares: number
+          slug: string
+        }[]
+      }
+      is_admin_user: { Args: never; Returns: boolean }
     }
     Enums: {
-      category: "dark" | "romantic" | "psychological" | "prophets" | "sahaba" | "documentaries" | "history"
+      category:
+        | "dark"
+        | "romantic"
+        | "psychological"
+        | "prophets"
+        | "sahaba"
+        | "documentaries"
+        | "history"
       favorite_item_type: "quran" | "hadith" | "story" | "scholar" | "dua"
       payment_status: "pending" | "approved" | "rejected"
       plan: "free" | "pro" | "premium"
@@ -3371,7 +3759,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      category: ["dark", "romantic", "psychological", "prophets", "sahaba", "documentaries", "history"],
+      category: [
+        "dark",
+        "romantic",
+        "psychological",
+        "prophets",
+        "sahaba",
+        "documentaries",
+        "history",
+      ],
       favorite_item_type: ["quran", "hadith", "story", "scholar", "dua"],
       payment_status: ["pending", "approved", "rejected"],
       plan: ["free", "pro", "premium"],

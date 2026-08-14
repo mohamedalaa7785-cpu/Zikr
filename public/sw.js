@@ -211,35 +211,48 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Handle push events (from server push, if configured later)
+// Handle encrypted Web Push payloads from the trusted notification worker.
 self.addEventListener('push', (event) => {
-  let data = { title: 'تذكير ذِكر', body: 'افتح التطبيق للاطلاع على الإشعار' };
+  let data = {
+    title: 'تذكير ذِكر',
+    body: 'افتح التطبيق للاطلاع على الإشعار',
+    url: '/',
+    tag: 'zikr-reminder',
+  };
   try {
-    if (event.data) {
-      data = event.data.json();
-    }
-  } catch { /* ignore */ }
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {
+    // A malformed payload must not prevent the browser from showing a safe fallback.
+  }
 
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: '/icons/icon-192.svg',
       badge: '/icons/icon-192.svg',
+      tag: data.tag,
+      data: { url: typeof data.url === 'string' && data.url.startsWith('/') ? data.url : '/' },
+      renotify: false,
       dir: 'rtl',
       lang: 'ar',
     })
   );
 });
 
-// Notification click — bring app to focus
+// Notification click — focus an existing ZIKR tab or open the notification target.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const target = event.notification.data?.url || '/';
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url && 'focus' in client) return client.focus();
+        const url = new URL(client.url);
+        if (url.origin === self.location.origin && 'focus' in client) {
+          if (url.pathname === target) return client.focus();
+          return client.navigate(target).then((navigated) => navigated?.focus());
+        }
       }
-      if (clients.openWindow) return clients.openWindow('/');
+      if (clients.openWindow) return clients.openWindow(target);
     })
   );
 });

@@ -1,12 +1,20 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Container } from '@/components/ui/container';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { usePrayerAlert, PRAYERS, PRAYER_NAMES_AR, type PrayerKey } from '@/hooks/use-prayer-alert';
-import { useSalawatReminder, type SalawatInterval } from '@/hooks/use-salawat-reminder';
-import { isAudioUnlocked } from '@/lib/audio/spiritual-tones';
+import { useEffect, useState } from "react";
+import { Container } from "@/components/ui/container";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  usePrayerAlert,
+  PRAYERS,
+  PRAYER_NAMES_AR,
+  type PrayerKey,
+} from "@/hooks/use-prayer-alert";
+import {
+  useSalawatReminder,
+  type SalawatInterval,
+} from "@/hooks/use-salawat-reminder";
+import { isAudioUnlocked } from "@/lib/audio/spiritual-tones";
 
 function Toggle({
   checked,
@@ -27,13 +35,13 @@ function Toggle({
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold ${
           checked
-            ? 'border-brand-gold bg-brand-gold/20'
-            : 'border-brand-cream/20 bg-transparent'
+            ? "border-brand-gold bg-brand-gold/20"
+            : "border-brand-cream/20 bg-transparent"
         }`}
       >
         <span
           className={`inline-block h-4 w-4 rounded-full bg-brand-gold transition-transform ${
-            checked ? 'translate-x-[1.375rem]' : 'translate-x-0.5'
+            checked ? "translate-x-[1.375rem]" : "translate-x-0.5"
           }`}
         />
       </button>
@@ -68,10 +76,10 @@ function SectionCard({
 }
 
 const INTERVAL_OPTIONS: { value: SalawatInterval; label: string }[] = [
-  { value: 15, label: 'كل 15 دقيقة' },
-  { value: 30, label: 'كل 30 دقيقة' },
-  { value: 60, label: 'كل ساعة' },
-  { value: 0, label: 'معطل' },
+  { value: 15, label: "كل 15 دقيقة" },
+  { value: 30, label: "كل 30 دقيقة" },
+  { value: 60, label: "كل ساعة" },
+  { value: 0, label: "معطل" },
 ];
 
 export default function SettingsPage() {
@@ -81,6 +89,7 @@ export default function SettingsPage() {
     togglePrayer,
     unlockAudio,
     requestPermission,
+    enableServerPush,
     testAzan,
   } = usePrayerAlert();
 
@@ -94,17 +103,18 @@ export default function SettingsPage() {
 
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [pushMessage, setPushMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setAudioUnlocked(isAudioUnlocked());
     setIsOnline(navigator.onLine);
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -113,54 +123,74 @@ export default function SettingsPage() {
     setAudioUnlocked(isAudioUnlocked());
   };
 
+  const handleEnableServerPush = async () => {
+    setPushMessage(null);
+    try {
+      const result = await enableServerPush();
+      if (result.status === "registered") {
+        setPushMessage("تم تفعيل تنبيهات الصلاة في الخلفية لهذا الجهاز.");
+      } else if (result.status === "unsupported") {
+        setPushMessage("هذا المتصفح لا يدعم إشعارات الدفع الآمنة.");
+      } else {
+        setPushMessage("يتم تجهيز خدمة الإشعارات. أعد المحاولة بعد دقيقة.");
+      }
+    } catch (error) {
+      setPushMessage(
+        error instanceof Error ? error.message : "تعذر تفعيل إشعارات الخلفية."
+      );
+    }
+  };
+
   const handleSkipWaiting = () => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then((reg) => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
         if (reg?.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          reg.waiting.postMessage({ type: "SKIP_WAITING" });
         }
       });
     }
   };
 
   const permLabel =
-    notificationPermission === 'granted'
-      ? 'مفعّلة'
-      : notificationPermission === 'denied'
-      ? 'محظورة (غيّر الإعداد يدويًا من متصفحك)'
-      : notificationPermission === 'unsupported'
-      ? 'غير مدعومة في هذا المتصفح'
-      : 'غير مفعّلة';
+    notificationPermission === "granted"
+      ? "مفعّلة"
+      : notificationPermission === "denied"
+        ? "محظورة (غيّر الإعداد يدويًا من متصفحك)"
+        : notificationPermission === "unsupported"
+          ? "غير مدعومة في هذا المتصفح"
+          : "غير مفعّلة";
 
   return (
     <Container className="py-12 space-y-8 max-w-2xl" dir="rtl">
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-4xl font-bold text-brand-gold">الإعدادات</h1>
-        <p className="text-brand-cream/60">تحكّم في التنبيهات والأصوات وتجربة التطبيق</p>
+        <p className="text-brand-cream/60">
+          تحكّم في التنبيهات والأصوات وتجربة التطبيق
+        </p>
       </div>
 
       {/* Section 1 — Azan */}
       <SectionCard
         title="الأذان وتنبيهات الصلاة"
-        description="فعّل أذان الصلاة عند دخول الوقت. يعمل فقط عندما التطبيق مفتوح في المتصفح."
+        description="يمكنك تفعيل الأذان المحلي أثناء فتح التطبيق، وتنبيهات دفع آمنة تعمل حتى بعد إغلاق الصفحة عند تسجيل الدخول."
       >
         {/* Audio unlock */}
         <div className="flex items-center justify-between gap-4 rounded-lg border border-brand-gold/20 bg-brand-gold/5 px-4 py-3">
           <div>
             <p className="text-sm font-semibold text-brand-cream">
-              {audioUnlocked ? 'الصوت مفعّل' : 'تفعيل الصوت'}
+              {audioUnlocked ? "الصوت مفعّل" : "تفعيل الصوت"}
             </p>
             <p className="text-xs text-brand-cream/50">
               المتصفح يحتاج إذنًا صريحًا لتشغيل الصوت
             </p>
           </div>
           <Button
-            variant={audioUnlocked ? 'ghost' : 'primary'}
+            variant={audioUnlocked ? "ghost" : "primary"}
             onClick={handleUnlockAudio}
             className="text-sm"
           >
-            {audioUnlocked ? 'تم التفعيل' : 'تفعيل الصوت'}
+            {audioUnlocked ? "تم التفعيل" : "تفعيل الصوت"}
           </Button>
         </div>
 
@@ -180,28 +210,67 @@ export default function SettingsPage() {
         </div>
 
         {/* Test button */}
-        <Button variant="secondary" onClick={testAzan} className="w-full text-sm">
+        <Button
+          variant="secondary"
+          onClick={testAzan}
+          className="w-full text-sm"
+        >
           اختبار صوت الأذان
         </Button>
 
         {/* Notification permission */}
         <div className="flex items-center justify-between gap-4 rounded-lg border border-brand-cream/10 px-4 py-3">
           <div>
-            <p className="text-sm font-semibold text-brand-cream">إشعارات المتصفح</p>
+            <p className="text-sm font-semibold text-brand-cream">
+              إشعارات المتصفح
+            </p>
             <p className="text-xs text-brand-cream/50">{permLabel}</p>
           </div>
-          {notificationPermission === 'default' && (
-            <Button variant="secondary" onClick={requestPermission} className="text-sm">
+          {notificationPermission === "default" && (
+            <Button
+              variant="secondary"
+              onClick={requestPermission}
+              className="text-sm"
+            >
               طلب الإذن
             </Button>
           )}
         </div>
+
+        {notificationPermission !== "denied" &&
+          notificationPermission !== "unsupported" && (
+            <div className="rounded-lg border border-brand-gold/20 bg-brand-gold/5 px-4 py-3">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-brand-cream">
+                    تنبيهات الصلاة في الخلفية
+                  </p>
+                  <p className="text-xs text-brand-cream/50">
+                    تتطلب تسجيل الدخول، وتبقى فعّالة عند إغلاق الصفحة على
+                    الأجهزة المدعومة.
+                  </p>
+                </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => void handleEnableServerPush()}
+                  className="text-sm"
+                >
+                  تفعيل
+                </Button>
+              </div>
+              {pushMessage && (
+                <p className="mt-2 text-xs text-brand-cream/70">
+                  {pushMessage}
+                </p>
+              )}
+            </div>
+          )}
       </SectionCard>
 
       {/* Section 2 — Salawat reminder */}
       <SectionCard
         title="تذكير الصلاة على النبي"
-        description='تذكير دوري قابل للتخصيص. معطّل افتراضيًا — فعّله بنفسك للتحكم الكامل.'
+        description="تذكير دوري قابل للتخصيص. معطّل افتراضيًا — فعّله بنفسك للتحكم الكامل."
       >
         <Toggle
           label="تفعيل التذكير"
@@ -216,14 +285,14 @@ export default function SettingsPage() {
                 الفترة بين التذكيرات
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {INTERVAL_OPTIONS.map((opt) => (
+                {INTERVAL_OPTIONS.map(opt => (
                   <button
                     key={opt.value}
                     onClick={() => setIntervalMinutes(opt.value)}
                     className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
                       salawatSettings.intervalMinutes === opt.value
-                        ? 'border-brand-gold bg-brand-gold/15 text-brand-gold'
-                        : 'border-brand-cream/15 text-brand-cream/60 hover:border-brand-gold/40'
+                        ? "border-brand-gold bg-brand-gold/15 text-brand-gold"
+                        : "border-brand-cream/15 text-brand-cream/60 hover:border-brand-gold/40"
                     }`}
                   >
                     {opt.label}
@@ -232,7 +301,11 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <Button variant="secondary" onClick={testReminder} className="w-full text-sm">
+            <Button
+              variant="secondary"
+              onClick={testReminder}
+              className="w-full text-sm"
+            >
               اختبار التذكير الآن
             </Button>
           </>
@@ -247,20 +320,23 @@ export default function SettingsPage() {
         <Toggle
           label="تفعيل أوقات الهدوء"
           checked={salawatSettings.quietHours.enabled}
-          onChange={(v) => setQuietHours({ enabled: v })}
+          onChange={v => setQuietHours({ enabled: v })}
         />
 
         {salawatSettings.quietHours.enabled && (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs text-brand-cream/50" htmlFor="quiet-from">
+              <label
+                className="text-xs text-brand-cream/50"
+                htmlFor="quiet-from"
+              >
                 من
               </label>
               <input
                 id="quiet-from"
                 type="time"
                 value={salawatSettings.quietHours.from}
-                onChange={(e) => setQuietHours({ from: e.target.value })}
+                onChange={e => setQuietHours({ from: e.target.value })}
                 className="w-full rounded-lg border border-brand-cream/15 bg-black/30 px-3 py-2 text-brand-cream focus:border-brand-gold focus:outline-none"
                 dir="ltr"
               />
@@ -273,7 +349,7 @@ export default function SettingsPage() {
                 id="quiet-to"
                 type="time"
                 value={salawatSettings.quietHours.to}
-                onChange={(e) => setQuietHours({ to: e.target.value })}
+                onChange={e => setQuietHours({ to: e.target.value })}
                 className="w-full rounded-lg border border-brand-cream/15 bg-black/30 px-3 py-2 text-brand-cream focus:border-brand-gold focus:outline-none"
                 dir="ltr"
               />
@@ -289,16 +365,17 @@ export default function SettingsPage() {
       >
         <div className="flex items-center gap-3">
           <span
-            className={`inline-block h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}
+            className={`inline-block h-2.5 w-2.5 rounded-full ${isOnline ? "bg-green-500" : "bg-red-500"}`}
           />
           <span className="text-sm text-brand-cream/80">
-            {isOnline ? 'متصل بالإنترنت' : 'غير متصل — يعمل أوفلاين'}
+            {isOnline ? "متصل بالإنترنت" : "غير متصل — يعمل أوفلاين"}
           </span>
         </div>
 
         <p className="text-xs text-brand-cream/40">
-          الصفحات الرئيسية (القرآن، الأذكار، الصلاة، الأدعية، التسبيح، الورد، الزكاة) تُحفظ تلقائيًا عند
-          زيارتها لتعمل بدون إنترنت. ثبّت التطبيق على شاشتك الرئيسية لتجربة أقرب لتطبيقات الموبايل.
+          الصفحات الرئيسية (القرآن، الأذكار، الصلاة، الأدعية، التسبيح، الورد،
+          الزكاة) تُحفظ تلقائيًا عند زيارتها لتعمل بدون إنترنت. ثبّت التطبيق على
+          شاشتك الرئيسية لتجربة أقرب لتطبيقات الموبايل.
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -310,7 +387,11 @@ export default function SettingsPage() {
           </Button>
         </div>
 
-        <Button variant="secondary" onClick={handleSkipWaiting} className="w-full text-sm">
+        <Button
+          variant="secondary"
+          onClick={handleSkipWaiting}
+          className="w-full text-sm"
+        >
           تحديث البيانات المخزنة
         </Button>
       </SectionCard>

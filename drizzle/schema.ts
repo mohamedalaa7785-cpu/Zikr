@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   integer,
   jsonb,
   numeric,
@@ -7,6 +8,7 @@ import {
   pgEnum,
   pgTable,
   text,
+  time,
   timestamp,
   unique,
   uniqueIndex,
@@ -1001,6 +1003,14 @@ export const prayerPreferences = pgTable("prayer_preferences", {
     .default(true),
   adhanEnabled: boolean("adhan_enabled").notNull().default(true),
   adhanVolume: integer("adhan_volume").notNull().default(70),
+  prayerReminders: jsonb("prayer_reminders")
+    .$type<Record<string, number | null>>()
+    .notNull()
+    .default(
+      sql`'{"Fajr":0,"Sunrise":null,"Dhuhr":0,"Asr":0,"Maghrib":0,"Isha":0}'::jsonb`
+    ),
+  quietHoursStart: time("quiet_hours_start"),
+  quietHoursEnd: time("quiet_hours_end"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -1024,6 +1034,108 @@ export const prayerNotifications = pgTable("prayer_notifications", {
     .defaultNow()
     .notNull(),
 });
+
+export const pushRuntimeSettings = pgTable("push_runtime_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  deviceId: text("device_id"),
+  userAgent: text("user_agent"),
+  platform: text("platform"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+});
+
+export const prayerScheduleCache = pgTable(
+  "prayer_schedule_cache",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => prayerLocations.id, { onDelete: "cascade" }),
+    prayerDate: date("prayer_date").notNull(),
+    latitude: numeric("latitude").notNull(),
+    longitude: numeric("longitude").notNull(),
+    timezone: text("timezone").notNull(),
+    calculationMethod: text("calculation_method").notNull(),
+    madhab: text("madhab").notNull(),
+    timings: jsonb("timings").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  table => ({
+    cacheUnique: uniqueIndex("prayer_schedule_cache_unique").on(
+      table.locationId,
+      table.prayerDate,
+      table.latitude,
+      table.longitude,
+      table.timezone,
+      table.calculationMethod,
+      table.madhab
+    ),
+  })
+);
+
+export const prayerNotificationDeliveries = pgTable(
+  "prayer_notification_deliveries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    pushSubscriptionId: uuid("push_subscription_id")
+      .notNull()
+      .references(() => pushSubscriptions.id, { onDelete: "cascade" }),
+    prayerName: text("prayer_name").notNull(),
+    scheduledAt: timestamp("scheduled_at", { withTimezone: true }).notNull(),
+    status: text("status").notNull().default("pending"),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    processingAt: timestamp("processing_at", { withTimezone: true }),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    failedAt: timestamp("failed_at", { withTimezone: true }),
+    retryAfter: timestamp("retry_after", { withTimezone: true }),
+    errorMessage: text("error_message"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  table => ({
+    deliveryUnique: uniqueIndex("prayer_notification_delivery_unique").on(
+      table.pushSubscriptionId,
+      table.prayerName,
+      table.scheduledAt
+    ),
+  })
+);
 
 export const tawasheehCategories = pgTable("tawasheeh_categories", {
   id: uuid("id").defaultRandom().primaryKey(),
