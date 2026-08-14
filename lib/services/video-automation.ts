@@ -24,7 +24,7 @@ export async function createVideoGenerationRequest(data: {
   title: string;
   description: string;
   category: string;
-  content: string;
+  content: string | Record<string, unknown>;
 }): Promise<VideoGenerationRequest | null> {
   try {
     // content column is jsonb — parse string input so it is stored as JSON

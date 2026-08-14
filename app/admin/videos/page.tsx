@@ -12,6 +12,7 @@ interface CreateFormState {
   description: string;
   category: "quran" | "hadith" | "story" | "dua" | "adhkar" | "other";
   content: string;
+  narration: string;
 }
 
 interface DetailModalState {
@@ -37,6 +38,7 @@ export default function AdminVideosPage() {
     description: "",
     category: "quran",
     content: "",
+    narration: "",
   });
 
   const loadRequests = async () => {
@@ -87,8 +89,22 @@ export default function AdminVideosPage() {
   };
 
   const handleCreateVideo = async () => {
-    if (!createForm.title || !createForm.description || !createForm.content) {
-      alert("يرجى ملء جميع الحقول المطلوبة");
+    if (!createForm.title || !createForm.description || !createForm.content || !createForm.narration.trim()) {
+      alert("يرجى ملء العنوان والوصف والمحتوى والنص الصوتي");
+      return;
+    }
+    if (createForm.narration.trim().length < 30) {
+      alert("يجب أن يحتوي النص الصوتي على 30 حرفًا على الأقل");
+      return;
+    }
+
+    let content: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(createForm.content);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("invalid content");
+      content = { ...parsed, text: createForm.narration.trim() };
+    } catch {
+      alert("المحتوى يجب أن يكون JSON صالحًا");
       return;
     }
 
@@ -97,7 +113,7 @@ export default function AdminVideosPage() {
       const response = await fetch("/api/admin/videos/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(createForm),
+        body: JSON.stringify({ ...createForm, content }),
       });
 
       if (!response.ok) {
@@ -112,6 +128,7 @@ export default function AdminVideosPage() {
         description: "",
         category: "quran",
         content: "",
+        narration: "",
       });
       setShowCreateForm(false);
       void loadRequests();
@@ -244,7 +261,7 @@ export default function AdminVideosPage() {
 
             <div>
               <label className="block text-sm font-medium text-brand-cream/80 mb-2">
-                المحتوى (JSON)
+                بيانات المحتوى (JSON)
               </label>
               <textarea
                 placeholder='{"type": "quran", "surahId": 1}'
@@ -253,6 +270,20 @@ export default function AdminVideosPage() {
                   setCreateForm({ ...createForm, content: e.target.value })
                 }
                 className="w-full h-32 px-4 py-2 bg-black/30 border border-brand-gold/30 rounded text-brand-cream focus:outline-none focus:border-brand-gold resize-none font-mono text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-brand-cream/80 mb-2">
+                النص الصوتي للفيديو (مطلوب، 30 حرفًا على الأقل)
+              </label>
+              <textarea
+                placeholder="اكتب النص الذي سيُقرأ صوتيًا في الفيديو..."
+                value={createForm.narration}
+                onChange={e =>
+                  setCreateForm({ ...createForm, narration: e.target.value })
+                }
+                className="w-full h-32 px-4 py-2 bg-black/30 border border-brand-gold/30 rounded text-brand-cream focus:outline-none focus:border-brand-gold resize-none"
               />
             </div>
 
@@ -274,6 +305,7 @@ export default function AdminVideosPage() {
                     description: "",
                     category: "quran",
                     content: "",
+                    narration: "",
                   });
                 }}
                 className="flex-1"

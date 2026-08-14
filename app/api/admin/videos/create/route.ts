@@ -20,6 +20,27 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    let contentObject: Record<string, unknown>;
+    try {
+      const parsed = typeof content === 'string' ? JSON.parse(content) : content;
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('invalid content');
+      contentObject = parsed as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: 'Content must be valid JSON.' }, { status: 400 });
+    }
+
+    const narration = ['prompt', 'script', 'text']
+      .map((field) => contentObject[field])
+      .find((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      ?.replace(/\s+/g, ' ')
+      .trim() ?? '';
+    if (narration.length < 30) {
+      return NextResponse.json(
+        { error: 'An explicit narration of at least 30 characters is required.' },
+        { status: 400 },
+      );
+    }
+
     // Validate category
     const validCategories = ['quran', 'hadith', 'story', 'dua', 'adhkar', 'other'];
     if (!validCategories.includes(category)) {
@@ -33,7 +54,7 @@ export async function POST(request: NextRequest) {
       title,
       description,
       category,
-      content,
+      content: contentObject,
     });
     
     if (!result) {

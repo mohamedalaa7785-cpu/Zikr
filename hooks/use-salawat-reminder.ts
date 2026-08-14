@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { playSalawatClip, unlockAudioContext } from '@/lib/audio/spiritual-tones';
 import { showSalawatNotification, isInQuietHours } from '@/lib/services/notifications';
 
-export type SalawatInterval = 15 | 30 | 60 | 0; // 0 = disabled
+export type SalawatInterval = 15 | 30 | 60 | 120 | 0; // 0 = disabled
 
 export interface QuietHours {
   enabled: boolean;
@@ -22,7 +22,7 @@ const SETTINGS_KEY = 'zikr_salawat_settings';
 
 const DEFAULT_SETTINGS: SalawatSettings = {
   enabled: false,           // opt-in: user must explicitly enable
-  intervalMinutes: 30,
+  intervalMinutes: 60,
   quietHours: { enabled: false, from: '22:00', to: '06:00' },
 };
 
@@ -54,9 +54,27 @@ export interface SalawatReminderReturn {
 export function useSalawatReminder(): SalawatReminderReturn {
   const [settings, setSettings] = useState<SalawatSettings>(DEFAULT_SETTINGS);
 
-  // Load settings on mount
+  // Load local settings immediately, then reconcile with the authenticated
+  // server preference so the background worker uses the same configuration.
   useEffect(() => {
     setSettings(loadSettings());
+    void fetch('/api/reminders/background', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!data) return;
+        const next: SalawatSettings = {
+          enabled: Boolean(data.salawat_enabled),
+          intervalMinutes: data.salawat_interval_minutes ?? 60,
+          quietHours: {
+            enabled: Boolean(data.quiet_hours_start && data.quiet_hours_end),
+            from: data.quiet_hours_start?.slice(0, 5) ?? '22:00',
+            to: data.quiet_hours_end?.slice(0, 5) ?? '06:00',
+          },
+        };
+        saveSettings(next);
+        setSettings(next);
+      })
+      .catch(() => undefined);
   }, []);
 
   // Set up interval whenever settings change
@@ -88,6 +106,16 @@ export function useSalawatReminder(): SalawatReminderReturn {
     setSettings((prev) => {
       const next = { ...prev, ...partial };
       saveSettings(next);
+      void fetch('/api/reminders/background', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          salawat_enabled: next.enabled,
+          salawat_interval_minutes: next.intervalMinutes,
+          quiet_hours_start: next.quietHours.enabled ? next.quietHours.from : null,
+          quiet_hours_end: next.quietHours.enabled ? next.quietHours.to : null,
+        }),
+      }).catch(() => undefined);
       return next;
     });
   }, []);
