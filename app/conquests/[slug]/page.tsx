@@ -20,6 +20,16 @@ type Conquest = {
   published: boolean;
 };
 
+type ConquestEvent = {
+  id: string;
+  title_ar: string;
+  title_en?: string | null;
+  content_ar: string;
+  content_en?: string | null;
+  event_type?: string | null;
+  order_num?: number | null;
+};
+
 import { pageMetadata } from '@/lib/site';
 import type { Metadata } from 'next';
 
@@ -55,6 +65,15 @@ export default async function ConquestDetailPage({ params }: { params: Promise<{
   }
 
   if (!conquest) notFound();
+
+  let events: ConquestEvent[] = [];
+  try {
+    events = await supabaseServerAnonRequest<ConquestEvent[]>(
+      `/rest/v1/conquest_events?select=*&conquest_id=eq.${conquest.id}&order=order_num.asc`
+    );
+  } catch {
+    events = [];
+  }
 
   return (
     <Container className="space-y-8 py-10 text-right">
@@ -120,6 +139,31 @@ export default async function ConquestDetailPage({ params }: { params: Promise<{
           )}
         </div>
       </Card>
+
+      {events.length > 0 && (
+        <section className="space-y-4" aria-labelledby="conquest-events-heading">
+          <div className="space-y-2 text-right">
+            <p className="text-sm font-medium text-brand-gold">التسلسل التاريخي</p>
+            <h2 id="conquest-events-heading" className="text-2xl font-bold text-foreground">محطات الفتح وآثاره</h2>
+            <p className="text-sm leading-7 text-muted-foreground">ملخصات تعليمية مرتبة، مع التنبيه إلى اختلاف الروايات والتواريخ في المصادر التاريخية.</p>
+          </div>
+          <div className="grid gap-4">
+            {events.map((event, index) => (
+              <Card key={event.id} className="space-y-3 border-brand-gold/15">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-gold/15 text-sm font-bold text-brand-gold">{index + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-semibold text-brand-gold">{event.title_ar}</h3>
+                    {event.title_en && <p className="text-xs text-muted-foreground">{event.title_en}</p>}
+                  </div>
+                </div>
+                <p className="leading-8 text-foreground whitespace-pre-wrap">{event.content_ar}</p>
+                {event.content_en && <p className="leading-7 text-sm text-muted-foreground">{event.content_en}</p>}
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
     </Container>
   );
 }
