@@ -231,9 +231,16 @@ export async function saveVideoPostAction(formData: FormData) {
     throw new Error("عنوان الفيديو والرابط المختصر مطلوبان.");
 
   const description = value(formData, "description");
+  const caption = value(formData, "caption") ?? description;
   const youtubeId = value(formData, "youtubeId");
+  const videoUrl = value(formData, "videoUrl");
+  const videoStorageKey = value(formData, "videoStorageKey");
   const thumbnailUrl = value(formData, "thumbnailUrl");
   const selectedPlatforms = platforms(formData);
+
+  if (selectedPlatforms.length > 0 && !videoUrl) {
+    throw new Error("للنشر التلقائي على Facebook أو YouTube يجب رفع ملف فيديو أو إدخال رابط فيديو مباشر.");
+  }
 
   await supabaseServerAdminRequest("/rest/v1/videos?on_conflict=slug", {
     method: "POST",
@@ -245,7 +252,13 @@ export async function saveVideoPostAction(formData: FormData) {
       youtube_id: youtubeId,
       thumbnail_url: thumbnailUrl,
       published: bool(formData, "published"),
-      metadata: { autoShare: selectedPlatforms.length > 0, source: "admin" },
+      metadata: {
+        autoShare: selectedPlatforms.length > 0,
+        source: "admin",
+        caption,
+        sourceVideoUrl: videoUrl,
+        sourceStorageKey: videoStorageKey,
+      },
       updated_at: new Date().toISOString(),
     }),
   });
@@ -284,14 +297,17 @@ export async function saveVideoPostAction(formData: FormData) {
     contentType: "video",
     contentId: slug,
     title,
-    body: description,
+    body: caption,
     imageUrl: thumbnailUrl,
-    videoUrl: youtubeId
-      ? `https://www.youtube.com/watch?v=${youtubeId}`
-      : value(formData, "videoUrl"),
+    videoUrl,
     targetPlatforms: selectedPlatforms,
     scheduledAt: value(formData, "scheduledAt"),
-    metadata: { publicPath: `/videos/${slug}` },
+    metadata: {
+      publicPath: `/videos/${slug}`,
+      caption,
+      sourceStorageKey: videoStorageKey,
+      sourceVideoUrl: videoUrl,
+    },
   });
 
   revalidatePath("/admin");

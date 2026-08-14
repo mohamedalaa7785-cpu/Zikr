@@ -24,6 +24,14 @@ export default function VideoDetailPage() {
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const directVideoUrl =
+    typeof video?.metadata?.sourceVideoUrl === 'string'
+      ? video.metadata.sourceVideoUrl
+      : typeof video?.metadata?.generatedVideoUrl === 'string'
+        ? video.metadata.generatedVideoUrl
+        : null;
+  const publicCaption = typeof video?.metadata?.caption === 'string' ? video.metadata.caption : null;
+
   useEffect(() => {
     const fetchVideo = async () => {
       if (!slug) return;
@@ -69,8 +77,8 @@ export default function VideoDetailPage() {
         <h1 className="text-4xl font-bold text-brand-gold">{video.title}</h1>
       </div>
 
-      {video.youtube_id && (
-        <div className="w-full aspect-video rounded-lg overflow-hidden">
+      {video.youtube_id ? (
+        <div className="w-full aspect-video rounded-lg overflow-hidden bg-black">
           <iframe
             width="100%"
             height="100%"
@@ -81,7 +89,20 @@ export default function VideoDetailPage() {
             allowFullScreen
           />
         </div>
-      )}
+      ) : directVideoUrl ? (
+        <div className="w-full aspect-video rounded-lg overflow-hidden bg-black">
+          <video
+            className="h-full w-full object-contain"
+            controls
+            playsInline
+            preload="metadata"
+            poster={video.thumbnail_url || undefined}
+            src={directVideoUrl}
+          >
+            متصفحك لا يدعم تشغيل الفيديو.
+          </video>
+        </div>
+      ) : null}
 
       <Card className="p-6 space-y-4 bg-black/30 border-brand-gold/30">
         <div className="flex justify-between items-center text-sm text-brand-cream/70">
@@ -98,21 +119,15 @@ export default function VideoDetailPage() {
             <p className="text-brand-cream/90 leading-relaxed">{video.description}</p>
           </div>
         )}
+        {publicCaption && publicCaption !== video.description ? (
+          <div className="space-y-2">
+            <h3 className="text-lg font-bold text-brand-gold">الكابشن</h3>
+            <p className="text-brand-cream/90 leading-relaxed">{publicCaption}</p>
+          </div>
+        ) : null}
       </Card>
 
-      {video.metadata && Object.keys(video.metadata).length > 0 && (
-        <Card className="p-6 space-y-4 bg-black/30 border-brand-gold/30">
-          <h3 className="text-lg font-bold text-brand-gold">معلومات إضافية</h3>
-          <div className="space-y-2 text-sm text-brand-cream/80">
-            {Object.entries(video.metadata).map(([key, value]) => (
-              <div key={key} className="flex justify-between">
-                <span className="text-brand-cream/60">{key}:</span>
-                <span>{String(value)}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
+
     </Container>
   );
 }

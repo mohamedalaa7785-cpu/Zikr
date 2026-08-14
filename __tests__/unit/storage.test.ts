@@ -14,6 +14,8 @@ describe('Supabase Storage helpers', () => {
     assert.equal(getStoragePurposeConfig('media').bucket, 'media');
     assert.equal(getStoragePurposeConfig('audio').bucket, 'audio');
     assert.equal(getStoragePurposeConfig('document').bucket, 'documents');
+    assert.equal(getStoragePurposeConfig('video').bucket, 'videos');
+    assert.equal(getStoragePurposeConfig('video').maxBytes, 512 * 1024 * 1024);
   });
 
   it('sanitizes path segments and parses bucket-prefixed keys', () => {

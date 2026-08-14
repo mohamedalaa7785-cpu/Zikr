@@ -1,9 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 
-export type StorageObjectPurpose = 'avatar' | 'media' | 'audio' | 'document';
+export type StorageObjectPurpose = 'avatar' | 'media' | 'audio' | 'document' | 'video';
 
 export type PresignedUpload = {
   key: string;
+  bucket: string;
+  path: string;
+  token: string;
   uploadUrl: string;
   publicUrl: string | null;
   expiresIn: number;
@@ -14,6 +17,7 @@ const PURPOSE_CONFIG: Record<StorageObjectPurpose, { bucket: string; maxBytes: n
   media: { bucket: 'media', maxBytes: 20 * 1024 * 1024, isPublic: true },
   audio: { bucket: 'audio', maxBytes: 50 * 1024 * 1024, isPublic: false },
   document: { bucket: 'documents', maxBytes: 20 * 1024 * 1024, isPublic: false },
+  video: { bucket: 'videos', maxBytes: 512 * 1024 * 1024, isPublic: true },
 };
 
 export function getStoragePurposeConfig(purpose: StorageObjectPurpose) {
@@ -83,6 +87,9 @@ export async function createPresignedUploadUrl(params: {
 
   return {
     key: encodeStorageKey(config.bucket, data.path),
+    bucket: config.bucket,
+    path: data.path,
+    token: data.token,
     uploadUrl: data.signedUrl,
     publicUrl,
     expiresIn,

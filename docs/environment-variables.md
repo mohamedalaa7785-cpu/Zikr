@@ -31,6 +31,18 @@ The following environment variables are optional and are used for integrating wi
 | `YOUTUBE_PLAYLIST_ID`           | YouTube playlist ID.                                                        | Server   |
 | `GOOGLE_CLIENT_ID`               | Google OAuth client ID.                                                     | Server   |
 | `GOOGLE_CLIENT_SECRET`           | Google OAuth client secret. Keep secret.                                    | Server   |
+| `YOUTUBE_CLIENT_ID`              | OAuth client ID used for YouTube uploads; falls back to `GOOGLE_CLIENT_ID`. | Server   |
+| `YOUTUBE_CLIENT_SECRET`          | OAuth client secret used for YouTube uploads; falls back to `GOOGLE_CLIENT_SECRET`. | Server   |
+| `YOUTUBE_REFRESH_TOKEN`          | Long-lived OAuth refresh token granted with the `youtube.upload` scope.     | Server   |
+| `FACEBOOK_PAGE_ID`               | Facebook Page ID that receives uploaded videos and Reels.                   | Server   |
+| `FACEBOOK_PAGE_ACCESS_TOKEN`     | Page access token with the Meta Page publishing permissions.                | Server   |
+| `VIDEO_AUTO_PUBLISH`             | Set to `false` to keep completed videos queued without publishing; defaults to automatic publishing when credentials exist. | Server |
+
+## Automatic Video Upload and Social Publishing
+
+The admin dashboard supports selecting a local MP4/WebM/MOV file. The browser uploads it directly to the Supabase `videos` Storage bucket using an admin-only signed upload URL, then the server action stores the public source URL in the `videos` metadata and creates a durable `social_publish_queue` item. The Supabase scheduled worker processes that queue without requiring the browser to remain open.
+
+YouTube uploads use OAuth2 and require `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, and `YOUTUBE_REFRESH_TOKEN`; the refresh token must be granted with the official `https://www.googleapis.com/auth/youtube.upload` scope. Facebook publishing uses `FACEBOOK_PAGE_ID` and `FACEBOOK_PAGE_ACCESS_TOKEN`; the token must belong to a Page and the Meta app must have the Page publishing permissions required by Meta. Never place these values in client-side code or commit them to Git.
 
 ## Deployment Validation
 

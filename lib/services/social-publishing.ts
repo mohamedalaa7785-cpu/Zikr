@@ -35,7 +35,7 @@ function siteUrl() {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.VERCEL_URL ||
-    "https://zikr.app"
+    "https://zikrmediaofficial.vercel.app"
   ).replace(/\/$/, "");
 }
 
@@ -187,7 +187,15 @@ async function publishPlatform(
   try {
     const remoteId =
       platform === "facebook"
-        ? await publishFacebookPost(item)
+        ? item.video_url
+          ? await publishToFacebook(
+              item.id,
+              { title: item.title, description: item.body ?? "" },
+              item.video_url,
+              getServerEnv().FACEBOOK_PAGE_ID,
+              false
+            )
+          : await publishFacebookPost(item)
         : platform === "facebook_reels"
           ? await publishFacebookReelItem(item)
           : await publishYoutubeItem(item);

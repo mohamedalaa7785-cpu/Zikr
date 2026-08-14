@@ -18,15 +18,17 @@ https://your-domain.com/admin/videos
 انقر على زر "+ إنشاء فيديو جديد"
 ```
 
-### 3. ملء نموذج الإنشاء
-```
-العنوان: "سورة الفاتحة"
-الوصف: "تلاوة معطرة لسورة الفاتحة"
-الفئة: "القرآن الكريم"
-المحتوى: {"type": "quran", "surahId": 1}
-```
+### 3. رفع فيديو جاهز أو توليده تلقائياً
 
-### 4. النقر على "إنشاء الفيديو"
+لرفع فيديو جاهز، املأ العنوان والوصف والكابشن، ثم اختر ملف MP4 أو WebM أو MOV من حقل الرفع. يُرفع الملف مباشرة إلى Supabase Storage، وبعد اكتمال الرفع يُحفظ الرابط في نموذج النشر. الحد الأقصى للملف 512 ميجابايت.
+
+يمكنك اختيار Facebook أو Facebook Reels أو YouTube. عند اختيار YouTube أو Facebook Reels يجب وجود ملف فيديو مرفوع أو رابط فيديو مباشر. يمكنك اختيار موعد مستقبلي، وسيعالج العامل الخلفي الطابور دون إبقاء المتصفح مفتوحاً.
+
+لتوليد فيديو HeyGen بدل رفع ملف جاهز، اترك الرفع فارغاً، فعّل خيار التوليد التلقائي، وأدخل سكريبتاً مراجَعاً لا يقل عن 30 حرفاً.
+
+### 4. النقر على "حفظ وتجهيز النشر"
+
+يُحفظ الفيديو في الموقع، وتُنشأ مهمة في `social_publish_queue`. يقوم العامل الخلفي بتجهيز النشر ثم يحفظ معرف النشر لكل منصة وحالة النجاح أو الفشل.
 
 ---
 
@@ -59,19 +61,34 @@ HEYGEN_AVATAR_ID=your_avatar_id
 HEYGEN_VOICE_ID=your_voice_id
 ```
 
-### اختياري: YouTube (النشر التلقائي)
+### اختياري: YouTube (رفع الفيديو تلقائياً)
 ```bash
-YOUTUBE_API_KEY=your_youtube_api_key
+YOUTUBE_CLIENT_ID=your_google_oauth_client_id
+YOUTUBE_CLIENT_SECRET=your_google_oauth_client_secret
+YOUTUBE_REFRESH_TOKEN=your_youtube_refresh_token
 YOUTUBE_CHANNEL_ID=your_channel_id
 ```
 
-### اختياري: Facebook (النشر التلقائي)
+يجب إنشاء Refresh Token بصلاحية OAuth الرسمية `https://www.googleapis.com/auth/youtube.upload`. مفتاح `YOUTUBE_API_KEY` مخصص لقراءة القناة العامة وليس كافياً لرفع الفيديو.
+
+### اختياري: Facebook (نشر الفيديو وReels تلقائياً)
 ```bash
-FACEBOOK_PAGE_ACCESS_TOKEN=your_page_token
+FACEBOOK_PAGE_ACCESS_TOKEN=your_page_access_token
 FACEBOOK_PAGE_ID=your_page_id
+VIDEO_AUTO_PUBLISH=true
 ```
 
+يجب أن يكون Page Access Token مرتبطاً بصفحتك وبصلاحيات Meta المطلوبة للنشر. لا تضع أي قيمة من هذه القيم في كود الواجهة أو GitHub.
+
 ---
+
+## 🔁 دورة الرفع والنشر
+
+1. يتحقق endpoint `/api/admin/videos/upload` من جلسة المدير ونوع الملف والحجم.
+2. يصدر Supabase signed upload URL للـ bucket العام `videos`، بينما تسمح RLS بالرفع والتعديل والحذف للمديرين فقط.
+3. يرفع المتصفح الملف مباشرة إلى Storage، ثم يحتفظ النموذج بـ `videoUrl` و`videoStorageKey` في حقول مخفية.
+4. تحفظ `saveVideoPostAction` المصدر والكابشن في `videos.metadata` وتضيف صفاً في `social_publish_queue`.
+5. يستلم `/api/internal/video-processing` الصف، ويرفع الفيديو إلى YouTube عبر OAuth2 وإلى Facebook عبر Page Video/Reels API، ثم يسجل النتائج والأخطاء.
 
 ## 💻 استخدام الـ API برمجياً
 
@@ -446,4 +463,4 @@ setInterval(checkFailedVideos, 30 * 60 * 1000);
 
 ---
 
-**آخر تحديث:** 4 يوليو 2026
+**آخر تحديث:** 15 أغسطس 2026

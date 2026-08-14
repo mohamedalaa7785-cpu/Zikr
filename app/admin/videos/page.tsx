@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
@@ -173,13 +174,21 @@ export default function AdminVideosPage() {
               إدارة طلبات توليد الفيديوهات والنشر التلقائي
             </p>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="whitespace-nowrap"
-          >
-            {showCreateForm ? "✕ إغلاق" : "+ إنشاء فيديو جديد"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/admin#video-publish"
+              className="inline-flex items-center justify-center rounded-lg border border-brand-gold/40 px-4 py-2 text-sm font-semibold text-brand-gold transition hover:bg-brand-gold/10"
+            >
+              رفع ونشر فيديو
+            </Link>
+            <Button
+              variant="primary"
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="whitespace-nowrap"
+            >
+              {showCreateForm ? "✕ إغلاق" : "+ إنشاء فيديو جديد"}
+            </Button>
+          </div>
           {errorMessage && (
             <div
               role="alert"

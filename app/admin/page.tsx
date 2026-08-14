@@ -1,10 +1,13 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { VideoUploadField } from "@/components/admin/video-upload-field";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { requireAdmin } from "@/lib/services/admin";
 import { runApiHealthChecks } from "@/lib/services/api-health";
+import { getVideoPublishingConfig } from "@/lib/services/video-automation";
 import { supabaseServerAdminCount } from "@/lib/supabase/server";
 import {
   saveArticleAction,
@@ -226,6 +229,7 @@ export default async function AdminPage() {
     videosCount,
     duasCount,
     socialQueueCount,
+    publishingConfig,
   ] = await Promise.all([
     runApiHealthChecks(),
     countTable("stories"),
@@ -235,6 +239,7 @@ export default async function AdminPage() {
     countTable("videos"),
     countTable("duas"),
     countTable("social_publish_queue"),
+    getVideoPublishingConfig(),
   ]);
 
   const maxContent = Math.max(
@@ -264,6 +269,28 @@ export default async function AdminPage() {
           الموقع، وأكثر.
         </p>
       </section>
+
+      <Card id="video-publishing-status" className="space-y-4 border-brand-gold/25 bg-black/25">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-brand-gold">جاهزية النشر التلقائي</h2>
+            <p className="text-xs text-brand-cream/45">لا تظهر المفاتيح هنا؛ هذه مؤشرات وجود الإعدادات فقط.</p>
+          </div>
+          <span className={`rounded-full border px-3 py-1 text-xs ${publishingConfig.autoPublish ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-amber-500/30 bg-amber-500/10 text-amber-300"}`}>
+            {publishingConfig.autoPublish ? "التشغيل التلقائي مفعّل" : "التشغيل التلقائي متوقف"}
+          </span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className={`rounded-xl border px-4 py-3 ${publishingConfig.youtubeEnabled ? "border-emerald-500/25 bg-emerald-500/5" : "border-amber-500/25 bg-amber-500/5"}`}>
+            <p className="font-semibold text-brand-cream">YouTube</p>
+            <p className="text-sm text-brand-cream/60">{publishingConfig.youtubeEnabled ? "OAuth والرفع جاهزان" : "يحتاج YOUTUBE_CLIENT_ID وSECRET وREFRESH_TOKEN"}</p>
+          </div>
+          <div className={`rounded-xl border px-4 py-3 ${publishingConfig.facebookEnabled ? "border-emerald-500/25 bg-emerald-500/5" : "border-amber-500/25 bg-amber-500/5"}`}>
+            <p className="font-semibold text-brand-cream">Facebook</p>
+            <p className="text-sm text-brand-cream/60">{publishingConfig.facebookEnabled ? "Page ID وPage Access Token جاهزان" : "يحتاج FACEBOOK_PAGE_ID وPAGE_ACCESS_TOKEN"}</p>
+          </div>
+        </div>
+      </Card>
 
       {/* Stats grid */}
       <section>
@@ -530,7 +557,7 @@ export default async function AdminPage() {
           </Card>
 
           {/* Video / media publishing */}
-          <Card className="space-y-5 p-6">
+          <Card id="video-publish" className="space-y-5 p-6">
             <h2 className="text-base font-bold text-brand-gold" dir="rtl">
               نشر فيديو أو صورة
             </h2>
@@ -546,13 +573,20 @@ export default async function AdminPage() {
               </div>
               <Field name="description" label="الوصف" textarea />
               <Field
+                name="caption"
+                label="الكابشن / نص المنشور على Facebook"
+                textarea
+                placeholder="النص الذي سيظهر مع المنشور على Facebook وReels"
+              />
+              <VideoUploadField />
+              <Field
                 name="youtubeId"
                 label="YouTube Video ID"
                 placeholder="مثال: dQw4w9WgXcQ"
               />
               <Field
                 name="videoUrl"
-                label="رابط فيديو خارجي / ملف"
+                label="رابط فيديو خارجي / ملف (بديل عن الرفع)"
                 placeholder="https://..."
               />
               <Field
@@ -562,9 +596,8 @@ export default async function AdminPage() {
               />
               <Field
                 name="script"
-                label="سكريبت الفيديو المراجَع (30 حرفاً على الأقل عند التوليد التلقائي)"
+                label="سكريبت الفيديو (اختياري؛ مطلوب فقط عند التوليد التلقائي، 30 حرفاً على الأقل)"
                 textarea
-                required
               />
               <Field
                 name="scheduledAt"
