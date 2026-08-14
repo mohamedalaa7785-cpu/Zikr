@@ -1,9 +1,9 @@
 name: Background Jobs
 
+# GitHub-hosted runners are currently unavailable for this account. The schedule
+# is deliberately paused to prevent recurring false failures; this manual
+# recovery workflow remains available once runner access is restored.
 on:
-  schedule:
-    - cron: "*/15 * * * *"
-    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       target:
@@ -77,16 +77,7 @@ jobs:
         id: target
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            if [[ "${{ github.event.schedule }}" == "0 3 * * *" ]]; then
-              echo "target=videos" >> "$GITHUB_OUTPUT"
-            else
-              # Poll submitted HeyGen jobs and process social work every 15 minutes.
-              echo "target=all" >> "$GITHUB_OUTPUT"
-            fi
-          else
-            echo "target=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
-          fi
+          echo "target=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
 
       - name: Run background queues
         env:

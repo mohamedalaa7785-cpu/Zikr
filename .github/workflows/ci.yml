@@ -1,12 +1,10 @@
 name: Continuous Integration
 
+# GitHub-hosted runners are currently unavailable for this account. Vercel now
+# executes `pnpm verify` for every deployment; retain this workflow as an
+# operator-invoked fallback for when runner access is restored.
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
