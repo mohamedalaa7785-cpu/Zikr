@@ -7,6 +7,8 @@ const STATIC_ASSETS = [
   '/',
   '/offline.html',
   '/manifest.webmanifest',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
   '/quran',
   '/adhkar',
   '/prayer-times',
@@ -190,8 +192,8 @@ self.addEventListener('message', (event) => {
     const { prayerName } = event.data;
     self.registration.showNotification(`حان وقت صلاة ${prayerName}`, {
       body: 'الصلاة خير من النوم — حافظ على صلاتك',
-      icon: '/icons/icon-192.svg',
-      badge: '/icons/icon-192.svg',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
       tag: `prayer-${prayerName}`,
       dir: 'rtl',
       lang: 'ar',
@@ -202,8 +204,8 @@ self.addEventListener('message', (event) => {
     const { text } = event.data;
     self.registration.showNotification('تذكير بالذكر', {
       body: text ?? 'اللهم صلِّ على سيدنا محمد',
-      icon: '/icons/icon-192.svg',
-      badge: '/icons/icon-192.svg',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
       tag: 'dhikr-reminder',
       dir: 'rtl',
       lang: 'ar',
@@ -228,8 +230,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/icons/icon-192.svg',
-      badge: '/icons/icon-192.svg',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
       tag: data.tag,
       data: { url: typeof data.url === 'string' && data.url.startsWith('/') ? data.url : '/' },
       renotify: false,

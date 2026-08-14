@@ -1,3 +1,5 @@
+import { playAzanClip } from '@/lib/audio/spiritual-tones';
+
 export type NotificationPermission = 'granted' | 'denied' | 'default' | 'unsupported';
 
 export interface NotificationPreference {
@@ -99,6 +101,10 @@ export function isInQuietHours(from: string, to: string): boolean {
 export function showPrayerNotification(prayerNameAr: string): void {
   if (typeof window === 'undefined') return;
 
+  // Play the real adhan clip in the foreground when the browser allows audio.
+  // Native scheduled notifications use the same adhan sound identifier below.
+  playAzanClip();
+
   const title = `حان وقت صلاة ${prayerNameAr}`;
   const body = 'الصلاة خير من النوم — حافظ على صلاتك';
   const tag = `prayer-${prayerNameAr}`;
@@ -111,7 +117,7 @@ export function showPrayerNotification(prayerNameAr: string): void {
     try {
       new Notification(title, {
         body,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag,
       });
     } catch {
@@ -137,7 +143,7 @@ export function showZakatNotification(daysLeft: number): void {
     try {
       new Notification('تذكير الزكاة', {
         body,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag: 'zakat-reminder',
       });
     } catch {
@@ -161,7 +167,7 @@ export function showDhikrNotification(text: string): void {
     try {
       new Notification(title, {
         body: text,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag,
       });
     } catch {
@@ -185,7 +191,7 @@ export function showSalawatNotification(): void {
     try {
       new Notification(title, {
         body,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag: 'salawat-reminder',
       });
     } catch {
