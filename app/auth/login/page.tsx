@@ -53,12 +53,10 @@ function LoginForm() {
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);
     setError('');
-    try {
-      await loginAction(formData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'حدث خطأ في عملية الدخول. تحقق من بيانات الدخول.');
-      setLoading(false);
-    }
+    // loginAction redirects after both authentication failures and successful
+    // logins. Let Next.js receive its redirect signal instead of converting it
+    // into a visible "NEXT_REDIRECT" error in the client.
+    await loginAction(formData);
   };
 
   return (

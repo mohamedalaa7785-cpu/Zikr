@@ -39,12 +39,10 @@ function RegisterForm() {
       return;
     }
 
-    try {
-      await registerAction(formData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'حدث خطأ في عملية التسجيل. حاول مرة أخرى.');
-      setLoading(false);
-    }
+    // registerAction redirects for both validation failures and successful
+    // registrations. Do not catch its redirect signal here: catching it makes
+    // Next.js render "NEXT_REDIRECT" instead of performing the navigation.
+    await registerAction(formData);
   };
 
   if (!isClient) return <div className="text-center py-10">جاري التحميل...</div>;
