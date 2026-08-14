@@ -63,7 +63,7 @@ export default async function ArticlesPage() {
         .from('article_categories')
         .select('id, name_ar, slug, icon')
         .eq('published', true)
-        .order('order_index', { ascending: true, nullsFirst: false }),
+        .order('name_ar', { ascending: true }),
     ]);
     articles = articlesRes.data ?? [];
     categories = categoriesRes.data ?? [];

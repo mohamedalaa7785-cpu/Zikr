@@ -35,11 +35,11 @@ export async function GET(request: NextRequest) {
     const params = new URLSearchParams();
     
     // Determine which endpoint to call
-    if (city || country) {
-      // Use timingsByCity if city or country is provided
+    if (city) {
+      // Aladhan requires both city and country for timingsByCity.
       url = `${ALADHAN_API_BASE}/timingsByCity`;
-      if (city) params.append('city', city);
-      if (country) params.append('country', country);
+      params.append('city', city);
+      params.append('country', country || 'Egypt');
     } else if (address) {
       // Use timingsByAddress for free-form address
       url = `${ALADHAN_API_BASE}/timingsByAddress`;
