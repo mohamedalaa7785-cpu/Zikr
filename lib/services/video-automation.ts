@@ -444,6 +444,14 @@ type HeyGenStatusResult = {
   error?: string;
 };
 
+type HeyGenErrorPayload = {
+  error?: {
+    code?: string;
+    message?: string;
+    warning?: string;
+  };
+};
+
 function getHeyGenCredentials(): { apiKey?: string; avatarId?: string; voiceId?: string } {
   return {
     apiKey: process.env.HEYGEN_API_KEY,
@@ -465,36 +473,49 @@ export async function submitVideoToHeyGen(
   if (!avatarId || !voiceId) return { error: 'HEYGEN_AVATAR_ID / HEYGEN_VOICE_ID are not configured' };
 
   try {
-    const createRes = await fetch('https://api.heygen.com/v2/video/generate', {
+    // HeyGen v2/video/generate is legacy. The current v3 API uses a flat body
+    // and returns the same data.video_id needed by the polling workflow.
+    const createRes = await fetch('https://api.heygen.com/v3/videos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Api-Key': apiKey,
+        // Prevent duplicate provider jobs when the background runner retries.
+        'Idempotency-Key': request.id,
       },
       signal: AbortSignal.timeout(25_000),
       body: JSON.stringify({
-        video_inputs: [
-          {
-            character: { type: 'avatar', avatar_id: avatarId },
-            voice: {
-              type: 'text',
-              input_text: narrationText(request),
-              voice_id: voiceId,
-            },
-          },
-        ],
-        // Generate vertical-first so the same asset can be published as a
-        // YouTube Short and Facebook Reel. Set content.videoFormat to
-        // 'horizontal' only when a landscape upload is explicitly required.
-        dimension: isVerticalVideo(request)
-          ? { width: 1080, height: 1920 }
-          : { width: 1280, height: 720 },
+        type: 'avatar',
+        avatar_id: avatarId,
+        title: request.title,
+        aspect_ratio: isVerticalVideo(request) ? '9:16' : '16:9',
+        output_format: 'mp4',
+        script: narrationText(request),
+        voice_id: voiceId,
       }),
     });
 
     if (!createRes.ok) {
       const errBody = await createRes.text().catch(() => '');
-      return { error: `HeyGen create failed (HTTP ${createRes.status}): ${errBody.slice(0, 500)}` };
+      let parsed: HeyGenErrorPayload | null = null;
+      try {
+        parsed = JSON.parse(errBody) as HeyGenErrorPayload;
+      } catch {
+        // Keep the raw response below when HeyGen does not return JSON.
+      }
+
+      const code = parsed?.error?.code;
+      const message = parsed?.error?.message;
+      if (createRes.status === 402 || code === 'insufficient_credit') {
+        return {
+          error:
+            'HeyGen credits are insufficient. Add credits or upgrade the HeyGen plan, then retry the request.',
+        };
+      }
+
+      return {
+        error: `HeyGen create failed (HTTP ${createRes.status}): ${(message || errBody).slice(0, 500)}`,
+      };
     }
 
     const createData = (await createRes.json()) as { data?: { video_id?: string } };
@@ -512,19 +533,29 @@ export async function getHeyGenVideoStatus(videoId: string): Promise<HeyGenStatu
 
   try {
     const statusRes = await fetch(
-      `https://api.heygen.com/v1/video_status.get?video_id=${encodeURIComponent(videoId)}`,
+      `https://api.heygen.com/v3/videos/${encodeURIComponent(videoId)}`,
       {
         headers: { 'X-Api-Key': apiKey },
         signal: AbortSignal.timeout(20_000),
       }
     );
+    const statusData = (await statusRes.json().catch(() => ({}))) as {
+      data?: {
+        status?: string;
+        video_url?: string;
+        failure_code?: string;
+        failure_message?: string;
+      };
+      error?: { message?: string };
+    };
+
     if (!statusRes.ok) {
-      return { status: 'processing', error: `HeyGen status request failed (HTTP ${statusRes.status})` };
+      const message = statusData.error?.message || `HTTP ${statusRes.status}`;
+      return statusRes.status >= 400 && statusRes.status < 500
+        ? { status: 'failed', error: `HeyGen status request failed: ${message}` }
+        : { status: 'processing', error: `HeyGen status request failed: ${message}` };
     }
 
-    const statusData = (await statusRes.json()) as {
-      data?: { status?: string; video_url?: string; error?: { message?: string } };
-    };
     const status = statusData.data?.status;
     if (status === 'completed') {
       const videoUrl = statusData.data?.video_url;
@@ -533,7 +564,13 @@ export async function getHeyGenVideoStatus(videoId: string): Promise<HeyGenStatu
         : { status: 'failed', error: 'HeyGen reported completed but returned no video_url' };
     }
     if (status === 'failed') {
-      return { status: 'failed', error: statusData.data?.error?.message ?? 'HeyGen generation failed' };
+      return {
+        status: 'failed',
+        error:
+          statusData.data?.failure_message ||
+          statusData.data?.failure_code ||
+          'HeyGen generation failed',
+      };
     }
     return { status: 'processing' };
   } catch (error) {
