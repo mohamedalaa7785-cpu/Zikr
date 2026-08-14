@@ -25,7 +25,22 @@ import { generateGeminiText } from '@/lib/services/gemini-client';
  */
 export async function POST(request: Request) {
   try {
-    const { poem, title } = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return Response.json(
+        { error: 'Malformed JSON request body.' },
+        { status: 400 }
+      );
+    }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json(
+        { error: 'Request body must be a JSON object.' },
+        { status: 400 }
+      );
+    }
+    const { poem, title } = body as { poem?: unknown; title?: unknown };
 
     if (typeof poem !== 'string' || typeof title !== 'string' || !poem.trim() || !title.trim()) {
       return Response.json(

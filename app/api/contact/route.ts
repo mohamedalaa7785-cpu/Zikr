@@ -3,7 +3,21 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { error: "صيغة JSON غير صالحة." },
+        { status: 400 }
+      );
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: "صيغة الطلب غير صالحة." },
+        { status: 400 }
+      );
+    }
     const { name, email, subject, message } = body as Record<string, string>;
 
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
