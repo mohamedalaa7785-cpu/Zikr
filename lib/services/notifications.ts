@@ -1,3 +1,5 @@
+import { playAzanClip } from '@/lib/audio/spiritual-tones';
+
 export type NotificationPermission = 'granted' | 'denied' | 'default' | 'unsupported';
 
 export interface NotificationPreference {
@@ -98,6 +100,10 @@ export function isInQuietHours(from: string, to: string): boolean {
 /** Show a browser/native notification for a prayer time. No-ops gracefully if not granted. */
 export function showPrayerNotification(prayerNameAr: string): void {
   if (typeof window === 'undefined') return;
+
+  // Play the real adhan clip in the foreground when the browser allows audio.
+  // Native scheduled notifications use the same adhan sound identifier below.
+  playAzanClip();
 
   const title = `حان وقت صلاة ${prayerNameAr}`;
   const body = 'الصلاة خير من النوم — حافظ على صلاتك';
