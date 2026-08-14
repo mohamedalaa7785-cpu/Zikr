@@ -117,6 +117,7 @@ export const appRoutes = [
   { path: '/conquests', label: 'الفتوحات', sitemap: { changeFrequency: 'monthly', priority: 0.6 } },
   { path: '/tawasheeh', label: 'التواشيح', sitemap: { changeFrequency: 'weekly', priority: 0.6 } },
   { path: '/search', label: 'بحث', sitemap: { changeFrequency: 'daily', priority: 0.7 }, nav: 'more', footer: 'tools' },
+  { path: '/offline-library', label: 'مكتبة الأوفلاين', sitemap: { changeFrequency: 'weekly', priority: 0.5 }, footer: 'tools' },
   { path: '/settings', label: 'الإعدادات', sitemap: { changeFrequency: 'monthly', priority: 0.4 }, footer: 'tools' },
   { path: '/favorites', label: 'المفضلة', sitemap: { changeFrequency: 'weekly', priority: 0.4 }, nav: 'more' },
   { path: '/profile', label: 'الملف الشخصي', sitemap: { changeFrequency: 'weekly', priority: 0.4 } },

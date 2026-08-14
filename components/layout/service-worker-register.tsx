@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { hydrateOfflineContent } from '@/lib/offline-pack';
 
 export function ServiceWorkerRegister() {
   useEffect(() => {
@@ -21,6 +22,11 @@ export function ServiceWorkerRegister() {
         registration = await navigator.serviceWorker.register('/sw.js', {
           scope: '/',
           updateViaCache: 'none'
+        });
+
+        // Hydrate all public content into IndexedDB for true offline reading.
+        void hydrateOfflineContent().catch((error) => {
+          console.warn('[PWA] Offline content hydration failed:', error);
         });
 
         // Check for updates periodically

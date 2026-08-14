@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'ZikrOfflineDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 interface DbStore {
   name: string;
@@ -38,6 +38,18 @@ const STORES: DbStore[] = [
     keyPath: 'id',
     indexes: [{ name: 'category', keyPath: 'category' }],
   },
+  { name: 'tafsir', keyPath: 'id', indexes: [{ name: 'surahId', keyPath: 'surah_id' }] },
+  { name: 'hadithBooks', keyPath: 'id', indexes: [{ name: 'slug', keyPath: 'slug' }] },
+  { name: 'prophets', keyPath: 'id', indexes: [{ name: 'slug', keyPath: 'slug' }] },
+  { name: 'prophetSections', keyPath: 'id', indexes: [{ name: 'prophetId', keyPath: 'prophet_id' }] },
+  { name: 'battles', keyPath: 'id', indexes: [{ name: 'slug', keyPath: 'slug' }] },
+  { name: 'battleEvents', keyPath: 'id', indexes: [{ name: 'battleId', keyPath: 'battle_id' }] },
+  { name: 'conquests', keyPath: 'id', indexes: [{ name: 'slug', keyPath: 'slug' }] },
+  { name: 'conquestEvents', keyPath: 'id', indexes: [{ name: 'conquestId', keyPath: 'conquest_id' }] },
+  { name: 'articles', keyPath: 'id', indexes: [{ name: 'slug', keyPath: 'slug' }] },
+  { name: 'kids', keyPath: 'id', indexes: [{ name: 'slug', keyPath: 'slug' }] },
+  { name: 'companions', keyPath: 'id', indexes: [{ name: 'slug', keyPath: 'slug' }] },
+  { name: 'companionStories', keyPath: 'id', indexes: [{ name: 'companionId', keyPath: 'companion_id' }] },
   {
     name: 'favorites',
     keyPath: 'id',
@@ -121,6 +133,24 @@ export class OfflineDatabase {
       const request = store.put(data);
       request.onsuccess = () => resolve(data);
       request.onerror = () => reject(request.error);
+    });
+  }
+
+  async setMany<T>(storeName: string, rows: T[]): Promise<number> {
+    if (!rows.length) return 0;
+    const store = this.getStore(storeName, 'readwrite');
+    return new Promise((resolve, reject) => {
+      let completed = 0;
+      const transaction = store.transaction;
+      transaction.oncomplete = () => resolve(rows.length);
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted'));
+      for (const row of rows) {
+        const request = store.put(row);
+        request.onsuccess = () => { completed += 1; };
+        request.onerror = () => reject(request.error);
+      }
+      void completed;
     });
   }
 
