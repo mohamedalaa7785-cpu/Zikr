@@ -13,20 +13,28 @@ export default function OfflineLibraryPage() {
   const [manifest, setManifest] = useState<Manifest>(null);
   const [status, setStatus] = useState('جاري فحص الحزمة الأوفلاين…');
   const [isHydrating, setIsHydrating] = useState(false);
+  const [isComplete, setIsComplete] = useState<boolean | null>(null);
 
   useEffect(() => {
     void fetchOfflineManifest().then((next) => {
       setManifest(next);
-      setStatus(next ? 'الحزمة متاحة للتصفح دون اتصال بعد اكتمال التنزيل.' : 'لم يتم العثور على manifest محلي حتى الآن.');
+      setStatus(next ? 'الحزمة متاحة للتنزيل والتصفح دون اتصال.' : 'لم يتم العثور على manifest محلي حتى الآن.');
     });
   }, []);
 
   const hydrate = async () => {
     setIsHydrating(true);
     setStatus('جاري تنزيل المحتوى إلى ذاكرة الجهاز…');
-    const next = await hydrateOfflineContent({ force: true });
-    setManifest(next);
-    setStatus(next ? 'تم تنزيل الحزمة إلى IndexedDB بنجاح.' : 'تعذر تنزيل الحزمة؛ تحقق من الاتصال ثم أعد المحاولة.');
+    const result = await hydrateOfflineContent({ force: true });
+    setManifest(result?.manifest ?? null);
+    setIsComplete(result?.complete ?? false);
+    setStatus(
+      !result
+        ? 'تعذر تنزيل الحزمة؛ تحقق من الاتصال ثم أعد المحاولة.'
+        : result.complete
+          ? 'تم تنزيل جميع datasets إلى IndexedDB بنجاح.'
+          : `اكتمل التنزيل جزئيًا. العناصر التي تحتاج إعادة المحاولة: ${result.failedDatasets.join('، ')}`,
+    );
     setIsHydrating(false);
   };
 
@@ -47,7 +55,12 @@ export default function OfflineLibraryPage() {
       <Card className="space-y-3 border-brand-gold/20">
         <p className="text-sm text-brand-gold">الحالة</p>
         <p className="leading-8 text-foreground">{status}</p>
-        {manifest && <p className="text-xs text-muted-foreground">الإصدار: {manifest.version} · المسارات الأوفلاين: {manifest.routes.length} · إجمالي السجلات: {total.toLocaleString('ar-EG')}</p>}
+        {manifest && (
+          <p className="text-xs text-muted-foreground">
+            الإصدار: {manifest.version} · المسارات الأوفلاين: {manifest.routes.length} · إجمالي السجلات: {total.toLocaleString('ar-EG')}
+            {isComplete !== null && ` · حالة IndexedDB: ${isComplete ? 'مكتملة' : 'تحتاج إعادة محاولة'}`}
+          </p>
+        )}
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

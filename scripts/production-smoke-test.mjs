@@ -101,7 +101,7 @@ async function checkSupabaseTable(supabaseUrl, anonKey, table) {
 
 const siteUrl = env("NEXT_PUBLIC_SITE_URL") || "https://zikrmediaofficial.vercel.app";
 const supabaseUrl = env("NEXT_PUBLIC_SUPABASE_URL", ["SUPABASE_URL"]);
-const anonKey = env("NEXT_PUBLIC_SUPABASE_ANON_KEY", ["SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY"]);
+const anonKey = env("NEXT_PUBLIC_SUPABASE_ANON_KEY", ["SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_KEY"]);
 
 if (!siteUrl) add("fail", "NEXT_PUBLIC_SITE_URL", "missing");
 if (!supabaseUrl) add("fail", "NEXT_PUBLIC_SUPABASE_URL", "missing");

@@ -31,7 +31,13 @@ const STORE_BY_DATASET: Record<string, string> = {
 };
 
 const MANIFEST_URL = '/offline-content/v1/manifest.json';
-const VERSION_KEY = 'offline-content-version';
+const VERSION_KEY = 'offline-content-version-v2';
+
+export type OfflineHydrationResult = {
+  manifest: OfflineManifest;
+  complete: boolean;
+  failedDatasets: string[];
+};
 
 export async function fetchOfflineManifest(): Promise<OfflineManifest | null> {
   if (typeof window === 'undefined') return null;
@@ -44,32 +50,51 @@ export async function fetchOfflineManifest(): Promise<OfflineManifest | null> {
   }
 }
 
-export async function hydrateOfflineContent(options: { force?: boolean } = {}): Promise<OfflineManifest | null> {
+export async function hydrateOfflineContent(options: { force?: boolean } = {}): Promise<OfflineHydrationResult | null> {
   if (typeof window === 'undefined') return null;
   const manifest = await fetchOfflineManifest();
   if (!manifest) return null;
 
   const previousVersion = window.localStorage.getItem(VERSION_KEY);
   if (!options.force && previousVersion === manifest.version && offlineDb.isReady()) {
-    return manifest;
+    return { manifest, complete: true, failedDatasets: [] };
   }
 
-  await offlineDb.initialize();
+  const failedDatasets: string[] = [];
+  try {
+    await offlineDb.initialize();
+  } catch (error) {
+    console.warn('[OfflinePack] Failed to initialize IndexedDB', error);
+    return { manifest, complete: false, failedDatasets: ['indexeddb'] };
+  }
+
   for (const [dataset, definition] of Object.entries(manifest.datasets)) {
     const storeName = STORE_BY_DATASET[dataset];
-    if (!storeName || !definition?.path) continue;
+    if (!storeName || !definition?.path) {
+      failedDatasets.push(dataset);
+      continue;
+    }
     try {
       const response = await fetch(definition.path, { cache: 'force-cache' });
-      if (!response.ok) continue;
+      if (!response.ok) {
+        failedDatasets.push(dataset);
+        continue;
+      }
       const rows = await response.json();
-      if (Array.isArray(rows)) await offlineDb.setMany(storeName, rows);
+      if (!Array.isArray(rows) || rows.length !== definition.count) {
+        failedDatasets.push(dataset);
+        continue;
+      }
+      await offlineDb.setMany(storeName, rows);
     } catch (error) {
+      failedDatasets.push(dataset);
       console.warn(`[OfflinePack] Failed to hydrate ${dataset}`, error);
     }
   }
 
-  window.localStorage.setItem(VERSION_KEY, manifest.version);
-  return manifest;
+  const complete = failedDatasets.length === 0;
+  if (complete) window.localStorage.setItem(VERSION_KEY, manifest.version);
+  return { manifest, complete, failedDatasets };
 }
 
 export async function getOfflineDataset<T>(dataset: string): Promise<T[]> {

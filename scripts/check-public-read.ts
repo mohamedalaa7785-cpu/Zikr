@@ -2,11 +2,13 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const rawSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseUrl = rawSupabaseUrl?.replace(/\/rest\/v1\/?$/, '');
 const anonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_PUBLISHABLE_KEY;
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
+  process.env.SUPABASE_KEY;
 
 async function main() {
   if (!supabaseUrl || !anonKey) {
@@ -15,14 +17,23 @@ async function main() {
   }
 
   const tables = [
-    'quran_chapters',
-    'verses',
+    'quran_surahs',
+    'quran_ayahs',
+    'quran_tafsir',
     'hadith_books',
-    'hadith_collection',
+    'hadiths',
     'duas',
+    'prophets',
+    'prophet_sections',
+    'battles',
+    'battle_events',
+    'conquests',
+    'conquest_events',
+    'articles',
+    'kids_content',
+    'companions',
+    'companion_stories',
     'videos',
-    'video_generation_requests',
-    'social_publish_queue',
   ];
   let failures = 0;
 

@@ -12,6 +12,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const showDiagnostics = process.env.NODE_ENV !== 'production';
+
   useEffect(() => {
     // Log the error to an error reporting service
     console.error('[global-error]', {
@@ -35,9 +37,11 @@ export default function GlobalError({
             </div>
 
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-left">
-              <p className="text-xs text-red-300 font-mono break-words">
-                {error.message || 'Unknown error'}
-              </p>
+              {showDiagnostics && error.message && (
+                <p className="text-xs text-red-300 font-mono break-words">
+                  {error.message}
+                </p>
+              )}
               {error.digest && (
                 <p className="text-xs text-red-400 mt-2">
                   Error ID: {error.digest}

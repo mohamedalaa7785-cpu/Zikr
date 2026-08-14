@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'ZikrOfflineDB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 interface DbStore {
   name: string;
@@ -106,14 +106,19 @@ export class OfflineDatabase {
       };
 
       request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
+        const requestWithUpgrade = event.target as IDBOpenDBRequest;
+        const db = requestWithUpgrade.result;
+        const upgradeTransaction = requestWithUpgrade.transaction;
+
         for (const store of STORES) {
-          if (!db.objectStoreNames.contains(store.name)) {
-            const objectStore = db.createObjectStore(store.name, { keyPath: store.keyPath });
-            if (store.indexes) {
-              for (const index of store.indexes) {
-                objectStore.createIndex(index.name, index.keyPath);
-              }
+          const objectStore = db.objectStoreNames.contains(store.name)
+            ? upgradeTransaction?.objectStore(store.name)
+            : db.createObjectStore(store.name, { keyPath: store.keyPath });
+
+          if (!objectStore || !store.indexes) continue;
+          for (const index of store.indexes) {
+            if (!objectStore.indexNames.contains(index.name)) {
+              objectStore.createIndex(index.name, index.keyPath);
             }
           }
         }
