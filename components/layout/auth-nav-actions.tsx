@@ -18,18 +18,11 @@ export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsPr
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
 
   useEffect(() => {
-    // Guard: if Supabase public env vars are not available at runtime in the
-    // browser (e.g. preview sandbox), rely on the server-passed initialUser
-    // and skip client-side auth subscription.
-    const supabaseUrl =
-      process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      process.env.NEXT_PUBLIC_SUPABASE_URL_FALLBACK;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    // Keep the server-provided authenticated state when the preview/runtime
-    // does not expose the complete public Supabase configuration to the browser.
-    // Creating a placeholder client here would incorrectly replace a real user
-    // with null and show "تسجيل الدخول" in the navbar.
+    // If the browser bundle cannot see Supabase configuration, preserve the
+    // server-rendered auth state instead of replacing it with a false logout.
     if (!supabaseUrl || !supabaseAnonKey) return;
 
     const supabase = createClient();
