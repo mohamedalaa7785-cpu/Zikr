@@ -7,7 +7,7 @@ import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = pageMetadata({
   title: 'الصحابة رضي الله عنهم',
@@ -57,11 +57,11 @@ const staticCompanions: Companion[] = [
   { id: '20', name_ar: 'معاذ بن جبل رضي الله عنه',     name_en: "Mu'adh ibn Jabal",        title_ar: 'أعلم الأمة بالحلال والحرام',          bio_ar: 'من أعلم الصحابة بالفقه والحلال والحرام. أرسله النبي ﷺ إلى اليمن معلماً وقاضياً. قال النبي: "أعلم أمتي بالحلال والحرام معاذ".',                                              slug: 'muadh-ibn-jabal',   category: 'الصحابة الكرام' },
   { id: '21', name_ar: 'خالد بن الوليد رضي الله عنه',   name_en: 'Khalid ibn al-Walid',     title_ar: 'سيف الله المسلول',                    bio_ar: 'لُقِّب بسيف الله المسلول. لم يُهزم في معركة قط. أسلم بعد صلح الحديبية وشارك في فتوحات الشام والعراق. قاد معركة اليرموك العظيمة.',                                            slug: 'khalid-ibn-al-walid',category: 'الصحابة الكرام' },
   { id: '22', name_ar: 'عمرو بن العاص رضي الله عنه',    name_en: "Amr ibn al-'As",          title_ar: 'فاتح مصر',                            bio_ar: 'فاتح مصر للإسلام. كان ذكياً ودبلوماسياً بارعاً. أسلم مع خالد بن الوليد وضرار بن الأزور في رحلة واحدة. قائد موهوب.',                                                         slug: 'amr-ibn-al-as',     category: 'الصحابة الكرام' },
-  { id: '23', name_ar: 'عبد الله بن عباس رضي الله عنهما',name_en: 'Abdullah ibn Abbas',     title_ar: 'حبر الأمة وترجمان القرآن',            bio_ar: 'دعا له النبي ﷺ: "اللهم فقّهه في الدين وعلّمه التأويل". أعلم الصحابة بتفسير القرآن الكريم. ابن عم النبي ﷺ.',                                                                slug: 'ibn-abbas',          category: 'الصحابة الكرام' },
+  { id: '23', name_ar: 'عبد الله بن عباس رضي الله عنهما',name_en: 'Abdullah ibn Abbas',     title_ar: 'حبر الأمة وترجمان القرآن',            bio_ar: 'دعا له النبي ﷺ: "اللهم فقّهه في الدين وعلّمه التأويل". أعلم الصحابة ��تفسير القرآن الكريم. ابن عم النبي ﷺ.',                                                                slug: 'ibn-abbas',          category: 'الصحابة الكرام' },
   { id: '24', name_ar: 'عبد الله بن عمر رضي الله عنهما', name_en: 'Abdullah ibn Umar',      title_ar: 'من كبار الفقهاء والمحدّثين',          bio_ar: 'ابن عمر بن الخطاب. من أكثر الصحابة ورعاً وتمسكاً بالسنة. روى أكثر من 2600 حديث. كان يتبع آثار النبي ﷺ في كل شيء.',                                                        slug: 'ibn-umar',          category: 'الصحابة الكرام' },
   { id: '25', name_ar: 'فاطمة الزهراء رضي الله عنها',   name_en: 'Fatimah az-Zahra',        title_ar: 'سيدة نساء أهل الجنة',                bio_ar: 'ابنة النبي ﷺ وزوجة علي بن أبي طالب وأم الحسن والحسين. قال عنها النبي: "فاطمة سيدة نساء أهل الجنة". عُرفت بتقواها وزهدها.',                                                slug: 'fatimah',            category: 'الصحابة الكرام' },
   { id: '26', name_ar: 'حمزة بن عبد المطلب رضي الله عنه',name_en: 'Hamza ibn Abd al-Muttalib',title_ar: 'سيد الشهداء — أسد الله',            bio_ar: 'عم النبي ﷺ وأخوه من الرضاعة. لُقِّب بـ"أسد الله وأسد رسوله". استُشهد في غزوة أُحد. قال عنه النبي: "سيد الشهداء".',                                                          slug: 'hamza',             category: 'الصحابة الكرام' },
-  { id: '27', name_ar: 'أبو ذر الغفاري رضي الله عنه',   name_en: 'Abu Dharr al-Ghifari',    title_ar: 'صادق الأمة',                          bio_ar: 'أسلم مبكراً جداً. عُرف بصدقه وزهده الشديد. قال عنه النبي: "ما أقلّت الغبراء ولا أظلّت الخضراء من رجل أصدق لهجة من أبي ذر".',                                              slug: 'abu-dharr',         category: 'الصحابة الكرام' },
+  { id: '27', name_ar: 'أبو ذر الغفاري رضي الله عنه',   name_en: 'Abu Dharr al-Ghifari',    title_ar: 'صادق الأمة',                          bio_ar: 'أسلم مبكراً جداً. عُرف بصدقه وزهده الشديد. قال عنه النبي: "ما أقلّت الغبراء ولا أظلّت الخضراء من رجل أصدق ��هجة من أبي ذر".',                                              slug: 'abu-dharr',         category: 'الصحابة الكرام' },
   { id: '28', name_ar: 'عبد الله بن الزبير رضي الله عنه',name_en: 'Abdullah ibn al-Zubayr', title_ar: 'أمير المؤمنين — أول مولود بعد الهجرة', bio_ar: 'أول مولود في الإسلام بعد الهجرة. ابن الزبير بن العوام. حكم الحجاز سنوات. كان من أشجع الناس وأشدهم عبادة.',                                                              slug: 'ibn-al-zubayr',     category: 'الصحابة الكرام' },
 ];
 
@@ -69,7 +69,7 @@ export default async function CompanionsPage() {
   let companions: Companion[] = [];
 
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data } = await supabase
       .from('companions')
       .select('id, name_ar, name_en, title_ar, bio_ar, slug, category')

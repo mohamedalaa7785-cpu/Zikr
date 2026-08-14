@@ -1,11 +1,11 @@
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createAdminClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   if (!isSupabaseConfigured()) return NextResponse.json([]);
 
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data: companions, error } = await supabase
       .from('companions')
       .select('*')
