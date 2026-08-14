@@ -45,9 +45,10 @@ export async function GET(request: NextRequest) {
       if (!user) {
         const sessionCheck = await supabase.auth.getUser();
         if (!sessionCheck.data.user) {
-          return NextResponse.redirect(
-            `${origin}/auth/login?error=auth_session_missing`,
-          );
+          const missingSessionUrl = new URL('/auth/login', origin);
+          missingSessionUrl.searchParams.set('error', 'auth_session_missing');
+          missingSessionUrl.searchParams.set('next', safePath);
+          return NextResponse.redirect(missingSessionUrl);
         }
       }
 

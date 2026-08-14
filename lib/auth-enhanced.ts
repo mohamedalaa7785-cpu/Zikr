@@ -34,8 +34,9 @@ export function buildOAuthRedirectUri(
  * different link. Localhost is preserved for development.
  */
 export function getCanonicalAuthBaseUrl(baseUrl?: string | null): string {
-  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  const canonicalProductionUrl = configuredSiteUrl || PRODUCTION_URL;
+  // Read through the normalized server environment so numbered Vercel
+  // integration variables (for example NEXT_PUBLIC_SITE_URL_2) are honored.
+  const canonicalProductionUrl = getServerEnv().NEXT_PUBLIC_SITE_URL || PRODUCTION_URL;
 
   if (!baseUrl) return canonicalProductionUrl;
 
