@@ -72,31 +72,34 @@ export function InstallPrompt() {
     <div
       role="region"
       aria-label="تثبيت التطبيق"
-      className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2"
+      className="fixed left-1/2 z-50 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 sm:w-[calc(100%-2rem)]"
+      style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
     >
-      <div className="flex items-center gap-3 rounded-xl border border-brand-gold/40 bg-brand-emeraldDeep/95 px-4 py-3 shadow-2xl backdrop-blur-md">
+      <div
+        className="flex items-center gap-2.5 rounded-xl border border-brand-gold/40 bg-brand-emeraldDeep/95 px-3 py-2.5 shadow-2xl backdrop-blur-md sm:gap-3 sm:px-4 sm:py-3"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
-          className="h-8 w-8 shrink-0 text-brand-gold"
+          className="h-7 w-7 shrink-0 text-brand-gold sm:h-8 sm:w-8"
           aria-hidden="true"
         >
           <rect x="5" y="2" width="14" height="20" rx="2" />
           <path strokeLinecap="round" d="M12 18h.01" />
         </svg>
         <div className="min-w-0 flex-1" dir="rtl">
-          <p className="text-sm font-bold text-brand-gold">ثبّت تطبيق ذِكر</p>
-          <p className="text-xs text-brand-cream/60">
+          <p className="text-xs font-bold text-brand-gold sm:text-sm">ثبّت تطبيق ذِكر</p>
+          <p className="text-[11px] leading-snug text-brand-cream/60 sm:text-xs">
             أضِفه إلى شاشتك الرئيسية واستخدمه بالكامل بدون إنترنت
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={handleInstall}
-            className="rounded-lg bg-brand-gold px-3 py-1.5 text-xs font-bold text-brand-emeraldDeep transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
+            className="rounded-lg bg-brand-gold px-2.5 py-1.5 text-[11px] font-bold text-brand-emeraldDeep transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold sm:px-3 sm:text-xs"
           >
             تثبيت
           </button>

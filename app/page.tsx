@@ -555,7 +555,7 @@ export default function HomePage() {
     : "";
 
   return (
-    <div className="min-h-screen bg-brand-emeraldDeep text-brand-cream">
+    <div className="min-h-screen min-w-0 overflow-x-clip bg-brand-emeraldDeep text-brand-cream">
       {/* ═══════════════════════════════════════════════════════════════════════
           SECTION 1 — HERO
       ══════════════════════════════════════════════════════════════════════ */}
@@ -600,7 +600,7 @@ export default function HomePage() {
           </svg>
         </div>
 
-        <Container className="relative z-10 pt-14 pb-16 space-y-10">
+        <Container className="relative z-10 space-y-7 pt-10 pb-10 sm:space-y-10 sm:pt-14 sm:pb-16">
           {/* Bismillah line */}
           <div className="text-center">
             <p
@@ -617,7 +617,7 @@ export default function HomePage() {
           {/* Main title + clock */}
           <div className="text-center space-y-3">
             <h1
-              className="text-6xl md:text-8xl font-bold text-brand-gold text-balance"
+              className="text-5xl sm:text-6xl md:text-8xl font-bold text-brand-gold text-balance"
               style={{
                 fontFamily: "var(--font-amiri), var(--font-noto-arabic)",
                 textShadow:
@@ -672,7 +672,7 @@ export default function HomePage() {
           <ArabicOrnament className="w-64 mx-auto rotate-180" />
 
           {/* Search bar */}
-          <div className="max-w-2xl mx-auto">
+          <div className="mx-auto w-full max-w-2xl">
             <form onSubmit={handleSearch} className="relative" role="search">
               <div
                 className="absolute inset-0 rounded-2xl pointer-events-none"
@@ -696,13 +696,13 @@ export default function HomePage() {
                     e.preventDefault();
                 }}
                 aria-label={isEnglish ? "Search content" : "البحث في المحتوى"}
-                className="w-full px-6 py-4 pr-14 rounded-2xl border border-brand-gold/25 bg-black/40 text-brand-cream placeholder:text-brand-cream/30 focus:border-brand-gold/55 focus:outline-none focus:ring-2 focus:ring-brand-gold/15 text-base"
+                className="w-full rounded-xl border border-brand-gold/25 bg-black/40 px-4 py-3 pr-12 text-base text-brand-cream placeholder:text-brand-cream/30 focus:border-brand-gold/55 focus:outline-none focus:ring-2 focus:ring-brand-gold/15 sm:rounded-2xl sm:px-6 sm:py-4 sm:pr-14"
                 style={{ backdropFilter: "blur(16px)" }}
                 dir={dir}
               />
               <button
                 type="submit"
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-brand-gold/15 flex items-center justify-center text-brand-gold hover:bg-brand-gold/25 transition-colors"
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-brand-gold/15 text-brand-gold transition-colors hover:bg-brand-gold/25 sm:right-4 sm:h-9 sm:w-9 sm:rounded-xl"
                 aria-label={isEnglish ? "Search" : "بحث"}
               >
                 <svg
@@ -726,7 +726,7 @@ export default function HomePage() {
           {/* Quick nav grid */}
           <nav
             aria-label={isEnglish ? "Platform sections" : "أقسام المنصة"}
-            className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-11 gap-2"
+            className="grid grid-cols-3 gap-1.5 min-[360px]:grid-cols-4 sm:gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-11"
           >
             {[
               { label: "القرآن", labelEn: "Quran", href: "/quran" },
@@ -755,9 +755,9 @@ export default function HomePage() {
               <Link
                 key={cat.href}
                 href={cat.href}
-                className="group flex items-center justify-center p-2.5 rounded-xl border border-brand-gold/12 bg-black/20 hover:border-brand-gold/40 hover:bg-brand-gold/8 transition-all duration-200 min-h-[44px]"
+                className="group flex min-h-10 items-center justify-center rounded-xl border border-brand-gold/12 bg-black/20 p-2 transition-all duration-200 hover:border-brand-gold/40 hover:bg-brand-gold/8 sm:min-h-[44px] sm:p-2.5"
               >
-                <span className="text-[11px] text-center text-brand-cream/60 group-hover:text-brand-gold leading-tight transition-colors">
+                <span                   className="text-center text-[10px] leading-tight text-brand-cream/60 transition-colors group-hover:text-brand-gold sm:text-[11px]">
                   {isEnglish ? cat.labelEn : cat.label}
                 </span>
               </Link>
@@ -770,7 +770,7 @@ export default function HomePage() {
           SECTION 2 — PRAYER TIMES
       ══════════════════════════════════════════════════════════════════════ */}
       <section
-        className="border-b border-brand-gold/12 px-4 py-12"
+        className="border-b border-brand-gold/12 px-3 py-10 sm:px-4 sm:py-12"
         aria-labelledby="prayer-times-heading"
         style={{
           background:
@@ -780,7 +780,7 @@ export default function HomePage() {
         <Container className="space-y-6">
           <SectionDivider title="مواقيت الصلاة" />
 
-          <div className="flex items-start justify-between flex-wrap gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2
                 id="prayer-times-heading"
@@ -805,14 +805,14 @@ export default function HomePage() {
                   setCityInput("");
                 }
               }}
-              className="flex gap-2"
+              className="flex w-full gap-2 sm:w-auto"
             >
               <input
                 type="text"
                 value={cityInput}
                 onChange={e => setCityInput(e.target.value)}
                 placeholder="اسم المدينة..."
-                className="px-3 py-2 rounded-lg border border-brand-gold/20 bg-black/30 text-brand-cream text-sm placeholder:text-brand-cream/30 focus:outline-none focus:border-brand-gold/50 w-36"
+                className="min-w-0 flex-1 rounded-lg border border-brand-gold/20 bg-black/30 px-3 py-2 text-sm text-brand-cream placeholder:text-brand-cream/30 focus:border-brand-gold/50 focus:outline-none sm:w-36 sm:flex-none"
                 aria-label="اسم المدينة"
                 dir="rtl"
               />
@@ -826,14 +826,14 @@ export default function HomePage() {
           </div>
 
           {prayerTimes ? (
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 gap-2 min-[360px]:grid-cols-3 sm:gap-3 md:grid-cols-6">
               {prayerNames.map(({ key, label }) => {
                 const isActive = activePrayer === key;
                 const isNext = nextPrayer === key;
                 return (
                   <div
                     key={key}
-                    className={`relative min-h-[92px] rounded-2xl border p-4 text-center transition-all duration-300 overflow-hidden ${
+                      className={`relative min-h-[88px] overflow-hidden rounded-2xl border p-3 text-center transition-all duration-300 sm:min-h-[92px] sm:p-4 ${
                       isActive
                         ? "border-brand-gold bg-brand-gold/12 shadow-lg shadow-brand-gold/10"
                         : isNext
@@ -870,11 +870,11 @@ export default function HomePage() {
               })}
             </div>
           ) : (
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 gap-2 min-[360px]:grid-cols-3 sm:gap-3 md:grid-cols-6">
               {prayerNames.map(({ label }) => (
                 <div
                   key={label}
-                  className="min-h-[92px] rounded-2xl border border-brand-gold/10 bg-black/20 p-4 text-center animate-pulse"
+                  className="min-h-[88px] animate-pulse rounded-2xl border border-brand-gold/10 bg-black/20 p-3 text-center sm:min-h-[92px] sm:p-4"
                 >
                   <p className="text-xs text-brand-gold/30 mb-2">{label}</p>
                   <div className="h-6 w-16 bg-brand-gold/10 rounded mx-auto" />
@@ -910,7 +910,7 @@ export default function HomePage() {
           SECTION 3 — FEATURED SECTIONS
       ══════════════════════════════════════════════════════════════════════ */}
       <section
-        className="border-b border-brand-gold/12 px-4 py-12"
+        className="border-b border-brand-gold/12 px-3 py-10 sm:px-4 sm:py-12"
         aria-labelledby="featured-heading"
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 520px" }}
       >
@@ -938,7 +938,7 @@ export default function HomePage() {
               <Link
                 key={sec.href}
                 href={sec.href}
-                className={`group block rounded-2xl border ${sec.border} bg-gradient-to-br ${sec.color} p-6 transition-all duration-300 hover:shadow-xl ${sec.glow} hover:-translate-y-0.5`}
+                className={`group block rounded-2xl border ${sec.border} bg-gradient-to-br ${sec.color} p-4 transition-all duration-300 hover:shadow-xl sm:p-6 ${sec.glow} hover:-translate-y-0.5`}
               >
                 <div className="flex items-start justify-between mb-5">
                   <div className="w-11 h-11 rounded-xl bg-black/30 border border-brand-gold/15 flex items-center justify-center text-brand-gold group-hover:border-brand-gold/40 transition-colors">
@@ -984,7 +984,7 @@ export default function HomePage() {
           SECTION 4 — MORE CONTENT
       ══════════════���═══════════════════════════════════════════════════════ */}
       <section
-        className="border-b border-brand-gold/12 px-4 py-12"
+        className="border-b border-brand-gold/12 px-3 py-10 sm:px-4 sm:py-12"
         aria-labelledby="more-heading"
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 520px" }}
       >
@@ -1003,7 +1003,7 @@ export default function HomePage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-brand-gold/12 bg-black/20 hover:border-brand-gold/35 hover:bg-brand-gold/6 transition-all duration-200 text-center"
+                className="group flex flex-col items-center gap-2 rounded-2xl border border-brand-gold/12 bg-black/20 p-3 text-center transition-all duration-200 hover:border-brand-gold/35 hover:bg-brand-gold/6 sm:gap-2.5 sm:p-4"
               >
                 <span className="text-2xl" aria-hidden="true">
                   {item.icon}
@@ -1024,7 +1024,7 @@ export default function HomePage() {
           SECTION 5 — QURAN STATS
       ══════════════════════════════════════════════════════════════════════ */}
       <section
-        className="border-b border-brand-gold/12 px-4 py-12"
+        className="border-b border-brand-gold/12 px-3 py-10 sm:px-4 sm:py-12"
         aria-labelledby="stats-heading"
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 420px" }}
       >
@@ -1042,7 +1042,7 @@ export default function HomePage() {
             {stats.map(stat => (
               <div
                 key={stat.label}
-                className="relative rounded-2xl border border-brand-gold/15 bg-black/25 p-6 text-center overflow-hidden group hover:border-brand-gold/35 transition-colors"
+                className="group relative overflow-hidden rounded-2xl border border-brand-gold/15 bg-black/25 p-4 text-center transition-colors hover:border-brand-gold/35 sm:p-6"
               >
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -1053,7 +1053,7 @@ export default function HomePage() {
                   aria-hidden="true"
                 />
                 <p
-                  className="text-4xl md:text-5xl font-bold text-brand-gold tabular-nums mb-2"
+                  className="mb-2 text-3xl font-bold tabular-nums text-brand-gold sm:text-4xl md:text-5xl"
                   style={{ textShadow: "0 0 20px rgba(199,168,107,0.25)" }}
                 >
                   {stat.value}
@@ -1104,7 +1104,7 @@ export default function HomePage() {
               </span>
             </div>
 
-            <div className="relative z-10 py-14 px-6 md:px-12 text-center space-y-6">
+            <div className="relative z-10 space-y-6 px-4 py-10 text-center sm:px-6 sm:py-14 md:px-12">
               {/* Top ornament */}
               <ArabicOrnament className="w-48 mx-auto" />
 
@@ -1113,7 +1113,7 @@ export default function HomePage() {
                   آية من كتاب الله
                 </p>
                 <p
-                  className="text-2xl md:text-3xl lg:text-4xl leading-loose text-brand-cream font-bold max-w-3xl mx-auto"
+                  className="mx-auto max-w-3xl text-xl font-bold leading-loose text-brand-cream sm:text-2xl md:text-3xl lg:text-4xl"
                   dir="rtl"
                   style={{
                     fontFamily: "var(--font-amiri)",
@@ -1134,20 +1134,20 @@ export default function HomePage() {
               <div className="flex min-h-10 justify-center gap-4 flex-wrap pt-2">
                 <Link
                   href="/quran"
-                  className="rounded-xl bg-brand-gold px-8 py-3 text-sm font-bold text-brand-emeraldDeep hover:bg-brand-goldSoft transition-colors shadow-lg shadow-brand-gold/20"
+                  className="w-full rounded-xl bg-brand-gold px-5 py-3 text-sm font-bold text-brand-emeraldDeep shadow-lg shadow-brand-gold/20 transition-colors hover:bg-brand-goldSoft sm:w-auto sm:px-8"
                 >
                   اقرأ القرآن الكريم
                 </Link>
                 <Link
                   href="/adhkar"
-                  className="rounded-xl border border-brand-gold/30 px-8 py-3 text-sm text-brand-cream/70 hover:border-brand-gold hover:text-brand-gold transition-colors"
+                  className="w-full rounded-xl border border-brand-gold/30 px-5 py-3 text-sm text-brand-cream/70 transition-colors hover:border-brand-gold hover:text-brand-gold sm:w-auto sm:px-8"
                 >
                   أذكار اليوم
                 </Link>
                 {!user && authLoaded && (
                   <Link
                     href="/auth/register"
-                    className="rounded-xl border border-brand-gold/15 px-8 py-3 text-sm text-brand-cream/45 hover:border-brand-gold/30 hover:text-brand-cream/65 transition-colors"
+                    className="w-full rounded-xl border border-brand-gold/15 px-5 py-3 text-sm text-brand-cream/45 transition-colors hover:border-brand-gold/30 hover:text-brand-cream/65 sm:w-auto sm:px-8"
                   >
                     إنشاء حساب مجاني
                   </Link>
@@ -1155,7 +1155,7 @@ export default function HomePage() {
                 {user && authLoaded && (
                   <Link
                     href="/profile"
-                    className="rounded-xl border border-brand-gold/15 px-8 py-3 text-sm text-brand-cream/45 hover:border-brand-gold/30 hover:text-brand-cream/65 transition-colors"
+                    className="w-full rounded-xl border border-brand-gold/15 px-5 py-3 text-sm text-brand-cream/45 transition-colors hover:border-brand-gold/30 hover:text-brand-cream/65 sm:w-auto sm:px-8"
                   >
                     الملف الشخصي
                   </Link>

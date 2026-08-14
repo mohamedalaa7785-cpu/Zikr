@@ -15,9 +15,11 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
+  min-width: 0;
   background: #000000;
   color: #f5f5f0;
   font-family: var(--font-arabic), system-ui, sans-serif;
@@ -163,6 +165,20 @@ p {
   overscroll-behavior-y: none;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 639px) {
+  /* Keep long Arabic labels and buttons inside the viewport on narrow phones. */
+  button,
+  a {
+    max-width: 100%;
+  }
+
+  /* Reserve a little breathing room for fixed mobile prompts and system bars. */
+  [data-mobile-nav],
+  nav[aria-label="التنقل السفلي"] {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
 }
 
 .capacitor-native [data-mobile-nav],
