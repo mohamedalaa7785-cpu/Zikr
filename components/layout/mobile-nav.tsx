@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { logoutAction } from '@/app/auth/actions';
 import { useLanguage } from './language-provider';
 
 const allLinks = [
@@ -56,7 +57,7 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
       {/* Overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 z-50 bg-black/50 md:hidden"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />
@@ -64,7 +65,7 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
 
       {/* Slide-in Drawer */}
       <nav
-        className={`fixed top-0 end-0 z-40 h-full w-72 bg-brand-emeraldDeep border-s border-brand-gold/15 shadow-xl md:hidden transition-all duration-300 ease-in-out overflow-y-auto ${open ? 'translate-x-0 visible' : dir === 'rtl' ? 'translate-x-full invisible' : '-translate-x-full invisible'}`}
+        className={`fixed top-0 end-0 z-[60] h-dvh max-h-dvh w-[min(18rem,calc(100vw-1rem))] bg-brand-emeraldDeep border-s border-brand-gold/15 shadow-xl md:hidden transition-all duration-300 ease-in-out overflow-y-auto overscroll-contain ${open ? 'translate-x-0 visible' : dir === 'rtl' ? 'translate-x-full invisible' : '-translate-x-full invisible'}`}
         aria-label={isEnglish ? 'Primary navigation' : 'القائمة الرئيسية'}
         aria-hidden={!open}
       >
@@ -82,13 +83,33 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
         </div>
 
         <div className="py-3 px-3">
-          <Link
-            href={isAuthenticated ? '/profile' : '/auth/login'}
-            onClick={() => setOpen(false)}
-            className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
-          >
-            {isAuthenticated ? 'الملف الشخصي' : 'تسجيل الدخول'}
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/profile"
+                onClick={() => setOpen(false)}
+                className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
+              >
+                الملف الشخصي
+              </Link>
+              <form action={logoutAction} className="mb-2">
+                <button
+                  type="submit"
+                  className="flex w-full items-center rounded-lg border border-brand-cream/15 px-4 py-3 text-sm font-semibold text-brand-cream/75 transition-all hover:border-brand-gold/30 hover:bg-brand-gold/10 hover:text-brand-gold"
+                >
+                  تسجيل الخروج
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link
+              href="/auth/login"
+              onClick={() => setOpen(false)}
+              className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
+            >
+              تسجيل الدخول
+            </Link>
+          )}
           {allLinks.map((link) => (
             <Link
               key={link.href}

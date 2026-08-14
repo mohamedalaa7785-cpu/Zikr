@@ -91,7 +91,7 @@ export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsPr
       )}
       <form action={logoutAction}>
         <Button variant="secondary" type="submit" className="text-sm">
-          خروج
+          تسجيل الخروج
         </Button>
       </form>
     </>
