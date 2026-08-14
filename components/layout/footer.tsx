@@ -48,7 +48,7 @@ export function Footer() {
     { href: '/contact', ar: 'تواصل معنا', en: 'Contact' },
     { href: '/privacy', ar: 'سياسة الخصوصية', en: 'Privacy Policy' },
     { href: '/terms', ar: 'الشروط والأحكام', en: 'Terms' },
-    { href: '/auth/login', ar: 'حسابي', en: 'My Account' },
+    { href: '/profile', ar: 'الملف الشخصي', en: 'My Profile' },
   ];
 
   return (

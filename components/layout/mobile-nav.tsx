@@ -31,7 +31,11 @@ const allLinks = [
   { href: '/search', label: 'البحث', labelEn: 'Search' },
 ];
 
-export function MobileNav() {
+type MobileNavProps = {
+  isAuthenticated?: boolean;
+};
+
+export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const { isEnglish, dir } = useLanguage();
 
@@ -78,6 +82,13 @@ export function MobileNav() {
         </div>
 
         <div className="py-3 px-3">
+          <Link
+            href={isAuthenticated ? '/profile' : '/auth/login'}
+            onClick={() => setOpen(false)}
+            className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
+          >
+            {isAuthenticated ? 'الملف الشخصي' : 'تسجيل الدخول'}
+          </Link>
           {allLinks.map((link) => (
             <Link
               key={link.href}

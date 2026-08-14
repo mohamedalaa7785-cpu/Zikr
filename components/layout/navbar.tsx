@@ -67,7 +67,7 @@ export async function Navbar() {
           >
             <Settings className="h-5 w-5" aria-hidden="true" />
           </Link>
-          <MobileNav />
+          <MobileNav isAuthenticated={Boolean(user)} />
           <AuthNavActions initialUser={user} initialIsAdmin={isAdmin} />
         </div>
       </Container>
