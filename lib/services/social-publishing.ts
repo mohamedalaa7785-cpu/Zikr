@@ -1,8 +1,8 @@
 import { supabaseServerAdminRequest } from "@/lib/supabase/server";
-import { publishToYoutube } from "@/lib/services/video-automation";
+import { publishToFacebook, publishToYoutube } from "@/lib/services/video-automation";
 import { getServerEnv } from "@/lib/env";
 
-export type SocialPlatform = "facebook" | "youtube";
+export type SocialPlatform = "facebook" | "facebook_reels" | "youtube";
 export type SocialQueueStatus =
   "queued" | "processing" | "published" | "partial" | "failed";
 
@@ -146,6 +146,21 @@ async function publishFacebookPost(
   return data.id ?? null;
 }
 
+async function publishFacebookReelItem(
+  item: SocialPublishQueueItem
+): Promise<string | null> {
+  if (!item.video_url) throw new Error("Facebook Reels publishing requires video_url");
+  const env = getServerEnv();
+  if (!env.FACEBOOK_PAGE_ID) throw new Error("FACEBOOK_PAGE_ID is not configured");
+  return publishToFacebook(
+    item.id,
+    { title: item.title, description: item.body ?? "" },
+    item.video_url,
+    env.FACEBOOK_PAGE_ID,
+    true
+  );
+}
+
 async function publishYoutubeItem(
   item: SocialPublishQueueItem
 ): Promise<string | null> {
@@ -159,6 +174,7 @@ async function publishYoutubeItem(
         .join("\n\n"),
       tags: ["zikr", "islamic", item.content_type],
       categoryId: "27",
+      isShort: item.metadata?.videoFormat !== "horizontal",
     },
     item.video_url
   );
@@ -172,7 +188,9 @@ async function publishPlatform(
     const remoteId =
       platform === "facebook"
         ? await publishFacebookPost(item)
-        : await publishYoutubeItem(item);
+        : platform === "facebook_reels"
+          ? await publishFacebookReelItem(item)
+          : await publishYoutubeItem(item);
     return { platform, ok: Boolean(remoteId), remoteId };
   } catch (error) {
     return {
@@ -191,7 +209,7 @@ export async function processSocialPublishItem(
     await markQueueItem(item.id, "processing");
   }
   const platforms = item.target_platforms.filter(
-    (p): p is SocialPlatform => p === "facebook" || p === "youtube"
+    (p): p is SocialPlatform => p === "facebook" || p === "facebook_reels" || p === "youtube"
   );
   if (platforms.length === 0) {
     await markQueueItem(item.id, "failed", {

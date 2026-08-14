@@ -230,11 +230,13 @@ async function logPublishResult(entry: {
  * Generate metadata for YouTube
  */
 export function generateYoutubeMetadata(request: VideoGenerationRequest) {
+  const isShort = isVerticalVideo(request);
   return {
     title: request.title,
-    description: request.description ?? '',
-    tags: ['islamic', 'quran', 'hadith', 'dua', 'adhkar'],
+    description: [request.description ?? '', isShort ? '#Shorts' : ''].filter(Boolean).join('\n\n'),
+    tags: ['islamic', 'quran', 'hadith', 'dua', 'adhkar', ...(isShort ? ['shorts'] : [])],
     categoryId: '27', // Education
+    isShort,
   };
 }
 
@@ -383,6 +385,11 @@ function validateVideoGenerationRequest(request: VideoGenerationRequest): string
   return null;
 }
 
+function isVerticalVideo(request: VideoGenerationRequest): boolean {
+  const format = requestContentObject(request).videoFormat;
+  return format !== 'horizontal';
+}
+
 function slugFromRequest(request: VideoGenerationRequest): string {
   const content = requestContentObject(request);
   const publicPath = content.publicPath;
@@ -476,7 +483,12 @@ export async function submitVideoToHeyGen(
             },
           },
         ],
-        dimension: { width: 1280, height: 720 },
+        // Generate vertical-first so the same asset can be published as a
+        // YouTube Short and Facebook Reel. Set content.videoFormat to
+        // 'horizontal' only when a landscape upload is explicitly required.
+        dimension: isVerticalVideo(request)
+          ? { width: 1080, height: 1920 }
+          : { width: 1280, height: 720 },
       }),
     });
 
@@ -654,13 +666,70 @@ export async function publishToFacebook(
   videoId: string,
   metadata: ReturnType<typeof generateFacebookMetadata>,
   videoUrl: string,
-  pageId: string
+  pageId: string,
+  asReel = false
 ): Promise<string | null> {
   try {
     const pageAccessToken = pickEnv('FACEBOOK_PAGE_ACCESS_TOKEN');
     if (!pageAccessToken) {
       console.warn('[video-automation] FACEBOOK_PAGE_ACCESS_TOKEN not configured');
       return null;
+    }
+
+    if (asReel) {
+      const startParams = new URLSearchParams({
+        upload_phase: 'start',
+        access_token: pageAccessToken,
+      });
+      const startResponse = await fetch(`https://graph.facebook.com/v26.0/${pageId}/video_reels`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: startParams,
+      });
+      const startData = (await startResponse.json().catch(() => ({}))) as {
+        video_id?: string;
+        upload_url?: string;
+        error?: { message?: string };
+      };
+      if (!startResponse.ok || !startData.video_id || !startData.upload_url) {
+        throw new Error(`Facebook Reel start failed: ${startData.error?.message ?? `HTTP ${startResponse.status}`}`);
+      }
+
+      const uploadResponse = await fetch(startData.upload_url, {
+        method: 'POST',
+        headers: {
+          Authorization: `OAuth ${pageAccessToken}`,
+          file_url: videoUrl,
+        },
+      });
+      if (!uploadResponse.ok) {
+        const body = await uploadResponse.text().catch(() => '');
+        throw new Error(`Facebook Reel upload failed (HTTP ${uploadResponse.status}): ${body.slice(0, 300)}`);
+      }
+
+      const finishParams = new URLSearchParams({
+        upload_phase: 'finish',
+        video_id: startData.video_id,
+        video_state: 'PUBLISHED',
+        title: metadata.title,
+        description: metadata.description,
+        is_ai_generated: 'true',
+        access_token: pageAccessToken,
+      });
+      const finishResponse = await fetch(`https://graph.facebook.com/v26.0/${pageId}/video_reels`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: finishParams,
+      });
+      const finishData = (await finishResponse.json().catch(() => ({}))) as {
+        success?: boolean;
+        post_id?: string;
+        error?: { message?: string };
+      };
+      if (!finishResponse.ok || finishData.success === false) {
+        throw new Error(`Facebook Reel publish failed: ${finishData.error?.message ?? `HTTP ${finishResponse.status}`}`);
+      }
+      return finishData.post_id ?? startData.video_id;
     }
 
     const params = new URLSearchParams({
@@ -771,21 +840,30 @@ export async function processVideoGenerationRequest(
 
     // Publish only after a completed provider result is verified.
     const config = await getVideoPublishingConfig();
+    if (config.autoPublish && !config.youtubeEnabled && !config.facebookEnabled) {
+      await markVideoFailed(
+        request.id,
+        'Publish Configuration Missing',
+        'Automatic publishing is enabled, but no complete YouTube OAuth or Facebook Page configuration is available.'
+      );
+      return false;
+    }
     const failures: string[] = [];
     let youtubeId: string | null = null;
     let facebookId: string | null = null;
 
-    if (config.youtubeEnabled) {
+    if (config.youtubeEnabled && config.autoPublish) {
       youtubeId = await publishToYoutube(request.id, generateYoutubeMetadata(request), videoUrl);
       if (!youtubeId) failures.push('YouTube publish failed');
     }
 
-    if (config.facebookEnabled && config.facebookPageId) {
+    if (config.facebookEnabled && config.facebookPageId && config.autoPublish) {
       facebookId = await publishToFacebook(
         request.id,
         generateFacebookMetadata(request),
         videoUrl,
-        config.facebookPageId
+        config.facebookPageId,
+        isVerticalVideo(request)
       );
       if (!facebookId) failures.push('Facebook publish failed');
     }
@@ -856,7 +934,9 @@ export async function getVideoPublishingConfig() {
       pickEnv('FACEBOOK_PAGE_ACCESS_TOKEN') && pickEnv('FACEBOOK_PAGE_ID')
     ),
     facebookPageId: pickEnv('FACEBOOK_PAGE_ID'),
-    autoPublish: pickEnv('VIDEO_AUTO_PUBLISH') === 'true',
+    // Publishing is automatic when provider credentials exist unless an
+    // operator explicitly opts out with VIDEO_AUTO_PUBLISH=false.
+    autoPublish: pickEnv('VIDEO_AUTO_PUBLISH')?.toLowerCase() !== 'false',
     publishSchedule: pickEnv('VIDEO_PUBLISH_SCHEDULE'),
   };
 }

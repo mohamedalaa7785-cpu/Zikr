@@ -607,12 +607,23 @@ export default async function AdminPage() {
                 </label>
                 <label>
                   <input
+                    name="share_facebook_reels"
+                    type="checkbox"
+                    className="ml-2 accent-brand-gold"
+                  />
+                  نشر Reel على فيسبوك
+                </label>
+                <label>
+                  <input
                     name="share_youtube"
                     type="checkbox"
                     className="ml-2 accent-brand-gold"
                   />
-                  نشر/رفع يوتيوب
+                  نشر/رفع يوتيوب Shorts
                 </label>
+                <p className="basis-full text-xs text-brand-cream/50">
+                  التوليد التلقائي يستخدم مقاس 9:16؛ يجب أن يكون الفيديو بين 3 و90 ثانية حتى يقبله Facebook Reels.
+                </p>
               </div>
               <Button type="submit" className="w-full">
                 حفظ وتجهيز النشر

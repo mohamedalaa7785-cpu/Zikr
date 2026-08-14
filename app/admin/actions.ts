@@ -36,7 +36,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/services/admin";
 import { supabaseServerAdminRequest } from "@/lib/supabase/server";
 
-type SocialPlatform = "facebook" | "youtube";
+type SocialPlatform = "facebook" | "facebook_reels" | "youtube";
 
 const VIDEO_GENERATION_CATEGORIES = new Set([
   "quran",
@@ -58,7 +58,7 @@ function bool(formData: FormData, key: string) {
 }
 
 function platforms(formData: FormData): SocialPlatform[] {
-  return ["facebook", "youtube"].filter(
+  return ["facebook", "facebook_reels", "youtube"].filter(
     (platform): platform is SocialPlatform =>
       formData.get(`share_${platform}`) === "on"
   );

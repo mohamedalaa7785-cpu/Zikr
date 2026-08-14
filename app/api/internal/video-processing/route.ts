@@ -5,10 +5,15 @@ import {
   getSubmittedVideoRequests,
   processVideoGenerationRequest,
 } from '@/lib/services/video-automation';
+import {
+  claimPendingSocialPublishItems,
+  processSocialPublishItem,
+} from '@/lib/services/social-publishing';
 
 export const dynamic = 'force-dynamic';
 
 const VIDEO_BATCH_SIZE = 3;
+const SOCIAL_BATCH_SIZE = 10;
 
 async function isAuthorized(request: NextRequest): Promise<boolean> {
   const supplied = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
@@ -34,6 +39,7 @@ export async function POST(request: NextRequest) {
     const submitted = await getSubmittedVideoRequests(VIDEO_BATCH_SIZE);
     const claimed = await claimPendingVideoRequests(VIDEO_BATCH_SIZE);
     const requests = [...submitted, ...claimed];
+    const socialItems = await claimPendingSocialPublishItems(SOCIAL_BATCH_SIZE);
     let succeeded = 0;
     let failed = 0;
 
@@ -43,11 +49,22 @@ export async function POST(request: NextRequest) {
       else failed += 1;
     }
 
+    let socialSucceeded = 0;
+    let socialFailed = 0;
+    for (const item of socialItems) {
+      const ok = await processSocialPublishItem(item, { alreadyClaimed: true });
+      if (ok) socialSucceeded += 1;
+      else socialFailed += 1;
+    }
+
     return NextResponse.json({
       ok: true,
       processed: requests.length,
       succeeded,
       failed,
+      socialProcessed: socialItems.length,
+      socialSucceeded,
+      socialFailed,
     });
   } catch (error) {
     console.error('[api/internal/video-processing] failed:', error);
