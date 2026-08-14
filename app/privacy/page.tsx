@@ -52,8 +52,8 @@ export default function PrivacyPage() {
         </p>
         <p className="arabic-muted">
           يتيح استخدام Google لملفات تعريف الارتباط الإعلانية (DART cookies)
-          لها ولشركائها عرض إعلانات لمستخدمينا استناداً إلى زيارتهم لموقعنا
-          و/أو مواقع أخرى على الإنترنت. يمكنك إلغاء الاشتراك في الإعلانات
+          لها ولشركائها عرض إعلانات لمستخدمينا استناداً إلى زيارتهم لموقعنا و/أو
+          مواقع أخرى على الإنترنت. يمكنك إلغاء الاشتراك في الإعلانات
           المخصصة من خلال زيارة{" "}
           <a
             href="https://www.google.com/settings/ads"
@@ -63,7 +63,21 @@ export default function PrivacyPage() {
           >
             إعدادات إعلانات Google
           </a>
+          {" "}أو من خلال{" "}
+          <a
+            href="https://optout.aboutads.info/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-gold underline"
+          >
+            صفحة الاختيار من الإعلانات المخصصة
+          </a>
           .
+        </p>
+        <p className="arabic-muted">
+          عند تفعيل رسالة الموافقة من حساب الناشر، قد يعرض الموقع نظام Google
+          Funding Choices لتمكين المستخدمين من مراجعة خيارات الخصوصية والموافقة
+          على استخدام البيانات الإعلانية وفق المنطقة والقوانين المعمول بها.
         </p>
       </Card>
 
