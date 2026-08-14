@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import { Container } from '@/components/ui/container';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import { MobileNav } from './mobile-nav';
 import { AuthNavActions } from './auth-nav-actions';
 import { LanguageToggle } from './language-toggle';
@@ -29,8 +29,9 @@ export async function Navbar() {
   let user = null;
   let isAdmin = false;
 
-  try {
-    const supabase = await createClient();
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -44,10 +45,11 @@ export async function Navbar() {
         .eq('id', user.id)
         .maybeSingle();
       isAdmin = profile?.role === 'admin';
+      }
+    } catch (error) {
+      // Keep the authenticated user even if an optional profile lookup fails.
+      console.error('[v0] Navbar auth lookup failed:', error);
     }
-  } catch (error) {
-    // Keep the authenticated user even if an optional profile lookup fails.
-    console.error('[v0] Navbar auth lookup failed:', error);
   }
 
   return (

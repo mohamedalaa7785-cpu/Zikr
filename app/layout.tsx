@@ -10,6 +10,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const ADSENSE_CLIENT =
   process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-2457467624248791";
 
+// Navbar reads the Supabase session from request cookies, so the shell must be rendered per request.
+export const dynamic = "force-dynamic";
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
