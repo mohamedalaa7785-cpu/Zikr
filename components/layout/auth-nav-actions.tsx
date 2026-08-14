@@ -24,7 +24,13 @@ export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsPr
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL ||
       process.env.NEXT_PUBLIC_SUPABASE_URL_FALLBACK;
-    if (!supabaseUrl) return;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    // Keep the server-provided authenticated state when the preview/runtime
+    // does not expose the complete public Supabase configuration to the browser.
+    // Creating a placeholder client here would incorrectly replace a real user
+    // with null and show "تسجيل الدخول" in the navbar.
+    if (!supabaseUrl || !supabaseAnonKey) return;
 
     const supabase = createClient();
 
