@@ -1,4 +1,4 @@
-import { PRODUCTION_URL } from "@/lib/site";
+import { enforceCanonicalProductionUrl, PRODUCTION_URL } from "@/lib/site";
 
 // ─── Numbered-suffix env var resolution ──────────────────────────────────────
 // Vercel integrations expose vars as NAME_2, NAME_19, NAME_22, etc. when
@@ -32,7 +32,9 @@ function pick(...bases: string[]): string | undefined {
   return undefined;
 }
 
-const siteUrl = pick("NEXT_PUBLIC_SITE_URL") || PRODUCTION_URL;
+const siteUrl = enforceCanonicalProductionUrl(
+  pick("NEXT_PUBLIC_SITE_URL") || PRODUCTION_URL
+);
 
 /**
  * Return this app's own OAuth callback URL.

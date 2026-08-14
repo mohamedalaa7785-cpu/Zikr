@@ -4,11 +4,24 @@
  */
 export const PRODUCTION_URL = 'https://zikrmediaofficial.vercel.app';
 
+export function enforceCanonicalProductionUrl(value?: string): string {
+  if (!value) return PRODUCTION_URL;
+
+  try {
+    const origin = new URL(value).origin;
+    return process.env.VERCEL_ENV === 'production' && origin !== PRODUCTION_URL
+      ? PRODUCTION_URL
+      : origin;
+  } catch {
+    return PRODUCTION_URL;
+  }
+}
+
 export const siteConfig = {
   name: 'ZIKR | ذِكرٌ',
   shortName: 'ZIKR',
   description: 'ZIKR - منصة إسلامية شاملة للقرآن الكريم، الأحاديث النبوية، قصص الأنبياء، ومواقيت الصلاة بتجربة حديثة ومتكاملة.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || PRODUCTION_URL,
+  url: enforceCanonicalProductionUrl(process.env.NEXT_PUBLIC_SITE_URL),
   locale: 'ar_SA',
   dir: 'rtl' as const,
 };

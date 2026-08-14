@@ -50,6 +50,7 @@ const OPTIONAL_INTEGRATIONS = [
 ];
 
 const TIMEOUT_MS = 8000;
+const CANONICAL_PRODUCTION_ORIGIN = "https://zikrmediaofficial.vercel.app";
 const results = [];
 
 function addResult(status, label, detail) {
@@ -168,6 +169,22 @@ function validateUrls() {
   parseUrl("QURAN_API_BASE_URL");
   parseUrl("QURAN_AUDIO_CDN_URL");
   parseUrl("HADITH_API_BASE_URL");
+
+  if (siteUrl && siteUrl.origin !== CANONICAL_PRODUCTION_ORIGIN) {
+    addResult(
+      "fail",
+      "NEXT_PUBLIC_SITE_URL",
+      `must equal ${CANONICAL_PRODUCTION_ORIGIN} for production`
+    );
+  }
+
+  if (callbackUrl && callbackUrl.origin !== CANONICAL_PRODUCTION_ORIGIN) {
+    addResult(
+      "fail",
+      "AUTH_CALLBACK_URL",
+      `must use ${CANONICAL_PRODUCTION_ORIGIN}/auth/callback for production`
+    );
+  }
 
   if (supabaseUrl && !supabaseUrl.hostname.endsWith(".supabase.co")) {
     addResult(
