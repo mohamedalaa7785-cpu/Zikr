@@ -17,10 +17,8 @@ export async function GET(request: NextRequest) {
   try {
     const configStatus = getGoogleOAuthConfigStatus();
     if (!configStatus.isReady) {
-      console.error("[auth/google] Google OAuth config mismatch:", {
+      console.error("[auth/google] Supabase OAuth configuration is incomplete:", {
         missing: configStatus.missing,
-        appCallbackUrl: configStatus.appCallbackUrl,
-        configuredCallbackUrl: configStatus.configuredCallbackUrl,
       });
       loginUrl.searchParams.set("error", "google_oauth_unavailable");
       return NextResponse.redirect(loginUrl);

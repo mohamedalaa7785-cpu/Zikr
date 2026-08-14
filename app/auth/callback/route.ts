@@ -41,10 +41,11 @@ export async function GET(request: NextRequest) {
         return loginRedirect(origin, 'google_oauth_failed', safePath);
       }
 
-      const user = data.user;
+      let user = data.user;
       if (!user) {
         const sessionCheck = await supabase.auth.getUser();
-        if (!sessionCheck.data.user) {
+        user = sessionCheck.data.user;
+        if (!user) {
           const missingSessionUrl = new URL('/auth/login', origin);
           missingSessionUrl.searchParams.set('error', 'auth_session_missing');
           missingSessionUrl.searchParams.set('next', safePath);
