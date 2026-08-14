@@ -111,7 +111,7 @@ export function showPrayerNotification(prayerNameAr: string): void {
     try {
       new Notification(title, {
         body,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag,
       });
     } catch {
@@ -137,7 +137,7 @@ export function showZakatNotification(daysLeft: number): void {
     try {
       new Notification('تذكير الزكاة', {
         body,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag: 'zakat-reminder',
       });
     } catch {
@@ -161,7 +161,7 @@ export function showDhikrNotification(text: string): void {
     try {
       new Notification(title, {
         body: text,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag,
       });
     } catch {
@@ -185,7 +185,7 @@ export function showSalawatNotification(): void {
     try {
       new Notification(title, {
         body,
-        icon: '/icons/icon-192.svg',
+        icon: '/icons/icon-192.png',
         tag: 'salawat-reminder',
       });
     } catch {
