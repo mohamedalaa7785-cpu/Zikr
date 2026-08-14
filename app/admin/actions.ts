@@ -256,6 +256,11 @@ export async function saveVideoPostAction(formData: FormData) {
       throw new Error("يرجى اختيار تصنيف صحيح لتوليد الفيديو.");
     }
 
+    const script = value(formData, "script")?.replace(/\s+/g, " ").trim() ?? "";
+    if (script.length < 30) {
+      throw new Error("يرجى إدخال نص مراجَع لا يقل عن 30 حرفاً قبل توليد الفيديو تلقائياً.");
+    }
+
     await supabaseServerAdminRequest("/rest/v1/video_generation_requests", {
       method: "POST",
       headers: { Prefer: "return=minimal" },
@@ -264,7 +269,7 @@ export async function saveVideoPostAction(formData: FormData) {
         description,
         category,
         content: {
-          prompt: value(formData, "script") ?? description ?? title,
+          prompt: script,
           publicPath: `/videos/${slug}`,
         },
         thumbnail_url: thumbnailUrl,

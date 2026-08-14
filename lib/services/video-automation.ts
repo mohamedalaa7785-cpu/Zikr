@@ -357,6 +357,32 @@ function requestContentObject(request: VideoGenerationRequest): Record<string, u
     : {};
 }
 
+const MIN_VIDEO_NARRATION_CHARACTERS = 30;
+
+/**
+ * Return only explicit administrator-supplied narration. Titles and short
+ * descriptions must never be expanded into religious content by automation.
+ */
+function narrationText(request: VideoGenerationRequest): string {
+  const content = requestContentObject(request);
+  for (const field of ['prompt', 'script', 'text']) {
+    const value = content[field];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return '';
+}
+
+function validateVideoGenerationRequest(request: VideoGenerationRequest): string | null {
+  if (request.title.trim().length < 3) return 'A descriptive video title is required.';
+
+  const narration = narrationText(request).replace(/\s+/g, ' ').trim();
+  if (narration.length < MIN_VIDEO_NARRATION_CHARACTERS) {
+    return `An explicit administrator-reviewed narration of at least ${MIN_VIDEO_NARRATION_CHARACTERS} characters is required.`;
+  }
+
+  return null;
+}
+
 function slugFromRequest(request: VideoGenerationRequest): string {
   const content = requestContentObject(request);
   const publicPath = content.publicPath;
@@ -445,7 +471,7 @@ export async function submitVideoToHeyGen(
             character: { type: 'avatar', avatar_id: avatarId },
             voice: {
               type: 'text',
-              input_text: request.description || request.title,
+              input_text: narrationText(request),
               voice_id: voiceId,
             },
           },
@@ -688,6 +714,12 @@ export async function processVideoGenerationRequest(
     const now = new Date().toISOString();
 
     if (!request.heygen_video_id) {
+      const validationError = validateVideoGenerationRequest(request);
+      if (validationError) {
+        await markVideoFailed(request.id, 'Generation Blocked', validationError);
+        return false;
+      }
+
       const submission = await submitVideoToHeyGen(request);
       if (!submission.videoId) {
         await markVideoFailed(request.id, 'Generation Failed', submission.error || 'HeyGen did not accept the request');

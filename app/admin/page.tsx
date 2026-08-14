@@ -562,8 +562,9 @@ export default async function AdminPage() {
               />
               <Field
                 name="script"
-                label="سكريبت التوليد أو نص الفيديو"
+                label="سكريبت الفيديو المراجَع (30 حرفاً على الأقل عند التوليد التلقائي)"
                 textarea
+                required
               />
               <Field
                 name="scheduledAt"
