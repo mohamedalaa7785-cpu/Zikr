@@ -96,6 +96,11 @@ const rawEnv: Record<string, string | undefined> = {
     "SUPABASE_SECRET_KEY"
   ),
 
+  // ── Cloudinary (server-only authenticated uploads) ─────────────────────────
+  CLOUDINARY_CLOUD_NAME: pick("CLOUDINARY_CLOUD_NAME"),
+  CLOUDINARY_API_KEY: pick("CLOUDINARY_API_KEY"),
+  CLOUDINARY_API_SECRET: pick("CLOUDINARY_API_SECRET"),
+
   // ── Site / Auth ───────────────────────────────────────────────────────────
   // NEXT_PUBLIC_SITE_URL: use the known production URL when the env var is empty
   NEXT_PUBLIC_SITE_URL: siteUrl,
@@ -162,6 +167,9 @@ export function getServerEnv() {
   return {
     ...getPublicEnv(),
     SUPABASE_SERVICE_ROLE_KEY: validatedEnv.SUPABASE_SERVICE_ROLE_KEY || "",
+    CLOUDINARY_CLOUD_NAME: validatedEnv.CLOUDINARY_CLOUD_NAME || "",
+    CLOUDINARY_API_KEY: validatedEnv.CLOUDINARY_API_KEY || "",
+    CLOUDINARY_API_SECRET: validatedEnv.CLOUDINARY_API_SECRET || "",
     DATABASE_URL: validatedEnv.DATABASE_URL || "",
     AUTH_CALLBACK_URL: validatedEnv.AUTH_CALLBACK_URL || "",
     GEMINI_API_KEY: validatedEnv.GEMINI_API_KEY || "",
@@ -199,12 +207,21 @@ export function getEnvAudit() {
       "NEXT_PUBLIC_SITE_URL",
       "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
     ],
-    serverOnly: ["SUPABASE_SERVICE_ROLE_KEY", "GOOGLE_CLIENT_SECRET"],
+    serverOnly: [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "GOOGLE_CLIENT_SECRET",
+      "CLOUDINARY_CLOUD_NAME",
+      "CLOUDINARY_API_KEY",
+      "CLOUDINARY_API_SECRET",
+    ],
     runtimeServer: [
       "NEXT_PUBLIC_SUPABASE_URL",
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "NEXT_PUBLIC_SITE_URL",
       "SUPABASE_SERVICE_ROLE_KEY",
+      "CLOUDINARY_CLOUD_NAME",
+      "CLOUDINARY_API_KEY",
+      "CLOUDINARY_API_SECRET",
       "DATABASE_URL",
       "AUTH_CALLBACK_URL",
       "GEMINI_API_KEY",
@@ -235,6 +252,9 @@ export function getEnvAudit() {
       "FACEBOOK_APP_SECRET",
       "FACEBOOK_PAGE_ACCESS_TOKEN",
       "FACEBOOK_PAGE_ID",
+      "CLOUDINARY_CLOUD_NAME",
+      "CLOUDINARY_API_KEY",
+      "CLOUDINARY_API_SECRET",
     ],
   } as const;
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/services/admin";
+import { uploadCloudinaryImage } from "@/lib/services/cloudinary";
 import { supabaseServerAdminRequest } from "@/lib/supabase/server";
 
 function value(formData: FormData, key: string) {
@@ -47,6 +48,19 @@ export async function saveKidsContentAction(formData: FormData) {
     throw new Error("العنوان بالعربية والرابط المختصر والمحتوى كلها مطلوبة.");
   }
 
+  const featuredImageFile = formData.get("featured_image_file");
+  const featuredImageUrl =
+    featuredImageFile instanceof File && featuredImageFile.size > 0
+      ? (
+          await uploadCloudinaryImage({
+            file: featuredImageFile,
+            folder: "zikr/kids",
+            publicId: slug,
+            tags: ["zikr", "kids-content"],
+          })
+        ).secureUrl
+      : value(formData, "featured_image_url");
+
   await supabaseServerAdminRequest("/rest/v1/kids_content?on_conflict=slug", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
@@ -58,7 +72,7 @@ export async function saveKidsContentAction(formData: FormData) {
       content_ar,
       content_en: value(formData, "content_en"),
       age_group: value(formData, "age_group") ?? "6-8",
-      featured_image_url: value(formData, "featured_image_url"),
+      featured_image_url: featuredImageUrl,
       video_url: value(formData, "video_url"),
       quiz_data: parseQuizData(value(formData, "quiz_data")),
       published: formData.has("published"),
