@@ -63,8 +63,20 @@ async function checkRoute(baseUrl, route, expectedStatuses) {
   }
 }
 
+function normalizeSupabaseUrl(value) {
+  try {
+    const url = new URL(value.trim());
+    url.pathname = url.pathname.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+    url.search = '';
+    url.hash = '';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return value.trim().replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+  }
+}
+
 async function checkSupabaseTable(supabaseUrl, anonKey, table) {
-  const url = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/${table}?limit=1`;
+  const url = `${normalizeSupabaseUrl(supabaseUrl)}/rest/v1/${table}?limit=1`;
   try {
     const response = await fetchWithTimeout(url, {
       headers: {

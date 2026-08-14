@@ -9,6 +9,20 @@ import { enforceCanonicalProductionUrl, PRODUCTION_URL } from "@/lib/site";
 
 const e = process.env;
 
+/** Normalize Supabase project URLs supplied by integrations or local scripts. */
+function normalizeSupabaseUrl(value: string | undefined): string | undefined {
+  if (!value) return value;
+  try {
+    const url = new URL(value.trim());
+    url.pathname = url.pathname.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+    url.search = '';
+    url.hash = '';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return value.trim().replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+  }
+}
+
 // Vercel can suffix duplicated integration variables with any numeric suffix.
 // Resolve the bare key first, then deterministic numeric aliases that actually
 // exist in the project instead of maintaining a stale hand-written list.
@@ -85,7 +99,9 @@ const rawEnv: Record<string, string | undefined> = {
   // The public URL and anon key are intentionally public; the service-role key
   // remains server-only and is never returned by getPublicEnv(). Accept both
   // app-facing NEXT_PUBLIC_* names and Supabase integration names.
-  NEXT_PUBLIC_SUPABASE_URL: pick("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"),
+  NEXT_PUBLIC_SUPABASE_URL: normalizeSupabaseUrl(
+    pick("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL")
+  ),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: pick(
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "SUPABASE_ANON_KEY",
