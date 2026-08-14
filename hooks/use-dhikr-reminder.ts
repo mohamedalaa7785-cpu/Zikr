@@ -30,34 +30,12 @@ export const DHIKR_PHRASES: string[] = [
   'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ',
 ];
 
-const SETTINGS_KEY = 'zikr_dhikr_settings';
-
 const DEFAULT_SETTINGS: DhikrReminderSettings = {
   enabled: false, // opt-in: user must explicitly enable
   intervalMinutes: 60,
   quietHours: { enabled: false, from: '22:00', to: '06:00' },
 };
 
-function loadSettings(): DhikrReminderSettings {
-  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    const parsed = JSON.parse(raw);
-    return {
-      ...DEFAULT_SETTINGS,
-      ...parsed,
-      quietHours: { ...DEFAULT_SETTINGS.quietHours, ...parsed.quietHours },
-    };
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-}
-
-function saveSettings(s: DhikrReminderSettings): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-}
 
 function pickDhikr(index: number): string {
   return DHIKR_PHRASES[index % DHIKR_PHRASES.length];
@@ -75,9 +53,16 @@ export function useDhikrReminder(): DhikrReminderReturn {
   const [settings, setSettings] = useState<DhikrReminderSettings>(DEFAULT_SETTINGS);
   const rotationRef = useRef(0);
 
-  // Load settings on mount
+  // Load persisted settings from the authenticated server.
   useEffect(() => {
-    setSettings(loadSettings());
+    void fetch('/api/reminders/background').then((response) => response.ok ? response.json() : null).then((data) => {
+      if (!data) return;
+      setSettings({
+        enabled: Boolean(data.dhikr_enabled),
+        intervalMinutes: data.dhikr_interval_minutes ?? 60,
+        quietHours: { enabled: Boolean(data.quiet_hours_start && data.quiet_hours_end), from: data.quiet_hours_start?.slice(0, 5) ?? '22:00', to: data.quiet_hours_end?.slice(0, 5) ?? '06:00' },
+      });
+    }).catch(() => undefined);
   }, []);
 
   // Set up interval whenever settings change
@@ -111,7 +96,7 @@ export function useDhikrReminder(): DhikrReminderReturn {
   const update = useCallback((partial: Partial<DhikrReminderSettings>) => {
     setSettings((prev) => {
       const next = { ...prev, ...partial };
-      saveSettings(next);
+      void fetch('/api/reminders/background', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dhikr_enabled: next.enabled, dhikr_interval_minutes: next.intervalMinutes, quiet_hours_start: next.quietHours.enabled ? next.quietHours.from : null, quiet_hours_end: next.quietHours.enabled ? next.quietHours.to : null }) }).catch(() => undefined);
       return next;
     });
   }, []);

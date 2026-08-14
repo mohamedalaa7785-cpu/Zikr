@@ -52,6 +52,8 @@ type Delivery = {
   user_id: string;
   push_subscription_id: string;
   prayer_name: string;
+  notification_kind: 'prayer' | 'dhikr' | 'salawat';
+  notification_text: string | null;
   scheduled_at: string;
   attempt_count: number;
 };
@@ -296,6 +298,9 @@ async function loadVapidBundle(): Promise<VapidBundle> {
 }
 
 async function ensureSchedules(now: Date): Promise<number> {
+  // The database function plans opt-in dhikr/salawat rows for every active device.
+  const { error: backgroundError } = await supabase.rpc('plan_background_reminder_deliveries', { now_at: now.toISOString() });
+  if (backgroundError) throw backgroundError;
   const { data: subscriptions, error: subscriptionsError } = await supabase
     .from("push_subscriptions")
     .select("id, user_id, endpoint, p256dh, auth")
@@ -488,7 +493,7 @@ async function claimDueDeliveries(now: Date): Promise<Delivery[]> {
   const { data: rows, error } = await supabase
     .from("prayer_notification_deliveries")
     .select(
-      "id, user_id, push_subscription_id, prayer_name, scheduled_at, attempt_count"
+      "id, user_id, push_subscription_id, prayer_name, notification_kind, notification_text, scheduled_at, attempt_count"
     )
     .in("status", ["pending", "failed"])
     .lte("scheduled_at", now.toISOString())
@@ -512,7 +517,7 @@ async function claimDueDeliveries(now: Date): Promise<Delivery[]> {
       .eq("id", row.id)
       .in("status", ["pending", "failed"])
       .select(
-        "id, user_id, push_subscription_id, prayer_name, scheduled_at, attempt_count"
+        "id, user_id, push_subscription_id, prayer_name, notification_kind, notification_text, scheduled_at, attempt_count"
       )
       .maybeSingle();
     if (claimError) throw claimError;
@@ -567,11 +572,8 @@ async function deliverDue(
     }
 
     try {
-      const topic =
-        `zikr-${delivery.prayer_name.toLowerCase()}-${delivery.scheduled_at.slice(0, 10)}`.slice(
-          0,
-          32
-        );
+      const topic = `zikr-${delivery.notification_kind}-${delivery.scheduled_at.slice(0, 10)}`.slice(0, 32);
+      const isPrayer = delivery.notification_kind === 'prayer';
       await applicationServer
         .subscribe({
           endpoint: subscription.endpoint,
@@ -579,9 +581,9 @@ async function deliverDue(
         })
         .pushTextMessage(
           JSON.stringify({
-            title: `حان وقت صلاة ${PRAYER_NAMES_AR[delivery.prayer_name] ?? delivery.prayer_name}`,
-            body: "حافظ على صلاتك",
-            url: "/prayer-times",
+            title: isPrayer ? `حان وقت صلاة ${PRAYER_NAMES_AR[delivery.prayer_name] ?? delivery.prayer_name}` : delivery.notification_kind === 'dhikr' ? 'تذكير بالذكر' : 'تذكير بالصلاة على النبي',
+            body: isPrayer ? 'حافظ على صلاتك' : delivery.notification_text ?? (delivery.notification_kind === 'dhikr' ? 'سبحان الله وبحمده' : 'اللهم صل وسلم على نبينا محمد'),
+            url: isPrayer ? '/prayer-times' : '/adhkar',
             tag: topic,
           }),
           { urgency: Urgency.High, ttl: 300, topic }

@@ -6,12 +6,9 @@ export function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Only register in production
-    if (process.env.NODE_ENV !== 'production') {
-      return;
-    }
+    // Check if service workers are supported. Registering in preview as well
+    // lets users verify notification behavior before deployment.
 
-    // Check if service workers are supported
     if (!('serviceWorker' in navigator)) {
       return;
     }
