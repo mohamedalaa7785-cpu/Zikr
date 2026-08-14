@@ -80,9 +80,7 @@ export function getGoogleOAuthConfigStatus() {
   const normalizedAppCallbackUrl = appCallbackUrl.replace(/\/$/, "");
 
   return {
-    isReady:
-      missing.length === 0 &&
-      normalizedConfiguredCallbackUrl === normalizedAppCallbackUrl,
+    isReady: missing.length === 0,
     missing,
     appCallbackUrl,
     configuredCallbackUrl,
