@@ -110,23 +110,7 @@ export default function RootLayout({
         />
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
         <link rel="manifest" href="/manifest.webmanifest" />
-        {/* Ad scripts are production-only: preview/dev domains are not authorized
-            for AdSense and the scripts throw opaque cross-origin "Script error."s.
-            They must be plain <script> tags — next/script adds data-nscript which AdSense rejects */}
-        {isProduction && (
-          <>
-            <script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-              crossOrigin="anonymous"
-            />
-            {/* Google Funding Choices (consent management) */}
-            <script
-              async
-              src="https://fundingchoicesmessages.google.com/i/fundingchoicesmessages.js"
-            />
-          </>
-        )}
+        {/* AdSense is intentionally loaded after the first page load so it cannot compete with LCP. */}
       </head>
       <body className="font-arabic antialiased">
         {/* JSON-LD lives in <body> so head scripts injected at runtime (AdSense)
@@ -136,6 +120,38 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <SiteShell>{children}</SiteShell>
+        {isProduction && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (() => {
+                  const loadAds = () => {
+                    if (window.__zikrAdsLoaded) return;
+                    window.__zikrAdsLoaded = true;
+                    const ads = document.createElement('script');
+                    ads.async = true;
+                    ads.crossOrigin = 'anonymous';
+                    ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}';
+                    document.head.appendChild(ads);
+                    const consent = document.createElement('script');
+                    consent.async = true;
+                    consent.src = 'https://fundingchoicesmessages.google.com/i/fundingchoicesmessages.js';
+                    document.head.appendChild(consent);
+                  };
+                  if (document.readyState === 'complete') {
+                    if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 3000 });
+                    else setTimeout(loadAds, 1500);
+                  } else {
+                    window.addEventListener('load', () => {
+                      if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 3000 });
+                      else setTimeout(loadAds, 1500);
+                    }, { once: true, passive: true });
+                  }
+                })();
+              `,
+            }}
+          />
+        )}
         <Analytics />
         <ServiceWorkerRegister />
         <NativeCapacitorBridge />
