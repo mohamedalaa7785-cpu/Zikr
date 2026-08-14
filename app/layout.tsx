@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SiteShell } from "@/components/layout/site-shell";
 
@@ -9,6 +9,11 @@ import { NativeCapacitorBridge } from "@/components/layout/native-capacitor-brid
 import { SpeedInsights } from "@vercel/speed-insights/next";
 const ADSENSE_CLIENT =
   process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-2457467624248791";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
