@@ -18,7 +18,12 @@ DROP INDEX IF EXISTS public.prayer_preferences_rls_user_id_idx;
 DROP INDEX IF EXISTS public.idx_profiles_role;
 DROP INDEX IF EXISTS public.idx_quran_ayahs_surah;
 DROP INDEX IF EXISTS public.quran_reciters_code_unique;
-ALTER TABLE public.subscriptions DROP CONSTRAINT IF EXISTS subscriptions_email_unique;
+DO $$
+BEGIN
+  IF to_regclass('public.subscriptions') IS NOT NULL THEN
+    ALTER TABLE public.subscriptions DROP CONSTRAINT IF EXISTS subscriptions_email_unique;
+  END IF;
+END $$;
 DROP INDEX IF EXISTS public.tawasheeh_category_id_idx;
 DROP INDEX IF EXISTS public.tawasheeh_published_idx;
 DROP INDEX IF EXISTS public.videos_category_idx;
