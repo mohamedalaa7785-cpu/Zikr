@@ -2503,13 +2503,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "saved_stories_user_id_profiles_id_fk"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       scholars: {
@@ -2743,13 +2736,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "stories_user_id_profiles_id_fk"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       story_favorites: {
@@ -2816,13 +2802,6 @@ export type Database = {
           },
           {
             foreignKeyName: "story_progress_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "story_progress_user_id_profiles_id_fk"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -2958,13 +2937,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tasks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_user_id_profiles_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -3778,4 +3750,3 @@ export const Constants = {
     },
   },
 } as const
-
