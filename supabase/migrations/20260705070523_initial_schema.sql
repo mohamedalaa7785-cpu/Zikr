@@ -1,2 +1,0 @@
--- Historical migration version retained for Supabase migration history reconciliation.
--- The schema is represented by the canonical migrations in this directory.
