@@ -126,11 +126,11 @@ export default async function BattleDetailPage({ params }: { params: Promise<{ s
   const staticStory = BATTLE_STORIES[slug];
   if (!battle && !staticStory) notFound();
 
-  const displayName = battle?.name_ar ?? staticStory.name_ar;
-  const displayDateHijri = battle?.date_hijri ?? staticStory.date_hijri;
-  const displayDateGregorian = battle?.date_gregorian ?? staticStory.date_gregorian;
-  const displayLocation = battle?.location_ar ?? staticStory.location_ar;
-  const displayDescription = battle?.description_ar ?? staticStory.description_ar;
+  const displayName = battle?.name_ar ?? staticStory?.name_ar ?? 'غزوة إسلامية';
+  const displayDateHijri = battle?.date_hijri ?? staticStory?.date_hijri ?? null;
+  const displayDateGregorian = battle?.date_gregorian ?? staticStory?.date_gregorian ?? null;
+  const displayLocation = battle?.location_ar ?? staticStory?.location_ar ?? null;
+  const displayDescription = battle?.description_ar ?? staticStory?.description_ar ?? null;
   const displayEvents = events.length > 0 ? events : (staticStory?.events ?? []);
   const displayVideoId = youtubeVideoId ?? staticStory?.youtube_video_id ?? null;
 
@@ -227,10 +227,9 @@ export default async function BattleDetailPage({ params }: { params: Promise<{ s
                       )}
                     </div>
                   </div>
-                  <div
-                    className="text-base leading-9 text-brand-cream/85 whitespace-pre-wrap pr-11"
-                    dangerouslySetInnerHTML={{ __html: event.content_ar.replace(/\n/g, '<br/>') }}
-                  />
+                  <p className="text-base leading-9 text-brand-cream/85 whitespace-pre-wrap pr-11">
+                    {event.content_ar}
+                  </p>
                 </Card>
               );
             })}
