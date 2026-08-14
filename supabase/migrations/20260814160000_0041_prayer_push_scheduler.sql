@@ -6,8 +6,18 @@
 -- subscription/prayer/scheduled instant, so overlapping worker invocations cannot
 -- send the same notification twice.
 
-create extension if not exists pg_cron;
-create extension if not exists pg_net;
+-- Preview branches may not expose Supabase's managed extensions. The schema and
+-- RLS below are still useful there; only the optional dispatcher is skipped.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_available_extensions WHERE name = 'pg_cron') THEN
+    CREATE EXTENSION IF NOT EXISTS pg_cron;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_available_extensions WHERE name = 'pg_net') THEN
+    CREATE EXTENSION IF NOT EXISTS pg_net;
+  END IF;
+END
+$$;
 
 create table if not exists public.push_runtime_settings (
   key text primary key,
@@ -24,7 +34,9 @@ alter table public.push_runtime_settings enable row level security;
 insert into public.push_runtime_settings (key, value)
 values (
   'scheduler_secret',
-  jsonb_build_object('secret', encode(gen_random_bytes(32), 'hex'))
+  jsonb_build_object(
+    'secret', md5(random()::text || clock_timestamp()::text || current_database())
+  )
 )
 on conflict (key) do nothing;
 
@@ -253,21 +265,31 @@ grant execute on function public.get_push_vapid_bundle() to service_role;
 
 -- Replace any prior scheduler of the same name. There is one authoritative
 -- recurring dispatcher; the worker performs batched due-only queries.
-select cron.unschedule(jobid)
-from cron.job
-where jobname = 'zikr-prayer-push-dispatch';
-
-select cron.schedule(
-  'zikr-prayer-push-dispatch',
-  '* * * * *',
-  $cron$
-    select net.http_post(
-      url := 'https://eydxvcamhjhajxjrsgym.supabase.co/functions/v1/prayer-notification-worker',
-      headers := jsonb_build_object(
-        'Content-Type', 'application/json',
-        'Authorization', 'Bearer ' || public.get_push_scheduler_secret()
-      ),
-      body := jsonb_build_object('source', 'pg_cron')
-    );
-  $cron$
-);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron')
+     AND EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_net') THEN
+    EXECUTE $sql$
+      select cron.unschedule(jobid)
+      from cron.job
+      where jobname = 'zikr-prayer-push-dispatch'
+    $sql$;
+    EXECUTE $sql$
+      select cron.schedule(
+        'zikr-prayer-push-dispatch',
+        '* * * * *',
+        $cron$
+          select net.http_post(
+            url := 'https://eydxvcamhjhajxjrsgym.supabase.co/functions/v1/prayer-notification-worker',
+            headers := jsonb_build_object(
+              'Content-Type', 'application/json',
+              'Authorization', 'Bearer ' || public.get_push_scheduler_secret()
+            ),
+            body := jsonb_build_object('source', 'pg_cron')
+          );
+        $cron$
+      )
+    $sql$;
+  END IF;
+END
+$$;

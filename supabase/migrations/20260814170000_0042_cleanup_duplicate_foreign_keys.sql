@@ -1,17 +1,24 @@
--- Remove duplicate foreign keys created by earlier schema reconciliation passes.
--- Keep one canonical constraint per relationship; application code does not depend on names.
-
-ALTER TABLE public.stories
-  DROP CONSTRAINT IF EXISTS stories_user_id_profiles_id_fk;
-
-ALTER TABLE public.story_progress
-  DROP CONSTRAINT IF EXISTS story_progress_user_id_profiles_id_fk;
-
-ALTER TABLE public.saved_stories
-  DROP CONSTRAINT IF EXISTS saved_stories_user_id_profiles_id_fk;
-
-ALTER TABLE public.tasks
-  DROP CONSTRAINT IF EXISTS tasks_user_id_profiles_fkey;
-
-ALTER TABLE public.profiles
-  DROP CONSTRAINT IF EXISTS profiles_id_auth_users_fk;
+-- Remove duplicate foreign keys when their optional tables exist.
+DO $$
+DECLARE
+  item record;
+BEGIN
+  FOR item IN
+    SELECT * FROM (VALUES
+      ('public.stories'::text, 'stories_user_id_profiles_id_fk'::text),
+      ('public.story_progress'::text, 'story_progress_user_id_profiles_id_fk'::text),
+      ('public.saved_stories'::text, 'saved_stories_user_id_profiles_id_fk'::text),
+      ('public.tasks'::text, 'tasks_user_id_profiles_fkey'::text),
+      ('public.profiles'::text, 'profiles_id_auth_users_fk'::text)
+    ) AS constraints(table_name, constraint_name)
+  LOOP
+    IF to_regclass(item.table_name) IS NOT NULL THEN
+      EXECUTE format(
+        'ALTER TABLE %s DROP CONSTRAINT IF EXISTS %I',
+        item.table_name,
+        item.constraint_name
+      );
+    END IF;
+  END LOOP;
+END
+$$;

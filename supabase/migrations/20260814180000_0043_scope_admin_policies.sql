@@ -1,9 +1,30 @@
--- Restrict admin-only policies that were accidentally granted to public.
--- Public read policies remain unchanged; authenticated admin checks still use
--- private.is_admin_user() and continue to protect writes.
-
-ALTER POLICY battles_admin_write ON public.battles TO authenticated;
-ALTER POLICY companions_admin_write ON public.companions TO authenticated;
-ALTER POLICY conquests_admin_write ON public.conquests TO authenticated;
-ALTER POLICY "Admins can manage render jobs" ON public.render_jobs TO authenticated;
-ALTER POLICY "Admins can manage publish log" ON public.video_publish_log TO authenticated;
+-- Restrict admin-only policies when the optional tables and policies exist.
+DO $$
+DECLARE
+  item record;
+BEGIN
+  FOR item IN
+    SELECT * FROM (VALUES
+      ('public.battles'::text, 'battles_admin_write'::text),
+      ('public.companions'::text, 'companions_admin_write'::text),
+      ('public.conquests'::text, 'conquests_admin_write'::text),
+      ('public.render_jobs'::text, 'Admins can manage render jobs'::text),
+      ('public.video_publish_log'::text, 'Admins can manage publish log'::text)
+    ) AS policies(table_name, policy_name)
+  LOOP
+    IF to_regclass(item.table_name) IS NOT NULL
+       AND EXISTS (
+         SELECT 1 FROM pg_policies
+         WHERE schemaname = split_part(item.table_name, '.', 1)
+           AND tablename = split_part(item.table_name, '.', 2)
+           AND policyname = item.policy_name
+       ) THEN
+      EXECUTE format(
+        'ALTER POLICY %I ON %s TO authenticated',
+        item.policy_name,
+        item.table_name
+      );
+    END IF;
+  END LOOP;
+END
+$$;
