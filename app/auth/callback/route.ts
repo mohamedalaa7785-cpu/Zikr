@@ -41,18 +41,15 @@ export async function GET(request: NextRequest) {
         return loginRedirect(origin, 'google_oauth_failed', safePath);
       }
 
-      const user = data.user;
+      const user = data.user ?? (await supabase.auth.getUser()).data.user;
       if (!user) {
-        const sessionCheck = await supabase.auth.getUser();
-        if (!sessionCheck.data.user) {
-          const missingSessionUrl = new URL('/auth/login', origin);
-          missingSessionUrl.searchParams.set('error', 'auth_session_missing');
-          missingSessionUrl.searchParams.set('next', safePath);
-          return NextResponse.redirect(missingSessionUrl);
-        }
+        const missingSessionUrl = new URL('/auth/login', origin);
+        missingSessionUrl.searchParams.set('error', 'auth_session_missing');
+        missingSessionUrl.searchParams.set('next', safePath);
+        return NextResponse.redirect(missingSessionUrl);
       }
 
-      if (user) {
+      {
         try {
           const metadata = user.user_metadata ?? {};
           const displayName =

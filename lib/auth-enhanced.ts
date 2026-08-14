@@ -67,23 +67,14 @@ export function getGoogleOAuthConfigStatus() {
   const missing = [
     ["NEXT_PUBLIC_SUPABASE_URL", env.NEXT_PUBLIC_SUPABASE_URL],
     ["NEXT_PUBLIC_SUPABASE_ANON_KEY", env.NEXT_PUBLIC_SUPABASE_ANON_KEY],
-    ["NEXT_PUBLIC_SITE_URL", env.NEXT_PUBLIC_SITE_URL],
   ]
     .filter(([, value]) => !value)
     .map(([name]) => name);
 
-  const appCallbackUrl = buildOAuthRedirectUri(env.NEXT_PUBLIC_SITE_URL);
+  const appCallbackUrl = buildOAuthRedirectUri(PRODUCTION_URL);
   const configuredCallbackUrl = env.AUTH_CALLBACK_URL || appCallbackUrl;
-  const normalizedConfiguredCallbackUrl = configuredCallbackUrl.replace(
-    /\/$/,
-    ""
-  );
-  const normalizedAppCallbackUrl = appCallbackUrl.replace(/\/$/, "");
-
   return {
-    isReady:
-      missing.length === 0 &&
-      normalizedConfiguredCallbackUrl === normalizedAppCallbackUrl,
+    isReady: missing.length === 0,
     missing,
     appCallbackUrl,
     configuredCallbackUrl,

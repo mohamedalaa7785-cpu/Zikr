@@ -9,9 +9,8 @@ export function enforceCanonicalProductionUrl(value?: string): string {
 
   try {
     const origin = new URL(value).origin;
-    return process.env.VERCEL_ENV === 'production' && origin !== PRODUCTION_URL
-      ? PRODUCTION_URL
-      : origin;
+    if (process.env.VERCEL_ENV === 'production') return PRODUCTION_URL;
+    return origin;
   } catch {
     return PRODUCTION_URL;
   }
