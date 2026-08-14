@@ -1,5 +1,23 @@
 // Service Worker for Zikr PWA
-const CACHE_NAME = 'zikr-v5';
+const CACHE_NAME = 'zikr-v6';
+
+// Public, non-personalized content APIs that are safe to cache for offline reading.
+// Authenticated and mutation APIs remain network-only to avoid leaking private data.
+const PUBLIC_CONTENT_API_PREFIXES = [
+  '/api/content/articles',
+  '/api/content/companions',
+  '/api/content/prophets',
+  '/api/content/stories',
+  '/api/duas',
+  '/api/hadith/books',
+  '/api/quran/surahs',
+  '/api/search',
+  '/api/tawasheeh',
+];
+
+function isPublicContentApi(url) {
+  return PUBLIC_CONTENT_API_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`));
+}
 
 // App shell + key pages pre-cached on install for offline availability.
 // Audio files are NOT pre-cached (50–200MB per reciter).
@@ -39,17 +57,32 @@ const STATIC_ASSETS = [
   '/spiritual-ai',
   '/faq',
   '/platform',
+  // Public content APIs
+  '/api/content/articles',
+  '/api/content/companions',
+  '/api/content/prophets',
+  '/api/content/stories',
+  '/api/duas/categories',
+  '/api/duas',
+  '/api/hadith/books',
+  '/api/quran/surahs',
+  '/api/tawasheeh/categories',
+  '/api/tawasheeh',
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[SW] Failed to cache some assets:', err);
-        // Continue even if some assets fail to cache
-        return Promise.resolve();
-      });
+      return Promise.allSettled(
+        STATIC_ASSETS.map(async (asset) => {
+          try {
+            await cache.add(asset);
+          } catch (error) {
+            console.warn(`[SW] Failed to cache ${asset}:`, error);
+          }
+        }),
+      );
     })
   );
   self.skipWaiting();
@@ -114,6 +147,27 @@ self.addEventListener('fetch', (event) => {
         JSON.stringify({ error: 'Network error' }),
         { status: 503, headers: { 'Content-Type': 'application/json' } },
       )))
+    );
+    return;
+  }
+
+  // Public content APIs use network-first with a cached response fallback.
+  // This makes Quran, hadith, duas, stories, articles, and search content available
+  // after the user has opened it once, without caching authenticated data.
+  if (isPublicContentApi(url)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || new Response(
+          JSON.stringify({ error: 'Offline content is not cached yet' }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } },
+        )))
     );
     return;
   }

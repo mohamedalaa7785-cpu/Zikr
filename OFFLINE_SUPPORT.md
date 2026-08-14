@@ -7,19 +7,22 @@ The Zikr platform now includes comprehensive offline support powered by:
 - **Service Worker** - Caches pages and assets for offline access
 - **IndexedDB** - Local database for Quranic content, favorites, and settings
 - **Offline Indicator** - Shows users when they're offline or reconnecting
-- **Automatic Sync** - Syncs data when connection is restored
+- **Network-first content caching** - Caches public content API responses after installation or first successful use, then serves them when offline
 
 ## Features
 
 ### 1. Offline Content Access
 
 #### Pre-cached Pages
-The following pages are automatically cached on first visit:
+The app shell and core pages are cached during service-worker installation:
 - Home page (`/`)
-- Quran pages (`/quran`, `/quran/[number]`)
+- Quran (`/quran`)
 - Adhkar (`/adhkar`)
 - Prayer times (`/prayer-times`)
 - Duas (`/dua`)
+- Hadith, stories, articles, prophets, companions, kids, search, radio, qibla, poetry, memorization, spiritual AI, FAQ, and platform pages
+
+Public content API responses for Quran surahs, hadith books, duas, stories, articles, companions, prophets, and tawasheeh are also cached through a network-first strategy. Authenticated APIs, user data, and media streams remain network-only for privacy and bandwidth reasons.
 
 #### Offline Database
 
@@ -243,7 +246,7 @@ View cached content:
 1. Open DevTools
 2. Go to Application tab
 3. Expand "Cache Storage"
-4. Look for "zikr-v4" cache
+4. Look for the "zikr-v6" cache
 5. View all cached URLs
 
 ## IndexedDB Inspector
