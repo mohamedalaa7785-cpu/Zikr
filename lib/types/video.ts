@@ -14,6 +14,10 @@ export interface VideoGenerationRequest {
   youtube_id?: string | null;
   facebook_id?: string | null;
   video_url?: string | null;
+  heygen_video_id?: string | null;
+  heygen_status?: string | null;
+  heygen_submitted_at?: string | null;
+  heygen_last_polled_at?: string | null;
   error_message?: string | null;
   error_details?: string | null;
   created_at: string;

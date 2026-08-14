@@ -571,7 +571,20 @@ export default async function AdminPage() {
                 type="datetime-local"
               />
               <div className="grid grid-cols-2 gap-3">
-                <Field name="category" label="التصنيف" defaultValue="other" />
+                <label className="grid gap-1 text-sm text-brand-cream/65">
+                  <span>التصنيف</span>
+                  <select
+                    name="category"
+                    defaultValue="story"
+                    className="rounded-lg border border-brand-gold/30 bg-black/30 px-3 py-2 text-brand-cream focus:border-brand-gold focus:outline-none"
+                  >
+                    <option value="quran">القرآن</option>
+                    <option value="hadith">الحديث</option>
+                    <option value="story">قصة إسلامية</option>
+                    <option value="dua">دعاء</option>
+                    <option value="adhkar">أذكار</option>
+                  </select>
+                </label>
                 <label className="flex items-center gap-2 pt-7 text-sm text-brand-cream/65">
                   <input
                     name="generateVideo"

@@ -114,6 +114,23 @@ export async function claimPendingVideoRequests(limit = 100): Promise<VideoGener
 }
 
 /**
+ * Return already-submitted provider jobs for a later status poll. Only records
+ * with a persisted HeyGen ID are selected, so retries never create a second
+ * provider video for the same request.
+ */
+export async function getSubmittedVideoRequests(limit = 100): Promise<VideoGenerationRequest[]> {
+  try {
+    const results = await supabaseServerAdminRequest<VideoGenerationRequest[]>(
+      `/rest/v1/video_generation_requests?status=eq.processing&heygen_video_id=not.is.null&order=updated_at.asc&limit=${limit}`
+    );
+    return results || [];
+  } catch (error) {
+    console.error('[video-automation] Failed to fetch submitted video requests:', error);
+    return [];
+  }
+}
+
+/**
  * Get all video requests (any status) for the admin dashboard
  */
 export async function getAllVideoRequests(): Promise<VideoGenerationRequest[]> {
@@ -143,11 +160,16 @@ export async function updateVideoRequestStatus(
     if (metadata?.facebookId) body.facebook_id = metadata.facebookId;
     if (metadata?.videoUrl) body.video_url = metadata.videoUrl;
     if (status === 'pending') {
-      // Retry: clear stale error and publish state
+      // Retry: clear stale error, publish, and provider-job state.
       body.error_message = null;
       body.error_details = null;
       body.youtube_id = null;
       body.facebook_id = null;
+      body.video_url = null;
+      body.heygen_video_id = null;
+      body.heygen_status = null;
+      body.heygen_submitted_at = null;
+      body.heygen_last_polled_at = null;
     }
 
     await supabaseServerAdminRequest(`/rest/v1/video_generation_requests?id=eq.${videoId}`, {
@@ -381,37 +403,42 @@ async function publishGeneratedVideoOnSite(
 
 // ─── Video generation (HeyGen) ───────────────────────────────────────────────
 
-const HEYGEN_POLL_INTERVAL_MS = 5000;
-const HEYGEN_MAX_POLLS = 48; // 4 minutes max within a single invocation
+type HeyGenVideoStatus = 'processing' | 'completed' | 'failed';
+
+type HeyGenStatusResult = {
+  status: HeyGenVideoStatus;
+  videoUrl?: string;
+  error?: string;
+};
+
+function getHeyGenCredentials(): { apiKey?: string; avatarId?: string; voiceId?: string } {
+  return {
+    apiKey: process.env.HEYGEN_API_KEY,
+    avatarId: process.env.HEYGEN_AVATAR_ID,
+    voiceId: process.env.HEYGEN_VOICE_ID,
+  };
+}
 
 /**
- * Generate a video with HeyGen.
- * HeyGen generation is asynchronous: we submit the job, then poll the status
- * endpoint until the video is ready or a bounded timeout elapses.
- * Never returns a fabricated URL — a missing URL is a hard failure.
+ * Submit a video to HeyGen and persist the returned provider job separately.
+ * HeyGen jobs routinely outlive a GitHub Actions invocation, so callers must
+ * poll the durable job ID on later scheduled runs rather than hold a worker.
  */
-export async function generateVideoWithHeyGen(
+export async function submitVideoToHeyGen(
   request: VideoGenerationRequest
-): Promise<{ videoUrl?: string; error?: string }> {
-  const heygenApiKey = process.env.HEYGEN_API_KEY;
-
-  if (!heygenApiKey) {
-    return { error: 'HEYGEN_API_KEY is not configured' };
-  }
-  const avatarId = process.env.HEYGEN_AVATAR_ID;
-  const voiceId = process.env.HEYGEN_VOICE_ID;
-  if (!avatarId || !voiceId) {
-    return { error: 'HEYGEN_AVATAR_ID / HEYGEN_VOICE_ID are not configured' };
-  }
+): Promise<{ videoId?: string; error?: string }> {
+  const { apiKey, avatarId, voiceId } = getHeyGenCredentials();
+  if (!apiKey) return { error: 'HEYGEN_API_KEY is not configured' };
+  if (!avatarId || !voiceId) return { error: 'HEYGEN_AVATAR_ID / HEYGEN_VOICE_ID are not configured' };
 
   try {
-    // 1. Submit generation job (HeyGen v2 API)
     const createRes = await fetch('https://api.heygen.com/v2/video/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Api-Key': heygenApiKey,
+        'X-Api-Key': apiKey,
       },
+      signal: AbortSignal.timeout(25_000),
       body: JSON.stringify({
         video_inputs: [
           {
@@ -433,41 +460,48 @@ export async function generateVideoWithHeyGen(
     }
 
     const createData = (await createRes.json()) as { data?: { video_id?: string } };
-    const heygenVideoId = createData.data?.video_id;
-    if (!heygenVideoId) {
-      return { error: 'HeyGen did not return a video_id' };
+    const videoId = createData.data?.video_id;
+    return videoId ? { videoId } : { error: 'HeyGen did not return a video_id' };
+  } catch (error) {
+    return { error: `HeyGen submission failed: ${error instanceof Error ? error.message : 'Unknown error'}` };
+  }
+}
+
+/** Query one already-submitted HeyGen job without creating another provider job. */
+export async function getHeyGenVideoStatus(videoId: string): Promise<HeyGenStatusResult> {
+  const { apiKey } = getHeyGenCredentials();
+  if (!apiKey) return { status: 'failed', error: 'HEYGEN_API_KEY is not configured' };
+
+  try {
+    const statusRes = await fetch(
+      `https://api.heygen.com/v1/video_status.get?video_id=${encodeURIComponent(videoId)}`,
+      {
+        headers: { 'X-Api-Key': apiKey },
+        signal: AbortSignal.timeout(20_000),
+      }
+    );
+    if (!statusRes.ok) {
+      return { status: 'processing', error: `HeyGen status request failed (HTTP ${statusRes.status})` };
     }
 
-    // 2. Poll status until completed / failed / timeout
-    for (let i = 0; i < HEYGEN_MAX_POLLS; i++) {
-      await new Promise((r) => setTimeout(r, HEYGEN_POLL_INTERVAL_MS));
-
-      const statusRes = await fetch(
-        `https://api.heygen.com/v1/video_status.get?video_id=${encodeURIComponent(heygenVideoId)}`,
-        { headers: { 'X-Api-Key': heygenApiKey } }
-      );
-      if (!statusRes.ok) continue;
-
-      const statusData = (await statusRes.json()) as {
-        data?: { status?: string; video_url?: string; error?: { message?: string } };
-      };
-      const status = statusData.data?.status;
-
-      if (status === 'completed') {
-        const videoUrl = statusData.data?.video_url;
-        if (!videoUrl) return { error: 'HeyGen reported completed but returned no video_url' };
-        return { videoUrl };
-      }
-      if (status === 'failed') {
-        return { error: `HeyGen generation failed: ${statusData.data?.error?.message ?? 'unknown'}` };
-      }
-      // pending / processing → keep polling
+    const statusData = (await statusRes.json()) as {
+      data?: { status?: string; video_url?: string; error?: { message?: string } };
+    };
+    const status = statusData.data?.status;
+    if (status === 'completed') {
+      const videoUrl = statusData.data?.video_url;
+      return videoUrl
+        ? { status: 'completed', videoUrl }
+        : { status: 'failed', error: 'HeyGen reported completed but returned no video_url' };
     }
-
-    return { error: `HeyGen generation timed out (video_id=${heygenVideoId}); will retry on next run` };
+    if (status === 'failed') {
+      return { status: 'failed', error: statusData.data?.error?.message ?? 'HeyGen generation failed' };
+    }
+    return { status: 'processing' };
   } catch (error) {
     return {
-      error: `Generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      status: 'processing',
+      error: `HeyGen status check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }
@@ -651,19 +685,59 @@ export async function processVideoGenerationRequest(
       await updateVideoRequestStatus(request.id, 'processing');
     }
 
-    // 1. Generate the video — no fabricated fallback URLs.
-    const generationResult = await generateVideoWithHeyGen(request);
-    if (!generationResult.videoUrl) {
+    const now = new Date().toISOString();
+
+    if (!request.heygen_video_id) {
+      const submission = await submitVideoToHeyGen(request);
+      if (!submission.videoId) {
+        await markVideoFailed(request.id, 'Generation Failed', submission.error || 'HeyGen did not accept the request');
+        return false;
+      }
+
+      await supabaseServerAdminRequest(`/rest/v1/video_generation_requests?id=eq.${request.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'processing',
+          heygen_video_id: submission.videoId,
+          heygen_status: 'processing',
+          heygen_submitted_at: now,
+          heygen_last_polled_at: now,
+          error_message: null,
+          error_details: null,
+          updated_at: now,
+        }),
+      });
+      console.log(`[video-automation] Submitted request ${request.id} to HeyGen as ${submission.videoId}.`);
+      return true;
+    }
+
+    const providerStatus = await getHeyGenVideoStatus(request.heygen_video_id);
+    await supabaseServerAdminRequest(`/rest/v1/video_generation_requests?id=eq.${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        heygen_status: providerStatus.status,
+        heygen_last_polled_at: now,
+        updated_at: now,
+      }),
+    });
+
+    if (providerStatus.status === 'processing') {
+      console.log(`[video-automation] HeyGen job ${request.heygen_video_id} is still processing.`);
+      return true;
+    }
+    if (providerStatus.status === 'failed' || !providerStatus.videoUrl) {
       await markVideoFailed(
         request.id,
         'Generation Failed',
-        generationResult.error || 'Video generation returned no URL'
+        providerStatus.error || 'HeyGen reported no completed video URL'
       );
       return false;
     }
-    const videoUrl = generationResult.videoUrl;
+    const videoUrl = providerStatus.videoUrl;
 
-    // 2. Publish to every enabled target.
+    // Publish only after a completed provider result is verified.
     const config = await getVideoPublishingConfig();
     const failures: string[] = [];
     let youtubeId: string | null = null;
@@ -684,7 +758,6 @@ export async function processVideoGenerationRequest(
       if (!facebookId) failures.push('Facebook publish failed');
     }
 
-    // 3. Record the outcome truthfully and keep the site video library in sync.
     if (youtubeId || facebookId || videoUrl) {
       await publishGeneratedVideoOnSite(request, videoUrl, youtubeId, facebookId);
     }
@@ -697,7 +770,6 @@ export async function processVideoGenerationRequest(
         facebookId,
         status: youtubeId || facebookId ? 'partial' : 'failed',
       });
-      // Persist whatever succeeded so a retry does not re-publish.
       if (youtubeId || facebookId) {
         await supabaseServerAdminRequest(`/rest/v1/video_generation_requests?id=eq.${request.id}`, {
           method: 'PATCH',

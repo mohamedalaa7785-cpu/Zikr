@@ -38,6 +38,14 @@ import { supabaseServerAdminRequest } from "@/lib/supabase/server";
 
 type SocialPlatform = "facebook" | "youtube";
 
+const VIDEO_GENERATION_CATEGORIES = new Set([
+  "quran",
+  "hadith",
+  "story",
+  "dua",
+  "adhkar",
+]);
+
 type JsonRecord = Record<string, unknown>;
 
 function value(formData: FormData, key: string) {
@@ -243,13 +251,18 @@ export async function saveVideoPostAction(formData: FormData) {
   });
 
   if (bool(formData, "generateVideo")) {
+    const category = value(formData, "category");
+    if (!category || !VIDEO_GENERATION_CATEGORIES.has(category)) {
+      throw new Error("يرجى اختيار تصنيف صحيح لتوليد الفيديو.");
+    }
+
     await supabaseServerAdminRequest("/rest/v1/video_generation_requests", {
       method: "POST",
       headers: { Prefer: "return=minimal" },
       body: JSON.stringify({
         title,
         description,
-        category: value(formData, "category") ?? "other",
+        category,
         content: {
           prompt: value(formData, "script") ?? description ?? title,
           publicPath: `/videos/${slug}`,
