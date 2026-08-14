@@ -190,26 +190,32 @@ self.addEventListener('message', (event) => {
   // Allow page to schedule a background prayer reminder
   if (event.data && event.data.type === 'SHOW_PRAYER_NOTIFICATION') {
     const { prayerName } = event.data;
-    self.registration.showNotification(`حان وقت صلاة ${prayerName}`, {
+    event.waitUntil(self.registration.showNotification(`حان وقت صلاة ${prayerName}`, {
       body: 'الصلاة خير من النوم — حافظ على صلاتك',
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
       tag: `prayer-${prayerName}`,
+      data: { url: '/prayer-times' },
       dir: 'rtl',
       lang: 'ar',
-    });
+    }));
   }
-  // Dhikr / Salawat background reminder
+  // Dhikr / Salawat reminder while the service worker is controlling the page.
   if (event.data && event.data.type === 'SHOW_DHIKR_NOTIFICATION') {
-    const { text } = event.data;
-    self.registration.showNotification('تذكير بالذكر', {
-      body: text ?? 'اللهم صلِّ على سيدنا محمد',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
-      tag: 'dhikr-reminder',
-      dir: 'rtl',
-      lang: 'ar',
-    });
+    const { text, kind } = event.data;
+    const isSalawat = kind === 'salawat';
+    event.waitUntil(self.registration.showNotification(
+      isSalawat ? 'تذكير بالصلاة على النبي' : 'تذكير بالذكر',
+      {
+        body: text ?? (isSalawat ? 'اللهم صلِّ وسلم على نبينا محمد' : 'سبحان الله وبحمده'),
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        tag: isSalawat ? 'salawat-reminder' : 'dhikr-reminder',
+        data: { url: '/adhkar' },
+        dir: 'rtl',
+        lang: 'ar',
+      },
+    ));
   }
 });
 

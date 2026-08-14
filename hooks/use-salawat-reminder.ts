@@ -74,6 +74,7 @@ export function useSalawatReminder(): SalawatReminderReturn {
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           type: 'SHOW_DHIKR_NOTIFICATION',
+          kind: 'salawat',
           text: 'اللهم صلِّ وسلم على نبينا محمد',
         });
       }
