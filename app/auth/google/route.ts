@@ -31,9 +31,9 @@ export async function GET(request: NextRequest) {
       provider: "google",
       options: {
         redirectTo,
-        scopes: "email profile",
+        // Supabase supplies the standard Google OpenID profile scopes. Passing
+        // `email profile` again duplicates them in the authorization request.
         queryParams: {
-          access_type: "offline",
           prompt: "select_account",
         },
       },
