@@ -258,7 +258,9 @@ export async function saveVideoPostAction(formData: FormData) {
 
     const script = value(formData, "script")?.replace(/\s+/g, " ").trim() ?? "";
     if (script.length < 30) {
-      throw new Error("يرجى إدخال نص مراجَع لا يقل عن 30 حرفاً قبل توليد الفيديو تلقائياً.");
+      throw new Error(
+        "يرجى إدخال نص مراجَع لا يقل عن 30 حرفاً قبل توليد الفيديو تلقائياً."
+      );
     }
 
     await supabaseServerAdminRequest("/rest/v1/video_generation_requests", {
@@ -366,6 +368,16 @@ export async function updateUserRoleAction(formData: FormData) {
       body: JSON.stringify({ role, updated_at: new Date().toISOString() }),
     }
   );
+
+  await supabaseServerAdminRequest("/rest/v1/admin_actions_audit", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({
+      user_id: admin.id,
+      action: "update_user_role",
+      meta: { target_user_id: userId, role },
+    }),
+  });
 
   revalidatePath("/admin/users");
 }
