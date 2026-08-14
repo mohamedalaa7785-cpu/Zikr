@@ -137,6 +137,7 @@ const rawEnv: Record<string, string | undefined> = {
     "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_ID"
   ),
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: pick("NEXT_PUBLIC_GA_MEASUREMENT_ID"),
 
   // ── YouTube ───────────────────────────────────────────────────────────────
   YOUTUBE_API_KEY: pick("YOUTUBE_API_KEY"),
@@ -176,6 +177,8 @@ export function getPublicEnv() {
     NEXT_PUBLIC_SITE_URL: validatedEnv.NEXT_PUBLIC_SITE_URL || "",
     NEXT_PUBLIC_GOOGLE_CLIENT_ID:
       validatedEnv.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+    NEXT_PUBLIC_GA_MEASUREMENT_ID:
+      validatedEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID || "",
   };
 }
 
@@ -222,6 +225,7 @@ export function getEnvAudit() {
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "NEXT_PUBLIC_SITE_URL",
       "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+      "NEXT_PUBLIC_GA_MEASUREMENT_ID",
     ],
     serverOnly: [
       "SUPABASE_SERVICE_ROLE_KEY",
