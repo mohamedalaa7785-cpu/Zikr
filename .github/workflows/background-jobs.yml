@@ -77,7 +77,8 @@ jobs:
             if [[ "${{ github.event.schedule }}" == "0 3 * * *" ]]; then
               echo "target=videos" >> "$GITHUB_OUTPUT"
             else
-              echo "target=social" >> "$GITHUB_OUTPUT"
+              # Poll submitted HeyGen jobs and process social work every 15 minutes.
+              echo "target=all" >> "$GITHUB_OUTPUT"
             fi
           else
             echo "target=${{ inputs.target }}" >> "$GITHUB_OUTPUT"

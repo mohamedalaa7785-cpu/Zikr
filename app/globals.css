@@ -4,6 +4,7 @@
 @tailwind utilities;
 
 :root {
+  --font-noto-arabic: "Noto Naskh Arabic";
   --font-amiri:
     var(--font-noto-arabic), "Amiri", "Times New Roman", serif;
   --font-arabic:

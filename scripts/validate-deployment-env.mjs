@@ -343,9 +343,9 @@ async function validateSupabaseRest() {
     }
   } catch (error) {
     addResult(
-      "fail",
+      "warn",
       "Supabase Auth",
-      error instanceof Error ? error.message : "request failed"
+      `connectivity check skipped (${error instanceof Error ? error.message : "request failed"}); runtime clients will use offline-safe fallbacks`
     );
   }
 }

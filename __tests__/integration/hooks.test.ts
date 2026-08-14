@@ -1,14 +1,14 @@
 /**
  * Hooks smoke tests (node:test)
- * Verifies that hooks exported from lib/hooks/ can be imported.
- * Run with: node --test __tests__/integration/hooks.test.ts
+ * Verifies that hooks can be imported from their application locations.
+ * Run with: pnpm test
  */
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 describe('Prayer times hook exports', () => {
   it('exports usePrayerTimes', async () => {
-    const mod = await import('../../lib/hooks/use-prayer-times.ts');
+    const mod = await import('../../hooks/use-prayer-times.ts');
     assert.equal(typeof mod.usePrayerTimes, 'function');
   });
 });

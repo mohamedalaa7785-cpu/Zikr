@@ -3,6 +3,13 @@
 import { useRef, useState, useTransition } from 'react';
 import { uploadAvatarAction } from '@/app/profile/avatar-actions';
 
+const ALLOWED_AVATAR_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]);
+
 interface AvatarUploadProps {
   currentAvatarUrl: string | null;
   displayName: string | null;
@@ -23,25 +30,20 @@ export function AvatarUpload({ currentAvatarUrl, displayName, email }: AvatarUpl
       setError('حجم الصورة يجب أن يكون أقل من 2MB');
       return;
     }
-    if (!file.type.startsWith('image/')) {
-      setError('يرجى اختيار ملف صورة صالح');
+    if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+      setError('يرجى اختيار صورة بصيغة JPG أو PNG أو WEBP أو GIF');
       return;
     }
 
     setError(null);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      setPreview(base64);
-      const formData = new FormData();
-      formData.append('avatarBase64', base64);
-      startTransition(() => {
-        uploadAvatarAction(formData).catch(() => {
-          setError('فشل رفع الصورة، حاول مرة أخرى');
-        });
+    setPreview(URL.createObjectURL(file));
+    const formData = new FormData();
+    formData.append('avatarFile', file);
+    startTransition(() => {
+      uploadAvatarAction(formData).catch(() => {
+        setError('فشل رفع الصورة، حاول مرة أخرى');
       });
-    };
-    reader.readAsDataURL(file);
+    });
   }
 
   const initial = (displayName?.[0] ?? email?.[0] ?? 'م').toUpperCase();
@@ -76,7 +78,7 @@ export function AvatarUpload({ currentAvatarUrl, displayName, email }: AvatarUpl
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif"
         className="sr-only"
         onChange={handleFileChange}
       />
