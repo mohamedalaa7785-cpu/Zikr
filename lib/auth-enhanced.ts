@@ -73,12 +73,6 @@ export function getGoogleOAuthConfigStatus() {
 
   const appCallbackUrl = buildOAuthRedirectUri(PRODUCTION_URL);
   const configuredCallbackUrl = env.AUTH_CALLBACK_URL || appCallbackUrl;
-  const normalizedConfiguredCallbackUrl = configuredCallbackUrl.replace(
-    /\/$/,
-    ""
-  );
-  const normalizedAppCallbackUrl = appCallbackUrl.replace(/\/$/, "");
-
   return {
     isReady: missing.length === 0,
     missing,
