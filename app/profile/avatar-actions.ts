@@ -1,25 +1,35 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { uploadCloudinaryImage } from '@/lib/services/cloudinary';
+import { createClient } from '@/lib/supabase/server';
 
 export async function uploadAvatarAction(formData: FormData) {
-  const avatarBase64 = String(formData.get('avatarBase64') || '').trim();
-
-  if (!avatarBase64.startsWith('data:image/')) {
-    throw new Error('صيغة الصورة غير صالحة');
+  const avatarFile = formData.get('avatarFile');
+  if (!(avatarFile instanceof File)) {
+    throw new Error('يرجى اختيار ملف صورة صالح');
   }
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  await supabase.from('profiles').upsert({
+  const upload = await uploadCloudinaryImage({
+    file: avatarFile,
+    folder: 'zikr/avatars',
+    publicId: user.id,
+    tags: ['zikr', 'avatar', user.id],
+  });
+
+  const { error } = await supabase.from('profiles').upsert({
     id: user.id,
-    avatar_url: avatarBase64,
+    avatar_url: upload.secureUrl,
     updated_at: new Date().toISOString(),
   });
+  if (error) throw error;
 
   revalidatePath('/profile');
 }

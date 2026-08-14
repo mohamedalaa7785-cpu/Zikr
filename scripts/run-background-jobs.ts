@@ -1,5 +1,6 @@
 import {
   claimPendingVideoRequests,
+  getSubmittedVideoRequests,
   processVideoGenerationRequest,
 } from "../lib/services/video-automation";
 import {
@@ -23,13 +24,18 @@ function validateRequiredEnv() {
   }
 
   process.env.NEXT_PUBLIC_SUPABASE_URL ||= process.env.SUPABASE_URL;
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||= process.env.SUPABASE_ANON_KEY;
 }
 
 async function processVideos() {
+  console.log(`[background-jobs] Loading up to ${VIDEO_BATCH_SIZE} submitted HeyGen job(s).`);
+  const submitted = await getSubmittedVideoRequests(VIDEO_BATCH_SIZE);
   console.log(`[background-jobs] Claiming up to ${VIDEO_BATCH_SIZE} pending video request(s).`);
-  const requests = await claimPendingVideoRequests(VIDEO_BATCH_SIZE);
+  const claimed = await claimPendingVideoRequests(VIDEO_BATCH_SIZE);
+  const requests = [...submitted, ...claimed];
+
   if (requests.length === 0) {
-    console.log("[background-jobs] No pending video requests claimed.");
+    console.log("[background-jobs] No pending or submitted video requests found.");
     return { processed: 0, succeeded: 0, failed: 0 };
   }
 

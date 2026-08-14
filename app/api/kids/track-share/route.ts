@@ -1,66 +1,70 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServerAdminRequest } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+
+const VALID_PLATFORMS = new Set([
+  "facebook",
+  "whatsapp",
+  "twitter",
+  "copy-link",
+]);
+const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
+
+type ShareRequest = {
+  slug?: unknown;
+  platform?: unknown;
+  action?: unknown;
+};
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { slug, platform, action } = body;
+    const body = (await request.json()) as ShareRequest;
+    const slug = typeof body.slug === "string" ? body.slug.trim() : "";
+    const platform = typeof body.platform === "string" ? body.platform : "";
+    const action = body.action === undefined ? "share" : body.action;
 
-    if (!slug || !platform) {
+    if (!slug || slug.length > 160 || !SLUG_PATTERN.test(slug)) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Invalid content slug" },
         { status: 400 }
       );
     }
 
-    // Validate platform
-    const validPlatforms = ["facebook", "whatsapp", "twitter", "copy-link"];
-    if (!validPlatforms.includes(platform)) {
-      return NextResponse.json(
-        { error: "Invalid platform" },
-        { status: 400 }
-      );
+    if (!VALID_PLATFORMS.has(platform)) {
+      return NextResponse.json({ error: "Invalid platform" }, { status: 400 });
     }
 
-    // Track share event
-    const response = await supabaseServerAdminRequest(
-      "/rest/v1/kids_content?slug=eq.${slug}",
+    if (action !== "share") {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    }
+
+    const supabase = createAdminClient();
+    const { data, error } = await supabase.rpc(
+      "increment_kids_content_shares",
       {
-        method: "PATCH",
-        headers: { Prefer: "return=minimal" },
-        body: JSON.stringify({
-          shares: `shares + 1`,
-        }),
+        p_slug: slug,
       }
     );
 
-    // Also track in analytics if available
-    if (typeof window === "undefined" && process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) {
-      // Server-side event tracking could be implemented here
-      console.log(`[Kids] Share tracked: ${slug} via ${platform}`);
+    if (error) {
+      console.error("[Kids Share Tracking Error] RPC failed:", error);
+      return NextResponse.json(
+        { error: "Failed to track share" },
+        { status: 500 }
+      );
+    }
+
+    const updated = Array.isArray(data) ? data[0] : data;
+    if (!updated) {
+      return NextResponse.json({ error: "Content not found" }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      message: `Share tracked on ${platform}`,
+      platform,
+      shares: updated.shares,
     });
   } catch (error) {
-    console.error("[Kids Share Tracking Error]:", error);
-    return NextResponse.json(
-      { error: "Failed to track share" },
-      { status: 500 }
-    );
+    console.error("[Kids Share Tracking Error] Request failed:", error);
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 }
-
-/**
- * Track engagement metrics for kids content
- * POST /api/kids/track-share
- *
- * Body:
- * {
- *   slug: string (content slug)
- *   platform: string ('facebook', 'whatsapp', 'twitter', 'copy-link')
- *   action?: string ('share', 'like', 'complete')
- * }
- */

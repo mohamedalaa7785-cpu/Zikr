@@ -42,17 +42,22 @@ async function fetchWithTimeout(url, init = {}) {
   }
 }
 
-async function checkRoute(baseUrl, route) {
+async function checkRoute(baseUrl, route, expectedStatuses) {
   const url = new URL(route, baseUrl).toString();
   try {
     const response = await fetchWithTimeout(url, {
       headers: { Accept: "text/html,application/xhtml+xml" },
+      redirect: "manual",
     });
-    if (response.ok) {
+    if (expectedStatuses.includes(response.status)) {
       add("pass", `Route ${route}`, `HTTP ${response.status}`);
       return;
     }
-    add("fail", `Route ${route}`, `HTTP ${response.status}`);
+    add(
+      "fail",
+      `Route ${route}`,
+      `HTTP ${response.status}; expected ${expectedStatuses.join(" or ")}`,
+    );
   } catch (error) {
     add("fail", `Route ${route}`, error instanceof Error ? error.message : "request failed");
   }
@@ -69,12 +74,16 @@ async function checkSupabaseTable(supabaseUrl, anonKey, table) {
       },
     });
     if (response.ok) {
-      add("pass", `Supabase ${table}`, `HTTP ${response.status}`);
+      add("pass", `Anonymous Supabase ${table}`, `HTTP ${response.status}`);
       return;
     }
-    add("fail", `Supabase ${table}`, `HTTP ${response.status}`);
+    add("fail", `Anonymous Supabase ${table}`, `HTTP ${response.status}`);
   } catch (error) {
-    add("fail", `Supabase ${table}`, error instanceof Error ? error.message : "request failed");
+    add(
+      "fail",
+      `Anonymous Supabase ${table}`,
+      error instanceof Error ? error.message : "request failed",
+    );
   }
 }
 
@@ -87,13 +96,28 @@ if (!supabaseUrl) add("fail", "NEXT_PUBLIC_SUPABASE_URL", "missing");
 if (!anonKey) add("fail", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "missing");
 
 if (siteUrl) {
-  for (const route of ["/", "/quran", "/quran/1", "/hadith", "/dua", "/profile", "/search", "/settings"]) {
-    await checkRoute(siteUrl, route);
+  const publicRoutes = ["/", "/quran", "/quran/1", "/hadith", "/dua", "/search", "/settings"];
+  for (const route of publicRoutes) {
+    await checkRoute(siteUrl, route, [200]);
+  }
+
+  for (const route of ["/profile", "/favorites", "/memorization", "/admin"]) {
+    await checkRoute(siteUrl, route, [302, 303, 307, 308]);
   }
 }
 
 if (supabaseUrl && anonKey) {
-  for (const table of ["quran_surahs", "quran_ayahs", "hadith_books", "hadiths", "duas", "videos", "video_generation_requests", "social_publish_queue"]) {
+  // Only public content is queried with an anonymous key. User, admin, and
+  // automation tables are deliberately omitted because successful anonymous
+  // reads would indicate an RLS regression rather than deployment health.
+  for (const table of [
+    "quran_surahs",
+    "quran_ayahs",
+    "hadith_books",
+    "hadiths",
+    "duas",
+    "videos",
+  ]) {
     await checkSupabaseTable(supabaseUrl, anonKey, table);
   }
 }
