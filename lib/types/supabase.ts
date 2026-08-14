@@ -549,7 +549,7 @@ export type Database = {
           language: string
           message: string
           name: string
-          notificationsent: boolean
+          notification_sent: boolean
           read: boolean
           subject: string
           updated_at: string
@@ -561,7 +561,7 @@ export type Database = {
           language?: string
           message: string
           name: string
-          notificationsent?: boolean
+          notification_sent?: boolean
           read?: boolean
           subject: string
           updated_at?: string
@@ -573,7 +573,7 @@ export type Database = {
           language?: string
           message?: string
           name?: string
-          notificationsent?: boolean
+          notification_sent?: boolean
           read?: boolean
           subject?: string
           updated_at?: string
@@ -1003,6 +1003,7 @@ export type Database = {
           metadata: Json | null
           published: boolean
           quiz_data: Json | null
+          shares: number
           slug: string
           title_ar: string
           title_en: string
@@ -1021,6 +1022,7 @@ export type Database = {
           metadata?: Json | null
           published?: boolean
           quiz_data?: Json | null
+          shares?: number
           slug: string
           title_ar: string
           title_en: string
@@ -1039,6 +1041,7 @@ export type Database = {
           metadata?: Json | null
           published?: boolean
           quiz_data?: Json | null
+          shares?: number
           slug?: string
           title_ar?: string
           title_en?: string

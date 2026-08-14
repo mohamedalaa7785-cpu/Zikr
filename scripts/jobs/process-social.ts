@@ -22,14 +22,17 @@
  * - NEXT_PUBLIC_SITE_URL
  */
 
-import { getPendingSocialPublishItems, processSocialPublishItem } from '@/lib/services/social-publishing';
+import {
+  claimPendingSocialPublishItems,
+  processSocialPublishItem,
+} from "@/lib/services/social-publishing";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BATCH_SIZE = 10; // Process up to 10 items per run
-const JOB_NAME = 'process-social';
+const JOB_NAME = "process-social";
 const LOG_PREFIX = `[${JOB_NAME}]`;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -37,25 +40,33 @@ const LOG_PREFIX = `[${JOB_NAME}]`;
 // ─────────────────────────────────────────────────────────────────────────────
 
 function validateEnvironment(): void {
-  const required = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'NEXT_PUBLIC_SITE_URL'];
+  const required = [
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "NEXT_PUBLIC_SITE_URL",
+  ];
 
-  const missing = required.filter((key) => !process.env[key]);
+  const missing = required.filter(key => !process.env[key]);
 
   if (missing.length > 0) {
-    throw new Error(`${LOG_PREFIX} Missing required environment variables: ${missing.join(', ')}`);
+    throw new Error(
+      `${LOG_PREFIX} Missing required environment variables: ${missing.join(", ")}`
+    );
   }
 
   const optional = [
-    'YOUTUBE_CLIENT_ID',
-    'YOUTUBE_CLIENT_SECRET',
-    'YOUTUBE_REFRESH_TOKEN',
-    'FACEBOOK_PAGE_ID',
-    'FACEBOOK_PAGE_ACCESS_TOKEN',
+    "YOUTUBE_CLIENT_ID",
+    "YOUTUBE_CLIENT_SECRET",
+    "YOUTUBE_REFRESH_TOKEN",
+    "FACEBOOK_PAGE_ID",
+    "FACEBOOK_PAGE_ACCESS_TOKEN",
   ];
 
-  const unconfigured = optional.filter((key) => !process.env[key]);
+  const unconfigured = optional.filter(key => !process.env[key]);
   if (unconfigured.length > 0) {
-    console.warn(`${LOG_PREFIX} Optional publishing targets not configured: ${unconfigured.join(', ')}`);
+    console.warn(
+      `${LOG_PREFIX} Optional publishing targets not configured: ${unconfigured.join(", ")}`
+    );
   }
 }
 
@@ -74,7 +85,7 @@ async function runJob(): Promise<JobResult> {
   console.log(`${LOG_PREFIX} Starting social publishing job`);
   console.log(`${LOG_PREFIX} Timestamp: ${new Date().toISOString()}`);
   console.log(`${LOG_PREFIX} Batch size: ${BATCH_SIZE}`);
-  console.log('');
+  console.log("");
 
   let totalProcessed = 0;
   let totalSucceeded = 0;
@@ -83,15 +94,18 @@ async function runJob(): Promise<JobResult> {
   try {
     validateEnvironment();
     console.log(`${LOG_PREFIX} Environment validation passed`);
-    console.log('');
+    console.log("");
 
-    // Fetch pending items
-    console.log(`${LOG_PREFIX} Fetching queued social items (limit: ${BATCH_SIZE})...`);
-    const queuedItems = await getPendingSocialPublishItems(BATCH_SIZE);
+    // Claim items before any external side effect. This prevents duplicate
+    // publishing when an older/manual entrypoint overlaps the scheduler.
+    console.log(
+      `${LOG_PREFIX} Claiming queued social items (limit: ${BATCH_SIZE})...`
+    );
+    const queuedItems = await claimPendingSocialPublishItems(BATCH_SIZE);
 
     if (queuedItems.length === 0) {
       console.log(`${LOG_PREFIX} No queued social items found`);
-      console.log('');
+      console.log("");
       console.log(`${LOG_PREFIX} Job completed`);
       console.log(`${LOG_PREFIX} Processed: 0, Succeeded: 0, Failed: 0`);
       return {
@@ -103,21 +117,25 @@ async function runJob(): Promise<JobResult> {
     }
 
     console.log(`${LOG_PREFIX} Found ${queuedItems.length} queued item(s)`);
-    console.log('');
+    console.log("");
 
     // Process each item (in parallel is OK for social publishing)
     let itemIndex = 0;
     const results = await Promise.all(
-      queuedItems.map(async (item) => {
+      queuedItems.map(async item => {
         itemIndex++;
         const currentIndex = itemIndex;
-        console.log(`${LOG_PREFIX} [${currentIndex}/${queuedItems.length}] Processing item: ${item.id}`);
+        console.log(
+          `${LOG_PREFIX} [${currentIndex}/${queuedItems.length}] Processing item: ${item.id}`
+        );
         console.log(`  Type: ${item.content_type}`);
-        console.log(`  Platforms: ${item.target_platforms.join(', ')}`);
+        console.log(`  Platforms: ${item.target_platforms.join(", ")}`);
         console.log(`  Status: ${item.status}`);
 
         try {
-          const success = await processSocialPublishItem(item);
+          const success = await processSocialPublishItem(item, {
+            alreadyClaimed: true,
+          });
           if (success) {
             totalSucceeded++;
             console.log(`  ✅ Published successfully to all platforms`);
@@ -138,10 +156,12 @@ async function runJob(): Promise<JobResult> {
     totalProcessed = results.length;
 
     // Summary
-    console.log('');
+    console.log("");
     console.log(`${LOG_PREFIX} Job completed`);
-    console.log(`${LOG_PREFIX} Processed: ${totalProcessed}, Succeeded: ${totalSucceeded}, Failed: ${totalFailed}`);
-    console.log('');
+    console.log(
+      `${LOG_PREFIX} Processed: ${totalProcessed}, Succeeded: ${totalSucceeded}, Failed: ${totalFailed}`
+    );
+    console.log("");
 
     return {
       success: totalFailed === 0,
@@ -152,7 +172,7 @@ async function runJob(): Promise<JobResult> {
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error(`${LOG_PREFIX} Fatal error: ${errorMsg}`);
-    console.error('');
+    console.error("");
     throw error;
   }
 }
@@ -162,10 +182,10 @@ async function runJob(): Promise<JobResult> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 runJob()
-  .then((result) => {
+  .then(result => {
     process.exit(result.success ? 0 : 1);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error(`${LOG_PREFIX} Unhandled error:`, error);
     process.exit(1);
   });

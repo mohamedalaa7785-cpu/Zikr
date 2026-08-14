@@ -68,8 +68,6 @@ export function getGoogleOAuthConfigStatus() {
     ["NEXT_PUBLIC_SUPABASE_URL", env.NEXT_PUBLIC_SUPABASE_URL],
     ["NEXT_PUBLIC_SUPABASE_ANON_KEY", env.NEXT_PUBLIC_SUPABASE_ANON_KEY],
     ["NEXT_PUBLIC_SITE_URL", env.NEXT_PUBLIC_SITE_URL],
-    ["GOOGLE_CLIENT_ID", env.GOOGLE_CLIENT_ID],
-    ["GOOGLE_CLIENT_SECRET", env.GOOGLE_CLIENT_SECRET],
   ]
     .filter(([, value]) => !value)
     .map(([name]) => name);
