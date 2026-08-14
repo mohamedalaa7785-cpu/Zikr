@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { logoutAction } from '@/app/auth/actions';
 import { useLanguage } from './language-provider';
 
 const allLinks = [
@@ -82,13 +83,33 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
         </div>
 
         <div className="py-3 px-3">
-          <Link
-            href={isAuthenticated ? '/profile' : '/auth/login'}
-            onClick={() => setOpen(false)}
-            className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
-          >
-            {isAuthenticated ? 'الملف الشخصي' : 'تسجيل الدخول'}
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/profile"
+                onClick={() => setOpen(false)}
+                className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
+              >
+                الملف الشخصي
+              </Link>
+              <form action={logoutAction} className="mb-2">
+                <button
+                  type="submit"
+                  className="flex w-full items-center rounded-lg border border-brand-cream/15 px-4 py-3 text-sm font-semibold text-brand-cream/75 transition-all hover:border-brand-gold/30 hover:bg-brand-gold/10 hover:text-brand-gold"
+                >
+                  تسجيل الخروج
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link
+              href="/auth/login"
+              onClick={() => setOpen(false)}
+              className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
+            >
+              تسجيل الدخول
+            </Link>
+          )}
           {allLinks.map((link) => (
             <Link
               key={link.href}
