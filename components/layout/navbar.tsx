@@ -37,15 +37,17 @@ export async function Navbar() {
     user = authUser;
 
     if (user) {
+      // A missing profile row must not erase a valid auth session from the UI.
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       isAdmin = profile?.role === 'admin';
     }
-  } catch {
-    // Continue with unauthenticated state
+  } catch (error) {
+    // Keep the authenticated user even if an optional profile lookup fails.
+    console.error('[v0] Navbar auth lookup failed:', error);
   }
 
   return (
