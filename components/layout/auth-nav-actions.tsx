@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/app/auth/actions';
@@ -12,6 +13,7 @@ type AuthNavActionsProps = {
 };
 
 export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsProps) {
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(initialUser);
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
 
@@ -61,7 +63,7 @@ export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsPr
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [pathname]);
 
   if (!user) {
     return (
