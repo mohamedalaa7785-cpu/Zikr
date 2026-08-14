@@ -88,7 +88,8 @@ export type AppRoute = {
 
 export const appRoutes = [
   { path: '/', label: 'الرئيسية', sitemap: { changeFrequency: 'weekly', priority: 1 } },
-  { path: '/quran', label: 'القرآن', sitemap: { changeFrequency: 'monthly', priority: 0.9 }, nav: 'primary', footer: 'platform' },
+  { path: '/mushaf', label: 'المصحف', sitemap: { changeFrequency: 'monthly', priority: 0.95 }, nav: 'primary', footer: 'platform' },
+  { path: '/quran', label: 'القرآن', sitemap: { changeFrequency: 'monthly', priority: 0.9 }, nav: 'more', footer: 'platform' },
   { path: '/hadith', label: 'الأحاديث', sitemap: { changeFrequency: 'monthly', priority: 0.9 }, nav: 'primary', footer: 'platform' },
   { path: '/stories', label: 'القصص', sitemap: { changeFrequency: 'weekly', priority: 0.8 }, nav: 'primary' },
   { path: '/scholars', label: 'العلماء', sitemap: { changeFrequency: 'monthly', priority: 0.8 }, nav: 'primary', footer: 'platform' },

@@ -97,6 +97,25 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Founder */}
+        <section className="rounded-2xl border border-brand-gold/25 bg-brand-gold/5 p-8 md:p-10 space-y-5">
+          <div className="flex flex-col md:flex-row md:items-center gap-5">
+            <div className="w-16 h-16 rounded-full border border-brand-gold/40 bg-brand-gold/10 flex items-center justify-center text-2xl font-bold text-brand-gold" aria-hidden>
+              م ع
+            </div>
+            <div>
+              <p className="text-sm text-brand-gold/70 mb-1">عن المؤسس</p>
+              <h2 className="text-3xl font-bold text-brand-gold">محمد علاء</h2>
+            </div>
+          </div>
+          <p className="leading-9 text-brand-cream/75">
+            أُسست منصة ذِكرٌ على يد <strong className="text-brand-cream">محمد علاء</strong> بهدف تقديم مكتبة إسلامية رقمية عربية تجمع القرآن الكريم والحديث والسيرة والقصص النافعة في مكان واحد، مع عناية خاصة بسهولة الاستخدام ووضوح المصادر واحترام خصوصية الزائر.
+          </p>
+          <p className="leading-9 text-brand-cream/65 text-sm">
+            المحتوى التحريري التعليمي في المنصة يُراجع ويُنظم داخليًا، أما النصوص التراثية والبيانات المفتوحة فتُعرض مع الإشارة إلى مصادرها وتراخيصها، لتبقى المنصة مساحة معرفة نافعة ومسؤولة.
+          </p>
+        </section>
+
         {/* Features */}
         <section className="space-y-8">
           <h2 className="text-3xl font-bold text-brand-gold text-center">ما الذي تقدّمه المنصة؟</h2>
