@@ -335,10 +335,10 @@ async function getSitemapEntries(): Promise<MetadataRoute.Sitemap> {
 
 export async function generateSitemaps() {
   // Keep a deterministic set of files because Next.js may call this during
-  // build before runtime-only Supabase credentials are available. Three files
-  // provide room for 135,000 URLs while each file remains below the protocol
-  // limit; empty tail files are valid and avoid silently dropping future URLs.
-  return [{ id: 0 }, { id: 1 }, { id: 2 }];
+  // build before runtime-only Supabase credentials are available. Two files
+  // provide room for 90,000 current URLs while each file remains below the
+  // protocol limit; add another id when the published corpus grows beyond it.
+  return [{ id: 0 }, { id: 1 }];
 }
 
 export default async function sitemap(props: {
