@@ -4,13 +4,24 @@ import { NextResponse } from 'next/server';
 // Uses request.url and cookies — can never be statically rendered.
 export const dynamic = 'force-dynamic';
 
+function parsePositiveInt(value: string | null, fallback: number, max?: number): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return max === undefined ? parsed : Math.min(parsed, max);
+}
+
+function parseNonNegativeInt(value: string | null, fallback = 0): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parsePositiveInt(searchParams.get('limit'), 20, 100);
+    const offset = parseNonNegativeInt(searchParams.get('offset'));
     const featured = searchParams.get('featured') === 'true';
 
     // No database connected — return an empty page so the UI shows its

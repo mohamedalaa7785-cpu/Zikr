@@ -16,8 +16,18 @@ type ShareRequest = {
 };
 
 export async function POST(request: NextRequest) {
+  let body: ShareRequest;
   try {
-    const body = (await request.json()) as ShareRequest;
+    const parsed = await request.json();
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+    body = parsed as ShareRequest;
+  } catch {
+    return NextResponse.json({ error: "Malformed JSON request body" }, { status: 400 });
+  }
+
+  try {
     const slug = typeof body.slug === "string" ? body.slug.trim() : "";
     const platform = typeof body.platform === "string" ? body.platform : "";
     const action = body.action === undefined ? "share" : body.action;
@@ -65,6 +75,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("[Kids Share Tracking Error] Request failed:", error);
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
