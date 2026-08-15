@@ -90,3 +90,7 @@ The final `pnpm verify` exited 0: 121 migration checks passed, local import and 
 After adding retry logic for slow connections, the local production build passed TypeScript, ESLint, and Next build. In the browser, the page rendered normally and `navigator.serviceWorker.getRegistrations()` returned one active registration with scope `/`, an active controller, online connectivity, and a 4G/no-Data-Saver connection. This confirms the delayed registration still results in an active controlling Service Worker.
 
 The follow-up full verification after the retry change exited 0: 121 Supabase migration checks passed, imports and mobile readiness passed, 56 tests passed with 0 failures, and the Next.js production build completed. The browser console remained free of runtime errors after the active Service Worker was registered.
+
+## Live production PWA validation after retry fix
+
+After deployment `dpl_FoJwYtfx5TTKQ4kPGGnXZVtm6wgg` reached `READY` and was aliased to `https://zikrmediaofficial.vercel.app`, the live homepage rendered normally. Browser inspection returned one active Service Worker controlling the official origin with no waiting worker. The browser was online and `Notification.permission` remained `default`, confirming the page did not trigger an automatic notification permission prompt during passive load.
