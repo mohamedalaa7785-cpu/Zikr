@@ -53,15 +53,22 @@ BEGIN
 END $$;
 
 -- This table is only written by the service role or an admin. The service role
--- bypasses RLS, so its redundant public-role policy is not needed.
-DROP POLICY IF EXISTS social_publish_queue_admin_all ON public.social_publish_queue;
-DROP POLICY IF EXISTS social_publish_queue_service_role_all ON public.social_publish_queue;
-CREATE POLICY social_publish_queue_admin_insert ON public.social_publish_queue
-  FOR INSERT TO authenticated WITH CHECK (private.is_admin_user());
-CREATE POLICY social_publish_queue_admin_update ON public.social_publish_queue
-  FOR UPDATE TO authenticated USING (private.is_admin_user()) WITH CHECK (private.is_admin_user());
-CREATE POLICY social_publish_queue_admin_delete ON public.social_publish_queue
-  FOR DELETE TO authenticated USING (private.is_admin_user());
+-- bypasses RLS, so its redundant public-role policy is not needed. The table is
+-- optional in legacy/local replay environments, so do not fail if it is absent.
+DO $social_queue$
+BEGIN
+  IF to_regclass('public.social_publish_queue') IS NOT NULL THEN
+    DROP POLICY IF EXISTS social_publish_queue_admin_all ON public.social_publish_queue;
+    DROP POLICY IF EXISTS social_publish_queue_service_role_all ON public.social_publish_queue;
+    CREATE POLICY social_publish_queue_admin_insert ON public.social_publish_queue
+      FOR INSERT TO authenticated WITH CHECK (private.is_admin_user());
+    CREATE POLICY social_publish_queue_admin_update ON public.social_publish_queue
+      FOR UPDATE TO authenticated USING (private.is_admin_user()) WITH CHECK (private.is_admin_user());
+    CREATE POLICY social_publish_queue_admin_delete ON public.social_publish_queue
+      FOR DELETE TO authenticated USING (private.is_admin_user());
+  END IF;
+END
+$social_queue$;
 
 -- Keep one owner policy for each personal activity table.
 DROP POLICY IF EXISTS users_own_reading_progress ON public.reading_progress;
@@ -86,23 +93,30 @@ CREATE POLICY tawasheeh_playlists_owner_delete ON public.tawasheeh_playlists
   FOR DELETE TO public USING ((SELECT auth.uid()) = user_id);
 
 -- Public newsletter signup needs one INSERT policy. Account owners may still
--- read/update/delete their own subscription rows without INSERT overlap.
-DROP POLICY IF EXISTS "Anyone can subscribe" ON public.subscriptions;
-DROP POLICY IF EXISTS subscriptions_public_insert ON public.subscriptions;
-DROP POLICY IF EXISTS subscriptions_owner_all ON public.subscriptions;
-CREATE POLICY subscriptions_public_insert ON public.subscriptions
-  FOR INSERT TO anon, authenticated WITH CHECK (email IS NOT NULL);
-CREATE POLICY subscriptions_owner_select ON public.subscriptions
-  FOR SELECT TO authenticated USING (
-    email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
-  );
-CREATE POLICY subscriptions_owner_update ON public.subscriptions
-  FOR UPDATE TO authenticated USING (
-    email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
-  ) WITH CHECK (
-    email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
-  );
-CREATE POLICY subscriptions_owner_delete ON public.subscriptions
-  FOR DELETE TO authenticated USING (
-    email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
-  );
+-- read/update/delete their own subscription rows without INSERT overlap. The
+-- legacy baseline drops this table, so guard the policy repair for replays.
+DO $subscriptions$
+BEGIN
+  IF to_regclass('public.subscriptions') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Anyone can subscribe" ON public.subscriptions;
+    DROP POLICY IF EXISTS subscriptions_public_insert ON public.subscriptions;
+    DROP POLICY IF EXISTS subscriptions_owner_all ON public.subscriptions;
+    CREATE POLICY subscriptions_public_insert ON public.subscriptions
+      FOR INSERT TO anon, authenticated WITH CHECK (email IS NOT NULL);
+    CREATE POLICY subscriptions_owner_select ON public.subscriptions
+      FOR SELECT TO authenticated USING (
+        email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
+      );
+    CREATE POLICY subscriptions_owner_update ON public.subscriptions
+      FOR UPDATE TO authenticated USING (
+        email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
+      ) WITH CHECK (
+        email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
+      );
+    CREATE POLICY subscriptions_owner_delete ON public.subscriptions
+      FOR DELETE TO authenticated USING (
+        email = ((SELECT email FROM auth.users WHERE id = (SELECT auth.uid()))::text)
+      );
+  END IF;
+END
+$subscriptions$;
