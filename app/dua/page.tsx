@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
+import { mergePublishedBySlug } from '@/lib/data/content-merge';
 
 export const metadata: Metadata = pageMetadata({
   title: 'الأدعية الإسلامية',
@@ -133,9 +134,9 @@ export default async function DuaPage() {
     // Fall through to static content
   }
 
-  const showStatic = duas.length === 0;
-  const displayDuas = showStatic ? staticDuas : duas;
-  const displayCategories = showStatic ? staticCategories : categories;
+  const databaseDuaSlugs = new Set(duas.map(dua => dua.slug));
+  const displayDuas = mergePublishedBySlug(duas, staticDuas);
+  const displayCategories = mergePublishedBySlug(categories, staticCategories);
 
   return (
     <Container className="py-12 space-y-10">
@@ -174,8 +175,8 @@ export default async function DuaPage() {
         <div className="grid gap-5">
           {displayDuas.map((dua) => (
             <Link
-              key={dua.id}
-              href={showStatic ? '/dua' : `/dua/${dua.slug}`}
+              key={`${dua.id}-${dua.slug}`}
+              href={databaseDuaSlugs.has(dua.slug) ? `/dua/${dua.slug}` : '/dua'}
             >
               <Card className="p-6 space-y-4 hover:border-brand-gold/50 transition-colors cursor-pointer">
                 <div className="flex items-start justify-between gap-3">

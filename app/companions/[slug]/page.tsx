@@ -5,6 +5,12 @@ import { Container } from '@/components/ui/container';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+const STATIC_COMPANION_SLUGS: Record<string, string> = {
+  'أبو بكر الصديق': 'abu-bakr',
+  'عمر بن الخطاب': 'umar-ibn-khattab',
+  'علي بن أبي طالب': 'ali-ibn-abi-talib',
+};
+
 type Companion = {
   id: string;
   name_ar: string;
@@ -18,6 +24,7 @@ type Companion = {
 
 import { pageMetadata } from '@/lib/site';
 import type { Metadata } from 'next';
+import { COMPANIONS } from '@/lib/data/companions';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -30,9 +37,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   } catch {
     companion = null;
   }
+  const fallback = COMPANIONS.find(item => STATIC_COMPANION_SLUGS[item.name_ar] === slug);
   return pageMetadata({
-    title: companion?.name_ar ?? 'صحابي',
-    description: companion?.bio_ar?.slice(0, 160) ?? 'سيرة الصحابي الجليل وأبرز مواقفه.',
+    title: companion?.name_ar ?? fallback?.name_ar ?? 'صحابي',
+    description: companion?.bio_ar?.slice(0, 160) ?? fallback?.biography_ar.slice(0, 160) ?? 'سيرة الصحابي الجليل وأبرز مواقفه.',
     path: `/companions/${slug}`,
   });
 }
@@ -47,6 +55,22 @@ export default async function CompanionDetailPage({ params }: { params: Promise<
     companion = data && data.length > 0 ? data[0] : null;
   } catch {
     companion = null;
+  }
+
+  if (!companion) {
+    const fallback = COMPANIONS.find(item => STATIC_COMPANION_SLUGS[item.name_ar] === slug);
+    companion = fallback
+      ? {
+          id: fallback.id,
+          name_ar: fallback.name_ar,
+          name_en: fallback.name_en,
+          title_ar: fallback.title_ar,
+          bio_ar: fallback.biography_ar,
+          birth_place_ar: null,
+          death_place_ar: null,
+          death_year: String(fallback.death_year),
+        }
+      : null;
   }
 
   if (!companion) notFound();

@@ -57,7 +57,8 @@ const ageGroupLabels: Record<string, string> = {
   "13-15": "13-15 سنة",
 };
 
-// Full static content library shown when DB is empty
+// Full static content library is always merged with the database so a slow
+// or partially unavailable Supabase request cannot hide the local catalogue.
 const STATIC_CONTENT: KidsContent[] = staticKidsContent.map(item => ({
   id: item.id,
   title_ar: item.title_ar,
@@ -68,7 +69,7 @@ const STATIC_CONTENT: KidsContent[] = staticKidsContent.map(item => ({
   metadata: item.metadata,
 }));
 
-const KIDS_DB_TIMEOUT_MS = 3000;
+const KIDS_DB_TIMEOUT_MS = 8000;
 
 export const metadata = pageMetadata({
   title: "قسم الأطفال | ذكر",
@@ -85,8 +86,8 @@ export default async function KidsPage() {
         .from("kids_content")
         .select("*")
         .eq("published", true)
-        .eq("is_active", true)
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(1000),
       new Promise<{ data: null }>(resolve =>
         setTimeout(() => resolve({ data: null }), KIDS_DB_TIMEOUT_MS)
       ),

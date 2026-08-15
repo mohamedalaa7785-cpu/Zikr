@@ -32,6 +32,7 @@ type ConquestEvent = {
 
 import { pageMetadata } from '@/lib/site';
 import type { Metadata } from 'next';
+import { FALLBACK_CONQUESTS } from '@/lib/data/conquests-fallback';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -44,9 +45,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   } catch {
     conquest = null;
   }
+  const fallback = FALLBACK_CONQUESTS.find(item => item.slug === slug);
   return pageMetadata({
-    title: conquest?.name_ar ?? 'فتح إسلامي',
-    description: conquest?.description_ar?.slice(0, 160) ?? 'تفاصيل الفتح الإسلامي: القائد والتاريخ والموقع.',
+    title: conquest?.name_ar ?? fallback?.name_ar ?? 'فتح إسلامي',
+    description: conquest?.description_ar?.slice(0, 160) ?? fallback?.description_ar?.slice(0, 160) ?? 'تفاصيل الفتح الإسلامي: القائد والتاريخ والموقع.',
     path: `/conquests/${slug}`,
   });
 }
@@ -62,6 +64,11 @@ export default async function ConquestDetailPage({ params }: { params: Promise<{
     conquest = data && data.length > 0 ? data[0] : null;
   } catch {
     conquest = null;
+  }
+
+  if (!conquest) {
+    const fallback = FALLBACK_CONQUESTS.find(item => item.slug === slug);
+    conquest = fallback ? { ...fallback, published: true } : null;
   }
 
   if (!conquest) notFound();

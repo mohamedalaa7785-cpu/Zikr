@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ui/section-header';
 import { createClient } from '@/lib/supabase/server';
 import { companionCategoryLabel, uniqueCompanionSummaries } from '@/lib/utils/companions';
+import { COMPANIONS } from '@/lib/data/companions';
 
 export const metadata: Metadata = pageMetadata({
   title: 'الصحابة رضي الله عنهم',
@@ -28,6 +29,22 @@ type Companion = {
   category: string | null;
 };
 
+const STATIC_COMPANION_SLUGS: Record<string, string> = {
+  'أبو بكر الصديق': 'abu-bakr',
+  'عمر بن الخطاب': 'umar-ibn-khattab',
+  'علي بن أبي طالب': 'ali-ibn-abi-talib',
+};
+
+const STATIC_COMPANIONS: Companion[] = COMPANIONS.map((companion) => ({
+  id: `static-${companion.id}`,
+  name_ar: companion.name_ar,
+  name_en: companion.name_en,
+  title_ar: companion.title_ar,
+  bio_ar: companion.biography_ar,
+  slug: STATIC_COMPANION_SLUGS[companion.name_ar] ?? `static-${companion.id}`,
+  category: 'الخلفاء الراشدون',
+}));
+
 export default async function CompanionsPage() {
   let companions: Companion[] = [];
 
@@ -45,7 +62,11 @@ export default async function CompanionsPage() {
     console.error('[companions] Failed to load published content:', error);
   }
 
-  const grouped = companions.reduce<Record<string, Companion[]>>((acc, companion) => {
+  const displayCompanions = uniqueCompanionSummaries([
+    ...companions,
+    ...STATIC_COMPANIONS,
+  ]);
+  const grouped = displayCompanions.reduce<Record<string, Companion[]>>((acc, companion) => {
     const category = companionCategoryLabel(companion.category);
     (acc[category] ??= []).push(companion);
     return acc;
@@ -60,7 +81,7 @@ export default async function CompanionsPage() {
         </p>
       </section>
 
-      {companions.length === 0 ? (
+      {displayCompanions.length === 0 ? (
         <Card className="p-8 text-center space-y-3">
           <h2 className="text-xl font-bold text-brand-gold">لا تتوفر تراجم منشورة حاليًا</h2>
           <p className="arabic-muted leading-7">

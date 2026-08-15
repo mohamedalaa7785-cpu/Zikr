@@ -6,6 +6,7 @@ import { Container } from '@/components/ui/container';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
 import { pageMetadata } from '@/lib/site';
+import { mergePublishedBySlug } from '@/lib/data/content-merge';
 
 export const metadata: Metadata = pageMetadata({
   title: 'قصص الأنبياء والرسل',
@@ -32,9 +33,8 @@ interface Prophet {
   quran_mentions?: number;
 }
 
-// The database is the canonical source for all 25 prophets. This fallback only
-// exposes the six stories that also have a complete local detail page.
-const STATIC_DETAIL_SLUGS = new Set(['adam', 'nuh', 'ibrahim', 'musa', 'yusuf', 'muhammad']);
+// Merge the full local index with Supabase so a transient database failure
+// never hides the 25-prophet catalogue from the public page.
 
 const staticProphets: Prophet[] = [
   { id: '1',  order_num: 1,  name_ar: 'آدم عليه السلام',          name_en: 'Adam',       slug: 'adam',      quran_mentions: 25,  bio_ar: 'أبو البشر وأول الأنبياء، خلقه الله بيده ونفخ فيه الروح وعلّمه الأسماء كلها. أُهبط إلى الأرض بعد أن أكل من الشجرة ثم تاب الله عليه.' },
@@ -86,10 +86,7 @@ export default async function ProphetsPage() {
     // fall through to static
   }
 
-  const useStatic = prophets.length === 0;
-  const displayProphets = useStatic
-    ? staticProphets.filter(prophet => STATIC_DETAIL_SLUGS.has(prophet.slug))
-    : prophets;
+  const displayProphets = mergePublishedBySlug(prophets, staticProphets);
 
   // Prophet era colors for visual variety
   const eraColors = [
@@ -144,7 +141,7 @@ export default async function ProphetsPage() {
             return (
               <Link
                 key={prophet.id}
-                href={useStatic ? `/prophets/${prophet.slug}` : `/prophets/${prophet.slug}`}
+                href={`/prophets/${prophet.slug}`}
                 className="group block"
               >
                 <div className={`h-full rounded-xl border bg-gradient-to-br ${colorClass} p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-brand-gold/10 hover:border-brand-gold/40`}>

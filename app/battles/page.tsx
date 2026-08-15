@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { pageMetadata } from '@/lib/site';
 import { supabaseServerAnonRequest } from '@/lib/supabase/server';
+import { mergePublishedBySlug } from '@/lib/data/content-merge';
 
 export const metadata = pageMetadata({
   title: 'غزوات النبي ﷺ',
@@ -24,9 +25,17 @@ type Battle = {
   order_num: number | null;
 };
 
-// The database is the canonical source for the full battle library. This
-// fallback only exposes battles with complete local detail stories.
-const STATIC_DETAIL_SLUGS = new Set(['badr', 'uhud', 'khandaq', 'fathmakka']);
+const BATTLE_SLUG_ALIASES: Record<string, string> = {
+  nadir: 'banu-nadir',
+  qaynuqa: 'banu-qaynuqa',
+  qurayza: 'banu-qurayza',
+  mutah: 'mu-tah',
+  salasel: 'dhat-salasil',
+};
+
+function canonicalBattleSlug(slug: string) {
+  return BATTLE_SLUG_ALIASES[slug] ?? slug;
+}
 
 const staticBattles: Battle[] = [
   { id: '1', order_num: 1,  name_ar: 'غزوة بدر الكبرى',      name_en: 'Battle of Badr',      slug: 'badr',      date_hijri: '17 رمضان 2هـ',   date_gregorian: '13 مارس 624م', location_ar: 'وادي بدر — شمال غرب المدينة',     description_ar: 'أول معركة فاصلة في الإسلام، انتصر فيها 313 مسلماً على قريش وعددهم 950 مقاتلاً. قال الله: ﴿وَلَقَدْ نَصَرَكُمُ اللَّهُ بِبَدْرٍ وَأَنتُمْ أَذِلَّةٌ﴾.', thumbnail_url: null },
@@ -54,10 +63,11 @@ export default async function BattlesPage() {
     battles = [];
   }
 
-  const useStatic = battles.length === 0;
-  const displayBattles = useStatic
-    ? staticBattles.filter(battle => STATIC_DETAIL_SLUGS.has(battle.slug))
-    : battles;
+  const databaseBattleKeys = new Set(battles.map(battle => canonicalBattleSlug(battle.slug)));
+  const fallbackBattles = staticBattles.filter(
+    battle => !databaseBattleKeys.has(canonicalBattleSlug(battle.slug)),
+  );
+  const displayBattles = mergePublishedBySlug(battles, fallbackBattles);
 
   return (
     <main className="min-h-screen" dir="rtl">
@@ -101,7 +111,7 @@ export default async function BattlesPage() {
           {displayBattles.map((battle, i) => (
             <Link
               key={battle.id}
-              href={`/battles/${battle.slug}`}
+              href={`/battles/${canonicalBattleSlug(battle.slug)}`}
               className="group block"
             >
               <div className="h-full rounded-xl border border-red-900/20 bg-gradient-to-br from-red-950/30 to-[#0A2A1E]/80 p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-red-900/10 hover:border-brand-gold/40">

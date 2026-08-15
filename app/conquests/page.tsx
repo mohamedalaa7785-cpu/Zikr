@@ -5,6 +5,8 @@ import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { Castle } from "lucide-react";
 import { pageMetadata } from "@/lib/site";
+import { FALLBACK_CONQUESTS } from "@/lib/data/conquests-fallback";
+import { mergePublishedBySlug } from "@/lib/data/content-merge";
 
 export const metadata = pageMetadata({
   title: "الفتوحات الإسلامية",
@@ -42,6 +44,8 @@ export default async function ConquestsPage() {
     conquests = [];
   }
 
+  const displayConquests = mergePublishedBySlug(conquests, FALLBACK_CONQUESTS);
+
   return (
     <Container className="space-y-8 py-10 text-right">
       <section className="space-y-3">
@@ -52,7 +56,7 @@ export default async function ConquestsPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {conquests.map(c => (
+        {displayConquests.map(c => (
           <Link
             key={c.id}
             href={`/conquests/${c.slug}`}
@@ -82,7 +86,7 @@ export default async function ConquestsPage() {
             </Card>
           </Link>
         ))}
-        {!conquests.length && (
+        {!displayConquests.length && (
           <Card className="md:col-span-2 lg:col-span-3">
             لا توجد فتوحات حالياً.
           </Card>

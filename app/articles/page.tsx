@@ -9,6 +9,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
 import { staticArticles } from '@/lib/data/articles';
+import { mergePublishedBySlug } from '@/lib/data/content-merge';
 
 export const metadata: Metadata = pageMetadata({
   title: 'المقالات الإسلامية',
@@ -58,7 +59,7 @@ export default async function ArticlesPage() {
         .select('id, title, slug, summary, author, featured_image_url, views, created_at, category_id')
         .eq('published', true)
         .order('created_at', { ascending: false })
-        .limit(24),
+        .limit(1000),
       supabase
         .from('article_categories')
         .select('id, name_ar, slug, icon')
@@ -71,9 +72,8 @@ export default async function ArticlesPage() {
     // Fall through to static content
   }
 
-  const showStatic = articles.length === 0;
-  const displayArticles = showStatic ? staticArticles : articles;
-  const displayCategories = showStatic ? staticCategories : categories;
+  const displayArticles = mergePublishedBySlug(articles, staticArticles);
+  const displayCategories = mergePublishedBySlug(categories, staticCategories);
 
   return (
     <Container className="py-12 space-y-10">
@@ -109,7 +109,7 @@ export default async function ArticlesPage() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {displayArticles.map((article) => (
-            <Link key={article.id} href={`/articles/${article.slug}`}>
+            <Link key={`${article.id}-${article.slug}`} href={`/articles/${article.slug}`}>
               <Card className="h-full flex flex-col hover:border-brand-gold/50 transition-colors cursor-pointer">
                 {article.featured_image_url ? (
                   <div className="w-full h-40 bg-brand-gold/10 rounded-t-xl overflow-hidden">
