@@ -407,6 +407,7 @@ export default function HomePage() {
   const prayerTimesRef = useRef<PrayerTimes | null>(null);
   const [prayerCity, setPrayerCity] = useState("Cairo");
   const [cityInput, setCityInput] = useState("");
+  const [usingLocation, setUsingLocation] = useState(false);
   const [loadingPrayer, setLoadingPrayer] = useState(false);
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -483,50 +484,32 @@ export default function HomePage() {
   );
 
   useEffect(() => {
-    let cancelled = false;
-
-    const setFetchedPrayerTimes = (timings: PrayerTimes) => {
-      if (!cancelled) setPrayerTimes(timings);
-    };
-
-    const fallbackToCity = async (
-      keepExisting = Boolean(prayerTimesRef.current)
-    ) => {
-      if (!cancelled) await fetchPrayerByCity(prayerCity, { keepExisting });
-    };
-
     if (!prayerTimesRef.current) setLoadingPrayer(true);
+    void fetchPrayerByCity(prayerCity, { keepExisting: Boolean(prayerTimesRef.current) });
+  }, [prayerCity, fetchPrayerByCity]);
 
-    if (!("geolocation" in navigator)) {
-      void fallbackToCity();
-      return () => {
-        cancelled = true;
-      };
-    }
+  const requestPrayerByLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) return;
 
+    setLoadingPrayer(true);
     navigator.geolocation.getCurrentPosition(
       async ({ coords: { latitude, longitude } }) => {
         try {
           const res = await getPrayerTimes(latitude, longitude);
-          if (res?.data?.timings)
-            setFetchedPrayerTimes(res.data.timings as PrayerTimes);
-          else await fallbackToCity();
-        } catch {
-          await fallbackToCity();
+          if (res?.data?.timings) {
+            setPrayerTimes(res.data.timings as PrayerTimes);
+            setUsingLocation(true);
+          }
+        } catch (error) {
+          console.error("Location prayer fetch error:", error);
         } finally {
-          if (!cancelled) setLoadingPrayer(false);
+          setLoadingPrayer(false);
         }
       },
-      () => {
-        void fallbackToCity();
-      },
-      { timeout: 6000 }
+      () => setLoadingPrayer(false),
+      { timeout: 6000, maximumAge: 300000 }
     );
-
-    return () => {
-      cancelled = true;
-    };
-  }, [prayerCity, fetchPrayerByCity]);
+  }, []);
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
@@ -790,7 +773,7 @@ export default function HomePage() {
                 أوقات الصلاة اليوم
               </h2>
               <p className="text-sm text-brand-cream/40 mt-0.5" dir="rtl">
-                {prayerCity} ·{" "}
+                {usingLocation ? "موقعك الحالي" : prayerCity} ·{" "}
                 {loadingPrayer
                   ? "يتم التحديث دون إخفاء المواقيت"
                   : "يتجدد تلقائيًا"}
@@ -802,6 +785,7 @@ export default function HomePage() {
                 const val = cityInput.trim();
                 if (val) {
                   setPrayerCity(val);
+                  setUsingLocation(false);
                   setCityInput("");
                 }
               }}
@@ -821,6 +805,13 @@ export default function HomePage() {
                 className="px-4 py-2 rounded-lg border border-brand-gold/30 text-brand-gold text-sm hover:border-brand-gold/60 hover:bg-brand-gold/8 transition-colors"
               >
                 تغيير
+              </button>
+              <button
+                type="button"
+                onClick={requestPrayerByLocation}
+                className="rounded-lg border border-brand-gold/20 px-3 py-2 text-sm text-brand-cream/55 transition-colors hover:border-brand-gold/50 hover:text-brand-gold"
+              >
+                موقعي
               </button>
             </form>
           </div>

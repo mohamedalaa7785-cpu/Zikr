@@ -1,6 +1,5 @@
 import { Footer } from './footer';
 import { Navbar } from './navbar';
-import { PrayerAlertProvider } from './prayer-alert-provider';
 import { InstallPrompt } from './install-prompt';
 import { OfflineIndicator } from '../offline-indicator';
 import { LanguageProvider } from './language-provider';
@@ -13,8 +12,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         <Navbar />
         <main>{children}</main>
         <Footer />
-        {/* Single mount point for prayer alerts + salawat reminders */}
-        <PrayerAlertProvider />
         {/* One-time prompt asking for notification permission */}
         <NotificationPermissionBanner />
         {/* PWA "add to home screen" invitation */}

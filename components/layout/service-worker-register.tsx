@@ -15,6 +15,8 @@ export function ServiceWorkerRegister() {
     }
 
     let updateInterval: NodeJS.Timeout | null = null;
+    let hydrationTimeout: number | undefined;
+    let hydrationIdleHandle: number | undefined;
     let registration: ServiceWorkerRegistration | null = null;
 
     const registerServiceWorker = async () => {
@@ -24,10 +26,32 @@ export function ServiceWorkerRegister() {
           updateViaCache: 'none'
         });
 
-        // Hydrate all public content into IndexedDB for true offline reading.
-        void hydrateOfflineContent().catch((error) => {
-          console.warn('[PWA] Offline content hydration failed:', error);
-        });
+        // The offline pack contains several large public datasets. Register the
+        // worker immediately, but hydrate only after the critical page has had
+        // time to settle so slow mobile connections do not compete with LCP.
+        const connection = (navigator as Navigator & {
+          connection?: { saveData?: boolean; effectiveType?: string };
+        }).connection;
+        const isSlowConnection =
+          connection?.saveData === true ||
+          connection?.effectiveType === 'slow-2g' ||
+          connection?.effectiveType === '2g';
+
+        if (!isSlowConnection) {
+          const hydrate = () => {
+            void hydrateOfflineContent().catch((error) => {
+              console.warn('[PWA] Offline content hydration failed:', error);
+            });
+          };
+          hydrationTimeout = window.setTimeout(() => {
+            const requestIdle = window.requestIdleCallback?.bind(window);
+            if (requestIdle) {
+              hydrationIdleHandle = requestIdle(hydrate, { timeout: 5000 });
+            } else {
+              hydrate();
+            }
+          }, 15000);
+        }
 
         // Check for updates periodically
         updateInterval = setInterval(() => {
@@ -68,9 +92,11 @@ export function ServiceWorkerRegister() {
     }
 
     return () => {
-      if (updateInterval) {
-        clearInterval(updateInterval);
+      if (updateInterval) clearInterval(updateInterval);
+      if (hydrationIdleHandle !== undefined) {
+        window.cancelIdleCallback?.(hydrationIdleHandle);
       }
+      if (hydrationTimeout !== undefined) window.clearTimeout(hydrationTimeout);
     };
   }, []);
 

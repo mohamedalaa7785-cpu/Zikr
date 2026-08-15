@@ -3,12 +3,7 @@ import "./globals.css";
 import { SiteShell } from "@/components/layout/site-shell";
 
 import { defaultOgImage, siteConfig } from "@/lib/site";
-import { Analytics } from "@/components/layout/analytics";
-import { ServiceWorkerRegister } from "@/components/layout/service-worker-register";
-import { NativeCapacitorBridge } from "@/components/layout/native-capacitor-bridge";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-const ADSENSE_CLIENT =
-  process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-2457467624248791";
+import { DeferredRuntime } from "@/components/layout/deferred-runtime";
 
 // Navbar reads the Supabase session from request cookies, so the shell must be rendered per request.
 export const dynamic = "force-dynamic";
@@ -82,8 +77,6 @@ const jsonLd = {
   ],
 };
 
-const isProduction = process.env.NODE_ENV === "production";
-
 export default function RootLayout({
   children,
 }: {
@@ -111,7 +104,6 @@ export default function RootLayout({
         />
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
         <link rel="manifest" href="/manifest.webmanifest" />
-        {/* AdSense is intentionally loaded after the first page load so it cannot compete with LCP. */}
       </head>
       <body className="font-arabic antialiased">
         {/* JSON-LD lives in <body> so head scripts injected at runtime (AdSense)
@@ -121,42 +113,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <SiteShell>{children}</SiteShell>
-        {isProduction && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                (() => {
-                  const loadAds = () => {
-                    if (window.__zikrAdsLoaded) return;
-                    window.__zikrAdsLoaded = true;
-                    const ads = document.createElement('script');
-                    ads.async = true;
-                    ads.crossOrigin = 'anonymous';
-                    ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}';
-                    document.head.appendChild(ads);
-                    const consent = document.createElement('script');
-                    consent.async = true;
-                    consent.src = 'https://fundingchoicesmessages.google.com/i/fundingchoicesmessages.js';
-                    document.head.appendChild(consent);
-                  };
-                  if (document.readyState === 'complete') {
-                    if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 3000 });
-                    else setTimeout(loadAds, 1500);
-                  } else {
-                    window.addEventListener('load', () => {
-                      if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 3000 });
-                      else setTimeout(loadAds, 1500);
-                    }, { once: true, passive: true });
-                  }
-                })();
-              `,
-            }}
-          />
-        )}
-        <Analytics />
-        <ServiceWorkerRegister />
-        <NativeCapacitorBridge />
-        <SpeedInsights />
+        <DeferredRuntime />
       </body>
     </html>
   );
