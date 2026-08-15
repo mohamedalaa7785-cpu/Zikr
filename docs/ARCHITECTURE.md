@@ -9,8 +9,8 @@ This is the canonical architecture reference; historical reports live in `docs/r
 - **Database:** Supabase (PostgreSQL, RLS, Storage, Auth)
 - **ORM/schema mirror:** Drizzle (`drizzle/schema.ts`, config in `drizzle.config.ts`)
 - **Package manager:** pnpm (single lockfile: `pnpm-lock.yaml`)
-- **CI:** GitHub Actions (`.github/workflows/ci.yml` typecheck + build, `codeql.yml` security scanning)
-- **Hosting:** Vercel (`vercel.json`)
+- **Verification:** Vercel runs `pnpm verify` on every deployment; GitHub Actions retains manual-only verification and recovery workflows while hosted runners are billing-locked
+- **Hosting:** Vercel (`vercel.json`) with Supabase `pg_cron` and Edge Functions for production background scheduling
 
 ## Directory Map
 

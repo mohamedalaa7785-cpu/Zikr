@@ -3,13 +3,13 @@
 **Date:** 15 August 2026  
 **Repository:** `mohamedalaa7785-cpu/Zikr`  
 **Production URL:** `https://zikrmediaofficial.vercel.app`  
-**Final repository revision:** `13e91f313b962de039b80abe419cbbc331779756`
+**Audit revision at report update:** pending final commit after this audit
 
 ## Executive summary
 
 The blocked GitHub Actions runner has been replaced for deployment verification by a Vercel build gate. The existing GitHub workflows are now manual-only so the GitHub billing lock no longer creates misleading automatic failures. The prayer Web Push path has been implemented end to end with authenticated browser registration, private server-side VAPID storage, Supabase RLS, an idempotent delivery ledger, a one-minute `pg_cron` schedule, and a deployed custom-authenticated Edge Function.
 
-The independent Supabase Preview migration-history failure has also been removed at its source: the project’s GitHub integration was disconnected from the authenticated Supabase dashboard. Production schema and user data were not reset, rewritten, or deleted. The newly applied scheduler migration was renamed in the repository to the exact production-recorded version, `20260814074720_prayer_push_scheduler`, so the new change itself is synchronized with the live migration ledger.
+The independent Supabase Preview migration-history failure was removed at its source by disconnecting the project’s GitHub integration. Production schema and user data were not reset, rewritten, or deleted. The local scheduler migration is now named `20260814160000_prayer_push_scheduler.sql`, matching the version recorded by the production migration ledger; the ledger currently stores that row with a null name, so no duplicate migration was applied.
 
 ## Implemented changes
 
@@ -19,10 +19,10 @@ The independent Supabase Preview migration-history failure has also been removed
 | GitHub Actions | `ci.yml` and `background-jobs.yml` are manual-only while the account-level GitHub runner lock remains. | No automatic runner is required for production verification; recovery workflows remain available on demand. |
 | Prayer Web Push API | Added `GET /api/push/public-key` and authenticated `POST/DELETE /api/push/subscription`. | Production public-key endpoint returned HTTP 200 with only `publicKey`; unauthenticated subscription write returned HTTP 401. |
 | Browser integration | Added explicit notification opt-in, device identity, location and preference synchronization, service-worker push handling, click-through routing, and logout cleanup. | Changes are in `lib/push-subscription.ts`, `hooks/use-prayer-alert.ts`, `app/settings/page.tsx`, and `public/sw.js`. |
-| Database | Added private subscriptions, schedule cache, delivery ledger, runtime settings, VAPID RPCs, RLS, indexes, uniqueness constraints, and the scheduler function. | Production migration applied successfully and recorded as version `20260814074720`. |
+| Database | Added private subscriptions, schedule cache, delivery ledger, runtime settings, VAPID RPCs, RLS, indexes, uniqueness constraints, and the scheduler function. | Production migration is recorded as version `20260814160000`; the local filename now matches that version. |
 | Supabase scheduler | Added active `zikr-prayer-push-dispatch` cron job at `* * * * *`. | Read-only production audit confirmed the job is active. |
 | Edge Function | Deployed `prayer-notification-worker` with custom database-secret authorization and JWT verification disabled at the platform boundary. | Supabase deployment status is `ACTIVE`; database smoke invocation returned an asynchronous request ID and the function log recorded HTTP 200. |
-| Migration alignment | Renamed the local scheduler migration to the exact production version after applying it. | `pnpm supabase:migrations:check` passed on the final repository. |
+| Migration alignment | Renamed the local scheduler migration to the exact production version recorded by Supabase. | `pnpm supabase:migrations:check` passed on the final repository. |
 | Supabase Preview | Disconnected the GitHub integration from the authenticated project settings page. | Supabase displayed “GitHub connection removed.” Production remains active and healthy. |
 
 ## Security controls verified
@@ -54,7 +54,7 @@ The final repository was tested after rebasing onto the latest remote `main` his
 
 ## Queue ownership after the change
 
-Prayer Web Push is now the only active automatic minute-level scheduler. Browser-local reminders remain an offline fallback. Social publishing and video generation remain manual recovery workflows because they require external provider credentials, long-running polling or media transfer, and side-effect-specific retry policies that should not be moved speculatively into the prayer worker. The operational details are documented in [`production-scheduling.md`](./production-scheduling.md) and [`background-jobs.md`](./background-jobs.md).
+Prayer Web Push and the video/social queue each have one active automatic minute-level scheduler. Browser-local reminders remain an offline fallback. Video and social processing is owned by `zikr-video-processing`, which calls the authenticated `/api/internal/video-processing` route; GitHub remains a manual recovery path only. The operational details are documented in [`production-scheduling.md`](./production-scheduling.md) and [`background-jobs.md`](./background-jobs.md).
 
 ## Remaining requirements
 

@@ -1,416 +1,85 @@
-# GitHub Actions Migration Guide
+# Zikr automation and GitHub Actions operations
 
-**Vercel Cron to GitHub Actions Migration**  
-**Date:** July 31, 2026  
-**Status:** ✅ Migration Complete
+**Status:** Current architecture documented
 
----
+## Executive summary
 
-## Overview
+Zikr no longer uses GitHub Actions as its production scheduler. Every Vercel deployment runs the repository verification gate through `pnpm verify`, while Supabase `pg_cron` owns the minute-level production automation. The prayer notification worker is a Supabase Edge Function, and the video/social queue entrypoint is the authenticated Vercel route `/api/internal/video-processing`.
 
-This project has been successfully migrated from **Vercel Cron Jobs** to **GitHub Actions**. All background job functionality has been preserved and enhanced with better monitoring and reliability.
+GitHub Actions remains in the repository for operator-invoked verification and recovery. Both workflows are intentionally `workflow_dispatch`-only because GitHub currently reports an account-level billing lock that prevents hosted runners from starting. This is an external account constraint; changing YAML cannot bypass it.
 
----
+## Current ownership
 
-## What Changed
+| Responsibility | Authoritative owner | Frequency | Production status |
+|---|---|---:|---|
+| Install, typecheck, lint, tests, route checks, and build | Vercel build gate (`pnpm verify`) | Every deployment | Active |
+| Prayer Web Push dispatch | Supabase `pg_cron` → `prayer-notification-worker` | Every minute | Active |
+| Video and social queue processing | Supabase `pg_cron` → `/api/internal/video-processing` | Every minute | Active, authenticated by the scheduler secret |
+| Manual queue recovery | GitHub `Background Jobs` workflow | On demand | Available only when GitHub runners can start |
+| Manual verification fallback | GitHub `Continuous Integration` workflow | On demand | Available only when GitHub runners can start |
 
-### Removed (Vercel Cron)
-- ❌ `vercel.json` cron configuration
-- ❌ `app/api/cron/process-videos/route.ts`
-- ❌ `app/api/cron/process-social/route.ts`
-- ❌ `CRON_SECRET` environment variable
+There must be only one automatic owner for each queue. Do not add a GitHub schedule or a Vercel Cron entry for a queue that is already owned by Supabase.
 
-### Added (GitHub Actions)
-- ✅ `.github/workflows/background-jobs.yml` – Main workflow
-- ✅ `scripts/jobs/process-videos.ts` – Video processing job
-- ✅ `scripts/jobs/process-social.ts` – Social publishing job
+## Workflows in the repository
 
----
+`/.github/workflows/ci.yml` runs `pnpm install --frozen-lockfile` and `pnpm verify` when an operator manually dispatches it. `/.github/workflows/background-jobs.yml` accepts the `target` input `all`, `videos`, or `social`, validates the required Supabase configuration, and invokes `pnpm background:jobs`. Neither workflow is an automatic production scheduler.
 
-## Job Schedules
+The current workflow files deliberately configure `pnpm/action-setup@v4` before `actions/setup-node@v4` so that the pnpm cache can be initialized correctly. The production deployment gate is independent of GitHub runner availability.
 
-### Video Processing
-- **Schedule:** Daily at 3:00 AM UTC (`0 3 * * *`)
-- **Function:** Generate videos and publish to YouTube/Facebook
-- **Batch Size:** 3 (sequential processing due to HeyGen rate limiting)
-- **Timeout:** 15 minutes
+## Manual recovery procedure
+
+Use the GitHub Actions page only for a deliberate recovery run after confirming that the account-level runner lock has been resolved. Select **Background Jobs**, choose `all`, `videos`, or `social`, and review the queue rows and provider-side results after the run. The current workflow input is named `target`; older instructions using `job_type` are obsolete.
+
+The equivalent CLI command is:
 
 ```bash
-# Manual trigger
-gh workflow run background-jobs.yml -f job_type=videos
+gh workflow run background-jobs.yml --repo mohamedalaa7785-cpu/Zikr -f target=all
 ```
 
-### Social Media Publishing
-- **Schedule:** Every 15 minutes (`*/15 * * * *`)
-- **Function:** Publish queued social media posts
-- **Batch Size:** 10 (parallel processing)
-- **Timeout:** 15 minutes
+For verification, use:
 
 ```bash
-# Manual trigger
-gh workflow run background-jobs.yml -f job_type=social
+gh workflow run ci.yml --repo mohamedalaa7785-cpu/Zikr
+gh run list --repo mohamedalaa7785-cpu/Zikr --limit 10
 ```
 
----
+If GitHub reports that the job was not started because the account is locked due to a billing issue, stop retrying the workflow. Run the same checks locally or rely on the Vercel build gate instead.
 
-## Setup: GitHub Secrets
+## Secrets and security
 
-The workflow requires the following GitHub Secrets to be configured. Navigate to:  
-**Settings → Secrets and variables → Actions**
+Production secrets belong in Vercel or Supabase secret storage, not in the repository. GitHub repository secrets are needed only if an operator intentionally uses the manual recovery workflow after runner access is restored. Never print, commit, or move `SUPABASE_SERVICE_ROLE_KEY`, provider tokens, OAuth refresh tokens, or the scheduler secret into client code.
 
-### Required Secrets
+The queue workflow requires the Supabase URL, service-role key, public site URL, and the public Supabase key. Provider credentials are required only for the selected queue and should be added only when that integration is intentionally enabled. The scheduler route itself is protected by the server-side value returned by `get_push_scheduler_secret`; it is not a public cron endpoint.
 
-| Secret | Description | Example |
-|--------|-------------|---------|
-| `SUPABASE_URL` | Supabase project URL | `https://project.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-only) | `eyJhbGc...` |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host/db` |
-| `NEXT_PUBLIC_SITE_URL` | Public site URL | `https://zikr.vercel.app` |
+## Production scheduler verification
 
-### Optional Secrets (Video Generation)
+The production Supabase database should contain one active job named `zikr-prayer-push-dispatch` with schedule `* * * * *` and one active job named `zikr-video-processing` with the same schedule. The jobs must be visible in `cron.job`, and recent rows in `cron.job_run_details` should show successful executions. Do not create a second job to compensate for a transient provider failure; inspect the worker logs and delivery ledger first.
 
-| Secret | Description |
-|--------|-------------|
-| `HEYGEN_API_KEY` | HeyGen API key |
-| `HEYGEN_AVATAR_ID` | Avatar ID for video generation |
-| `HEYGEN_VOICE_ID` | Voice ID for video generation |
-| `YOUTUBE_CLIENT_ID` | YouTube OAuth client ID |
-| `YOUTUBE_CLIENT_SECRET` | YouTube OAuth client secret |
-| `YOUTUBE_REFRESH_TOKEN` | YouTube refresh token |
-| `FACEBOOK_PAGE_ID` | Facebook page ID |
-| `FACEBOOK_PAGE_ACCESS_TOKEN` | Facebook page access token |
+The prayer worker uses the private VAPID key held in Supabase runtime settings and writes idempotent delivery records. The video route claims pending rows before external side effects and polls persisted HeyGen job IDs before submitting new provider jobs. These controls are part of the production design and must be preserved when changing scheduling.
 
-### Setup Instructions
+## Troubleshooting order
 
-1. Navigate to your GitHub repository
-2. Go to **Settings** → **Secrets and variables** → **Actions**
-3. Click **New repository secret** for each required variable
-4. Name: `SUPABASE_URL`, Value: (your Supabase project URL)
-5. Repeat for all required secrets above
+When a deployment fails, inspect the Vercel build logs first and reproduce with `pnpm verify`. When a prayer notification fails, inspect the Edge Function logs, the active cron row, the delivery ledger, and the subscription endpoint response. When a video or social queue is stuck, inspect `/api/internal/video-processing` authentication, row status transitions, provider credentials, and the relevant publish log. Do not re-enable an old scheduler before proving that the current owner is disabled.
 
----
-
-## Manual Execution
-
-### Using GitHub CLI
+When an operator needs a local verification run, use the repository’s documented commands:
 
 ```bash
-# Trigger both jobs
-gh workflow run background-jobs.yml
-
-# Trigger only video processing
-gh workflow run background-jobs.yml -f job_type=videos
-
-# Trigger only social publishing
-gh workflow run background-jobs.yml -f job_type=social
+pnpm install --frozen-lockfile
+pnpm verify
 ```
 
-### Using GitHub Web UI
+Queue processing should be run only in a server-side environment with the required secrets. Do not run a service-role process from a browser or expose its environment variables to a client bundle.
 
-1. Navigate to **Actions** tab
-2. Select **Background Jobs** workflow
-3. Click **Run workflow** dropdown
-4. (Optional) Select job type from dropdown
-5. Click **Run workflow**
+## Migration history note
 
-### Running Locally
+The prayer scheduler migration is stored locally as `20260814160000_prayer_push_scheduler.sql`, matching the version recorded by the production Supabase migration ledger. The database was not reset or rewritten to correct this naming alignment; only the repository filename and documentation are kept synchronized.
 
-```bash
-# Install dependencies
-pnpm install
+## References
 
-# Set environment variables
-export SUPABASE_URL="..."
-export SUPABASE_SERVICE_ROLE_KEY="..."
-# ... set other required vars ...
+- [GitHub Actions workflow syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
+- [Supabase pg_cron](https://supabase.com/docs/guides/database/extensions/pg_cron)
+- [Zikr production scheduling runbook](docs/production-scheduling.md)
+- [Zikr background jobs runbook](docs/background-jobs.md)
+- [Zikr automation completion evidence](docs/automation-and-ci-completion-report.md)
 
-# Run video processing
-pnpm tsx scripts/jobs/process-videos.ts
-
-# Run social publishing
-pnpm tsx scripts/jobs/process-social.ts
-```
-
----
-
-## Job Execution Flow
-
-### Video Processing Job
-
-```
-1. Validate environment variables
-   ↓
-2. Fetch pending video requests from Supabase (limit: 3)
-   ↓
-3. For each request:
-   a. Update status to "processing"
-   b. Generate video with HeyGen API
-   c. Publish to YouTube (if configured)
-   d. Publish to Facebook (if configured)
-   e. Update status to "completed" or "failed"
-   ↓
-4. Return results and logs
-```
-
-**Database Tables Used:**
-- `video_generation_requests` – pending → processing → completed/failed
-- `video_publish_log` – publish audit trail
-- `videos` – published videos
-
----
-
-### Social Publishing Job
-
-```
-1. Validate environment variables
-   ↓
-2. Fetch queued social items from Supabase (limit: 10)
-   ↓
-3. For each item (parallel):
-   a. Update status to "processing"
-   b. Publish to Facebook (if enabled)
-   c. Publish to YouTube (if enabled)
-   d. Update status to published/partial/failed
-   ↓
-4. Return results and logs
-```
-
-**Database Tables Used:**
-- `social_publish_queue` – queued → processing → published/partial/failed
-
----
-
-## Monitoring & Alerts
-
-### GitHub Actions Dashboard
-
-1. **Actions** tab → **Background Jobs** workflow
-2. View:
-   - Run history
-   - Execution logs
-   - Success/failure status
-   - Execution time
-
-### Automatic Failure Alerts
-
-When a job fails, the workflow automatically:
-1. Creates a GitHub Issue with details
-2. Includes run log link for debugging
-3. Lists troubleshooting steps
-4. Provides manual retry instructions
-
-To disable automatic issues:
-- Edit `.github/workflows/background-jobs.yml`
-- Comment out the "Create issue on failure" step
-
-### Manual Status Check
-
-```bash
-# List recent workflow runs
-gh run list --workflow background-jobs.yml --limit 10
-
-# View specific run details
-gh run view <RUN_ID>
-
-# View logs
-gh run view <RUN_ID> --log
-```
-
----
-
-## Troubleshooting
-
-### Workflow Won't Run
-
-**Error:** Workflow doesn't appear in Actions tab
-
-**Solution:**
-1. Commit changes to repository (workflows require git commit)
-2. Workflow must be on the default branch
-3. Check branch protection rules aren't blocking actions
-
----
-
-### Missing Environment Variables Error
-
-**Error:**
-```
-[process-videos] Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
-```
-
-**Solution:**
-1. Go to **Settings** → **Secrets and variables** → **Actions**
-2. Add all required secrets (see [Setup: GitHub Secrets](#setup-github-secrets))
-3. Re-run the workflow
-
----
-
-### Database Connection Failed
-
-**Error:**
-```
-Failed to fetch pending requests: connection refused
-```
-
-**Solution:**
-1. Verify `SUPABASE_URL` is correct
-2. Verify `SUPABASE_SERVICE_ROLE_KEY` is valid
-3. Check Supabase project is running
-4. Test locally first:
-   ```bash
-   pnpm tsx scripts/jobs/process-videos.ts
-   ```
-
----
-
-### Video Generation Timeout
-
-**Error:**
-```
-HeyGen generation timed out (video_id=...); will retry on next run
-```
-
-**Solution:**
-- Normal behavior – workflow will retry on next scheduled run
-- Check HeyGen API status: https://status.heygen.com
-- Reduce batch size if timeouts persist (edit workflow: `BATCH_SIZE=1`)
-
----
-
-### Facebook/YouTube Publishing Failed
-
-**Error:**
-```
-Facebook: Invalid page access token
-```
-
-**Solution:**
-1. Regenerate access tokens from platform dashboards
-2. Update GitHub Secrets with new tokens
-3. Verify permissions on platform account
-4. Check tokens haven't expired
-
----
-
-## Comparison: Vercel Cron vs GitHub Actions
-
-| Aspect | Vercel Cron | GitHub Actions |
-|--------|------------|----------------|
-| **Cost** | Included | Free tier generous (60k min/month) |
-| **Observability** | Limited logs | Full run history + logs |
-| **Security** | `CRON_SECRET` bearer token | GitHub OIDC tokens |
-| **Reliability** | Basic retry | Configurable retry + concurrency control |
-| **Latency** | HTTP request | Direct function call |
-| **Public Endpoint** | Exposed API | None (private) |
-| **Monitoring** | Minimal | Issue creation, GitHub UI, CLI |
-| **Scheduling** | Vercel managed | GitHub managed |
-
----
-
-## Best Practices
-
-### 1. Secrets Management
-- ✅ Use GitHub Secrets for all sensitive data
-- ✅ Rotate YouTube/Facebook tokens regularly
-- ✅ Never commit secrets to repository
-- ❌ Don't hardcode API keys in scripts
-
-### 2. Job Execution
-- ✅ Monitor GitHub Actions for failures
-- ✅ Check logs immediately after failures
-- ✅ Test locally before deploying changes
-- ✅ Keep batch sizes reasonable for timeouts
-
-### 3. Database State
-- ✅ Ensure proper status transitions (pending → processing → completed)
-- ✅ Always update status, even on partial failures
-- ✅ Use database locks to prevent duplicate processing
-- ✅ Log all errors for debugging
-
-### 4. Error Handling
-- ✅ Catch all errors and log details
-- ✅ Update database status on errors
-- ✅ Don't fail silently
-- ✅ Include context in error messages
-
-### 5. Monitoring
-- ✅ Check workflow runs weekly
-- ✅ Review failure alerts immediately
-- ✅ Monitor Supabase logs for database issues
-- ✅ Track job execution times for performance
-
----
-
-## Rollback Instructions
-
-If you need to revert to Vercel Cron:
-
-1. **Restore vercel.json:**
-   ```json
-   {
-     "$schema": "https://openapi.vercel.sh/vercel.json",
-     "framework": "nextjs",
-     "crons": [
-       {
-         "path": "/api/cron/process-videos",
-         "schedule": "0 3 * * *"
-       },
-       {
-         "path": "/api/cron/process-social",
-         "schedule": "*/15 * * * *"
-       }
-     ]
-   }
-   ```
-
-2. **Restore API routes:** Copy route files back to:
-   - `app/api/cron/process-videos/route.ts`
-   - `app/api/cron/process-social/route.ts`
-
-3. **Restore environment variable:**
-   - Add `CRON_SECRET` to `.env.example`
-   - Add to production environment
-
-4. **Disable GitHub Actions:** Delete or disable `.github/workflows/background-jobs.yml`
-
-5. **Deploy:** Push changes to Vercel
-
----
-
-## Testing Checklist
-
-- [ ] All GitHub Secrets are configured
-- [ ] Workflow runs successfully manually
-- [ ] Video processing logs show pending requests
-- [ ] Social publishing logs show queued items
-- [ ] Database status updates correctly
-- [ ] No errors in workflow logs
-- [ ] Failure alerts work (if enabled)
-- [ ] Manual retry works
-- [ ] Scheduled runs execute at correct times
-
----
-
-## Support
-
-For issues or questions:
-
-1. **Check logs first:** GitHub Actions → Background Jobs → Workflow run
-2. **Review troubleshooting:** See section above
-3. **Test locally:** Run job script locally with same env vars
-4. **Check GitHub Issues:** Automatic failure alerts created
-5. **Contact:** Verify job configuration in workflow file
-
----
-
-## Additional Resources
-
-- **GitHub Actions Documentation:** https://docs.github.com/en/actions
-- **Workflow Syntax:** https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
-- **Secrets Management:** https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions
-- **GitHub CLI Reference:** https://cli.github.com/manual/gh_workflow_run
-
----
-
-**Last Updated:** July 31, 2026  
-**Next Review:** August 31, 2026
+**Last updated:** August 15, 2026

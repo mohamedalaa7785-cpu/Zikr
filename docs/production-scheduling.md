@@ -1,13 +1,13 @@
 # ZIKR Production Scheduling
 
-ZIKR has **one authoritative automatic scheduler** for prayer Web Push delivery. It runs inside Supabase: `pg_cron` invokes the `prayer-notification-worker` Edge Function once each minute over a private bearer channel. The job plans a two-day window from each user’s saved location and preference record, persists unique delivery rows per device, then claims and sends only due rows.
+ZIKR has one authoritative automatic scheduler per production workload. Prayer Web Push runs inside Supabase: `pg_cron` invokes the `prayer-notification-worker` Edge Function once each minute over a private bearer channel. The video and social queues run through the separate `zikr-video-processing` cron job, which calls the authenticated Vercel route `/api/internal/video-processing`. The prayer job plans a two-day window from each user’s saved location and preference record, persists unique delivery rows per device, then claims and sends only due rows.
 
 | Workload                              | Authoritative execution owner                     |                  Cadence | Safety boundary                                                                                                                          |
 | ------------------------------------- | ------------------------------------------------- | -----------------------: | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Prayer Web Push planning and delivery | Supabase `pg_cron` + `prayer-notification-worker` |             Every minute | Private scheduler token, per-device delivery uniqueness, atomic row claims, bounded retries, invalid-subscription deactivation.          |
 | Client-local azan and reminder sounds | Browser only                                      | While the page is active | Remains an offline/local fallback; it does not create server deliveries.                                                                 |
-| Social publishing queue               | Manual recovery workflow                          |       On operator demand | External platform tokens remain in GitHub/Vercel configuration; there is no automatic runner while the GitHub account runner is blocked. |
-| Video generation and publishing queue | Manual recovery workflow                          |       On operator demand | Provider polling and media publishing are long-running/external side effects and must not be moved to the minute prayer worker.          |
+| Social publishing queue               | Supabase `pg_cron` → `/api/internal/video-processing` | Every minute | Conditional queue claims and provider-side credentials remain server-only; GitHub is recovery only. |
+| Video generation and publishing queue | Supabase `pg_cron` → `/api/internal/video-processing` | Every minute | Persisted HeyGen IDs are polled before new submissions; GitHub is recovery only. |
 | Repository verification               | Vercel deployment build gate                      |     Every Git deployment | `pnpm verify` runs before Vercel publishes the build.                                                                                    |
 
 ## Prayer Web Push lifecycle
@@ -24,7 +24,7 @@ Each delivery has a unique `(push_subscription_id, prayer_name, scheduled_at)` k
 
 The Edge Function is deployed with JWT verification disabled because it accepts only the private database-scheduler bearer token. The function independently verifies that token against the service-role-only `get_push_scheduler_secret()` RPC. Do not expose the scheduler token, VAPID private key, Supabase service-role key, or external social/video credentials to the browser.
 
-The old GitHub Actions workflows are manual-only by design while GitHub reports an account-level billing lock. They are retained as recovery runbooks for the social and video queues and must **not** be re-enabled on a schedule while any replacement scheduler is active. Before moving either queue to a new automatic platform, provision its provider credentials in that platform’s secret store and verify its runtime limits, retry strategy, and idempotent claim behavior.
+The old GitHub Actions workflows are manual-only by design while GitHub reports an account-level billing lock. They remain recovery runbooks for the social and video queues and must **not** be re-enabled on a schedule while `zikr-video-processing` is active. Before changing the owner, provision provider credentials in the new server-side secret store and verify runtime limits, retry strategy, and idempotent claim behavior.
 
 ## Supabase Preview integration
 

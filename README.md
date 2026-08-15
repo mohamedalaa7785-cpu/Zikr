@@ -2,7 +2,7 @@
 
 ## A Premium Islamic Spiritual Platform
 
-> **📢 Background Jobs Migration:** Background jobs have been migrated from Vercel Cron to GitHub Actions. See [`QUICK_START_GITHUB_ACTIONS.md`](./QUICK_START_GITHUB_ACTIONS.md) for setup. All functionality preserved.
+> **Production automation:** Supabase `pg_cron` owns the prayer notification and video/social queue schedulers. Vercel runs `pnpm verify` on every deployment. GitHub Actions is retained as a manual recovery and verification path while hosted runners are blocked by an account-level billing lock; see [`QUICK_START_GITHUB_ACTIONS.md`](./QUICK_START_GITHUB_ACTIONS.md).
 
 ## 
 

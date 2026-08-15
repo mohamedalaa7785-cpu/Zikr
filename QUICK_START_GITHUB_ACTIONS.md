@@ -1,232 +1,69 @@
-# Quick Start: GitHub Actions Background Jobs
+# Zikr quick start: GitHub Actions and production automation
 
-**TL;DR** – Get background jobs running in 5 minutes ⚡
+## Important architecture note
 
----
+GitHub Actions is **not** the production scheduler for Zikr. Production automation is owned by Supabase `pg_cron`: prayer notifications run through the `prayer-notification-worker` Edge Function, and the video/social queue runs through the authenticated Vercel route `/api/internal/video-processing`. Vercel runs `pnpm verify` as the deployment gate.
 
-## What This Is
+The GitHub workflows are manual-only because the GitHub account currently has a billing lock that prevents hosted runners from starting. Keep them available for recovery, but do not treat a successful workflow file parse or an enabled workflow as evidence that production scheduling is active.
 
-ZIKR's background jobs (video processing + social publishing) have been moved from **Vercel Cron** to **GitHub Actions**.
+## Verify the repository locally
 
-**No user-facing changes.** Everything works the same. Just better monitoring.
+From the repository root, run:
 
----
-
-## 5-Minute Setup
-
-### 1. Add GitHub Secrets (2 minutes)
-
-Go to: **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
-
-Add these 4 secrets:
-
-| Name | Value | Example |
-|------|-------|---------|
-| `SUPABASE_URL` | Your Supabase URL | `https://project.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key | `eyJhbGc...` |
-| `DATABASE_URL` | PostgreSQL connection | `postgresql://...` |
-| `NEXT_PUBLIC_SITE_URL` | Your site URL | `https://zikr.vercel.app` |
-
-**If you're adding video generation/social publishing support, also add:**
-
-```
-HEYGEN_API_KEY=...
-HEYGEN_AVATAR_ID=...
-HEYGEN_VOICE_ID=...
-YOUTUBE_CLIENT_ID=...
-YOUTUBE_CLIENT_SECRET=...
-YOUTUBE_REFRESH_TOKEN=...
-FACEBOOK_PAGE_ID=...
-FACEBOOK_PAGE_ACCESS_TOKEN=...
-```
-
-### 2. That's It! (0 minutes)
-
-The workflow is automatically enabled. Jobs run on schedule:
-- **Video processing:** Daily at 3 AM UTC
-- **Social publishing:** Every 15 minutes
-
----
-
-## Test It
-
-### Option A: GitHub CLI (1 command)
 ```bash
-gh workflow run background-jobs.yml
+pnpm install --frozen-lockfile
+pnpm verify
 ```
 
-### Option B: GitHub Web UI
-1. **Actions** tab
-2. **Background Jobs** workflow
-3. **Run workflow** button
+The verification command is the same gate configured in `vercel.json`. It covers migration checks, route and import checks, linting, TypeScript, tests, and the production build.
 
-### Option C: Local Testing
+## Run the CI fallback manually
+
+After GitHub runner access is restored, dispatch the verification workflow from the Actions tab or with:
+
 ```bash
-export SUPABASE_URL="..."
-export SUPABASE_SERVICE_ROLE_KEY="..."
-export DATABASE_URL="..."
-export NEXT_PUBLIC_SITE_URL="https://zikr.vercel.app"
-export HEYGEN_API_KEY="..."
-export HEYGEN_AVATAR_ID="..."
-export HEYGEN_VOICE_ID="..."
-
-pnpm tsx scripts/jobs/process-videos.ts
-pnpm tsx scripts/jobs/process-social.ts
+gh workflow run ci.yml --repo mohamedalaa7785-cpu/Zikr
 ```
 
----
+The workflow installs the frozen lockfile and runs `pnpm verify`. If GitHub reports an account billing lock, do not repeatedly rerun it; use the local command or inspect the Vercel deployment instead.
 
-## Monitor Executions
+## Run queue recovery manually
 
-### GitHub Actions Dashboard
-**Actions** tab → **Background Jobs** → View runs
+The Background Jobs workflow is a recovery tool for a deliberate operator action. Its input is `target`, with one of these values:
 
-### Recent Runs
+| Input | Queue |
+|---|---|
+| `all` | Video and social queues |
+| `videos` | Video generation and publishing queue |
+| `social` | Social publishing queue |
+
+Use the CLI form only when runner access and all required server-side secrets have been verified:
+
 ```bash
-gh run list --workflow background-jobs.yml --limit 10
+gh workflow run background-jobs.yml --repo mohamedalaa7785-cpu/Zikr -f target=all
 ```
 
-### View Logs
-```bash
-gh run view <RUN_ID> --log
-```
+The previous `job_type` input is no longer valid. The workflow must never be changed back to `schedule` while the Supabase queue scheduler is active, because doing so can duplicate external publishing.
 
----
+## Check production automation
 
-## If Something Breaks
+Use the Supabase dashboard or the project’s operational SQL checks to confirm that `cron.job` contains exactly one active row for `zikr-prayer-push-dispatch` and exactly one active row for `zikr-video-processing`. Review recent `cron.job_run_details`, Edge Function logs, the prayer delivery ledger, and the video publish log. A GitHub Actions run is not a substitute for these checks.
 
-### No secrets configured?
-**Error:** `Missing required environment variables`
+For the public site, verify that the canonical domain is `https://zikrmediaofficial.vercel.app`, that the latest production deployment is `READY`, and that recent Vercel runtime logs contain no error-level entries. Deployment protection may remain enabled for non-custom preview domains, but the canonical custom domain must remain reachable for users and OAuth callbacks.
 
-**Fix:** Add GitHub Secrets (see setup above)
+## Secret handling
 
-### Can't connect to database?
-**Error:** `Failed to fetch pending requests`
+Never put service-role keys, OAuth refresh tokens, provider access tokens, VAPID private keys, or the scheduler secret in a browser bundle, README, issue, workflow output, or committed file. Production secrets belong in Vercel/Supabase server-side secret stores. GitHub secrets are required only for the manual recovery workflow and should not be copied from production into local shell history.
 
-**Fix:** Verify `DATABASE_URL` is correct
+## Do not create a duplicate scheduler
 
-### 15-minute social job keeps timing out?
-**Normal** – External API delays
+Before adding or re-enabling any cron, identify the current owner, verify its authentication, and inspect its last runs. Zikr has one authoritative owner per automatic queue. The prayer worker and the video-processing route already use idempotent controls; adding another scheduler would risk duplicate notifications or duplicate provider submissions.
 
-**Solution:** Reduces happen automatically on next run
+## References
 
----
+- [GitHub Actions workflow syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
+- [Zikr GitHub Actions operations guide](GITHUB_ACTIONS_MIGRATION_GUIDE.md)
+- [Zikr production scheduling runbook](docs/production-scheduling.md)
+- [Zikr background jobs runbook](docs/background-jobs.md)
 
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `.github/workflows/background-jobs.yml` | Main workflow (don't edit) |
-| `scripts/jobs/process-videos.ts` | Video processing job |
-| `scripts/jobs/process-social.ts` | Social publishing job |
-| `GITHUB_ACTIONS_MIGRATION_GUIDE.md` | **Full guide →** Read if you need details |
-
----
-
-## What Changed
-
-### Removed ❌
-- `app/api/cron/process-videos/` endpoint
-- `app/api/cron/process-social/` endpoint
-- `CRON_SECRET` environment variable
-- Vercel Cron configuration from `vercel.json`
-
-### Added ✨
-- `.github/workflows/background-jobs.yml`
-- `scripts/jobs/process-videos.ts`
-- `scripts/jobs/process-social.ts`
-
-### Unchanged ✓
-- Database schema
-- Service logic (video-automation, social-publishing)
-- Job functionality
-- Behavior
-
----
-
-## Schedules
-
-### Video Processing
-- **When:** Every day at 3:00 AM UTC
-- **What:** Generate videos, publish to YouTube/Facebook
-- **Speed:** 3 at a time (batch)
-
-### Social Publishing
-- **When:** Every 15 minutes
-- **What:** Publish queued social posts
-- **Speed:** 10 at a time (parallel)
-
----
-
-## Manual Triggers
-
-### Via CLI
-```bash
-# Both jobs
-gh workflow run background-jobs.yml
-
-# Just videos
-gh workflow run background-jobs.yml -f job_type=videos
-
-# Just social
-gh workflow run background-jobs.yml -f job_type=social
-```
-
-### Via Web UI
-1. **Actions** → **Background Jobs**
-2. **Run workflow** → Select type (optional)
-3. **Run workflow**
-
----
-
-## FAQ
-
-**Q: Will jobs still run on schedule?**  
-A: Yes, automatically. First run at scheduled time.
-
-**Q: Can I manually trigger?**  
-A: Yes, via CLI or GitHub web UI.
-
-**Q: What if a job fails?**  
-A: A GitHub Issue is created with details and logs.
-
-**Q: Do I need to do anything?**  
-A: Just add the 4 required secrets. That's it.
-
-**Q: Will this cost money?**  
-A: No, GitHub Actions is free for public repos.
-
-**Q: Can I disable it?**  
-A: Yes, disable the workflow in Actions tab.
-
----
-
-## Support
-
-| Issue | See |
-|-------|-----|
-| Setup help | This file or `GITHUB_ACTIONS_MIGRATION_GUIDE.md` |
-| Troubleshooting | `GITHUB_ACTIONS_MIGRATION_GUIDE.md` → Troubleshooting |
-| Detailed info | `GITHUB_ACTIONS_MIGRATION_GUIDE.md` |
-| Full audit | `MIGRATION_AUDIT_VERCEL_CRON_TO_GITHUB_ACTIONS.md` |
-| Deployment steps | `DEPLOYMENT_CHECKLIST.md` |
-
----
-
-## Next Steps
-
-1. ✅ Read this file (you're done!)
-2. ⏭️ Add 4 secrets to GitHub (Settings → Secrets)
-3. ⏭️ Test with `gh workflow run background-jobs.yml`
-4. ⏭️ Check actions tab for results
-5. ✅ Done!
-
----
-
-**That's it!** Your background jobs are now running on GitHub Actions.
-
-Questions? See the detailed guides linked above. 👆
-
----
-
-*Last Updated: July 31, 2026*
+**Last updated:** August 15, 2026

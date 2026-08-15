@@ -1,113 +1,76 @@
-# Zikr Media Launch Checklist
+# Zikr production launch checklist
 
-Use this checklist to prepare the project for production without committing secrets. Keep real credentials only in local `.env.local`, Vercel Environment Variables, Supabase dashboard settings, and GitHub Actions secrets.
+Use this checklist before promoting a release. Keep real credentials only in local `.env.local` for development and in Vercel/Supabase server-side secret stores for production. Do not commit secrets or copy service-role credentials into browser-side tests.
 
-## 1. Local environment
+## Local verification
 
-1. Copy the template:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-2. Fill `.env.local` with project-specific values:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `DATABASE_URL`
-   - `NEXT_PUBLIC_SITE_URL`
-   - Optional OAuth and integration keys such as `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GEMINI_API_KEY`, `HEYGEN_API_KEY`, and YouTube credentials.
-
-3. Validate the local deployment configuration:
-
-   ```bash
-   pnpm deploy:check
-   ```
-
-## 2. Database readiness
-
-1. Confirm Supabase connectivity with the values from `.env.local`.
-2. Apply the consolidated migration:
-
-   ```bash
-   pnpm db:migrate:supabase
-   ```
-
-3. Verify migration status:
-
-   ```bash
-   pnpm dlx supabase migration list
-   ```
-
-4. Confirm the expected tables are present and protected by RLS policies:
-   - `users`, `profiles`, `quran_chapters`, `verses`
-   - `hadith_books`, `hadith_collection`, `duas`
-   - `videos`, `video_generation_requests`
-   - `social_publish_queue`
-
-## 3. Vercel configuration
-
-Add these variables in Vercel Dashboard → Settings → Environment Variables:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `DATABASE_URL`
-- `NEXT_PUBLIC_SITE_URL`
-- Optional integration variables required for enabled features.
-
-After saving the variables, trigger a deployment and review the build logs.
-
-## 4. GitHub Actions configuration
-
-Add these secrets in Repository → Settings → Secrets and variables → Actions:
-
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `DATABASE_URL`
-- `NEXT_PUBLIC_SITE_URL`
-- Optional: `HEYGEN_API_KEY`, `YOUTUBE_CLIENT_ID`, and other integration secrets used by workflows.
-
-Verify workflows are available and run the background jobs workflow manually when appropriate:
+From the repository root:
 
 ```bash
-gh workflow list
-gh workflow run background-jobs.yml
+pnpm install --frozen-lockfile
+pnpm verify
+pnpm deploy:check
 ```
 
-## 5. Production smoke tests
+The lockfile must remain unchanged after installation. The verification suite is also the Vercel build gate.
 
-Manually verify the primary routes after deployment:
+## Vercel configuration
 
-- `/` loads the home banner and sections.
-- `/quran` lists surahs.
-- `/quran/1` displays verses.
-- `/hadith` lists hadith books.
-- `/dua` lists duas.
-- `/profile` requires authentication when signed out.
-- `/search` searches content.
-- `/settings` loads settings.
+The project must be linked to the `zikr` Vercel project and the canonical domain must be `https://zikrmediaofficial.vercel.app`. Confirm that the build uses `pnpm install --frozen-lockfile` and `pnpm verify`, that the latest production deployment is `READY`, and that the custom domain is not password protected.
 
-Run API and application checks:
+Set the required public and server-side variables in the correct Vercel environments. The public Supabase URL and anon/publishable key may be exposed to the browser; the service-role key, OAuth client secret, provider tokens, VAPID private key, and scheduler secret must remain server-only. Optional integrations should be configured only when their feature is intentionally enabled.
 
-```bash
-pnpm lint
-pnpm check
-pnpm build
-pnpm launch:smoke
-curl -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-  "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/quran_chapters?limit=1"
+## Supabase readiness
+
+Confirm that the production project is healthy and that the local migration filenames match the remote migration versions. The scheduler migration is locally stored as `20260814160000_prayer_push_scheduler.sql`, matching the production version. Do not reset production or apply a duplicate migration to repair a name-only discrepancy.
+
+Verify that all user and operational tables have RLS enabled. Owner policies must use `auth.uid()`, admin policies must call the server-side admin helper, and scheduler tables must not have public read or write access. Confirm that the service-role key is used only in server-side code.
+
+## Scheduler readiness
+
+Confirm exactly one active row for each production job:
+
+| Job | Schedule | Target |
+|---|---:|---|
+| `zikr-prayer-push-dispatch` | `* * * * *` | `prayer-notification-worker` |
+| `zikr-video-processing` | `* * * * *` | `/api/internal/video-processing` |
+
+Review recent `cron.job_run_details` rows and Edge Function/runtime logs. The prayer worker must use the delivery ledger and private VAPID settings. The video route must reject requests without its scheduler bearer secret and must claim queue rows before external provider side effects.
+
+## Authentication and OAuth
+
+Verify email registration, login, logout, password recovery, session refresh, protected-route redirects, and Google sign-in. Google Cloud and Supabase provider configuration must allow the canonical application callback `https://zikrmediaofficial.vercel.app/auth/callback`. The application’s Google initiation route must redirect to that app route and must not use the Supabase provider callback as its `redirectTo` value.
+
+Test the flow from the canonical domain in a real browser session. Do not record or commit the account password or OAuth tokens in project files.
+
+## Smoke tests
+
+After deployment, verify that these routes load and do not emit unexpected console or server errors:
+
+```text
+/
+/auth/login
+/auth/register
+/quran
+/quran/1
+/hadith
+/dua
+/prayer-times
+/qibla
+/search
+/settings
+/profile
+/api/push/public-key
 ```
 
-## 6. Security and performance gate
+When signed out, `/profile` and other private surfaces must require authentication. The public push-key route may return only the public VAPID key. An unauthenticated subscription write must return `401`; an authenticated write must be associated with the authenticated user and must not allow a caller to choose another `user_id`.
 
-Before launch, confirm:
+## Post-deployment evidence
 
-- HTTPS is enabled for all public pages.
-- Browser console has no unexpected errors.
-- RLS policies block private data access for anonymous users.
-- No server-only values appear in browser bundles, logs, screenshots, or committed files.
-- Lighthouse scores are at least 90 for Performance, Accessibility, Best Practices, and SEO.
-- Offline mode behaves as expected.
+Record the deployed commit SHA, Vercel deployment state, the `pnpm verify` result, the remote/local migration counts, the active cron job names, recent cron run results, Supabase advisor warnings, and Vercel runtime error results. A `READY` deployment alone is not proof that authentication, RLS, schedulers, or core routes are healthy.
 
-> Note: `pnpm launch:smoke` intentionally checks only public routes and anon-key Supabase reads. Keep service-role and database credentials out of browser-side smoke tests.
+## GitHub Actions constraint
+
+The repository contains manual-only `ci.yml` and `background-jobs.yml` workflows. They are recovery and verification paths, not production schedules. GitHub currently blocks hosted runners because of an account-level billing lock. Do not restore `schedule` triggers or move production secrets into GitHub merely to make the workflows appear active. Use the Vercel build gate and Supabase cron until the external lock is resolved.
+
+**Last updated:** August 15, 2026
