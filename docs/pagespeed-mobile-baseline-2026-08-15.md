@@ -76,3 +76,11 @@ The second PageSpeed run for deployment `dpl_Ge7vEQfVCpkfJABbQCxFZAr5YB7P` was s
 ## Final functional verification
 
 The final `pnpm verify` exited 0: 121 migration checks passed, local import and mobile readiness checks passed, 56 tests passed with 0 failures, TypeScript and ESLint passed, and the Next.js production build completed. The production smoke test also exited 0: `/`, Quran routes, Hadith, Dua, search, settings, protected redirects, and anonymous Supabase reads for Quran, Hadith, Duas, and Videos all returned the expected HTTP statuses.
+
+## References
+
+[1] [PageSpeed Insights report supplied by the user](https://pagespeed.web.dev/analysis/https-zikrmediaofficial-vercel-app/fjpw06s5g2?hl=en&form_factor=mobile)
+
+[2] [Fresh PageSpeed Insights Mobile run after the first performance deployment](https://pagespeed.web.dev/analysis/https-zikrmediaofficial-vercel-app/wnlfi4l70k?form_factor=mobile)
+
+[3] [Google Lighthouse performance scoring documentation](https://developer.chrome.com/docs/lighthouse/performance/performance-scoring/)
