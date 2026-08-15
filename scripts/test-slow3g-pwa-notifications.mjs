@@ -173,6 +173,24 @@ async function runBrowserTest() {
       }
     )()`);
 
+    await emulate(cdp, {
+      offline: true,
+      latency: 0,
+      downloadThroughput: 0,
+      uploadThroughput: 0,
+    });
+    await sleep(800);
+    const offlineProbe = await evaluateWithTimeout(cdp, `fetch('/mushaf', { cache: 'no-store' }).then(async (response) => ({
+      status: response.status,
+      hasMushafHeading: (await response.text()).includes('المصحف الشريف'),
+    })).catch((error) => ({ status: 0, error: String(error) }))`);
+    await emulate(cdp, {
+      offline: false,
+      latency: 50,
+      downloadThroughput: 1_500 * 1024,
+      uploadThroughput: 750 * 1024,
+    });
+
     const notificationResults = await evaluateWithTimeout(cdp, `(
       async () => {
         const registration = await Promise.race([
@@ -214,7 +232,7 @@ async function runBrowserTest() {
 
     socket.close();
     browserConnection.socket.close();
-    return { initial, offlineState, recovered, notificationResults, consoleErrors, pageErrors, expectedNetworkErrors, unexpectedPageErrors };
+    return { initial, offlineState, recovered, offlineProbe, notificationResults, consoleErrors, pageErrors, expectedNetworkErrors, unexpectedPageErrors };
   } finally {
     chrome.kill('SIGTERM');
   }
@@ -317,6 +335,7 @@ const failures = [];
 if (!browser.initial.hasMushafHeading || !browser.initial.hasSurahSearch) failures.push('Mushaf did not render during Slow 3G load');
 if (!browser.initial.serviceWorkerSupported) failures.push('Service Worker unsupported');
 if (!browser.recovered.registrations?.some((registration) => registration.active && registration.controller)) failures.push('Service Worker did not recover as active controller');
+if (browser.offlineProbe.status !== 200 || !browser.offlineProbe.hasMushafHeading) failures.push('Mushaf did not remain readable during offline probe');
 if (browser.notificationResults.supported && browser.notificationResults.count < 2) failures.push(`Expected at least 2 browser notifications, got ${browser.notificationResults.count}`);
 if (handlers.notificationCount !== 3) failures.push(`Expected 3 simulated notifications, got ${handlers.notificationCount}`);
 if (!handlers.registeredEvents.includes('notificationclick')) failures.push('notificationclick handler missing');
