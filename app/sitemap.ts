@@ -11,7 +11,8 @@ import type { Scholar } from "@/lib/services/scholars";
 import type { HadithBook } from "@/lib/types/hadith";
 import type { Story } from "@/lib/services/stories";
 
-export const revalidate = 86400; // 24 hours
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type SlugRow = { slug: string };
@@ -96,6 +97,8 @@ const NON_INDEXABLE_PATHS = new Set([
   "/favorites",
   "/profile",
   "/settings",
+  "/wird",
+  "/memorization",
 ]);
 
 const EXTRA_PUBLIC_ROUTES = [
@@ -139,12 +142,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   );
   try {
-    if (process.env.NEXT_PHASE === "phase-production-build") {
-      console.info(
-        "[sitemap] Skipping dynamic fetch during build phase to avoid dynamic usage error"
-      );
-      return staticRoutes;
-    }
 
     const [
       surahs,
