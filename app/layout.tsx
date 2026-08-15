@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/layout/site-shell";
 
 import { defaultOgImage, siteConfig } from "@/lib/site";
 import { DeferredRuntime } from "@/components/layout/deferred-runtime";
+import { NativeCapacitorBridge } from "@/components/layout/native-capacitor-bridge";
 
 // Navbar reads the Supabase session from request cookies, so the shell must be rendered per request.
 export const dynamic = "force-dynamic";
@@ -113,6 +114,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <SiteShell>{children}</SiteShell>
+        <NativeCapacitorBridge />
         <DeferredRuntime />
       </body>
     </html>

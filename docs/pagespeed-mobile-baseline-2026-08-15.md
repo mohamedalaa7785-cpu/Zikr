@@ -94,3 +94,9 @@ The follow-up full verification after the retry change exited 0: 121 Supabase mi
 ## Live production PWA validation after retry fix
 
 After deployment `dpl_FoJwYtfx5TTKQ4kPGGnXZVtm6wgg` reached `READY` and was aliased to `https://zikrmediaofficial.vercel.app`, the live homepage rendered normally. Browser inspection returned one active Service Worker controlling the official origin with no waiting worker. The browser was online and `Notification.permission` remained `default`, confirming the page did not trigger an automatic notification permission prompt during passive load.
+
+## Follow-up clarification and hardening
+
+The first performance implementation correctly preserved Service Worker registration, but its initial offline hydration attempt skipped 2G/Data Saver sessions without an explicit retry. This was hardened in commit `1a61aaf`: the offline pack now retries after `online`, connection-type changes, focus, visibility changes, and the existing 60-second update cycle. Hydration remains deduplicated and only runs when the connection is suitable.
+
+The Capacitor native bridge is intentionally mounted directly in the root layout rather than behind the web performance delay. This preserves immediate native deep-link listeners, SplashScreen handling, StatusBar setup, push/local notification permission flow, and native network events. The web-only PWA, prayer-alert provider, and third-party scripts remain deferred. After this hardening, the full verification suite exited 0 with 56 passing tests and 0 failures, and the production build completed.
