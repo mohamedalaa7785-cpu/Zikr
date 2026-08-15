@@ -68,3 +68,11 @@ The fresh Mobile report was captured at 2026-08-15 07:22:27 UTC using the same L
 | Speed Index | 2.2 s | 2.4 s |
 
 The new report reduced long tasks from 8 to 4 and no longer listed the previous `Minimize main-thread work` and `Reduce JavaScript execution time` diagnostics in the visible result. Remaining insights include render-blocking CSS with estimated savings of 110 ms, cache lifetimes mainly involving third-party resources, legacy JavaScript estimated savings of 14 KiB, unused JavaScript estimated savings of 265 KiB, unused CSS estimated savings of 11 KiB, layout-shift investigation, LCP breakdown, third-party code, and document request latency/DOM-size/manual checks.
+
+A second fresh PageSpeed Mobile run was started after deployment `dpl_Ge7vEQfVCpkfJABbQCxFZAr5YB7P` reached `READY`. At this checkpoint PageSpeed was still showing `Running analysis / data loading`; the final result will be captured after completion.
+
+The second PageSpeed run for deployment `dpl_Ge7vEQfVCpkfJABbQCxFZAr5YB7P` was still displaying `loading` after repeated checks, even though Vercel reported the deployment `READY`. The earlier completed fresh run at 07:22:27 UTC remains the authoritative post-fix measurement for this task; the second run is retained as an attempted confirmation and is not counted as a score.
+
+## Final functional verification
+
+The final `pnpm verify` exited 0: 121 migration checks passed, local import and mobile readiness checks passed, 56 tests passed with 0 failures, TypeScript and ESLint passed, and the Next.js production build completed. The production smoke test also exited 0: `/`, Quran routes, Hadith, Dua, search, settings, protected redirects, and anonymous Supabase reads for Quran, Hadith, Duas, and Videos all returned the expected HTTP statuses.
