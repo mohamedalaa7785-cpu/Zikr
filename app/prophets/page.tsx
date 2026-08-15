@@ -35,6 +35,14 @@ interface Prophet {
 
 // Merge the full local index with Supabase so a transient database failure
 // never hides the 25-prophet catalogue from the public page.
+const PROPHET_SLUG_ALIASES: Record<string, string> = {
+  dhulkifl: 'dhul-kifl',
+  zakariyya: 'zakariya',
+};
+
+function canonicalProphetSlug(slug: string) {
+  return PROPHET_SLUG_ALIASES[slug] ?? slug;
+}
 
 const staticProphets: Prophet[] = [
   { id: '1',  order_num: 1,  name_ar: 'آدم عليه السلام',          name_en: 'Adam',       slug: 'adam',      quran_mentions: 25,  bio_ar: 'أبو البشر وأول الأنبياء، خلقه الله بيده ونفخ فيه الروح وعلّمه الأسماء كلها. أُهبط إلى الأرض بعد أن أكل من الشجرة ثم تاب الله عليه.' },
@@ -86,7 +94,11 @@ export default async function ProphetsPage() {
     // fall through to static
   }
 
-  const displayProphets = mergePublishedBySlug(prophets, staticProphets);
+  const databaseProphetKeys = new Set(prophets.map(prophet => canonicalProphetSlug(prophet.slug)));
+  const fallbackProphets = staticProphets.filter(
+    prophet => !databaseProphetKeys.has(canonicalProphetSlug(prophet.slug)),
+  );
+  const displayProphets = mergePublishedBySlug(prophets, fallbackProphets);
 
   // Prophet era colors for visual variety
   const eraColors = [
@@ -141,7 +153,7 @@ export default async function ProphetsPage() {
             return (
               <Link
                 key={prophet.id}
-                href={`/prophets/${prophet.slug}`}
+                href={`/prophets/${canonicalProphetSlug(prophet.slug)}`}
                 className="group block"
               >
                 <div className={`h-full rounded-xl border bg-gradient-to-br ${colorClass} p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-brand-gold/10 hover:border-brand-gold/40`}>
