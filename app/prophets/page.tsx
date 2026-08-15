@@ -32,7 +32,10 @@ interface Prophet {
   quran_mentions?: number;
 }
 
-// 25 أنبياء مذكورون في القرآن الكريم مع بياناتهم الكاملة
+// The database is the canonical source for all 25 prophets. This fallback only
+// exposes the six stories that also have a complete local detail page.
+const STATIC_DETAIL_SLUGS = new Set(['adam', 'nuh', 'ibrahim', 'musa', 'yusuf', 'muhammad']);
+
 const staticProphets: Prophet[] = [
   { id: '1',  order_num: 1,  name_ar: 'آدم عليه السلام',          name_en: 'Adam',       slug: 'adam',      quran_mentions: 25,  bio_ar: 'أبو البشر وأول الأنبياء، خلقه الله بيده ونفخ فيه الروح وعلّمه الأسماء كلها. أُهبط إلى الأرض بعد أن أكل من الشجرة ثم تاب الله عليه.' },
   { id: '2',  order_num: 2,  name_ar: 'إدريس عليه السلام',        name_en: 'Enoch',      slug: 'idris',     quran_mentions: 2,   bio_ar: 'أول من كتب بالقلم وخاط الثياب. رفعه الله مكاناً علياً. كان صابراً صادقاً ومن الصالحين.' },
@@ -84,7 +87,9 @@ export default async function ProphetsPage() {
   }
 
   const useStatic = prophets.length === 0;
-  const displayProphets = useStatic ? staticProphets : prophets;
+  const displayProphets = useStatic
+    ? staticProphets.filter(prophet => STATIC_DETAIL_SLUGS.has(prophet.slug))
+    : prophets;
 
   // Prophet era colors for visual variety
   const eraColors = [

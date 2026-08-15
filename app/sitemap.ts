@@ -16,6 +16,8 @@ export const revalidate = 86400; // 24 hours
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type SlugRow = { slug: string };
 
+// Build-time fallback slugs mirror the currently published Supabase content.
+// Runtime generation still merges the live database slugs below.
 const STATIC_PROPHET_SLUGS = [
   "adam",
   "idris",
@@ -28,17 +30,17 @@ const STATIC_PROPHET_SLUGS = [
   "ishaq",
   "yaqub",
   "yusuf",
-  "shuayb",
   "ayyub",
-  "dhul-kifl",
+  "shuayb",
   "musa",
   "harun",
+  "dhulkifl",
   "yunus",
-  "ilyas",
-  "alyasa",
   "dawud",
   "sulayman",
-  "zakariyya",
+  "ilyas",
+  "alyasa",
+  "zakariya",
   "yahya",
   "isa",
   "muhammad",
@@ -49,14 +51,25 @@ const STATIC_BATTLE_SLUGS = [
   "uhud",
   "khandaq",
   "khaybar",
-  "fathmakka",
   "hunayn",
+  "waddan",
+  "buwat",
+  "ushayra",
+  "safwan",
+  "qarqarat-kudr",
+  "banu-qaynuqa",
+  "sawiq",
+  "banu-nadir",
+  "dumat-al-jandal",
+  "banu-qurayza",
+  "muraysi",
+  "dhat-riqa",
+  "mu-tah",
+  "dhat-salasil",
   "tabuk",
-  "qaynuqa",
-  "nadir",
-  "qurayza",
-  "mutah",
-  "salasel",
+  "taif",
+  // This is a supported static story even though it is not a live DB row.
+  "fathmakka",
 ] as const;
 
 function range(count: number) {

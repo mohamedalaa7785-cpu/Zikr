@@ -77,14 +77,14 @@ export default async function AdminBattlesPage() {
     battles = [];
   }
 
+  // Use the same canonical fallback slugs as the public content routes.
   const staticBattles = [
     { slug: 'badr', name_ar: 'غزوة بدر الكبرى', year_hijri: 2 },
     { slug: 'uhud', name_ar: 'غزوة أحد', year_hijri: 3 },
     { slug: 'khandaq', name_ar: 'غزوة الخندق (الأحزاب)', year_hijri: 5 },
     { slug: 'khaybar', name_ar: 'غزوة خيبر', year_hijri: 7 },
-    { slug: 'fath-mecca', name_ar: 'فتح مكة المكرمة', year_hijri: 8 },
-    { slug: 'hunain', name_ar: 'غزوة حنين', year_hijri: 8 },
-    { slug: 'tabouk', name_ar: 'غزوة تبوك', year_hijri: 9 },
+    { slug: 'hunayn', name_ar: 'غزوة حنين', year_hijri: 8 },
+    { slug: 'tabuk', name_ar: 'غزوة تبوك', year_hijri: 9 },
   ];
 
   const hasBattles = battles.length > 0;

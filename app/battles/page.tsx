@@ -24,7 +24,10 @@ type Battle = {
   order_num: number | null;
 };
 
-// Static battles data with slugs for detail pages
+// The database is the canonical source for the full battle library. This
+// fallback only exposes battles with complete local detail stories.
+const STATIC_DETAIL_SLUGS = new Set(['badr', 'uhud', 'khandaq', 'fathmakka']);
+
 const staticBattles: Battle[] = [
   { id: '1', order_num: 1,  name_ar: 'غزوة بدر الكبرى',      name_en: 'Battle of Badr',      slug: 'badr',      date_hijri: '17 رمضان 2هـ',   date_gregorian: '13 مارس 624م', location_ar: 'وادي بدر — شمال غرب المدينة',     description_ar: 'أول معركة فاصلة في الإسلام، انتصر فيها 313 مسلماً على قريش وعددهم 950 مقاتلاً. قال الله: ﴿وَلَقَدْ نَصَرَكُمُ اللَّهُ بِبَدْرٍ وَأَنتُمْ أَذِلَّةٌ﴾.', thumbnail_url: null },
   { id: '2', order_num: 2,  name_ar: 'غزوة أُحد',            name_en: 'Battle of Uhud',       slug: 'uhud',      date_hijri: '7 شوال 3هـ',     date_gregorian: '23 مارس 625م', location_ar: 'جبل أُحد — شمال المدينة',          description_ar: 'الغزوة التي كانت فيها الهزيمة الجزئية درساً عظيماً للمسلمين بسبب مخالفة الرماة أمر النبي ﷺ. استُشهد فيها سيد الشهداء حمزة بن عبدالمطلب.', thumbnail_url: null },
@@ -52,7 +55,9 @@ export default async function BattlesPage() {
   }
 
   const useStatic = battles.length === 0;
-  const displayBattles = useStatic ? staticBattles : battles;
+  const displayBattles = useStatic
+    ? staticBattles.filter(battle => STATIC_DETAIL_SLUGS.has(battle.slug))
+    : battles;
 
   return (
     <main className="min-h-screen" dir="rtl">

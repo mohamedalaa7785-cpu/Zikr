@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
@@ -27,6 +27,14 @@ type BattleEvent = {
   content_ar: string;
   event_type: string;
   order_num: number;
+};
+
+const LEGACY_BATTLE_SLUG_REDIRECTS: Record<string, string> = {
+  qaynuqa: 'banu-qaynuqa',
+  nadir: 'banu-nadir',
+  qurayza: 'banu-qurayza',
+  mutah: 'mu-tah',
+  salasel: 'dhat-salasil',
 };
 
 const BATTLE_STORIES: Record<string, {
@@ -101,6 +109,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BattleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const canonicalSlug = LEGACY_BATTLE_SLUG_REDIRECTS[slug];
+  if (canonicalSlug) redirect(`/battles/${canonicalSlug}`);
 
   let battle: Battle | null = null;
   let events: BattleEvent[] = [];

@@ -114,6 +114,41 @@ const nextConfig: NextConfig = {
       destination: '/conquests',
       permanent: true,
     },
+    {
+      source: '/battles/qaynuqa',
+      destination: '/battles/banu-qaynuqa',
+      permanent: true,
+    },
+    {
+      source: '/battles/nadir',
+      destination: '/battles/banu-nadir',
+      permanent: true,
+    },
+    {
+      source: '/battles/qurayza',
+      destination: '/battles/banu-qurayza',
+      permanent: true,
+    },
+    {
+      source: '/battles/mutah',
+      destination: '/battles/mu-tah',
+      permanent: true,
+    },
+    {
+      source: '/battles/salasel',
+      destination: '/battles/dhat-salasil',
+      permanent: true,
+    },
+    {
+      source: '/prophets/dhul-kifl',
+      destination: '/prophets/dhulkifl',
+      permanent: true,
+    },
+    {
+      source: '/prophets/zakariyya',
+      destination: '/prophets/zakariya',
+      permanent: true,
+    },
   ],
   productionBrowserSourceMaps: false,
   trailingSlash: false,

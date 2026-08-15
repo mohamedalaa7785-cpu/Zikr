@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
@@ -33,6 +33,11 @@ interface Prophet {
   metadata: Record<string, string> | null;
   order_num: number | null;
 }
+
+const LEGACY_PROPHET_SLUG_REDIRECTS: Record<string, string> = {
+  'dhul-kifl': 'dhulkifl',
+  zakariyya: 'zakariya',
+};
 
 // Static full prophet stories — shown when DB has no data yet
 const PROPHET_STORIES: Record<string, {
@@ -131,6 +136,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProphetDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const canonicalSlug = LEGACY_PROPHET_SLUG_REDIRECTS[slug];
+  if (canonicalSlug) redirect(`/prophets/${canonicalSlug}`);
 
   let prophet: Prophet | null = null;
   let sections: ProphetSection[] = [];
@@ -280,10 +287,9 @@ export default async function ProphetDetailPage({ params }: { params: Promise<{ 
                       </div>
                     </div>
                   </div>
-                  <div
-                    className="text-base leading-9 text-brand-cream/85 whitespace-pre-wrap pr-11"
-                    dangerouslySetInnerHTML={{ __html: section.content_ar.replace(/\n/g, '<br/>') }}
-                  />
+                  <p className="text-base leading-9 text-brand-cream/85 whitespace-pre-wrap pr-11">
+                    {section.content_ar}
+                  </p>
                 </Card>
               );
             })}

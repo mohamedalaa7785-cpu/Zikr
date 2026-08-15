@@ -138,12 +138,9 @@ export default function ArticleDetailPage() {
       </div>
 
       <Card className="p-8 space-y-6 bg-black/30 border-brand-gold/30">
-        <div
-          className="prose prose-invert max-w-none text-brand-cream leading-relaxed whitespace-pre-wrap"
-          dangerouslySetInnerHTML={{
-            __html: article.content.replace(/\n/g, '<br/>'),
-          }}
-        />
+        <div className="prose prose-invert max-w-none text-brand-cream leading-relaxed whitespace-pre-wrap">
+          {article.content}
+        </div>
       </Card>
 
       {article.tags && article.tags.length > 0 && (
