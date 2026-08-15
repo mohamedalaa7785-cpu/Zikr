@@ -52,13 +52,27 @@ function normalizeArabicToken(token: string): string {
     .replace(/^(?:و|ف|ب|ك|ل)(?=.{3,})/u, '');
 }
 
-function searchTerm(value: string): string {
+const PRIORITY_SEARCH_TERMS = [
+  'الربا', 'ربا', 'الفائدة', 'فوائد', 'الصلاة', 'الزكاة', 'الصيام', 'الحج',
+  'الطلاق', 'الميراث', 'النكاح', 'الزواج', 'الوضوء', 'الغسل', 'الحجاب',
+  'التوبة', 'الاستغفار', 'الدعاء', 'الأذكار', 'الحديث', 'السنة', 'التفسير',
+  'يوسف', 'موسى', 'إبراهيم', 'محمد', 'بدر', 'أحد', 'الهجرة', 'الصحابة',
+];
+
+export function deriveSpiritualSearchTerm(value: string): string {
   const normalized = cleanQuery(value);
   const tokens = normalized
     .split(' ')
     .map(normalizeArabicToken)
     .filter(token => token.length >= 3 && !SEARCH_STOPWORDS.has(token));
-  return (tokens.sort((a, b) => b.length - a.length)[0] ?? normalized).slice(0, MAX_QUERY_LENGTH);
+  const priorityToken = tokens.find(token =>
+    PRIORITY_SEARCH_TERMS.some(priority => token.includes(priority) || priority.includes(token)),
+  );
+  return (priorityToken ?? tokens.sort((a, b) => b.length - a.length)[0] ?? normalized).slice(0, MAX_QUERY_LENGTH);
+}
+
+function searchTerm(value: string): string {
+  return deriveSpiritualSearchTerm(value);
 }
 
 function likeFilter(fields: string[], value: string): string {
@@ -137,27 +151,45 @@ function mapHadith(item: Hadith): SpiritualSource {
   };
 }
 
+function quranSearchVariants(term: string): string[] {
+  const variants = new Set([term]);
+  const aliases: Record<string, string[]> = {
+    'الربا': ['ٱلر'],
+    'الفائدة': ['ٱلر'],
+    'الصلاة': ['ٱلصَّل'],
+    'الزكاة': ['ٱلزَّك'],
+    'الصيام': ['ٱلصِّي'],
+    'الحج': ['ٱلْحَج'],
+    'التوبة': ['تُوب'],
+  };
+  for (const alias of aliases[term] ?? []) variants.add(alias);
+  return [...variants];
+}
+
 async function retrieveLocalQuran(query: string): Promise<SpiritualSource[]> {
   const term = cleanQuery(query);
   if (!term) return [];
 
-  try {
-    const rows = await supabaseServerAnonRequest<Record<string, unknown>[]>(
-      `/rest/v1/quran_ayahs?select=surah_id,ayah_number,text_ar,text_uthmani&text_ar=ilike.*${encodeURIComponent(term)}*&limit=5`,
-    );
-    return rows
-      .map(row => sourceFromRow(
-        'quran',
-        'آية قرآنية من مكتبة ZIKR',
-        row,
-        ['text_ar'],
-        `سورة رقم ${String(row.surah_id ?? 'غير محدد')}، آية ${String(row.ayah_number ?? '')}`,
-        ['text_uthmani', 'text_ar'],
-      ))
-      .filter((item): item is SpiritualSource => Boolean(item));
-  } catch {
-    return [];
-  }
+  const rows = (await Promise.all(quranSearchVariants(term).map(async variant => {
+    try {
+      return await supabaseServerAnonRequest<Record<string, unknown>[]>(
+        `/rest/v1/quran_ayahs?select=surah_id,ayah_number,text_ar,text_uthmani&text_ar=ilike.*${encodeURIComponent(variant)}*&limit=5`,
+      );
+    } catch {
+      return [];
+    }
+  }))).flat();
+
+  return rows
+    .map(row => sourceFromRow(
+      'quran',
+      'آية قرآنية من مكتبة ZIKR',
+      row,
+      ['text_ar'],
+      `سورة رقم ${String(row.surah_id ?? 'غير محدد')}، آية ${String(row.ayah_number ?? '')}`,
+      ['text_uthmani', 'text_ar'],
+    ))
+    .filter((item): item is SpiritualSource => Boolean(item));
 }
 
 async function retrieveFallbackQuran(query: string): Promise<SpiritualSource[]> {

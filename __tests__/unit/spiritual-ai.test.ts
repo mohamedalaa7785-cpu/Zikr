@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyQuestion, detectEmotion, isCrisisMessage } from '../../lib/services/spiritual-ai-policy';
-import { formatSourcesForPrompt, type SpiritualSource } from '../../lib/services/spiritual-retriever';
+import {
+  deriveSpiritualSearchTerm,
+  formatSourcesForPrompt,
+  type SpiritualSource,
+} from '../../lib/services/spiritual-retriever';
 
 test('classifies fiqh and spiritual questions separately', () => {
   assert.equal(classifyQuestion('ما حكم الربا؟'), 'fatwa');
@@ -18,6 +22,10 @@ test('blocks crisis language before model generation', () => {
   assert.equal(isCrisisMessage('لا أريد أن أعيش'), true);
   assert.equal(isCrisisMessage('أفكر في الانتحار'), true);
   assert.equal(isCrisisMessage('أشعر بالتعب وأحتاج مواساة'), false);
+});
+
+test('prioritizes the central Islamic term in compound questions', () => {
+  assert.equal(deriveSpiritualSearchTerm('ما حكم الإسلام في الربا والقروض البنكية بالفائدة؟'), 'الربا');
 });
 
 test('formats only retrieved source content for the model context', () => {
