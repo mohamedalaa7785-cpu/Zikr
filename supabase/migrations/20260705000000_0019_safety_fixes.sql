@@ -7,7 +7,6 @@
 --  4) guarding UPDATEs that reference optional columns
 --  5) adding story FK constraints only when stories table exists
 
-BEGIN;
 
 -- 1) Clean duplicate quran_reciters.code values (append short id suffix to duplicates)
 DO $$
@@ -119,5 +118,3 @@ BEGIN
 
   END IF;
 END $$;
-
-COMMIT;

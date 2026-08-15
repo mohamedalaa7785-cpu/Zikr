@@ -2,7 +2,6 @@
 -- Purpose: Emergency migration to cancel all subscriptions and reject all pending payments.
 -- WARNING: This migration updates production data. Take a full DB backup before applying.
 
-BEGIN;
 
 -- Create a lightweight audit table (idempotent) to record the admin action.
 CREATE TABLE IF NOT EXISTS public.admin_actions_audit (
@@ -31,7 +30,6 @@ SET status = 'rejected',
     reference_note = coalesce(reference_note,'') || ' | cancelled-globally-at-' || now()
 WHERE status = 'pending';
 
-COMMIT;
 
 -- NOTES:
 -- 1) This migration only updates the application database. If you accepted payments via an external

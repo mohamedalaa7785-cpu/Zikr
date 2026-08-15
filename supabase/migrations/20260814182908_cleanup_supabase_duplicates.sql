@@ -2,7 +2,6 @@
 -- This migration intentionally keeps one canonical index from each identical pair.
 -- It does not change public-read or owner RLS semantics.
 
-BEGIN;
 
 -- Remove redundant duplicate indexes while retaining the canonical/constraint-backed index.
 DROP INDEX IF EXISTS public.idx_articles_category;
@@ -33,5 +32,3 @@ DROP INDEX IF EXISTS public.videos_category_idx;
 DROP POLICY IF EXISTS "Admins can manage competitions" ON public.competitions;
 DROP POLICY IF EXISTS "Admins can manage memorization plans" ON public.memorization_plans;
 DROP POLICY IF EXISTS "Allow service role to update social stats" ON public.kids_content;
-
-COMMIT;

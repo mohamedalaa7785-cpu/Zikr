@@ -19,6 +19,9 @@ for (const file of files) {
   const path = join(migrationsDir, file);
   if (statSync(path).size === 0) errors.push(`${file}: migration is empty`);
   const sql = readFileSync(path, "utf8");
+  if (/^\s*(?:BEGIN|COMMIT|ROLLBACK|START\s+TRANSACTION)\s*;\s*$/im.test(sql)) {
+    errors.push(`${file}: do not include top-level transaction control; Supabase wraps each migration in a transaction`);
+  }
   if (/SUPABASE_SERVICE_ROLE_KEY|service_role_secret/i.test(sql) && !/CREATE ROLE service_role/i.test(sql)) {
     errors.push(`${file}: service-role secret must not be stored in SQL`);
   }
