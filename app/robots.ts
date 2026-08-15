@@ -13,9 +13,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/", "/auth/", "/favorites", "/profile", "/settings", "/wird", "/memorization"],
       },
     ],
-    sitemap: [
-      `${baseUrl}/sitemap/0.xml`,
-      `${baseUrl}/sitemap/1.xml`,
-    ],
+    sitemap: `${baseUrl}/sitemap-index.xml`,
   };
 }

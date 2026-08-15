@@ -54,20 +54,20 @@ export function Footer() {
   return (
     <footer className='mt-24 border-t border-brand-gold/10 py-20 bg-black relative overflow-hidden'>
       <div className="absolute inset-0 bg-[url('/branding/pattern.svg')] opacity-[0.02] pointer-events-none" />
-      <Container className='grid gap-12 md:grid-cols-4 relative'>
-        <div className='space-y-6 col-span-1 md:col-span-1'>
+      <Container className='relative grid grid-cols-2 gap-x-6 gap-y-10 sm:gap-x-10 md:grid-cols-4 md:gap-12'>
+        <div className='col-span-2 space-y-5 md:col-span-1 md:space-y-6'>
           <h3 className='text-2xl font-bold text-brand-gold'>ZIKR | ذِكرٌ</h3>
-          <p className='text-sm leading-relaxed text-brand-cream/60'>{copy.description}</p>
+          <p className='max-w-sm text-sm leading-7 text-brand-cream/75'>{copy.description}</p>
           <div className="flex gap-4 pt-2 items-center">
-            <BookOpen className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
-            <Scroll className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
-            <Star className="h-5 w-5 text-brand-gold/40 hover:text-brand-gold/80 cursor-pointer transition-colors" />
+            <BookOpen className="h-5 w-5 text-brand-gold/65 hover:text-brand-gold cursor-pointer transition-colors" />
+            <Scroll className="h-5 w-5 text-brand-gold/65 hover:text-brand-gold cursor-pointer transition-colors" />
+            <Star className="h-5 w-5 text-brand-gold/65 hover:text-brand-gold cursor-pointer transition-colors" />
             <a
               href={FACEBOOK_PAGE_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={isEnglish ? 'Facebook page' : 'صفحة الفيسبوك'}
-              className="text-brand-gold/40 hover:text-brand-gold/80 transition-colors"
+              className="text-brand-gold/65 hover:text-brand-gold transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.883v2.252h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
@@ -80,7 +80,7 @@ export function Footer() {
           <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>{copy.sections}</h3>
           <ul className='space-y-3 text-sm'>
             {sectionLinks.map((link) => (
-              <li key={link.href}><Link href={link.href} className='text-brand-cream/60 hover:text-brand-gold transition-colors'>{isEnglish ? link.en : link.ar}</Link></li>
+              <li key={link.href}><Link href={link.href} className='text-brand-cream/75 underline-offset-4 transition-colors hover:text-brand-gold hover:underline'>{isEnglish ? link.en : link.ar}</Link></li>
             ))}
           </ul>
         </div>
@@ -89,7 +89,7 @@ export function Footer() {
           <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>{copy.tools}</h3>
           <ul className='space-y-3 text-sm'>
             {toolLinks.map((link) => (
-              <li key={link.href}><Link href={link.href} className='text-brand-cream/60 hover:text-brand-gold transition-colors'>{isEnglish ? link.en : link.ar}</Link></li>
+              <li key={link.href}><Link href={link.href} className='text-brand-cream/75 underline-offset-4 transition-colors hover:text-brand-gold hover:underline'>{isEnglish ? link.en : link.ar}</Link></li>
             ))}
           </ul>
         </div>
@@ -98,10 +98,10 @@ export function Footer() {
           <h3 className='text-sm font-bold text-brand-gold uppercase tracking-widest'>{copy.legal}</h3>
           <ul className='space-y-3 text-sm'>
             {legalLinks.map((link) => (
-              <li key={link.href}><Link href={link.href} className='text-brand-cream/60 hover:text-brand-gold transition-colors'>{isEnglish ? link.en : link.ar}</Link></li>
+              <li key={link.href}><Link href={link.href} className='text-brand-cream/75 underline-offset-4 transition-colors hover:text-brand-gold hover:underline'>{isEnglish ? link.en : link.ar}</Link></li>
             ))}
             <li>
-              <a href={FACEBOOK_PAGE_URL} target="_blank" rel="noopener noreferrer" className='text-brand-cream/60 hover:text-brand-gold transition-colors'>
+              <a href={FACEBOOK_PAGE_URL} target="_blank" rel="noopener noreferrer" className='text-brand-cream/75 underline-offset-4 transition-colors hover:text-brand-gold hover:underline'>
                 {isEnglish ? 'Facebook Page' : 'صفحة الفيسبوك'}
               </a>
             </li>
@@ -112,7 +112,7 @@ export function Footer() {
         </div>
       </Container>
       
-      <Container className='mt-20 border-t border-brand-gold/10 pt-10 text-center text-xs text-brand-cream/30 relative'>
+      <Container className='relative mt-16 border-t border-brand-gold/15 pt-8 text-center text-xs text-brand-cream/60 sm:mt-20 sm:pt-10'>
         <p dir={isEnglish ? 'ltr' : 'rtl'}>{copy.copyright}</p>
       </Container>
     </footer>

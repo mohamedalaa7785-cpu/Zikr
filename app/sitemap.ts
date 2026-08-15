@@ -333,19 +333,25 @@ async function getSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   }
 }
 
+export async function getSitemapShardCount() {
+  const entries = await getSitemapEntries();
+  return Math.max(1, Math.ceil(entries.length / SITEMAP_PAGE_SIZE));
+}
+
+export async function getSitemapPage(id: number): Promise<MetadataRoute.Sitemap> {
+  const entries = await getSitemapEntries();
+  const safeId = Math.max(0, Math.floor(id));
+  const start = safeId * SITEMAP_PAGE_SIZE;
+  return entries.slice(start, start + SITEMAP_PAGE_SIZE);
+}
+
 export async function generateSitemaps() {
-  // Keep a deterministic set of files because Next.js may call this during
-  // build before runtime-only Supabase credentials are available. Two files
-  // provide room for 90,000 current URLs while each file remains below the
-  // protocol limit; add another id when the published corpus grows beyond it.
-  return [{ id: 0 }, { id: 1 }];
+  const count = await getSitemapShardCount();
+  return Array.from({ length: count }, (_, id) => ({ id }));
 }
 
 export default async function sitemap(props: {
   id: Promise<string>;
 }): Promise<MetadataRoute.Sitemap> {
-  const entries = await getSitemapEntries();
-  const id = Math.max(0, Number(await props.id) || 0);
-  const start = id * SITEMAP_PAGE_SIZE;
-  return entries.slice(start, start + SITEMAP_PAGE_SIZE);
+  return getSitemapPage(Number(await props.id) || 0);
 }

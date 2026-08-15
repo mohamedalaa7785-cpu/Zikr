@@ -917,8 +917,8 @@ export default function HomePage() {
               اكتشف المنصة
             </h2>
             <Link
-              href="/quran"
-              className="text-sm text-brand-gold/60 hover:text-brand-gold transition-colors"
+              href="#all-sections"
+              className="text-sm text-brand-gold/75 underline-offset-4 hover:text-brand-gold hover:underline transition-colors"
             >
               عرض الكل
             </Link>
@@ -976,6 +976,7 @@ export default function HomePage() {
       ══════════════���═══════════════════════════════════════════════════════ */}
       <section
         className="border-b border-brand-gold/12 px-3 py-10 sm:px-4 sm:py-12"
+        id="all-sections"
         aria-labelledby="more-heading"
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 520px" }}
       >
@@ -989,18 +990,18 @@ export default function HomePage() {
             المحتوى الإسلامي الشامل
           </h2>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 min-[360px]:grid-cols-4 gap-2.5 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6">
             {moreContent.map(item => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="group flex flex-col items-center gap-2 rounded-2xl border border-brand-gold/12 bg-black/20 p-3 text-center transition-all duration-200 hover:border-brand-gold/35 hover:bg-brand-gold/6 sm:gap-2.5 sm:p-4"
+                className="group flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-brand-gold/18 bg-black/20 p-2.5 text-center transition-all duration-200 hover:border-brand-gold/45 hover:bg-brand-gold/6 sm:min-h-[104px] sm:gap-2.5 sm:p-4"
               >
                 <span className="text-2xl" aria-hidden="true">
                   {item.icon}
                 </span>
                 <span
-                  className="text-xs text-brand-cream/60 group-hover:text-brand-gold transition-colors leading-tight"
+                  className="text-[11px] font-medium text-brand-cream/75 group-hover:text-brand-gold transition-colors leading-tight sm:text-xs"
                   dir="rtl"
                 >
                   {item.label}
@@ -1029,11 +1030,11 @@ export default function HomePage() {
             أرقام من القرآن الكريم
           </h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 min-[360px]:grid-cols-4 gap-2.5 sm:gap-4">
             {stats.map(stat => (
               <div
                 key={stat.label}
-                className="group relative overflow-hidden rounded-2xl border border-brand-gold/15 bg-black/25 p-4 text-center transition-colors hover:border-brand-gold/35 sm:p-6"
+                className="group relative min-h-[116px] overflow-hidden rounded-2xl border border-brand-gold/18 bg-black/25 p-3 text-center transition-colors hover:border-brand-gold/40 sm:min-h-[140px] sm:p-6"
               >
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -1044,13 +1045,13 @@ export default function HomePage() {
                   aria-hidden="true"
                 />
                 <p
-                  className="mb-2 text-3xl font-bold tabular-nums text-brand-gold sm:text-4xl md:text-5xl"
+                  className="mb-2 text-2xl font-bold tabular-nums text-brand-gold sm:text-4xl md:text-5xl"
                   style={{ textShadow: "0 0 20px rgba(199,168,107,0.25)" }}
                 >
                   {stat.value}
                 </p>
                 <p
-                  className="text-sm font-semibold text-brand-cream/70 mb-1"
+                  className="mb-1 text-[11px] font-semibold text-brand-cream/80 sm:text-sm"
                   dir="rtl"
                 >
                   {stat.label}

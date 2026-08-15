@@ -96,6 +96,12 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
+  rewrites: async () => [
+    {
+      source: '/sitemap-content/:id.xml',
+      destination: '/sitemap-content/:id',
+    },
+  ],
   redirects: async () => [
     {
       source: '/home',
