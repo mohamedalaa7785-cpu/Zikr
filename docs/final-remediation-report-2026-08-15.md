@@ -51,7 +51,7 @@ The audited release commit `e06dec8` and subsequent documentation-only commits a
 
 The latest verified Vercel production deployment is available from the successful `Vercel – zikr` status at `https://vercel.com/alaaabdelkader565-5560s-projects/zikr/8RRsWnSH6dUTveij7cUQjxzcibVm`; it targets production. The audited release code deployment `dpl_CDEBwmeGpe1Dxf3J4eHzbT4eTrTv` was `READY` and associated with commit `e06dec8`. It serves the aliases `zikrmediaofficial.vercel.app`, `zikr-zikr.vercel.app`, and `zikr-git-main-zikr.vercel.app`. Runtime log filtering for the code deployment and the final production deployment returned no error or fatal entries in the checked windows.
 
-The final commit's GitHub statuses showed both `Vercel – zikr` and the separate `Vercel – v0-project` context completed successfully, along with CircleCI. The v0 project is separate from ZIKR; earlier rate-limit messages were transient historical status entries and did not affect the ZIKR production deployment.
+The current GitHub aggregate status includes a failed `Vercel – v0-project` context with `Deployment rate limited — retry in 24 hours`; this is a separate v0 project limitation. The ZIKR Vercel context and CircleCI context are successful, and the v0 result does not affect the ZIKR production deployment.
 
 ## Tests and production evidence
 
