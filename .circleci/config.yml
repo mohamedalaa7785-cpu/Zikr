@@ -1,0 +1,35 @@
+version: 2.1
+
+jobs:
+  verify:
+    docker:
+      - image: cimg/node:22.13
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Enable pnpm
+          command: |
+            corepack enable
+            corepack prepare pnpm@9.15.0 --activate
+            pnpm --version
+      - restore_cache:
+          keys:
+            - zikr-pnpm-v1-{{ checksum "pnpm-lock.yaml" }}
+            - zikr-pnpm-v1-
+      - run:
+          name: Install dependencies
+          command: pnpm install --frozen-lockfile
+      - save_cache:
+          key: zikr-pnpm-v1-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - ~/.local/share/pnpm/store
+      - run:
+          name: Run full verification suite
+          command: pnpm verify
+          no_output_timeout: 20m
+
+workflows:
+  verify-on-change:
+    jobs:
+      - verify
