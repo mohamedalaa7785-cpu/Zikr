@@ -61,9 +61,10 @@ async function mapLimit(items, limit, fn) {
 }
 
 const staticResults = await mapLimit(appRoutes, 6, (path) => fetchOne(path));
-const sitemapResponse = await fetch(`${ORIGIN}/sitemap.xml`);
-const sitemapText = await sitemapResponse.text();
-const sitemapUrls = [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).filter((url) => url.startsWith(ORIGIN)).map((url) => new URL(url).pathname + new URL(url).search);
+const sitemapPaths = ['/sitemap/0.xml', '/sitemap/1.xml', '/sitemap/2.xml'];
+const sitemapResponses = await Promise.all(sitemapPaths.map((path) => fetch(`${ORIGIN}${path}`)));
+const sitemapTexts = await Promise.all(sitemapResponses.map((response) => response.text()));
+const sitemapUrls = sitemapTexts.flatMap((sitemapText) => [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).filter((url) => url.startsWith(ORIGIN)).map((url) => new URL(url).pathname + new URL(url).search));
 const dynamicPaths = [...new Set(sitemapUrls)].filter((path) => !appRoutes.includes(path)).slice(0, 120);
 const dynamicResults = await mapLimit(dynamicPaths, 6, (path) => fetchOne(path, 'sitemap-dynamic'));
 const apiResults = await mapLimit(apiRoutes, 4, (path) => fetchOne(path, 'api'));
@@ -89,13 +90,15 @@ for (const result of dynamicResults) {
   if (result.status === 200 && (!result.title || !result.description || result.h1s.length === 0)) issues.push({ type: 'sitemap-seo', path: result.path, status: result.status, title: result.title, description: Boolean(result.description), h1Count: result.h1s.length });
 }
 for (const result of apiResults) if (![200, 401, 403, 404].includes(result.status)) issues.push({ type: 'api-status', ...result });
-if (sitemapResponse.status !== 200) issues.push({ type: 'sitemap-http', status: sitemapResponse.status });
+sitemapResponses.forEach((response, index) => {
+  if (response.status !== 200) issues.push({ type: 'sitemap-http', path: sitemapPaths[index], status: response.status });
+});
 if (robots.status !== 200) issues.push({ type: 'robots-http', status: robots.status });
 if (ads.status !== 200) issues.push({ type: 'ads-http', status: ads.status });
 if (manifest.status !== 200) issues.push({ type: 'manifest-http', status: manifest.status });
 if (sw.status !== 200) issues.push({ type: 'sw-http', status: sw.status });
 
-const report = { generatedAt: new Date().toISOString(), origin: ORIGIN, counts: { declaredRoutes: appRoutes.length, staticPages: staticResults.length, sitemapUrls: sitemapUrls.length, dynamicSampled: dynamicResults.length, apiRoutes: apiResults.length, public200Pages: publicPageResults.length, issues: issues.length }, staticResults, dynamicResults, apiResults, assets: { robots, ads, manifest, sw }, issues };
+const report = { generatedAt: new Date().toISOString(), origin: ORIGIN, counts: { declaredRoutes: appRoutes.length, staticPages: staticResults.length, sitemapFiles: sitemapPaths.length, sitemapUrls: sitemapUrls.length, dynamicSampled: dynamicResults.length, apiRoutes: apiResults.length, public200Pages: publicPageResults.length, issues: issues.length }, staticResults, dynamicResults, apiResults, assets: { robots, ads, manifest, sw, sitemaps: sitemapPaths.map((path, index) => ({ path, status: sitemapResponses[index].status, bodyLength: sitemapTexts[index].length })) }, issues };
 await writeFile('/tmp/zikr-production-pages-audit.json', JSON.stringify(report, null, 2));
 console.log(JSON.stringify({ counts: report.counts, issueTypes: [...new Set(issues.map((issue) => issue.type))], issuePaths: issues.slice(0, 80).map((issue) => issue.path) }, null, 2));
 if (issues.some((issue) => ['page-status', 'protected-status', 'sitemap-status', 'robots-http', 'ads-http', 'manifest-http', 'sw-http'].includes(issue.type))) process.exitCode = 1;
