@@ -158,6 +158,20 @@ export default async function KidsPage() {
             <p className="mt-2 text-sm leading-relaxed text-brand-cream/70">مواقف تفاعلية تساعد الطفل على التفكير واختيار التصرف الحسن.</p>
           </Card>
         </Link>
+        <Link href="/kids/audio" className="group">
+          <Card className="h-full border-brand-gold/30 bg-gradient-to-br from-brand-gold/10 to-transparent p-5 transition-transform group-hover:-translate-y-1">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-brand-gold/70">اسمع وردد</p>
+            <h3 className="text-xl font-bold text-brand-gold">صوتيات الصغار</h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-cream/70">قصص وأناشيد وأذكار مع تسجيل القراءة محليًا على جهازك.</p>
+          </Card>
+        </Link>
+        <Link href="/kids/achievements" className="group">
+          <Card className="h-full border-brand-emerald/30 bg-gradient-to-br from-brand-emerald/10 to-transparent p-5 transition-transform group-hover:-translate-y-1">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-brand-emerald/70">شجع نفسك</p>
+            <h3 className="text-xl font-bold text-brand-emerald">نادي النجوم</h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-cream/70">شارات ونجوم ولوحة شرف محلية تحتفل بالتقدم دون مقارنة.</p>
+          </Card>
+        </Link>
       </section>
 
       {Object.entries(ageGroupLabels).map(([age, label]) => {

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
+import { readKidsProgress, updateKidsProgress } from '@/lib/data/kids-audio-client';
 
 type AdventureMode = 'missions' | 'memory' | 'scenarios';
 
@@ -98,6 +99,9 @@ export default function KidsAdventuresPage() {
   const [scenarioAnswer, setScenarioAnswer] = useState<number | null>(null);
   const [scenarioScore, setScenarioScore] = useState(0);
   const [scenarioDone, setScenarioDone] = useState(false);
+  const [memoryRewarded, setMemoryRewarded] = useState(false);
+  const [scenarioRewarded, setScenarioRewarded] = useState(false);
+  const [stars, setStars] = useState(0);
 
   useEffect(() => {
     const requestedMode = new URLSearchParams(window.location.search).get('mode');
@@ -108,6 +112,10 @@ export default function KidsAdventuresPage() {
     } catch {
       // Local progress is optional; the activity remains fully usable.
     }
+    setStars(readKidsProgress().stars);
+    const refreshStars = () => setStars(readKidsProgress().stars);
+    window.addEventListener('zikr-kids-progress', refreshStars);
+    return () => window.removeEventListener('zikr-kids-progress', refreshStars);
   }, []);
 
   useEffect(() => {
@@ -123,7 +131,14 @@ export default function KidsAdventuresPage() {
     `rounded-full px-4 py-2 text-sm font-bold transition-colors ${mode === tab ? 'bg-brand-gold text-black' : 'bg-brand-cream/10 text-brand-cream/70 hover:bg-brand-gold/15 hover:text-brand-gold'}`;
 
   const completeMission = () => {
-    setCompletedMissions(previous => previous.includes(missionIndex) ? previous : [...previous, missionIndex]);
+    if (completedMissions.includes(missionIndex)) return;
+    setCompletedMissions(previous => [...previous, missionIndex]);
+    const next = updateKidsProgress(progress => ({
+      ...progress,
+      completedActivities: progress.completedActivities + 1,
+      stars: progress.stars + 1,
+    }));
+    setStars(next.stars);
   };
 
   const chooseMemoryCard = (id: string) => {
@@ -135,8 +150,18 @@ export default function KidsAdventuresPage() {
       const second = memoryCards.find(card => card.id === nextOpen[1]);
       if (!first || !second) return;
       if (first.pair === second.label) {
-        setMemoryMatched(previous => [...previous, first.id, second.id]);
+        const nextMatched = [...memoryMatched, first.id, second.id];
+        setMemoryMatched(nextMatched);
         setMemoryOpen([]);
+        if (nextMatched.length === MEMORY_PAIRS.length && !memoryRewarded) {
+          setMemoryRewarded(true);
+          const next = updateKidsProgress(progress => ({
+            ...progress,
+            completedActivities: progress.completedActivities + 1,
+            stars: progress.stars + 3,
+          }));
+          setStars(next.stars);
+        }
       } else {
         window.setTimeout(() => setMemoryOpen([]), 700);
       }
@@ -147,6 +172,7 @@ export default function KidsAdventuresPage() {
     setMemoryCards(shuffle(MEMORY_PAIRS));
     setMemoryOpen([]);
     setMemoryMatched([]);
+    setMemoryRewarded(false);
   };
 
   const chooseScenario = (answer: number) => {
@@ -158,6 +184,15 @@ export default function KidsAdventuresPage() {
   const nextScenario = () => {
     if (scenarioIndex === SCENARIOS.length - 1) {
       setScenarioDone(true);
+      if (!scenarioRewarded) {
+        setScenarioRewarded(true);
+        const next = updateKidsProgress(progress => ({
+          ...progress,
+          completedActivities: progress.completedActivities + 1,
+          stars: progress.stars + 3,
+        }));
+        setStars(next.stars);
+      }
       return;
     }
     setScenarioIndex(index => index + 1);
@@ -169,6 +204,7 @@ export default function KidsAdventuresPage() {
     setScenarioAnswer(null);
     setScenarioScore(0);
     setScenarioDone(false);
+    setScenarioRewarded(false);
   };
 
   return (
@@ -182,6 +218,7 @@ export default function KidsAdventuresPage() {
         <div className="rounded-2xl border border-brand-gold/25 bg-brand-gold/10 px-5 py-4 text-right">
           <p className="text-xs text-brand-cream/60">تقدم مهام القيم</p>
           <p className="mt-1 text-2xl font-bold text-brand-gold">{completedMissions.length} / {MISSIONS.length}</p>
+          <p className="mt-1 text-xs font-bold text-brand-emerald">{stars} نجمة</p>
           <div className="mt-2 h-2 w-36 overflow-hidden rounded-full bg-black/30" aria-label={`${missionProgress}% من مهام القيم`}>
             <div className="h-full rounded-full bg-brand-gold transition-all" style={{ width: `${missionProgress}%` }} />
           </div>
