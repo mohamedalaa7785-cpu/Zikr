@@ -93,6 +93,10 @@ export default function RootLayout({
     >
       <head>
         <meta name="theme-color" content="#0A2A1E" />
+        <meta
+          name="google-adsense-account"
+          content={process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "ca-pub-2457467624248791"}
+        />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta

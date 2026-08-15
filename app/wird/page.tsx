@@ -9,6 +9,7 @@ export const metadata: Metadata = pageMetadata({
   description:
     'حدّد وردك اليومي من الآيات وتابع تقدّمك في ختم القرآن الكريم مع عدّاد المداومة — يعمل بالكامل بدون إنترنت.',
   path: '/wird',
+  noindex: true,
 });
 
 export default function WirdPage() {

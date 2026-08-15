@@ -7,7 +7,18 @@ const appRoutes = [
 
 const protectedRoutes = new Set(['/settings', '/favorites', '/profile', '/admin', '/memorization', '/wird']);
 const apiRoutes = [
-  '/api/quran/surahs', '/api/content/articles', '/api/content/companions', '/api/content/prophets', '/api/content/stories', '/api/duas', '/api/duas/categories', '/api/hadith/books', '/api/videos', '/api/search?q=قرآن', '/api/prayer-times?city=Cairo&country=Egypt',
+  '/api/quran/surahs',
+  '/api/content/articles',
+  '/api/content/companions',
+  '/api/content/prophets',
+  '/api/content/stories',
+  '/api/duas',
+  '/api/duas/categories',
+  '/api/hadith/books',
+  '/api/tawasheeh',
+  '/api/tawasheeh/categories',
+  '/api/search?q=قرآن',
+  '/api/prayer-times?city=Cairo&country=Egypt',
 ];
 
 function stripHtml(html) {

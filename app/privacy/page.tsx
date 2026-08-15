@@ -15,7 +15,7 @@ export default function PrivacyPage() {
     <Container className="max-w-4xl space-y-8 py-12">
       <section className="space-y-4 text-center">
         <h1 className="text-4xl font-bold text-brand-gold">سياسة الخصوصية</h1>
-        <p className="arabic-muted">آخر تحديث: 7 يونيو 2026</p>
+        <p className="arabic-muted">آخر تحديث: 15 أغسطس 2026</p>
       </section>
 
       <Card className="space-y-4 leading-8">

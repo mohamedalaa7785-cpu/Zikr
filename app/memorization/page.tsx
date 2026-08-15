@@ -14,6 +14,7 @@ export const metadata = pageMetadata({
   title: 'حفظ القرآن',
   description: 'خطط عملية لحفظ القرآن الكريم ومراجعته مع متابعة التقدم والتسجيل الصوتي للتسميع.',
   path: '/memorization',
+  noindex: true,
 });
 
 const plans = [

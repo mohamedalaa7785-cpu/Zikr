@@ -80,9 +80,12 @@ export default async function ScholarDetailPage({ params }: ScholarPageProps) {
             )}
           </div>
         ) : (
-          <p className="text-center leading-8 arabic-muted">
-            سيتم إثراء هذه الصفحة بالمزيد من السيرة والمحتوى العلمي قريبًا.
-          </p>
+          <div className="space-y-3 text-center leading-8 arabic-muted">
+            <p>لا تتوفر في قاعدة البيانات الحالية سيرة موثقة منشورة لهذا العالم.</p>
+            <p className="text-sm text-brand-cream/60">
+              لن ننسب إليه أقوالًا أو مؤلفات غير موثقة. تُعرض هنا فقط البيانات والروابط الرسمية المتاحة.
+            </p>
+          </div>
         )}
 
         {(scholar.websiteUrl || scholar.youtubeUrl) && (

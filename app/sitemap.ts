@@ -132,7 +132,12 @@ function uniqueRoutes(routes: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
   return Array.from(new Map(routes.map(entry => [entry.url, entry])).values());
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+const SITEMAP_PAGE_SIZE = 45_000;
+let sitemapCache: { entries: MetadataRoute.Sitemap; expiresAt: number } | null = null;
+
+async function getSitemapEntries(): Promise<MetadataRoute.Sitemap> {
+  if (sitemapCache && sitemapCache.expiresAt > Date.now()) return sitemapCache.entries;
+
   const now = new Date();
   const staticRoutes: MetadataRoute.Sitemap = siteConfigRoutes().map(appRoute =>
     route(appRoute.path === "/" ? "" : appRoute.path, {
@@ -318,9 +323,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ),
     ];
 
-    return uniqueRoutes([...staticRoutes, ...dynamicRoutes]);
+    const entries = uniqueRoutes([...staticRoutes, ...dynamicRoutes]);
+    sitemapCache = { entries, expiresAt: Date.now() + 15 * 60 * 1000 };
+    return entries;
   } catch (error) {
     console.error("[sitemap] Error generating dynamic routes:", error);
+    sitemapCache = { entries: staticRoutes, expiresAt: Date.now() + 5 * 60 * 1000 };
     return staticRoutes;
   }
+}
+
+export async function generateSitemaps() {
+  // Keep a deterministic set of files because Next.js may call this during
+  // build before runtime-only Supabase credentials are available. Three files
+  // provide room for 135,000 URLs while each file remains below the protocol
+  // limit; empty tail files are valid and avoid silently dropping future URLs.
+  return [{ id: 0 }, { id: 1 }, { id: 2 }];
+}
+
+export default async function sitemap(props: {
+  id: Promise<string>;
+}): Promise<MetadataRoute.Sitemap> {
+  const entries = await getSitemapEntries();
+  const id = Math.max(0, Number(await props.id) || 0);
+  const start = id * SITEMAP_PAGE_SIZE;
+  return entries.slice(start, start + SITEMAP_PAGE_SIZE);
 }

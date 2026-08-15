@@ -24,8 +24,8 @@ function DeferredThirdPartyRuntime() {
       <SpeedInsights />
       {process.env.NODE_ENV === 'production' && (
         <>
-          <AdSense />
           <GoogleFundingChoices />
+          <AdSense />
         </>
       )}
     </>
