@@ -151,11 +151,11 @@ function mapHadith(item: Hadith): SpiritualSource {
   };
 }
 
-function quranSearchVariants(term: string): string[] {
+export function deriveQuranSearchVariants(term: string): string[] {
   const variants = new Set([term]);
   const aliases: Record<string, string[]> = {
-    'الربا': ['ٱلر'],
-    'الفائدة': ['ٱلر'],
+    'الربا': ['ٱلرِّب'],
+    'الفائدة': ['ٱلرِّب'],
     'الصلاة': ['ٱلصَّل'],
     'الزكاة': ['ٱلزَّك'],
     'الصيام': ['ٱلصِّي'],
@@ -170,7 +170,7 @@ async function retrieveLocalQuran(query: string): Promise<SpiritualSource[]> {
   const term = cleanQuery(query);
   if (!term) return [];
 
-  const rows = (await Promise.all(quranSearchVariants(term).map(async variant => {
+  const rows = (await Promise.all(deriveQuranSearchVariants(term).map(async variant => {
     try {
       return await supabaseServerAnonRequest<Record<string, unknown>[]>(
         `/rest/v1/quran_ayahs?select=surah_id,ayah_number,text_ar,text_uthmani&text_ar=ilike.*${encodeURIComponent(variant)}*&limit=5`,

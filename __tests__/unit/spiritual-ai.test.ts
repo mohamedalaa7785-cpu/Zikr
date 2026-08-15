@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyQuestion, detectEmotion, isCrisisMessage } from '../../lib/services/spiritual-ai-policy';
 import {
+  deriveQuranSearchVariants,
   deriveSpiritualSearchTerm,
   formatSourcesForPrompt,
   type SpiritualSource,
@@ -26,6 +27,10 @@ test('blocks crisis language before model generation', () => {
 
 test('prioritizes the central Islamic term in compound questions', () => {
   assert.equal(deriveSpiritualSearchTerm('ما حكم الإسلام في الربا والقروض البنكية بالفائدة؟'), 'الربا');
+});
+
+test('uses a narrow Uthmani stem for Quran retrieval', () => {
+  assert.deepEqual(deriveQuranSearchVariants('الربا'), ['الربا', 'ٱلرِّب']);
 });
 
 test('formats only retrieved source content for the model context', () => {
