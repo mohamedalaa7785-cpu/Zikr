@@ -4,7 +4,8 @@
 **Repository:** `mohamedalaa7785-cpu/Zikr`  
 **Production:** [zikrmediaofficial.vercel.app](https://zikrmediaofficial.vercel.app)  
 **Supabase project:** `eydxvcamhjhajxjrsgym`  
-**Current commit:** `0f512c8` (`docs: publish final remediation evidence`)
+**Audited release code commit:** `e06dec8` (`fix: make RLS cleanup replay-safe`)  
+**Documentation commits:** `0f512c8`, `77ac4b4`, and `63618f8`
 
 ## Executive status
 
@@ -46,9 +47,9 @@ The production checks also returned HTTP 200 for `/auth/login`, `/mushaf`, `/qur
 
 ## GitHub and Vercel
 
-Commit `0f512c8` is present on both local `main` and `origin/main`; the working tree is clean. GitHub branch protection now requires the real CircleCI status context `ci/circleci: verify`, with force-push and deletion disabled. CircleCI job #25 passed and reported `Your tests passed on CircleCI!` for the final commit.
+The audited release commit `e06dec8` and subsequent documentation-only commits are present on local `main` and `origin/main`; the working tree is clean. GitHub branch protection now requires the real CircleCI status context `ci/circleci: verify`, with force-push and deletion disabled. CircleCI jobs #25 and #26 passed and reported `Your tests passed on CircleCI!`.
 
-The latest Vercel production deployment for the final commit is available from the successful `Vercel – zikr` status at `https://vercel.com/midohamozikr1-2959s-projects/zikr/8zDnuxC4AjrMA4PDw5yXWfDtkKjh`; it targets production. The preceding code deployment `dpl_CDEBwmeGpe1Dxf3J4eHzbT4eTrTv` was also `READY` and associated with commit `e06dec8`. It serves the aliases `zikrmediaofficial.vercel.app`, `zikr-zikr.vercel.app`, and `zikr-git-main-zikr.vercel.app`. Runtime log filtering for the code deployment and the final production deployment returned no error or fatal entries in the checked windows.
+The latest verified Vercel production deployment is available from the successful `Vercel – zikr` status at `https://vercel.com/alaaabdelkader565-5560s-projects/zikr/8RRsWnSH6dUTveij7cUQjxzcibVm`; it targets production. The audited release code deployment `dpl_CDEBwmeGpe1Dxf3J4eHzbT4eTrTv` was `READY` and associated with commit `e06dec8`. It serves the aliases `zikrmediaofficial.vercel.app`, `zikr-zikr.vercel.app`, and `zikr-git-main-zikr.vercel.app`. Runtime log filtering for the code deployment and the final production deployment returned no error or fatal entries in the checked windows.
 
 The final commit's GitHub statuses showed both `Vercel – zikr` and the separate `Vercel – v0-project` context completed successfully, along with CircleCI. The v0 project is separate from ZIKR; earlier rate-limit messages were transient historical status entries and did not affect the ZIKR production deployment.
 
