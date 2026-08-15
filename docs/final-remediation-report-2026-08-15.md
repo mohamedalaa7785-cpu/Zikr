@@ -4,7 +4,7 @@
 **Repository:** `mohamedalaa7785-cpu/Zikr`  
 **Production:** [zikrmediaofficial.vercel.app](https://zikrmediaofficial.vercel.app)  
 **Supabase project:** `eydxvcamhjhajxjrsgym`  
-**Current commit:** `e06dec8` (`fix: make RLS cleanup replay-safe`)
+**Current commit:** `0f512c8` (`docs: publish final remediation evidence`)
 
 ## Executive status
 
@@ -46,9 +46,9 @@ The production checks also returned HTTP 200 for `/auth/login`, `/mushaf`, `/qur
 
 ## GitHub and Vercel
 
-Commit `e06dec8` is present on both local `main` and `origin/main`; the working tree is clean. GitHub branch protection now requires the real CircleCI status context `ci/circleci: verify`, with force-push and deletion disabled. CircleCI job #23 passed and reported `Your tests passed on CircleCI!`.
+Commit `0f512c8` is present on both local `main` and `origin/main`; the working tree is clean. GitHub branch protection now requires the real CircleCI status context `ci/circleci: verify`, with force-push and deletion disabled. CircleCI job #23 passed and reported `Your tests passed on CircleCI!`.
 
-Vercel deployment `dpl_CDEBwmeGpe1Dxf3J4eHzbT4eTrTv` is `READY`, targets production, and is associated with commit `e06dec8`. It serves the aliases `zikrmediaofficial.vercel.app`, `zikr-zikr.vercel.app`, and `zikr-git-main-zikr.vercel.app`. Runtime log filtering for this exact deployment and the preceding two hours returned no error or fatal entries.
+The latest Vercel production deployment for the final commit is `4fqYypkBoYHhEPWyGsjLNwyDc2N7` and is complete; it targets production and is associated with the final report commit. The preceding code deployment `dpl_CDEBwmeGpe1Dxf3J4eHzbT4eTrTv` was also `READY` and associated with commit `e06dec8`. It serves the aliases `zikrmediaofficial.vercel.app`, `zikr-zikr.vercel.app`, and `zikr-git-main-zikr.vercel.app`. Runtime log filtering for the code deployment and the final production deployment returned no error or fatal entries in the checked windows.
 
 The GitHub aggregate status still shows an unrelated failed context for `Vercel – v0-project` with the message “Deployment rate limited — retry in 24 hours.” This is a separate Vercel v0 project and does not represent the ZIKR project deployment. The ZIKR Vercel context and CircleCI context are both successful.
 
