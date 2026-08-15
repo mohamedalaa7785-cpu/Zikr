@@ -41,7 +41,13 @@ interface KidsContent {
     durationDays?: number;
     dailyPlan?: string[];
     reviewPlan?: string[];
+    activitySteps?: string[];
+    familyPrompt?: string;
+    value?: string;
     gameType?: string;
+    category?: string;
+    summary_ar?: string;
+    safetyNote?: string;
     objective?: string;
   } | null;
 }
@@ -239,15 +245,24 @@ export default function KidsDetailPage() {
         </Card>
       )}
 
-      {content.metadata &&
-        (content.type === "memorize" ||
-          content.type === "matching" ||
-          content.type === "game") && (
-          <Card className="p-6 space-y-4 bg-brand-gold/10 border-brand-gold/30">
+      {content.metadata && (
+          <Card className="p-6 space-y-5 bg-brand-gold/10 border-brand-gold/30">
             <h2 className="text-2xl font-bold text-brand-gold text-center">
-              خطة المتابعة والتشجيع
+              بطاقة التعلم والتشجيع
             </h2>
             <div className="grid gap-4 md:grid-cols-2" dir="rtl">
+              {content.metadata.category && (
+                <div className="rounded-lg border border-brand-gold/20 p-4">
+                  <p className="text-sm text-brand-cream/60">المجال</p>
+                  <strong className="text-brand-gold">{content.metadata.category}</strong>
+                </div>
+              )}
+              {content.metadata.value && (
+                <div className="rounded-lg border border-brand-gold/20 p-4">
+                  <p className="text-sm text-brand-cream/60">القيمة التي نتدرب عليها</p>
+                  <strong className="text-brand-gold">{content.metadata.value}</strong>
+                </div>
+              )}
               {content.metadata.memorizationTarget && (
                 <div className="rounded-lg border border-brand-gold/20 p-4">
                   <p className="text-sm text-brand-cream/60">هدف الحفظ</p>
@@ -259,12 +274,33 @@ export default function KidsDetailPage() {
               {content.metadata.reward && (
                 <div className="rounded-lg border border-brand-gold/20 p-4">
                   <p className="text-sm text-brand-cream/60">المكافأة</p>
-                  <strong className="text-brand-gold">
-                    {content.metadata.reward}
-                  </strong>
+                  <strong className="text-brand-gold">{content.metadata.reward}</strong>
+                </div>
+              )}
+              {content.metadata.objective && (
+                <div className="rounded-lg border border-brand-gold/20 p-4">
+                  <p className="text-sm text-brand-cream/60">هدف النشاط</p>
+                  <strong className="text-brand-gold">{content.metadata.objective}</strong>
                 </div>
               )}
             </div>
+            {Array.isArray(content.metadata.activitySteps) && content.metadata.activitySteps.length > 0 && (
+              <div dir="rtl">
+                <h3 className="font-bold text-brand-gold mb-2">خطوات النشاط</h3>
+                <ol className="list-decimal list-inside text-brand-cream/80 space-y-1">
+                  {content.metadata.activitySteps.map(step => <li key={step}>{step}</li>)}
+                </ol>
+              </div>
+            )}
+            {content.metadata.familyPrompt && (
+              <div dir="rtl" className="rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 p-4 text-brand-cream/80">
+                <h3 className="font-bold text-brand-emerald mb-1">سؤال للعائلة</h3>
+                <p>{content.metadata.familyPrompt}</p>
+              </div>
+            )}
+            {content.metadata.safetyNote && (
+              <p dir="rtl" className="text-sm leading-relaxed text-amber-200/80">تنبيه السلامة: {content.metadata.safetyNote}</p>
+            )}
             {Array.isArray(content.metadata.dailyPlan) &&
               content.metadata.dailyPlan.length > 0 && (
                 <div dir="rtl">

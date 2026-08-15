@@ -28,6 +28,12 @@ interface KidsContent {
     | "memorize";
   age_group: "3-5" | "6-8" | "9-12" | "13-15";
   featured_image_url?: string;
+  metadata?: {
+    category?: string;
+    value?: string;
+    reward?: string;
+    objective?: string;
+  };
 }
 
 const typeLabels: Record<string, string> = {
@@ -41,6 +47,7 @@ const typeLabels: Record<string, string> = {
   puzzle: "لغز",
   coloring: "تلوين",
   matching: "توصيل",
+  lesson: "درس",
 };
 
 const ageGroupLabels: Record<string, string> = {
@@ -58,6 +65,7 @@ const STATIC_CONTENT: KidsContent[] = staticKidsContent.map(item => ({
   type: item.type,
   age_group: item.age_group,
   featured_image_url: item.featured_image_url,
+  metadata: item.metadata,
 }));
 
 const KIDS_DB_TIMEOUT_MS = 3000;
@@ -86,7 +94,13 @@ export default async function KidsPage() {
     const normalized = (data ?? [])
       .map(row => normalizeKidsContentRow(row))
       .filter((item): item is NonNullable<typeof item> => Boolean(item));
-    if (normalized.length > 0) content = normalized;
+    if (normalized.length > 0) {
+      const dbSlugs = new Set(normalized.map(item => item.slug));
+      content = [
+        ...normalized,
+        ...STATIC_CONTENT.filter(item => !dbSlugs.has(item.slug)),
+      ];
+    }
   } catch {
     // fall through to static content
   }
@@ -100,10 +114,50 @@ export default async function KidsPage() {
   return (
     <Container className="py-12 space-y-12">
       <section className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold">قسم الأطفال</h1>
+        <span className="inline-flex rounded-full border border-brand-gold/30 bg-brand-gold/10 px-4 py-2 text-sm text-brand-gold">
+          مدينة ذِكر للصغار
+        </span>
+        <h1 className="text-4xl font-bold text-brand-gold md:text-5xl">قسم الأطفال</h1>
         <p className="text-brand-cream/70 max-w-2xl mx-auto text-lg leading-relaxed">
-          محتوى تعليمي وترفيهي آمن ومناسب للأطفال المسلمين
+          قصص قصيرة، قيم جميلة، ألعاب ذكية ومهام عائلية تجعل التعلم الإسلامي رحلة محبة واكتشاف.
         </p>
+        <div className="flex flex-wrap justify-center gap-3 pt-2 text-sm" aria-label="إحصاءات قسم الأطفال">
+          <span className="rounded-full bg-brand-emerald/15 px-4 py-2 text-brand-emerald">{content.length} نشاطًا ومحتوى</span>
+          <span className="rounded-full bg-brand-gold/15 px-4 py-2 text-brand-gold">4 مسارات عمرية</span>
+          <span className="rounded-full bg-brand-cream/10 px-4 py-2 text-brand-cream/80">آمن مع إشراف الأسرة</span>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" aria-labelledby="kids-quick-start">
+        <h2 id="kids-quick-start" className="sr-only">ابدأ رحلة التعلم</h2>
+        <Link href="/kids/adventures" className="group">
+          <Card className="h-full border-brand-gold/30 bg-gradient-to-br from-brand-gold/15 to-transparent p-5 transition-transform group-hover:-translate-y-1">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-brand-gold/70">المسار الأول</p>
+            <h3 className="text-xl font-bold text-brand-gold">مغامرات القيم</h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-cream/70">مهام صغيرة للتعاون والصدق والرحمة والسلامة الرقمية.</p>
+          </Card>
+        </Link>
+        <Link href="/kids/adventures?mode=memory" className="group">
+          <Card className="h-full border-brand-emerald/30 bg-gradient-to-br from-brand-emerald/15 to-transparent p-5 transition-transform group-hover:-translate-y-1">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-brand-emerald/70">العب وتعلم</p>
+            <h3 className="text-xl font-bold text-brand-emerald">مختبر الذاكرة</h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-cream/70">ألعاب ذاكرة وأسئلة سريعة تربط الذكر بالمواقف اليومية.</p>
+          </Card>
+        </Link>
+        <Link href="/kids/puzzle" className="group">
+          <Card className="h-full border-brand-gold/30 bg-gradient-to-br from-brand-gold/10 to-transparent p-5 transition-transform group-hover:-translate-y-1">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-brand-gold/70">تحدي اليوم</p>
+            <h3 className="text-xl font-bold text-brand-gold">مركز الترتيب</h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-cream/70">رتّب الأركان والصلوات وخطوات الوضوء واكسب نقاطًا تعليمية.</p>
+          </Card>
+        </Link>
+        <Link href="/kids/quiz-akhlaq-adventure" className="group">
+          <Card className="h-full border-brand-emerald/30 bg-gradient-to-br from-brand-emerald/10 to-transparent p-5 transition-transform group-hover:-translate-y-1">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-brand-emerald/70">اختبر نفسك</p>
+            <h3 className="text-xl font-bold text-brand-emerald">أبطال الأخلاق</h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-cream/70">مواقف تفاعلية تساعد الطفل على التفكير واختيار التصرف الحسن.</p>
+          </Card>
+        </Link>
       </section>
 
       {Object.entries(ageGroupLabels).map(([age, label]) => {
@@ -193,6 +247,24 @@ export default async function KidsPage() {
                   <span className="px-2 py-1 bg-brand-emerald/20 text-brand-emerald rounded text-xs font-medium">
                     6-12 سنة
                   </span>
+                </div>
+              </div>
+            </Card>
+          </Link>
+          <Link href="/kids/adventures">
+            <Card className="h-full hover:border-brand-emerald/50 transition-colors cursor-pointer flex flex-col border-brand-emerald/25 bg-brand-emerald/5">
+              <div className="w-full h-40 bg-brand-emerald/10 flex items-center justify-center">
+                <div className="rounded-full border-2 border-brand-emerald/50 px-5 py-3 text-center text-brand-emerald">
+                  <span className="block text-xs">مركز</span>
+                  <span className="text-lg font-bold">المغامرات</span>
+                </div>
+              </div>
+              <div className="p-4 space-y-3 flex-1 flex flex-col">
+                <h3 className="text-lg font-bold text-brand-emerald leading-relaxed">مغامرات ذِكر</h3>
+                <p className="text-brand-cream/60 text-sm leading-relaxed">مهام قيم، ذاكرة أذكار، ومواقف آمنة تساعدك على التفكير والاختيار.</p>
+                <div className="flex gap-2 flex-wrap mt-auto">
+                  <span className="px-2 py-1 bg-brand-emerald/20 text-brand-emerald rounded text-xs font-medium">مغامرة</span>
+                  <span className="px-2 py-1 bg-brand-gold/20 text-brand-gold rounded text-xs font-medium">3-12 سنة</span>
                 </div>
               </div>
             </Card>
