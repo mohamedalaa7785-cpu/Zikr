@@ -12,6 +12,8 @@ const QUICK_PROMPTS = [
   'أذنبت كثيرًا وأريد التوبة، كيف أبدأ؟',
   'أحتاج أدعية وأذكار لتيسير الرزق',
   'ما حكم الغيبة والنميمة في الإسلام؟',
+  'أريد شرحًا مبسطًا لحديث أو آية مع مصدرها',
+  'ما قصة غزوة بدر وما أهم دروسها؟',
 ];
 
 const TYPE_BADGE: Record<string, { label: string; color: string }> = {
@@ -50,11 +52,21 @@ export default function SpiritualAIPage() {
       const history = [...messages, userMsg]
         .slice(-10)
         .map((m) => ({ role: m.role, content: m.content }));
-      const result = await sendChatMessage(value, history);
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: result.message, result },
-      ]);
+      try {
+        const result = await sendChatMessage(value, history);
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: result.message, result },
+        ]);
+      } catch {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: 'تعذر الوصول إلى خدمة الإجابة الآن. حاول مرة أخرى، ويمكنك تصفح مصادر القرآن والحديث في مكتبة ZIKR مباشرة.',
+          },
+        ]);
+      }
     });
   };
 
@@ -89,7 +101,7 @@ export default function SpiritualAIPage() {
           {messages.length === 0 && (
             <div className="space-y-8">
               <p className="text-center text-brand-cream/60 leading-8 pt-6 max-w-lg mx-auto">
-                اسألني في أي موضوع — حكم شرعي، فتوى، مشكلة تمر بها، ذكر أو دعاء، أو أي سؤال يخطر ببالك.
+                اسألني في القرآن والتفسير والحديث والسيرة والفقه والأخلاق والأذكار وقصص الأنبياء والغزوات والفتوحات، وسأبحث أولًا في مكتبة ZIKR وأعرض المصادر المتاحة بوضوح.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {QUICK_PROMPTS.map((p) => (
@@ -165,8 +177,15 @@ export default function SpiritualAIPage() {
                         <ul className="space-y-2">
                           {msg.result.citations.map((citation, ci) => (
                             <li key={`${citation.reference}-${ci}`} className="text-xs leading-6 text-brand-cream/55">
-                              <span className="text-brand-gold/80">{citation.label}</span> — {citation.reference}
+                              <span className="text-brand-gold/80">{citation.label}</span> — {citation.url ? (
+                                <a href={citation.url} className="text-brand-cream/75 underline decoration-brand-gold/30 underline-offset-2 hover:text-brand-gold">
+                                  {citation.reference}
+                                </a>
+                              ) : citation.reference}
                               <span className="block text-brand-cream/35 line-clamp-2">{citation.source}</span>
+                              <span className="block text-[10px] text-brand-cream/25">
+                                {citation.authority === 'primary' ? 'مصدر أصلي/نصي' : citation.authority === 'site' ? 'محتوى ZIKR' : 'مصدر مساعد'}
+                              </span>
                             </li>
                           ))}
                         </ul>
@@ -233,7 +252,7 @@ export default function SpiritualAIPage() {
             </Button>
           </div>
           <p className="text-xs text-brand-cream/20 text-center">
-            للإلزام والفتاوى الرسمية راجع دار الإفتاء أو علماء متخصصين
+            الإجابات مبنية على المصادر المسترجعة من ZIKR وليست بديلًا عن الفتوى الرسمية أو العالم المتخصص
           </p>
         </Container>
       </div>
