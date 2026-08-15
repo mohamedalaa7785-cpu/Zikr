@@ -18,6 +18,61 @@ export function ServiceWorkerRegister() {
     let hydrationTimeout: number | undefined;
     let hydrationIdleHandle: number | undefined;
     let registration: ServiceWorkerRegistration | null = null;
+    let hydrationFinished = false;
+    let hydrationStarted = false;
+
+    const connection = (navigator as Navigator & {
+      connection?: {
+        saveData?: boolean;
+        effectiveType?: string;
+        addEventListener?: (type: string, listener: () => void) => void;
+        removeEventListener?: (type: string, listener: () => void) => void;
+      };
+    }).connection;
+
+    const canHydrate = () =>
+      !connection?.saveData &&
+      connection?.effectiveType !== 'slow-2g' &&
+      connection?.effectiveType !== '2g';
+
+    const hydrate = async () => {
+      if (hydrationStarted || hydrationFinished || !canHydrate()) return;
+      hydrationStarted = true;
+      try {
+        const result = await hydrateOfflineContent();
+        hydrationFinished = result?.complete === true;
+      } catch (error) {
+        console.warn('[PWA] Offline content hydration failed:', error);
+      } finally {
+        hydrationStarted = false;
+      }
+    };
+
+    const scheduleHydration = (delayMs: number) => {
+      if (hydrationFinished || hydrationStarted) return;
+      if (hydrationIdleHandle !== undefined) {
+        window.cancelIdleCallback?.(hydrationIdleHandle);
+        hydrationIdleHandle = undefined;
+      }
+      if (hydrationTimeout !== undefined) window.clearTimeout(hydrationTimeout);
+      hydrationTimeout = window.setTimeout(() => {
+        hydrationTimeout = undefined;
+        if (!canHydrate()) return;
+        const requestIdle = window.requestIdleCallback?.bind(window);
+        if (requestIdle) {
+          hydrationIdleHandle = requestIdle(() => {
+            hydrationIdleHandle = undefined;
+            void hydrate();
+          }, { timeout: 5000 });
+        } else {
+          void hydrate();
+        }
+      }, delayMs);
+    };
+
+    const handleNetworkChange = () => {
+      if (canHydrate()) scheduleHydration(3000);
+    };
 
     const registerServiceWorker = async () => {
       try {
@@ -27,35 +82,20 @@ export function ServiceWorkerRegister() {
         });
 
         // The offline pack contains several large public datasets. Register the
-        // worker immediately, but hydrate only after the critical page has had
-        // time to settle so slow mobile connections do not compete with LCP.
-        const connection = (navigator as Navigator & {
-          connection?: { saveData?: boolean; effectiveType?: string };
-        }).connection;
-        const isSlowConnection =
-          connection?.saveData === true ||
-          connection?.effectiveType === 'slow-2g' ||
-          connection?.effectiveType === '2g';
+        // worker immediately, then hydrate only after the critical page settles.
+        // Slow connections skip the first attempt but retry when conditions improve.
+        scheduleHydration(15000);
 
-        if (!isSlowConnection) {
-          const hydrate = () => {
-            void hydrateOfflineContent().catch((error) => {
-              console.warn('[PWA] Offline content hydration failed:', error);
-            });
-          };
-          hydrationTimeout = window.setTimeout(() => {
-            const requestIdle = window.requestIdleCallback?.bind(window);
-            if (requestIdle) {
-              hydrationIdleHandle = requestIdle(hydrate, { timeout: 5000 });
-            } else {
-              hydrate();
-            }
-          }, 15000);
-        }
+        window.addEventListener('online', handleNetworkChange, { passive: true });
+        window.addEventListener('focus', handleNetworkChange, { passive: true });
+        document.addEventListener('visibilitychange', handleNetworkChange, { passive: true });
+        connection?.addEventListener?.('change', handleNetworkChange);
 
-        // Check for updates periodically
+        // Check for updates periodically and retry the offline pack if the
+        // connection was initially too slow or Data Saver was enabled.
         updateInterval = setInterval(() => {
           registration?.update();
+          handleNetworkChange();
         }, 60000); // Check every minute
 
         // Listen for new service worker
@@ -97,6 +137,10 @@ export function ServiceWorkerRegister() {
         window.cancelIdleCallback?.(hydrationIdleHandle);
       }
       if (hydrationTimeout !== undefined) window.clearTimeout(hydrationTimeout);
+      window.removeEventListener('online', handleNetworkChange);
+      window.removeEventListener('focus', handleNetworkChange);
+      document.removeEventListener('visibilitychange', handleNetworkChange);
+      connection?.removeEventListener?.('change', handleNetworkChange);
     };
   }, []);
 
