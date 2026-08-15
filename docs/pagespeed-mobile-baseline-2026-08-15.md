@@ -43,3 +43,28 @@ The live homepage was visually and semantically present, including Arabic RTL na
 ## Local production validation after first fixes
 
 The local production build started successfully and the homepage rendered the full Arabic navigation, search form, prayer cards, location button, featured content, Quran statistics, CTA, footer, and install prompt. The newly added `موقعي` control is user-triggered rather than an automatic geolocation request. The browser console was empty on the local production page after hydration.
+
+## Production deployment validation
+
+Commit `d1cf752` created production deployment `dpl_FQU76EoGS1h4gkLsk6Pesu9JSv4X`, which reached `READY` and is aliased to `https://zikrmediaofficial.vercel.app`. The live page rendered prayer times, search, navigation, content cards, and the user-triggered location control. The production browser console was empty during the validation session.
+
+The local asset comparison showed the initial route assets drop from 14 to 13 files, from 1,042,606 to 1,012,123 raw bytes and from 298,406 to 288,075 gzip bytes. Initial HTML dropped from 90,031 to 83,508 bytes. These are route-asset comparisons between the previous production deployment and the new local production build, not a replacement for the final PageSpeed lab score.
+
+## Final PageSpeed rerun
+
+A fresh PageSpeed Insights Mobile analysis was started for `https://zikrmediaofficial.vercel.app/` after deployment `dpl_FQU76EoGS1h4gkLsk6Pesu9JSv4X`. The result is still loading at this checkpoint and will be recorded when complete.
+
+## Fresh PageSpeed result after deployment
+
+The fresh Mobile report was captured at 2026-08-15 07:22:27 UTC using the same Lighthouse 13.4.1 mobile setup. The score improved from 68 to 99. Accessibility remained 96, Best Practices improved from 88 to 92, SEO remained 100, and Agentic Browsing reported 2/2.
+
+| Metric | Before | After |
+|---|---:|---:|
+| Performance | 68 | 99 |
+| First Contentful Paint | 0.9 s | 0.9 s |
+| Largest Contentful Paint | 2.6 s | 1.8 s |
+| Total Blocking Time | 530 ms | 74 ms |
+| Cumulative Layout Shift | 0.312 | 0.01 |
+| Speed Index | 2.2 s | 2.4 s |
+
+The new report reduced long tasks from 8 to 4 and no longer listed the previous `Minimize main-thread work` and `Reduce JavaScript execution time` diagnostics in the visible result. Remaining insights include render-blocking CSS with estimated savings of 110 ms, cache lifetimes mainly involving third-party resources, legacy JavaScript estimated savings of 14 KiB, unused JavaScript estimated savings of 265 KiB, unused CSS estimated savings of 11 KiB, layout-shift investigation, LCP breakdown, third-party code, and document request latency/DOM-size/manual checks.
