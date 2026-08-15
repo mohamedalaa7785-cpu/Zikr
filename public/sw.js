@@ -19,86 +19,22 @@ function isPublicContentApi(url) {
   return PUBLIC_CONTENT_API_PREFIXES.some((prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`));
 }
 
-// App shell + key pages pre-cached on install for offline availability.
-// Audio files are NOT pre-cached (50–200MB per reciter).
-const STATIC_ASSETS = [
-  '/',
+// Only a small app shell is pre-cached during install. Pages, public APIs,
+// and the Offline content pack are cached on demand after the first visit.
+const CORE_INSTALL_ASSETS = [
   '/offline.html',
   '/manifest.webmanifest',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  '/quran',
-  '/mushaf',
-  '/adhkar',
-  '/prayer-times',
-  '/tasbeeh',
-  '/dua',
-  '/settings',
-  '/wird',
-  '/zakat',
-  // Content pages
-  '/prophets',
-  '/companions',
-  '/articles',
-  '/hadith',
-  '/kids',
-  '/battles',
-  '/conquests',
-  '/stories',
-  '/about',
-  '/privacy',
-  '/contact',
-  '/reciters',
-  '/scholars',
-  '/search',
-  '/radio',
-  '/qibla',
-  '/poetry',
-  '/memorization',
-  '/spiritual-ai',
-  '/faq',
-  '/platform',
-  // Public content APIs
-  '/api/content/articles',
-  '/api/content/companions',
-  '/api/content/prophets',
-  '/api/content/stories',
-  '/api/duas/categories',
-  '/api/duas',
-  '/api/hadith/books',
-  '/api/quran/surahs',
-  '/api/tawasheeh/categories',
-  '/api/tawasheeh',
 ];
 
-async function cacheOfflinePack(cache) {
-  try {
-    const response = await fetch('/offline-content/v1/manifest.json', { cache: 'no-store' });
-    if (!response.ok) return;
-    const manifest = await response.json();
-    const assets = [
-      '/offline-content/v1/manifest.json',
-      ...Object.values(manifest.datasets ?? {}).map((dataset) => dataset.path),
-      ...(manifest.routes ?? []),
-    ];
-    await Promise.allSettled(assets.map(async (asset) => {
-      try {
-        await cache.add(asset);
-      } catch (error) {
-        console.warn(`[SW] Failed to cache offline asset ${asset}:`, error);
-      }
-    }));
-  } catch (error) {
-    console.warn('[SW] Offline pack manifest unavailable:', error);
-  }
-}
-
-// Install event - cache app shell and the complete public content pack.
+// Install event - cache only the lightweight app shell. The complete public
+// content pack is hydrated later by the client after the critical page settles.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
       await Promise.allSettled(
-        STATIC_ASSETS.map(async (asset) => {
+        CORE_INSTALL_ASSETS.map(async (asset) => {
           try {
             await cache.add(asset);
           } catch (error) {
@@ -106,7 +42,6 @@ self.addEventListener('install', (event) => {
           }
         }),
       );
-      await cacheOfflinePack(cache);
     })
   );
   self.skipWaiting();
