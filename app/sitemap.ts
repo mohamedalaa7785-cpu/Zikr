@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
-import { getAllSurahs } from "@/lib/services/quran";
+
 import { getAllScholars } from "@/lib/services/scholars";
 import { getHadithBooks } from "@/lib/services/hadith";
 import { getStories } from "@/lib/services/stories";
-import { reciters } from "@/lib/data/content";
+import { reciters, surahs as fallbackSurahs } from "@/lib/data/content";
 import { supabaseServerAnonRequest } from "@/lib/supabase/server";
 import { appRoutes, siteConfig } from "@/lib/site";
 import type { Surah } from "@/lib/types/quran";
@@ -162,10 +162,19 @@ async function getSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       companions,
       conquests,
     ] = await Promise.all([
-      getAllSurahs("ar").catch((error): Surah[] => {
-        console.error("[sitemap] Quran fetch failed:", error);
-        return [];
-      }),
+      Promise.resolve(
+        fallbackSurahs.map(
+          surah =>
+            ({
+              number: surah.id,
+              name: surah.nameAr,
+              englishName: surah.nameEn,
+              englishNameTranslation: "",
+              numberOfAyahs: surah.ayahCount,
+              revelationType: surah.revelationPlace === "meccan" ? "Meccan" : "Medinan",
+            }) satisfies Surah,
+        ),
+      ),
       getAllScholars().catch((error): Scholar[] => {
         console.error("[sitemap] Scholars fetch failed:", error);
         return [];

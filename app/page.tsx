@@ -180,6 +180,9 @@ const featuredSections = [
 ];
 
 const moreContent = [
+  { href: "/mushaf", label: "المصحف الشريف", icon: "📖" },
+  { href: "/tafsir", label: "التفسير", icon: "🔎" },
+  { href: "/offline-library", label: "المكتبة بلا إنترنت", icon: "⬇️" },
   { href: "/companions", label: "الصحابة الكرام", icon: "👥" },
   { href: "/scholars", label: "العلماء", icon: "📚" },
   { href: "/kids", label: "قسم الأطفال", icon: "🌟" },
@@ -412,6 +415,7 @@ export default function HomePage() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
+  const [libraryStats, setLibraryStats] = useState<Record<string, number | null> | null>(null);
 
   useEffect(() => {
     let interval: number | undefined;
@@ -428,6 +432,14 @@ export default function HomePage() {
       void offlineDb.initialize().catch(err => {
         console.error("[HomePage] Failed to initialize offline DB:", err);
       });
+
+      void fetch("/api/content/stats", { headers: { Accept: "application/json" } })
+        .then(async response => {
+          if (!response.ok) return;
+          const payload = (await response.json()) as { data?: Record<string, number | null> };
+          if (!cancelled && payload.data) setLibraryStats(payload.data);
+        })
+        .catch(() => undefined);
 
       void (async () => {
         const supabase = createBrowserSupabaseClient();
@@ -519,6 +531,19 @@ export default function HomePage() {
     },
     [searchQuery, router]
   );
+
+  const displayStats = useMemo(() => {
+    const liveValues = [
+      libraryStats?.quranSurahs,
+      libraryStats?.quranAyahs,
+      30,
+      libraryStats?.prophets,
+    ];
+    return stats.map((stat, index) => ({
+      ...stat,
+      value: liveValues[index] == null ? stat.value : liveValues[index]!.toLocaleString("ar-EG"),
+    }));
+  }, [libraryStats]);
 
   const timeStr = currentTime
     ? currentTime.toLocaleTimeString("en-GB", {
@@ -1031,7 +1056,7 @@ export default function HomePage() {
           </h2>
 
           <div className="grid grid-cols-2 min-[360px]:grid-cols-4 gap-2.5 sm:gap-4">
-            {stats.map(stat => (
+            {displayStats.map(stat => (
               <div
                 key={stat.label}
                 className="group relative min-h-[116px] overflow-hidden rounded-2xl border border-brand-gold/18 bg-black/25 p-3 text-center transition-colors hover:border-brand-gold/40 sm:min-h-[140px] sm:p-6"
