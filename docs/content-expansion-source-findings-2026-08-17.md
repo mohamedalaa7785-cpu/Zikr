@@ -57,3 +57,7 @@ The application now reads source attribution for tafsir on the ayah page, expose
 ## Educational article expansion
 
 A source-indexed editorial package added **12 original Arabic educational articles**, bringing the production article count from 26 to 38. The articles cover Quran study, memorization, prayer/time management, fasting, family ties, neighbor rights, sīrah research methodology, hadith verification, qibla/prayer technology, dua editorial policy, professional trust, and mental-health support. Each article is explicitly marked in metadata as editorial, not a hadith quotation, and not a fatwa, with a non-empty array of reference URLs. A production read-only check confirmed `total_articles=38`, `new_articles=12`, and `sourced_editorial_articles=12`.
+
+## Media integrity correction
+
+A first media query incorrectly treated `youtube_url` as the video source, while this schema uses `youtube_id`. The deeper production check confirmed all 9 published videos have non-empty YouTube IDs, so they were preserved and their metadata now records `content_source=youtube` and the existing ID. The four published tawasheeh rows used `example.com` placeholder audio URLs; migration `hide_unverified_media` set those rows to unpublished and preserved them with a `publication_block` reason. No media row was deleted, and no replacement URL was invented.
