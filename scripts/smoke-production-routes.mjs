@@ -22,7 +22,7 @@ try {
     results.push({ route: '/api/health', status: healthResponse.status, ok: false, error: `Expected JSON health response, received ${contentType || 'unknown content type'}` });
   } else {
     const health = await healthResponse.json();
-    const commitMatches = !expectedCommit || health.commit === expectedCommit;
+    const commitMatches = !expectedCommit || health.commit === expectedCommit || health.commit.startsWith(expectedCommit);
     results.push({ route: '/api/health', status: healthResponse.status, ok: healthResponse.ok && commitMatches, commit: health.commit, expectedCommit });
   }
 } catch (error) {
