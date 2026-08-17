@@ -417,6 +417,8 @@ export default async function ProphetDetailPage({
     youtubeVideoId ?? staticStory?.youtube_video_id ?? null;
   const quranMentions = staticStory?.quran_mentions;
   const references = getContentReferences(prophet?.metadata);
+  const storyStatus = prophet?.metadata?.content_status ?? (sections.length > 0 ? "quran_primary" : "fallback");
+  const storyCharCount = displaySections.reduce((total, section) => total + section.content_ar.length, 0);
 
   const sectionTypeLabel: Record<string, string> = {
     story: "القصة",
@@ -489,6 +491,14 @@ export default async function ProphetDetailPage({
             <p className="mt-2 text-sm leading-8 text-brand-cream/75">
               تُعرض مواضع القصة كاملة من القرآن الكريم في الأقسام التالية، مع إحالات مباشرة إلى السور والآيات. لا تُستبدل القصة بملخص، ولا تُضاف رواية تاريخية غير موثقة إلى النص القرآني.
             </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs text-brand-cream/65">
+              <span className="rounded-full border border-brand-gold/25 px-3 py-1 text-brand-gold/85">
+                {storyStatus === "quran_primary" ? "المصدر الأساسي: القرآن الكريم" : "المحتوى يحتاج مراجعة مصدرية"}
+              </span>
+              <span className="rounded-full border border-brand-gold/15 px-3 py-1">
+                {displaySections.length} أقسام · {storyCharCount.toLocaleString("ar-EG")} حرفًا
+              </span>
+            </div>
             {references.length > 0 && (
               <p className="mt-2 text-xs text-brand-cream/55">
                 عدد الإحالات الأساسية: {references.length}

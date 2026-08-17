@@ -31,6 +31,8 @@ interface Prophet {
   bio_ar: string | null;
   order_num: number | null;
   quran_mentions?: number;
+  story_chars?: number;
+  story_sections?: number;
 }
 
 // Merge the full local index with Supabase so a transient database failure
@@ -88,6 +90,25 @@ export default async function ProphetsPage() {
         bio_ar: r.bio_ar ?? null,
         order_num: r.order_num ?? null,
         quran_mentions: undefined,
+        story_chars: 0,
+        story_sections: 0,
+      }));
+
+      const { data: sectionRows } = await supabase
+        .from('prophet_sections')
+        .select('prophet_id, content_ar')
+        .in('prophet_id', prophets.map((prophet) => prophet.id));
+      const stats = new Map<string, { chars: number; sections: number }>();
+      for (const row of sectionRows ?? []) {
+        const current = stats.get(row.prophet_id) ?? { chars: 0, sections: 0 };
+        current.chars += (row.content_ar ?? '').length;
+        current.sections += 1;
+        stats.set(row.prophet_id, current);
+      }
+      prophets = prophets.map((prophet) => ({
+        ...prophet,
+        story_chars: stats.get(prophet.id)?.chars ?? 0,
+        story_sections: stats.get(prophet.id)?.sections ?? 0,
       }));
     }
   } catch {
@@ -184,6 +205,14 @@ export default async function ProphetsPage() {
                       {prophet.bio_ar}
                     </p>
                   )}
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-brand-cream/55">
+                    <span className="rounded-full border border-brand-gold/20 px-2 py-1 text-brand-gold/75">
+                      القصة القرآنية كاملة
+                    </span>
+                    {(prophet.story_sections ?? 0) > 0 && (
+                      <span>{prophet.story_sections} أقسام · {(prophet.story_chars ?? 0).toLocaleString('ar-EG')} حرف</span>
+                    )}
+                  </div>
                   <div className="mt-3 flex items-center gap-1 text-xs text-brand-gold/50 group-hover:text-brand-gold/80 transition-colors">
                     <span>اقرأ القصة كاملة</span>
                     <span>←</span>
