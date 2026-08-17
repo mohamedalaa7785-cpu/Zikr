@@ -30,3 +30,11 @@ The deployed `/mushaf` page loaded successfully. It displayed the Mushaf header,
 The real domain `https://zikrmediaofficial.vercel.app` returned successful responses for all 40 checked public pages, content APIs, PWA manifest, robots, and sitemap endpoints. Thirty-nine checks returned 200; `/memorization` returned the expected 307 protected-route redirect for anonymous visitors and was still classified as reachable. No 4xx or 5xx response was found.
 
 The preview alias `zikr-git-main-zikr.vercel.app` is protected by Vercel SSO and therefore returns 302 to `vercel.com/sso-api` for unauthenticated HTTP clients; this is preview protection, not a production route failure. The production domain remains publicly reachable.
+
+## Articles route verification
+
+The production `/articles` page loaded successfully after the OAuth-fix deployment. It displayed 52 published articles, category filters, article cards, author labels, and links to detail pages. The visible titles include source-verification, Quran reflection, prayer, family, ethics, study, and practical-life topics; the editorial metadata keeps original educational writing separate from quoted religious text.
+
+## Runtime verification after OAuth deployment
+
+Vercel runtime error aggregation for the last hour reported no runtime errors after production deployment `dpl_5TdrysrKeXYNRd2cBn5zrWJcrvJK`. The earlier historical `invalid flow state` cluster was addressed by classifying stale flow state as a recoverable OAuth restart and adding a regression test.
