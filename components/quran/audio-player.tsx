@@ -6,11 +6,11 @@ import { getReciters } from "@/lib/services/quran";
 import { Button } from "@/components/ui/button";
 
 // Audio URL generation function (client-safe)
-function getAudioUrl(surahId: number, reciter: Reciter) {
+function getAudioUrl(surahId: number, reciter: Reciter, databaseAudioUrl?: string | null) {
   const surahNumber = String(surahId).padStart(3, "0");
 
-  // Primary: use reciter's baseUrlTemplate (mp3quran.net verified working)
-  const primary = `${reciter.baseUrlTemplate}/${surahNumber}.mp3`;
+  // Primary: use the source-indexed DB row; retain the verified template as fallback.
+  const primary = databaseAudioUrl || `${reciter.baseUrlTemplate}/${surahNumber}.mp3`;
 
   // Fallback: quranicaudio.com
   const quranicAudioMap: Record<string, string> = {
@@ -22,7 +22,8 @@ function getAudioUrl(surahId: number, reciter: Reciter) {
     mahermuaiqly: "maher_al_muaiqly",
     ghamdi: "sa3d_al-ghaamidi",
   };
-  const quranicPath = quranicAudioMap[reciter.id];
+  const reciterKey = reciter.code.replace(/^ar\./, "");
+  const quranicPath = quranicAudioMap[reciterKey] ?? quranicAudioMap[reciter.id];
   const fallback = quranicPath
     ? [`https://download.quranicaudio.com/quran/${quranicPath}/${surahNumber}.mp3`]
     : [];
@@ -39,6 +40,7 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [databaseAudioUrl, setDatabaseAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Hydration guard - ensure component only renders on client
@@ -54,13 +56,43 @@ export function QuranAudioPlayer({ surahId }: { surahId: number }) {
   }, []);
 
   const [audioSourceIndex, setAudioSourceIndex] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    setDatabaseAudioUrl(null);
+    setAudioSourceIndex(0);
+    setError(null);
+
+    if (!isClient || !reciter?.code) return () => controller.abort();
+
+    fetch(`/api/quran/audio?surah=${surahId}&reciter=${encodeURIComponent(reciter.code)}`, {
+      signal: controller.signal,
+      headers: { Accept: 'application/json' },
+    })
+      .then(response => (response.ok ? response.json() as Promise<{ audio?: { audio_url?: string } | null }> : null))
+      .then(payload => {
+        const audioUrl = payload?.audio?.audio_url;
+        if (active && audioUrl) setDatabaseAudioUrl(audioUrl);
+      })
+      .catch(error => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        console.warn('[audio] DB audio source unavailable; using verified template fallback');
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [isClient, reciter, surahId]);
+
   const audioSources = useMemo(() => {
     if (!isClient || !reciter) return [];
     if (!reciter.code) return [];
 
-    const { primary, fallback } = getAudioUrl(surahId, reciter);
+    const { primary, fallback } = getAudioUrl(surahId, reciter, databaseAudioUrl);
     return [primary, ...fallback];
-  }, [reciter, surahId, isClient]);
+  }, [databaseAudioUrl, reciter, surahId, isClient]);
 
   const src = audioSources[audioSourceIndex] || audioSources[0];
 

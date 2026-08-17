@@ -5,7 +5,7 @@ import { BookmarkButton } from '@/components/quran/bookmark-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { getAyah, getSurahById, getTafsir } from '@/lib/services/quran';
-import { getAyahFromDb, getSurahFromDb, getTafsirFromDb } from '@/lib/services/quran-server';
+import { getAyahFromDb, getSurahFromDb, getTafsirRecordFromDb } from '@/lib/services/quran-server';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Share2 } from 'lucide-react';
 
@@ -43,16 +43,19 @@ export default async function AyahPage({ params }: AyahPageProps) {
   if (Number.isNaN(surahId) || Number.isNaN(ayahId)) return notFound();
 
   // DB-First Strategy with parallel execution
-  const [dbSurah, dbAyah, dbTafsir] = await Promise.all([
+  const [dbSurah, dbAyah, dbTafsirRecord] = await Promise.all([
     getSurahFromDb(surahId, 'ar'),
     getAyahFromDb(surahId, ayahId, 'ar'),
-    getTafsirFromDb(surahId, ayahId)
+    getTafsirRecordFromDb(surahId, ayahId)
   ]);
 
   // Fallback logic
   let surahData = dbSurah;
   let ayah = dbAyah;
-  let tafsir = dbTafsir;
+  let tafsir = dbTafsirRecord?.tafsir_ar ?? null;
+  let tafsirSource = dbTafsirRecord?.source_url ?? null;
+  let tafsirAuthor = dbTafsirRecord?.author ?? 'التفسير الميسر';
+  let tafsirRetrievedAt = dbTafsirRecord?.retrieved_at ?? null;
 
   if (!surahData) {
     console.info(`[ayah-page] Surah DB miss for ${surahId}, falling back to API`);
@@ -67,6 +70,9 @@ export default async function AyahPage({ params }: AyahPageProps) {
   if (!tafsir) {
     console.info(`[ayah-page] Tafsir DB miss for ${surahId}:${ayahId}, falling back to API`);
     tafsir = await getTafsir(surahId, ayahId);
+    tafsirSource = `https://api.alquran.cloud/v1/ayah/${surahId}:${ayahId}/ar.muyassar`;
+    tafsirAuthor = 'Al Quran Cloud — ar.muyassar';
+    tafsirRetrievedAt = null;
   }
 
   if (!surahData || !ayah) return notFound();
@@ -117,9 +123,20 @@ export default async function AyahPage({ params }: AyahPageProps) {
         <Card>
           <CardContent className="p-8">
             {tafsir ? (
-              <p className="text-xl leading-relaxed text-right arabic-muted" dir="rtl">
-                {tafsir}
-              </p>
+              <>
+                <p className="text-xl leading-relaxed text-right arabic-muted" dir="rtl">
+                  {tafsir}
+                </p>
+                <div className="mt-6 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 border-t pt-4 text-xs text-muted-foreground" dir="rtl">
+                  <span>المؤلف: {tafsirAuthor}</span>
+                  {tafsirRetrievedAt ? <span>تاريخ الجلب: {new Date(tafsirRetrievedAt).toLocaleDateString('ar-EG')}</span> : null}
+                  {tafsirSource ? (
+                    <a href={tafsirSource} target="_blank" rel="noreferrer" className="text-brand-gold underline underline-offset-4">
+                      رابط المصدر
+                    </a>
+                  ) : null}
+                </div>
+              </>
             ) : (
               <p className="text-center text-muted-foreground italic">جاري تحميل التفسير...</p>
             )}

@@ -1949,21 +1949,30 @@ export type Database = {
           audio_url: string
           duration: number | null
           id: string
+          metadata: Json
           reciter_id: string
+          retrieved_at: string | null
+          source_url: string | null
           surah_id: number
         }
         Insert: {
           audio_url: string
           duration?: number | null
           id?: string
+          metadata?: Json
           reciter_id: string
+          retrieved_at?: string | null
+          source_url?: string | null
           surah_id: number
         }
         Update: {
           audio_url?: string
           duration?: number | null
           id?: string
+          metadata?: Json
           reciter_id?: string
+          retrieved_at?: string | null
+          source_url?: string | null
           surah_id?: number
         }
         Relationships: [
@@ -2177,6 +2186,8 @@ export type Database = {
           ayah_number: number
           created_at: string
           id: string
+          retrieved_at: string | null
+          source_url: string | null
           surah_id: number
           tafsir_ar: string
           tafsir_en: string | null
@@ -2187,6 +2198,8 @@ export type Database = {
           ayah_number: number
           created_at?: string
           id?: string
+          retrieved_at?: string | null
+          source_url?: string | null
           surah_id: number
           tafsir_ar: string
           tafsir_en?: string | null
@@ -2197,6 +2210,8 @@ export type Database = {
           ayah_number?: number
           created_at?: string
           id?: string
+          retrieved_at?: string | null
+          source_url?: string | null
           surah_id?: number
           tafsir_ar?: string
           tafsir_en?: string | null

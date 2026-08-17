@@ -22,6 +22,7 @@ export type SpiritualSource = {
   reference: string;
   excerpt: string;
   url?: string;
+  sourceUrl?: string;
   authority: 'primary' | 'site' | 'fallback';
 };
 
@@ -108,6 +109,7 @@ function sourceFromRow(
     reference,
     excerpt: text,
     url,
+    sourceUrl: typeof row.source_url === 'string' ? row.source_url : undefined,
     authority: kind === 'quran' || kind === 'hadith' ? 'primary' : 'site',
   };
 }
@@ -224,7 +226,7 @@ export async function retrieveSpiritualSources(question: string): Promise<Spirit
       'dua', 'دعاء من مكتبة ZIKR', ['title_ar'], 'slug', ['text_ar', 'source_ar', 'benefits_ar'], row => row.slug ? `/dua/${row.slug}` : undefined,
     ),
     queryRows(
-      `/rest/v1/quran_tafsir?select=id,surah_id,ayah_number,author,tafsir_ar&or=${filter(['tafsir_ar', 'author'], query)}&limit=4`,
+      `/rest/v1/quran_tafsir?select=id,surah_id,ayah_number,author,tafsir_ar,source_url,retrieved_at&or=${filter(['tafsir_ar', 'author'], query)}&limit=4`,
       'quran', 'تفسير قرآني متاح في ZIKR', ['author'], row => `سورة ${String(row.surah_id ?? '?')}، آية ${String(row.ayah_number ?? '?')} — ${String(row.author ?? 'غير محدد')}`, ['tafsir_ar'],
     ),
     queryRows(

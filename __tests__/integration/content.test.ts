@@ -10,6 +10,7 @@ import { describe, it } from 'node:test';
 
 const publicContentRoutes = [
   '../../app/api/quran/surahs/route.ts',
+  '../../app/api/quran/audio/route.ts',
   '../../app/api/hadith/books/route.ts',
   '../../app/api/duas/route.ts',
   '../../app/api/duas/categories/route.ts',

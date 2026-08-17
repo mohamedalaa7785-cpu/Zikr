@@ -9,6 +9,7 @@ import {
   type DbSurah,
   type DbAyah,
   type DbReciter,
+  type DbTafsir,
   type Locale
 } from "./quran";
 
@@ -76,20 +77,33 @@ export async function getAyahFromDb(
   }
 }
 
-export async function getTafsirFromDb(
+export type QuranTafsirRecord = DbTafsir & {
+  author: string | null;
+  source_url: string | null;
+  retrieved_at: string | null;
+};
+
+export async function getTafsirRecordFromDb(
   surahId: number,
-  ayahNumber: number
-): Promise<string | null> {
+  ayahNumber: number,
+): Promise<QuranTafsirRecord | null> {
   try {
-    // Note: Column name is tafsir_ar in DB
-    const result = await supabaseServerAnonRequest<Array<{ tafsir_ar: string }>>(
-      `/rest/v1/quran_tafsir?surah_id=eq.${surahId}&ayah_number=eq.${ayahNumber}&limit=1&select=tafsir_ar`
+    const result = await supabaseServerAnonRequest<QuranTafsirRecord[]>(
+      `/rest/v1/quran_tafsir?surah_id=eq.${surahId}&ayah_number=eq.${ayahNumber}&order=author.asc&limit=1&select=tafsir_ar,tafsir_en,author,source_url,retrieved_at`
     );
-    return result?.[0]?.tafsir_ar ?? null;
+    return result?.[0] ?? null;
   } catch (error) {
-    console.error(`[quran-server] getTafsirFromDb failed for ${surahId}:${ayahNumber}:`, error);
+    console.error(`[quran-server] getTafsirRecordFromDb failed for ${surahId}:${ayahNumber}:`, error);
     return null;
   }
+}
+
+export async function getTafsirFromDb(
+  surahId: number,
+  ayahNumber: number,
+): Promise<string | null> {
+  const record = await getTafsirRecordFromDb(surahId, ayahNumber);
+  return record?.tafsir_ar ?? null;
 }
 
 export async function getRecitersFromDb(): Promise<Reciter[] | null> {
