@@ -72,7 +72,7 @@ export function isPkceVerifierError(error: unknown): boolean {
           ? String((error as { message?: unknown }).message ?? '')
           : '';
 
-  return /(?:pkce|code verifier).*(?:not found|missing|expired)|verifier.*(?:not found|missing|expired)/i.test(
+  return /invalid flow state|no valid flow state|(?:pkce|code verifier).*(?:not found|missing|expired)|verifier.*(?:not found|missing|expired)/i.test(
     message,
   );
 }

@@ -68,6 +68,10 @@ describe('isPkceVerifierError', () => {
     );
   });
 
+  it('recognizes an invalid or missing flow state as a recoverable OAuth restart', () => {
+    assert.equal(isPkceVerifierError(new Error('invalid flow state, no valid flow state found')), true);
+  });
+
   it('does not classify unrelated OAuth errors as PKCE expiry', () => {
     assert.equal(isPkceVerifierError(new Error('invalid grant')), false);
   });
