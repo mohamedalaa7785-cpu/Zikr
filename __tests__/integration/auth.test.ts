@@ -10,6 +10,7 @@ import {
   extractNextPath,
   getCanonicalAuthBaseUrl,
   buildOAuthRedirectUri,
+  isPkceVerifierError,
 } from '../../lib/auth-enhanced.ts';
 
 describe('extractNextPath', () => {
@@ -54,6 +55,21 @@ describe('getCanonicalAuthBaseUrl', () => {
   it('falls back to production URL for null', () => {
     const result = getCanonicalAuthBaseUrl(null);
     assert.match(result, /^https:\/\//);
+  });
+});
+
+describe('isPkceVerifierError', () => {
+  it('recognizes a missing PKCE verifier as a recoverable OAuth restart', () => {
+    assert.equal(
+      isPkceVerifierError(
+        new Error('PKCE code verifier not found in storage'),
+      ),
+      true,
+    );
+  });
+
+  it('does not classify unrelated OAuth errors as PKCE expiry', () => {
+    assert.equal(isPkceVerifierError(new Error('invalid grant')), false);
   });
 });
 

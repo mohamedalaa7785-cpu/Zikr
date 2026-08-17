@@ -1,5 +1,9 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server';
-import { extractNextPath, getTrustedAuthOrigin } from '@/lib/auth-enhanced';
+import {
+  extractNextPath,
+  getTrustedAuthOrigin,
+  isPkceVerifierError,
+} from '@/lib/auth-enhanced';
 import { NextRequest, NextResponse } from 'next/server';
 
 function getOAuthProfileValue(metadata: Record<string, unknown>, ...keys: string[]) {
@@ -37,6 +41,13 @@ export async function GET(request: NextRequest) {
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       
       if (error) {
+        if (isPkceVerifierError(error)) {
+          console.warn(
+            '[auth/callback] PKCE verifier is missing or expired; asking the user to restart OAuth',
+          );
+          return loginRedirect(origin, 'auth_pkce_expired', safePath);
+        }
+
         console.error('[auth/callback] exchangeCodeForSession error:', error.message, error.status);
         return loginRedirect(origin, 'google_oauth_failed', safePath);
       }

@@ -18,6 +18,7 @@ const MESSAGE_MAP: Record<string, string> = {
   check_email: 'تم التسجيل! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
   reset_sent: 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.',
   auth_callback_failed: 'فشل تسجيل الدخول عبر Google. حاول مرة أخرى.',
+  auth_pkce_expired: 'انتهت جلسة Google أو بدأ تسجيل الدخول من نافذة/جهاز آخر. اضغط متابعة باستخدام Google مرة أخرى من هذا المتصفح.',
   auth_session_missing: 'لم تكتمل جلسة تسجيل الدخول. حاول مرة أخرى.',
   google_oauth_unavailable: 'تسجيل الدخول عبر Google غير متاح حاليًا.',
   google_oauth_failed: 'تعذر بدء تسجيل الدخول عبر Google. حاول مرة أخرى.',

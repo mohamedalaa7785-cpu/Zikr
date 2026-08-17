@@ -62,6 +62,21 @@ export function getCanonicalAuthBaseUrl(baseUrl?: string | null): string {
   }
 }
 
+export function isPkceVerifierError(error: unknown): boolean {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'string'
+        ? error
+        : error && typeof error === 'object' && 'message' in error
+          ? String((error as { message?: unknown }).message ?? '')
+          : '';
+
+  return /(?:pkce|code verifier).*(?:not found|missing|expired)|verifier.*(?:not found|missing|expired)/i.test(
+    message,
+  );
+}
+
 export function getGoogleOAuthConfigStatus() {
   const env = getServerEnv();
   const missing = [
