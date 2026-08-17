@@ -80,6 +80,7 @@ function getEnv(name) {
       "NEXT_PUBLIC_SUPABASE_ANON_KEY",
       "SUPABASE_ANON_KEY",
       "SUPABASE_PUBLISHABLE_KEY",
+      "SUPABASE_KEY",
     ]),
     SUPABASE_SERVICE_ROLE_KEY: withNumberedAliases([
       "SUPABASE_SERVICE_ROLE_KEY",
@@ -310,7 +311,8 @@ async function fetchWithTimeout(url, init = {}) {
 }
 
 async function validateSupabaseRest() {
-  const supabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
+  const configuredSupabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
+  const supabaseUrl = configuredSupabaseUrl?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
   const anonKey = getEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
   if (!supabaseUrl || !anonKey) return;
 
@@ -332,7 +334,7 @@ async function validateSupabaseRest() {
       addResult(
         "pass",
         "Supabase Auth",
-        "reachable with NEXT_PUBLIC_SUPABASE_ANON_KEY"
+        "reachable with the configured public Supabase anon key"
       );
     } else {
       addResult(

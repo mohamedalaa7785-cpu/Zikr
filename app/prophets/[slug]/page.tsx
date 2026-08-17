@@ -478,12 +478,23 @@ export default async function ProphetDetailPage({
             )}
           </div>
 
-          {/* Bio */}
-          {displayBio && (
-            <p className="text-lg leading-8 text-brand-cream/80 max-w-3xl">
-              {displayBio}
+          {/* The detail page intentionally does not present the story as a short bio. */}
+          <section
+            aria-labelledby="full-story-notice"
+            className="max-w-3xl rounded-xl border border-brand-gold/20 bg-brand-gold/5 p-5"
+          >
+            <h2 id="full-story-notice" className="text-base font-bold text-brand-gold">
+              القصة التفصيلية والمصادر
+            </h2>
+            <p className="mt-2 text-sm leading-8 text-brand-cream/75">
+              تُعرض مواضع القصة كاملة من القرآن الكريم في الأقسام التالية، مع إحالات مباشرة إلى السور والآيات. لا تُستبدل القصة بملخص، ولا تُضاف رواية تاريخية غير موثقة إلى النص القرآني.
             </p>
-          )}
+            {references.length > 0 && (
+              <p className="mt-2 text-xs text-brand-cream/55">
+                عدد الإحالات الأساسية: {references.length}
+              </p>
+            )}
+          </section>
         </Container>
       </section>
 
