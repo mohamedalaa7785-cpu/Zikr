@@ -11,14 +11,22 @@ import { surahs, hadiths, prophets } from '@/lib/data/content';
 import type { Surah, Hadith, Prophet } from '@/lib/data/content';
 
 type Result = {
-  type: 'surah' | 'hadith' | 'prophet';
+  type: 'surah' | 'hadith' | 'prophet' | 'article';
   labelAr: string;
   title: string;
   subtitle: string;
   href: string;
 };
 
-function runSearch(query: string): Result[] {
+type ArticleSearchItem = {
+  id: string;
+  title: string;
+  slug: string;
+  summary?: string | null;
+  author?: string | null;
+};
+
+function runStaticSearch(query: string): Result[] {
   if (!query.trim()) return [];
   const q = query.trim().toLowerCase();
 
@@ -63,6 +71,31 @@ function runSearch(query: string): Result[] {
   return [...surahResults, ...hadithResults, ...prophetResults];
 }
 
+async function runSearch(query: string): Promise<Result[]> {
+  const staticResults = runStaticSearch(query);
+
+  try {
+    const response = await fetch(`/api/content/articles?q=${encodeURIComponent(query)}`, {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!response.ok) return staticResults;
+
+    const articles = (await response.json()) as ArticleSearchItem[];
+    const articleResults: Result[] = articles.map((article) => ({
+      type: 'article',
+      labelAr: 'مقال',
+      title: article.title,
+      subtitle: article.summary ?? article.author ?? 'مقال تعليمي من مكتبة ذِكر',
+      href: `/articles/${article.slug}`,
+    }));
+    return [...staticResults, ...articleResults];
+  } catch (error) {
+    console.error('[search] Failed to fetch article results:', error);
+    return staticResults;
+  }
+}
+
 const SUGGESTIONS = ['الفاتحة', 'الكهف', 'موسى', 'إبراهيم', 'الرحمن'];
 
 export default function SearchPage() {
@@ -74,11 +107,11 @@ export default function SearchPage() {
   useEffect(() => {
     const initialQuery = new URLSearchParams(window.location.search).get('q');
     if (initialQuery?.trim()) {
-      handleSearch(initialQuery);
+      void handleSearch(initialQuery);
     }
   }, []);
 
-  const handleSearch = (q: string) => {
+  const handleSearch = async (q: string) => {
     const trimmed = q.trim();
     if (!trimmed) return;
     setQuery(trimmed);
@@ -86,8 +119,10 @@ export default function SearchPage() {
     params.set('q', trimmed);
     window.history.replaceState(null, '', `/search?${params.toString()}`);
     startTransition(() => {
-      setResults(runSearch(trimmed));
-      setSearched(true);
+      void runSearch(trimmed).then((nextResults) => {
+        setResults(nextResults);
+        setSearched(true);
+      });
     });
   };
 
@@ -101,14 +136,14 @@ export default function SearchPage() {
       <section className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-brand-gold">بحث شامل</h1>
         <p className="max-w-2xl mx-auto text-lg leading-8 arabic-muted">
-          ابحث في السور القرآنية والأحاديث والأنبياء
+          ابحث في القرآن والأحاديث والأنبياء والمقالات التعليمية
         </p>
       </section>
 
       <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl mx-auto">
         <Input
           type="text"
-          placeholder="اكتب اسم سورة، نبي، أو جزء من حديث..."
+          placeholder="اكتب اسم سورة، نبي، أو كلمة من مقال..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
