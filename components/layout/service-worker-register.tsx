@@ -16,6 +16,8 @@ export function ServiceWorkerRegister() {
 
     let updateInterval: NodeJS.Timeout | null = null;
     let hydrationTimeout: number | undefined;
+    let refreshing = false;
+    const hadController = Boolean(navigator.serviceWorker.controller);
     let hydrationIdleHandle: number | undefined;
     let registration: ServiceWorkerRegistration | null = null;
     let hydrationFinished = false;
@@ -74,6 +76,15 @@ export function ServiceWorkerRegister() {
       if (canHydrate()) scheduleHydration(3000);
     };
 
+    const handleControllerChange = () => {
+      // Do not reload during the initial install. For existing visitors, a new
+      // worker must take control so the latest deployed UI and content rules
+      // are visible without requiring a manual hard refresh.
+      if (!hadController || refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    };
+
     const registerServiceWorker = async () => {
       try {
         registration = await navigator.serviceWorker.register('/sw.js', {
@@ -105,7 +116,9 @@ export function ServiceWorkerRegister() {
 
           const handleStateChange = () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New service worker is ready, but do not prompt by default
+              // Activate the new worker immediately; controllerchange performs
+              // one safe reload for already-controlled pages.
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
               console.log('[PWA] Service Worker updated');
             }
           };
@@ -124,6 +137,8 @@ export function ServiceWorkerRegister() {
 
     // Register after page load. Keep a named handler so cleanup is complete
     // when React remounts this component in development Strict Mode.
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+
     const handleLoad = () => {
       void registerServiceWorker();
     };
@@ -135,6 +150,7 @@ export function ServiceWorkerRegister() {
 
     return () => {
       window.removeEventListener('load', handleLoad);
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
       if (updateInterval) clearInterval(updateInterval);
       if (hydrationIdleHandle !== undefined) {
         window.cancelIdleCallback?.(hydrationIdleHandle);
