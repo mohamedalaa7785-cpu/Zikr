@@ -122,16 +122,19 @@ export function ServiceWorkerRegister() {
       }
     };
 
-    // Register after page load
+    // Register after page load. Keep a named handler so cleanup is complete
+    // when React remounts this component in development Strict Mode.
+    const handleLoad = () => {
+      void registerServiceWorker();
+    };
     if (document.readyState === 'complete') {
-      registerServiceWorker();
+      void registerServiceWorker();
     } else {
-      window.addEventListener('load', () => {
-        registerServiceWorker();
-      });
+      window.addEventListener('load', handleLoad, { once: true });
     }
 
     return () => {
+      window.removeEventListener('load', handleLoad);
       if (updateInterval) clearInterval(updateInterval);
       if (hydrationIdleHandle !== undefined) {
         window.cancelIdleCallback?.(hydrationIdleHandle);
