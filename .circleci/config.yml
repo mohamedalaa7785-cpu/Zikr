@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  run_automation:
+    type: boolean
+    default: false
+
 jobs:
   verify:
     docker:
@@ -29,7 +34,59 @@ jobs:
           command: pnpm verify
           no_output_timeout: 20m
 
+  automate-content:
+    docker:
+      - image: cimg/node:22.13
+    resource_class: small
+    working_directory: ~/zikr
+    steps:
+      - checkout
+      - run:
+          name: Install rendering tools
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg fonts-noto-core
+      - run:
+          name: Enable pnpm
+          command: |
+            sudo corepack enable
+            corepack prepare pnpm@9.15.0 --activate
+      - restore_cache:
+          keys:
+            - zikr-pnpm-v1-{{ checksum "pnpm-lock.yaml" }}
+            - zikr-pnpm-v1-
+      - run:
+          name: Install dependencies
+          command: pnpm install --frozen-lockfile
+      - run:
+          name: Validate automation environment
+          shell: bash
+          command: |
+            set -euo pipefail
+            for name in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY SUPABASE_ANON_KEY NEXT_PUBLIC_SITE_URL; do
+              if [[ -z "${!name:-}" ]]; then
+                echo "Missing required CircleCI project environment variable: ${name}" >&2
+                exit 1
+              fi
+            done
+      - run:
+          name: Run autonomous content and publishing queues
+          environment:
+            VIDEO_GENERATOR: template
+            AUTO_VIDEO_ENABLED: "true"
+            AUTO_VIDEO_BATCH_SIZE: "1"
+            VIDEO_BACKGROUND_BATCH_SIZE: "1"
+            SOCIAL_BACKGROUND_BATCH_SIZE: "10"
+            BACKGROUND_JOB_TARGET: all
+          command: pnpm automation:run
+          no_output_timeout: 15m
+
 workflows:
   verify-on-change:
     jobs:
       - verify
+
+  scheduled-automation:
+    when: << pipeline.parameters.run_automation >>
+    jobs:
+      - automate-content

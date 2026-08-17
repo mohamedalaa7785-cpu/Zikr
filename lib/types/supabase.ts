@@ -2618,6 +2618,7 @@ export type Database = {
       }
       social_publish_queue: {
         Row: {
+          automation_key: string | null
           body: string | null
           content_id: string | null
           content_type: string
@@ -2635,6 +2636,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          automation_key?: string | null
           body?: string | null
           content_id?: string | null
           content_type: string
@@ -2652,6 +2654,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          automation_key?: string | null
           body?: string | null
           content_id?: string | null
           content_type?: string
@@ -3343,6 +3346,7 @@ export type Database = {
       }
       video_generation_requests: {
         Row: {
+          automation_key: string | null
           category: string
           content: Json
           created_at: string
@@ -3364,6 +3368,7 @@ export type Database = {
           youtube_id: string | null
         }
         Insert: {
+          automation_key?: string | null
           category: string
           content: Json
           created_at?: string
@@ -3385,6 +3390,7 @@ export type Database = {
           youtube_id?: string | null
         }
         Update: {
+          automation_key?: string | null
           category?: string
           content?: Json
           created_at?: string

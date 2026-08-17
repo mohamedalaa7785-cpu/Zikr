@@ -1279,6 +1279,7 @@ export const videoGenerationRequests = pgTable("video_generation_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+  automationKey: text("automation_key"),
 });
 
 export const videoPublishLog = pgTable("video_publish_log", {
@@ -1317,6 +1318,7 @@ export const socialPublishQueue = pgTable("social_publish_queue", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+  automationKey: text("automation_key"),
 });
 
 export const videoPublishingConfig = pgTable("video_publishing_config", {

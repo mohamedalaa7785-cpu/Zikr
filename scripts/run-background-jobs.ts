@@ -7,6 +7,10 @@ import {
   claimPendingSocialPublishItems,
   processSocialPublishItem,
 } from "../lib/services/social-publishing";
+import {
+  processTemplateVideoQueue,
+  seedAutomatedVideoRequests,
+} from "./jobs/template-video-automation";
 
 const VIDEO_BATCH_SIZE = Number(process.env.VIDEO_BACKGROUND_BATCH_SIZE ?? 3);
 const SOCIAL_BATCH_SIZE = Number(process.env.SOCIAL_BACKGROUND_BATCH_SIZE ?? 10);
@@ -28,6 +32,15 @@ function validateRequiredEnv() {
 }
 
 async function processVideos() {
+  const generator = (process.env.VIDEO_GENERATOR ?? "template").toLowerCase();
+  if (generator === "template") {
+    const queued = await seedAutomatedVideoRequests();
+    console.log(`[background-jobs] Seeded ${queued} deterministic Quran video request(s).`);
+    return processTemplateVideoQueue(VIDEO_BATCH_SIZE);
+  }
+  if (generator !== "heygen") {
+    throw new Error(`Invalid VIDEO_GENERATOR: ${generator}. Use template or heygen.`);
+  }
   console.log(`[background-jobs] Loading up to ${VIDEO_BATCH_SIZE} submitted HeyGen job(s).`);
   const submitted = await getSubmittedVideoRequests(VIDEO_BATCH_SIZE);
   console.log(`[background-jobs] Claiming up to ${VIDEO_BATCH_SIZE} pending video request(s).`);
@@ -88,7 +101,7 @@ async function main() {
     throw new Error(`Invalid BACKGROUND_JOB_TARGET: ${target}`);
   }
 
-  console.log(`[background-jobs] Starting GitHub Actions background job runner (target=${target}).`);
+  console.log(`[background-jobs] Starting autonomous background job runner (target=${target}, generator=${(process.env.VIDEO_GENERATOR ?? "template").toLowerCase()}).`);
   const startedAt = Date.now();
 
   const videos = target === "all" || target === "videos"
