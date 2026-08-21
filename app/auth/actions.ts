@@ -154,15 +154,16 @@ export async function updateProfileAction(formData: FormData) {
 
   if (!user) redirect('/auth/login');
 
-  const { error } = await supabase.from('profiles').upsert(
-    {
-      id: user.id,
-      email: user.email ?? null,
+  // Email and role are synchronized by Auth triggers/admin code and are
+  // intentionally protected by the profiles integrity trigger. A profile
+  // update from the user session must only write presentation fields.
+  const { error } = await supabase
+    .from('profiles')
+    .update({
       display_name: displayName || null,
       updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'id' }
-  );
+    })
+    .eq('id', user.id);
 
   if (error) {
     console.error('[auth] updateProfileAction error:', error);
