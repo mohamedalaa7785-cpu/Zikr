@@ -9,10 +9,14 @@ let ctx: AudioContext | null = null;
 let masterVolume = 0.7; // 0.0 – 1.0
 
 function getCtx(): AudioContext | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   if (!ctx) {
     try {
-      ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      ctx = new (
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext
+      )();
     } catch {
       return null;
     }
@@ -24,7 +28,7 @@ function getCtx(): AudioContext | null {
 export function unlockAudioContext(): void {
   const context = getCtx();
   if (!context) return;
-  if (context.state === 'suspended') {
+  if (context.state === "suspended") {
     context.resume().catch(() => {});
   }
 }
@@ -32,7 +36,7 @@ export function unlockAudioContext(): void {
 /** Returns true when the AudioContext is ready to play. */
 export function isAudioUnlocked(): boolean {
   const context = getCtx();
-  return !!context && context.state === 'running';
+  return !!context && context.state === "running";
 }
 
 export function setToneVolume(v: number): void {
@@ -50,7 +54,7 @@ export function getToneVolume(): number {
  */
 export function playAzanTone(): void {
   const context = getCtx();
-  if (!context || context.state !== 'running') return;
+  if (!context || context.state !== "running") return;
 
   const notes = [440, 550, 660];
   const noteDuration = 0.5;
@@ -62,12 +66,15 @@ export function playAzanTone(): void {
     const osc = context.createOscillator();
     const gainNode = context.createGain();
 
-    osc.type = 'sine';
+    osc.type = "sine";
     osc.frequency.setValueAtTime(freq, startTime);
 
     gainNode.gain.setValueAtTime(0, startTime);
     gainNode.gain.linearRampToValueAtTime(masterVolume * 0.4, startTime + 0.05);
-    gainNode.gain.setValueAtTime(masterVolume * 0.4, startTime + noteDuration - 0.1);
+    gainNode.gain.setValueAtTime(
+      masterVolume * 0.4,
+      startTime + noteDuration - 0.1
+    );
     gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
 
     osc.connect(gainNode);
@@ -81,27 +88,27 @@ export function playAzanTone(): void {
 /**
  * Real audio clip URLs.
  * - Azan: full adhan (call to prayer) recitation.
- * - Salawat: "الصلاة على النبي" recited by Sheikh Al-Minshawi.
- * These are streamed via HTMLAudioElement (no CORS requirement for playback).
+ * - Salawat: a short local Arabic voice clip saying "صل على سيدنا محمد".
+ * Both clips are packaged locally so foreground playback also works offline.
  */
-export const AZAN_CLIP_URL = 'https://www.islamcan.com/audio/adhan/azan1.mp3';
-export const SALAWAT_CLIP_URL = 'https://archive.org/download/salawat-menshawy/salawat-menshawy.mp3';
+export const AZAN_CLIP_URL = "/audio/adhan.mp3";
+export const SALAWAT_CLIP_URL = "/audio/salawat.wav";
 
 let azanEl: HTMLAudioElement | null = null;
 let salawatEl: HTMLAudioElement | null = null;
 
-function getClipEl(kind: 'azan' | 'salawat'): HTMLAudioElement | null {
-  if (typeof window === 'undefined') return null;
-  if (kind === 'azan') {
+function getClipEl(kind: "azan" | "salawat"): HTMLAudioElement | null {
+  if (typeof window === "undefined") return null;
+  if (kind === "azan") {
     if (!azanEl) {
       azanEl = new Audio(AZAN_CLIP_URL);
-      azanEl.preload = 'none';
+      azanEl.preload = "none";
     }
     return azanEl;
   }
   if (!salawatEl) {
     salawatEl = new Audio(SALAWAT_CLIP_URL);
-    salawatEl.preload = 'none';
+    salawatEl.preload = "none";
   }
   return salawatEl;
 }
@@ -111,7 +118,7 @@ function getClipEl(kind: 'azan' | 'salawat'): HTMLAudioElement | null {
  * if the audio fails to load or autoplay is blocked.
  */
 export function playAzanClip(): void {
-  const el = getClipEl('azan');
+  const el = getClipEl("azan");
   if (!el) {
     playAzanTone();
     return;
@@ -134,7 +141,7 @@ export function stopAzanClip(): void {
  * Falls back to the soft bell tone if playback fails.
  */
 export function playSalawatClip(): void {
-  const el = getClipEl('salawat');
+  const el = getClipEl("salawat");
   if (!el) {
     playSalawatTone();
     return;
@@ -158,16 +165,19 @@ export function stopSalawatClip(): void {
  */
 export function playSalawatTone(): void {
   const context = getCtx();
-  if (!context || context.state !== 'running') return;
+  if (!context || context.state !== "running") return;
 
   const osc = context.createOscillator();
   const gainNode = context.createGain();
 
-  osc.type = 'sine';
+  osc.type = "sine";
   osc.frequency.setValueAtTime(528, context.currentTime);
 
   gainNode.gain.setValueAtTime(0, context.currentTime);
-  gainNode.gain.linearRampToValueAtTime(masterVolume * 0.35, context.currentTime + 0.08);
+  gainNode.gain.linearRampToValueAtTime(
+    masterVolume * 0.35,
+    context.currentTime + 0.08
+  );
   gainNode.gain.setValueAtTime(masterVolume * 0.35, context.currentTime + 0.8);
   gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 1.5);
 

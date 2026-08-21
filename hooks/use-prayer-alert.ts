@@ -103,13 +103,18 @@ function scheduleNativePrayerNotifications(
           body: string;
           scheduleAt: string;
           sound?: string;
+          channelId?: string;
         }) => Promise<void>;
+        cancelLocalNotifications?: (ids: number[]) => Promise<void>;
       };
     }
   ).zikrNative;
   if (!native?.scheduleLocalNotification) return;
 
   const now = new Date();
+  void native.cancelLocalNotifications?.(
+    PRAYERS.map(prayer => 7000 + PRAYERS.indexOf(prayer))
+  );
   for (const prayer of PRAYERS) {
     if (!settings.enabledPrayers[prayer]) continue;
     const time = timings[prayer];
@@ -125,6 +130,7 @@ function scheduleNativePrayerNotifications(
       body: "الصلاة خير من النوم — حافظ على صلاتك",
       scheduleAt: scheduled.toISOString(),
       sound: "adhan.wav",
+      channelId: "zikr-prayer-adhan",
     });
   }
 }
