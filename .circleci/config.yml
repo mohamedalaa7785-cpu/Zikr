@@ -106,9 +106,15 @@ workflows:
   verify-on-change:
     jobs:
       - verify
+      # Production smoke must run only after a main-branch deployment.
+      # On pull requests, CIRCLE_SHA1 is not the production commit and the
+      # comparison would fail even when the application is healthy.
       - production-smoke:
           requires:
             - verify
+          filters:
+            branches:
+              only: main
 
   scheduled-automation:
     when: << pipeline.parameters.run_automation >>
