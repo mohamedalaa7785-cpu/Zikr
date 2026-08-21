@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Linkedin } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { pageMetadata } from "@/lib/site";
@@ -197,7 +197,7 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-brand-gold/30 px-4 py-2 text-sm font-semibold text-brand-gold transition-colors hover:bg-brand-gold/10"
             >
-              <Linkedin className="h-4 w-4" aria-hidden="true" />
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
               LinkedIn
             </Link>
           </div>
