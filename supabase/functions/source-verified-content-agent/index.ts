@@ -59,24 +59,34 @@ function stringValue(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-function parseItems(source: Source, payload: unknown, retrievedAt: string): SourceItem[] {
+function parseItems(
+  source: Source,
+  payload: unknown,
+  retrievedAt: string
+): SourceItem[] {
   if (source.parser_key === "alquran_cloud") {
     const data = (payload as { data?: unknown }).data;
     if (!Array.isArray(data)) return [];
-    return data.flatMap((entry) => {
+    return data.flatMap(entry => {
       if (!entry || typeof entry !== "object") return [];
       const row = entry as Record<string, unknown>;
       const number = row.number;
       if (typeof number !== "number" && typeof number !== "string") return [];
       const externalId = `surah:${number}`;
       const title = stringValue(row.name) ?? stringValue(row.englishName);
-      return [{
-        externalId,
-        title,
-        body: null,
-        sourceUrl: `${source.base_url.replace(/\/$/, "")}/v1/surah/${number}`,
-        metadata: { source: source.name, retrievedAt, rawType: "surah_catalog" },
-      }];
+      return [
+        {
+          externalId,
+          title,
+          body: null,
+          sourceUrl: `${source.base_url.replace(/\/$/, "")}/v1/surah/${number}`,
+          metadata: {
+            source: source.name,
+            retrievedAt,
+            rawType: "surah_catalog",
+          },
+        },
+      ];
     });
   }
 
@@ -87,54 +97,90 @@ function parseItems(source: Source, payload: unknown, retrievedAt: string): Sour
 }
 
 async function processSource(source: Source, now: string) {
-  if (!source.fetch_url) return { fetched: 0, queued: 0, skipped: 1, failed: 0, reason: "missing_fetch_url" };
+  if (!source.fetch_url)
+    return {
+      fetched: 0,
+      queued: 0,
+      skipped: 1,
+      failed: 0,
+      reason: "missing_fetch_url",
+    };
   const headers = new Headers({ Accept: "application/json" });
   if (source.api_key_secret_name) {
     const key = Deno.env.get(source.api_key_secret_name);
-    if (!key) return { fetched: 0, queued: 0, skipped: 1, failed: 0, reason: "missing_source_secret" };
+    if (!key)
+      return {
+        fetched: 0,
+        queued: 0,
+        skipped: 1,
+        failed: 0,
+        reason: "missing_source_secret",
+      };
     headers.set("Authorization", `Bearer ${key}`);
   }
 
   const response = await fetch(source.fetch_url, { headers });
-  if (!response.ok) throw new Error(`${source.name} returned HTTP ${response.status}`);
+  if (!response.ok)
+    throw new Error(`${source.name} returned HTTP ${response.status}`);
   const payload = await response.json();
   const items = parseItems(source, payload, now);
   let queued = 0;
 
   for (const item of items) {
-    const contentHash = await sha256(`${source.id}:${item.externalId}:${item.sourceUrl}`);
-    const { error } = await supabase.from("content_agent_queue").upsert(
-      {
-        source_id: source.id,
-        external_id: item.externalId,
-        content_type: source.source_type,
-        title: item.title,
-        body: item.body,
-        source_url: item.sourceUrl,
-        source_retrieved_at: now,
-        content_hash: contentHash,
-        status: "pending",
-        is_machine_generated: false,
-        metadata: item.metadata,
-        updated_at: now,
-      },
-      { onConflict: "source_id,external_id", ignoreDuplicates: true },
+    const contentHash = await sha256(
+      `${source.id}:${item.externalId}:${item.sourceUrl}`
     );
+    const { data: insertedRows, error } = await supabase
+      .from("content_agent_queue")
+      .upsert(
+        {
+          source_id: source.id,
+          external_id: item.externalId,
+          content_type: source.source_type,
+          title: item.title,
+          body: item.body,
+          source_url: item.sourceUrl,
+          source_retrieved_at: now,
+          content_hash: contentHash,
+          status: "pending",
+          is_machine_generated: false,
+          metadata: item.metadata,
+          updated_at: now,
+        },
+        { onConflict: "source_id,external_id", ignoreDuplicates: true }
+      )
+      .select("id");
     if (error) throw error;
-    queued += 1;
+    queued += insertedRows?.length ?? 0;
   }
 
   return { fetched: items.length, queued, skipped: 0, failed: 0 };
 }
 
-async function sha256(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+function nextDailyRunAt(startedAt: string): string {
+  const next = new Date(startedAt);
+  next.setUTCHours(3, 0, 0, 0);
+  if (next.getTime() <= Date.parse(startedAt)) {
+    next.setUTCDate(next.getUTCDate() + 1);
+  }
+  return next.toISOString();
 }
 
-Deno.serve(async (request) => {
-  if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
-  if (!(await isAuthorized(request))) return json({ error: "Unauthorized" }, 401);
+async function sha256(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value)
+  );
+  return [...new Uint8Array(digest)]
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+Deno.serve(async request => {
+  if (request.method !== "POST")
+    return json({ error: "Method not allowed" }, 405);
+  if (!(await isAuthorized(request)))
+    return json({ error: "Unauthorized" }, 401);
 
   const startedAt = new Date().toISOString();
   const { data: run, error: runError } = await supabase
@@ -144,15 +190,31 @@ Deno.serve(async (request) => {
     .single();
   if (runError) return json({ error: "Unable to create run record" }, 500);
 
-  const summary = { fetched: 0, queued: 0, skipped: 0, failed: 0, sources: [] as Array<Record<string, unknown>> };
+  const summary = {
+    fetched: 0,
+    queued: 0,
+    skipped: 0,
+    failed: 0,
+    sources: [] as Array<Record<string, unknown>>,
+  };
   const { data: sources, error: sourceError } = await supabase
     .from("content_agent_sources")
-    .select("id,name,base_url,fetch_url,api_key_secret_name,source_type,parser_key")
+    .select(
+      "id,name,base_url,fetch_url,api_key_secret_name,source_type,parser_key"
+    )
     .eq("enabled", true)
     .lte("next_run_at", startedAt)
     .limit(10);
   if (sourceError) {
-    await supabase.from("content_agent_runs").update({ finished_at: new Date().toISOString(), status: "failed", failed_count: 1, details: { error: sourceError.message } }).eq("id", run.id);
+    await supabase
+      .from("content_agent_runs")
+      .update({
+        finished_at: new Date().toISOString(),
+        status: "failed",
+        failed_count: 1,
+        details: { error: sourceError.message },
+      })
+      .eq("id", run.id);
     return json({ error: "Unable to load sources" }, 500);
   }
 
@@ -163,15 +225,44 @@ Deno.serve(async (request) => {
       summary.queued += result.queued;
       summary.skipped += result.skipped;
       summary.sources.push({ name: source.name, ...result });
-      await supabase.from("content_agent_sources").update({ last_checked_at: startedAt, next_run_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() }).eq("id", source.id);
+      await supabase
+        .from("content_agent_sources")
+        .update({
+          last_checked_at: startedAt,
+          next_run_at: nextDailyRunAt(startedAt),
+        })
+        .eq("id", source.id);
     } catch (error) {
       summary.failed += 1;
-      summary.sources.push({ name: source.name, failed: 1, error: error instanceof Error ? error.message : "unknown error" });
-      await supabase.from("content_agent_sources").update({ last_checked_at: startedAt }).eq("id", source.id);
+      summary.sources.push({
+        name: source.name,
+        failed: 1,
+        error: error instanceof Error ? error.message : "unknown error",
+      });
+      await supabase
+        .from("content_agent_sources")
+        .update({ last_checked_at: startedAt })
+        .eq("id", source.id);
     }
   }
 
-  const finalStatus = summary.failed > 0 ? (summary.queued > 0 ? "partial" : "failed") : "succeeded";
-  await supabase.from("content_agent_runs").update({ finished_at: new Date().toISOString(), status: finalStatus, fetched_count: summary.fetched, queued_count: summary.queued, skipped_count: summary.skipped, failed_count: summary.failed, details: summary }).eq("id", run.id);
+  const finalStatus =
+    summary.failed > 0
+      ? summary.queued > 0
+        ? "partial"
+        : "failed"
+      : "succeeded";
+  await supabase
+    .from("content_agent_runs")
+    .update({
+      finished_at: new Date().toISOString(),
+      status: finalStatus,
+      fetched_count: summary.fetched,
+      queued_count: summary.queued,
+      skipped_count: summary.skipped,
+      failed_count: summary.failed,
+      details: summary,
+    })
+    .eq("id", run.id);
   return json({ ok: summary.failed === 0, runId: run.id, ...summary });
 });
