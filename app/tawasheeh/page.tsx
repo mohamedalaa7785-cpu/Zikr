@@ -1,52 +1,129 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { Container } from '@/components/ui/container';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { tawasheeh } from '@/lib/data/content';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Container } from "@/components/ui/container";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  tawasheeh as verifiedFallback,
+  type Tawasheeh,
+} from "@/lib/data/content";
+
+type ApiTrack = {
+  id: string;
+  title_ar: string;
+  title_en: string;
+  artist_ar: string | null;
+  artist_en: string | null;
+  audio_url: string;
+  duration: number | null;
+  views: number | null;
+  featured: boolean | null;
+  metadata: Record<string, unknown> | null;
+};
+type Track = Tawasheeh & { sourceUrl?: string };
 
 function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
+  const safeSeconds =
+    Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+  return `${Math.floor(safeSeconds / 60)}:${String(safeSeconds % 60).padStart(2, "0")}`;
+}
+
+function mapApiTrack(track: ApiTrack): Track {
+  return {
+    id: track.id,
+    titleAr: track.title_ar,
+    titleEn: track.title_en,
+    artistAr: track.artist_ar ?? "منشد غير محدد",
+    artistEn: track.artist_en ?? "Unknown artist",
+    audioUrl: track.audio_url,
+    duration: track.duration ?? 0,
+    views: track.views ?? 0,
+    featured: track.featured ?? false,
+    sourceUrl:
+      typeof track.metadata?.source_url === "string"
+        ? track.metadata.source_url
+        : undefined,
+  };
 }
 
 export default function TawasheehPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [tracks, setTracks] = useState<Track[]>(verifiedFallback);
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dataNotice, setDataNotice] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  const filtered = tawasheeh.filter(
-    (t) =>
-      t.titleAr.includes(searchQuery) ||
-      t.artistAr.includes(searchQuery) ||
-      t.titleEn.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadTracks() {
+      try {
+        const response = await fetch("/api/tawasheeh?limit=100", {
+          signal: controller.signal,
+          credentials: "same-origin",
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = (await response.json()) as { data?: ApiTrack[] };
+        const apiTracks = (payload.data ?? [])
+          .filter(track => Boolean(track.audio_url))
+          .map(mapApiTrack);
+        if (apiTracks.length > 0) {
+          setTracks(apiTracks);
+          setDataNotice(null);
+        } else {
+          setDataNotice(
+            "تُعرض المجموعة الموثقة المدمجة مؤقتًا حتى تتوفر سجلات الصوت في قاعدة البيانات."
+          );
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError")
+          return;
+        setDataNotice(
+          "تعذر الاتصال بالمكتبة الآن؛ تُعرض المجموعة الموثقة المدمجة ويمكنك الاستماع إليها مباشرة."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    void loadTracks();
+    return () => controller.abort();
+  }, []);
 
-  const featured = tawasheeh.filter((t) => t.featured);
-  const currentTrack = tawasheeh.find((t) => t.id === currentId) ?? null;
+  const filtered = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return tracks;
+    return tracks.filter(track =>
+      [track.titleAr, track.titleEn, track.artistAr, track.artistEn].some(
+        value => value.toLowerCase().includes(query)
+      )
+    );
+  }, [searchQuery, tracks]);
+  const featured = useMemo(
+    () => tracks.filter(track => track.featured),
+    [tracks]
+  );
+  const currentTrack = tracks.find(track => track.id === currentId) ?? null;
 
   const handlePlay = (id: string) => {
     setAudioError(null);
     if (currentId === id) {
-      if (isPlaying) {
-        audioRef.current?.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current?.play().catch(() => setAudioError('تعذّر تشغيل المقطع'));
-        setIsPlaying(true);
-      }
-    } else {
-      setCurrentId(id);
-      setIsPlaying(true);
+      if (isPlaying) audioRef.current?.pause();
+      else
+        void audioRef.current
+          ?.play()
+          .catch(() =>
+            setAudioError("تعذّر تشغيل المقطع؛ تحقق من الاتصال بالمصدر.")
+          );
+      return;
     }
+    setCurrentId(id);
+    setIsPlaying(true);
   };
-
   const handleStop = () => {
     audioRef.current?.pause();
     setCurrentId(null);
@@ -55,22 +132,39 @@ export default function TawasheehPage() {
   };
 
   return (
-    <Container className="py-12 space-y-10">
+    <Container className="py-12 space-y-10" dir="rtl">
       <section className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-brand-gold">التواشيح الدينية</h1>
+        <h1 className="text-4xl font-bold text-brand-gold">
+          المداحون والتواشيح
+        </h1>
         <p className="max-w-2xl mx-auto text-lg leading-8 arabic-muted">
-          استمع لأجمل التواشيح والأناشيد الدينية الإسلامية
+          مكتبة صوتية للتواشيح والابتهالات والمدائح النبوية، مع إظهار مصدر كل
+          تسجيل.
         </p>
+        <div className="flex flex-wrap justify-center gap-2 text-xs arabic-muted">
+          <Badge variant="outline">
+            {tracks.length.toLocaleString("ar-EG")} تسجيلًا
+          </Badge>
+          <Badge variant="outline">مصادر قابلة للمراجعة</Badge>
+          <Badge variant="outline">تشغيل مباشر</Badge>
+        </div>
       </section>
-
-      {/* Now playing bar */}
+      {dataNotice && (
+        <p className="rounded-lg border border-brand-gold/20 bg-brand-gold/5 p-3 text-center text-sm arabic-muted">
+          {dataNotice}
+        </p>
+      )}
       {currentTrack && (
         <Card className="border-brand-gold/40 space-y-2">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
               <p className="text-sm arabic-muted">يُشغّل الآن</p>
-              <p className="font-bold text-brand-gold">{currentTrack.titleAr}</p>
-              <p className="text-xs text-brand-cream/60">{currentTrack.artistAr}</p>
+              <p className="font-bold text-brand-gold truncate">
+                {currentTrack.titleAr}
+              </p>
+              <p className="text-xs text-brand-cream/60 truncate">
+                {currentTrack.artistAr}
+              </p>
             </div>
             <Button
               variant="ghost"
@@ -81,7 +175,9 @@ export default function TawasheehPage() {
             </Button>
           </div>
           {audioError && (
-            <p className="text-xs text-red-400 text-center py-1">{audioError} — الرابط غير متاح حالياً</p>
+            <p role="alert" className="text-xs text-red-400 text-center py-1">
+              {audioError}
+            </p>
           )}
           <audio
             ref={audioRef}
@@ -89,114 +185,138 @@ export default function TawasheehPage() {
             src={currentTrack.audioUrl}
             controls
             autoPlay
-            preload="auto"
+            preload="metadata"
             className="w-full"
             aria-label={`تشغيل ${currentTrack.titleAr}`}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
-            onEnded={() => { setIsPlaying(false); setCurrentId(null); }}
+            onEnded={() => {
+              setIsPlaying(false);
+              setCurrentId(null);
+            }}
             onError={() => {
               setIsPlaying(false);
-              setAudioError('تعذّر تحميل المقطع الصوتي');
+              setAudioError("تعذّر تحميل المقطع الصوتي من المصدر.");
             }}
           >
             متصفحك لا يدعم تشغيل الصوت.
           </audio>
+          {currentTrack.sourceUrl && (
+            <a
+              href={currentTrack.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block text-xs text-brand-gold underline"
+            >
+              عرض صفحة المصدر والترخيص
+            </a>
+          )}
         </Card>
       )}
-
-      {/* Featured */}
-      {featured.length > 0 && !searchQuery && (
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold text-brand-gold">المميزة</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((track) => (
-              <Card
-                key={track.id}
-                className={`space-y-3 transition-all hover:border-brand-gold/50 ${
-                  currentId === track.id ? 'border-brand-gold/60 bg-brand-gold/5' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-brand-gold truncate">{track.titleAr}</h3>
-                    <p className="text-sm text-brand-cream/60 truncate">{track.artistAr}</p>
-                  </div>
-                  <Badge variant="outline" className="text-xs shrink-0 mr-2">
-                    {formatDuration(track.duration)}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between text-xs arabic-muted">
-                  <span>{track.views.toLocaleString('ar-EG')} مشاهدة</span>
-                </div>
-                <Button
-                  variant={currentId === track.id ? 'primary' : 'secondary'}
-                  className="w-full"
-                  onClick={() => handlePlay(track.id)}
-                >
-                  {currentId === track.id && isPlaying ? 'إيقاف مؤقت' : currentId === track.id ? 'استئناف' : 'استمع'}
-                </Button>
-              </Card>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Search */}
       <section className="flex gap-2">
         <Input
-          type="text"
-          placeholder="ابحث عن تشيح أو منشد..."
+          type="search"
+          placeholder="ابحث عن توشيح أو منشد..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={event => setSearchQuery(event.target.value)}
           className="flex-1"
           dir="rtl"
+          aria-label="البحث في التواشيح"
         />
       </section>
-
-      {/* All / filtered results */}
-      <section className="space-y-4">
-        {searchQuery && (
-          <p className="text-sm arabic-muted">
-            {filtered.length} نتيجة للبحث عن &quot;{searchQuery}&quot;
-          </p>
-        )}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((track) => (
-            <Card
-              key={track.id}
-              className={`flex items-center gap-4 transition-all hover:border-brand-gold/50 ${
-                currentId === track.id ? 'border-brand-gold/60 bg-brand-gold/5' : ''
-              }`}
-            >
-              <button
-                onClick={() => handlePlay(track.id)}
-                className="w-10 h-10 shrink-0 rounded-full border border-brand-gold/30 flex items-center justify-center text-brand-gold hover:bg-brand-gold/10 transition-colors"
-                aria-label={currentId === track.id && isPlaying ? 'إيقاف مؤقت' : currentId === track.id ? 'استئناف' : `تشغيل ${track.titleAr}`}
-              >
-                {currentId === track.id ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                    <path fillRule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                    <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
-                  </svg>
-                )}
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-brand-cream truncate">{track.titleAr}</p>
-                <p className="text-xs text-brand-cream/50 truncate">{track.artistAr} · {formatDuration(track.duration)}</p>
-              </div>
-            </Card>
-          ))}
-          {filtered.length === 0 && (
-            <div className="col-span-full text-center py-8 arabic-muted">
-              لم يتم العثور على نتائج للبحث.
-            </div>
-          )}
+      {isLoading ? (
+        <div className="py-12 text-center arabic-muted" role="status">
+          جارٍ تحميل المكتبة الصوتية...
         </div>
-      </section>
+      ) : (
+        <>
+          {featured.length > 0 && !searchQuery && (
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-brand-gold">
+                مختارات موصى بها
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {featured.map(track => (
+                  <TrackCard
+                    key={`featured-${track.id}`}
+                    track={track}
+                    currentId={currentId}
+                    isPlaying={isPlaying}
+                    onPlay={handlePlay}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+          <section className="space-y-4">
+            {searchQuery && (
+              <p className="text-sm arabic-muted">
+                {filtered.length.toLocaleString("ar-EG")} نتيجة للبحث عن «
+                {searchQuery}»
+              </p>
+            )}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map(track => (
+                <TrackCard
+                  key={track.id}
+                  track={track}
+                  currentId={currentId}
+                  isPlaying={isPlaying}
+                  onPlay={handlePlay}
+                />
+              ))}
+              {filtered.length === 0 && (
+                <div className="col-span-full text-center py-8 arabic-muted">
+                  لم يتم العثور على نتائج للبحث.
+                </div>
+              )}
+            </div>
+          </section>
+        </>
+      )}
     </Container>
+  );
+}
+
+type TrackCardProps = {
+  track: Track;
+  currentId: string | null;
+  isPlaying: boolean;
+  onPlay: (id: string) => void;
+};
+function TrackCard({ track, currentId, isPlaying, onPlay }: TrackCardProps) {
+  const active = currentId === track.id;
+  return (
+    <Card
+      className={`flex items-center gap-4 transition-all hover:border-brand-gold/50 ${active ? "border-brand-gold/60 bg-brand-gold/5" : ""}`}
+    >
+      <button
+        onClick={() => onPlay(track.id)}
+        className="w-10 h-10 shrink-0 rounded-full border border-brand-gold/30 flex items-center justify-center text-brand-gold hover:bg-brand-gold/10 transition-colors"
+        aria-label={
+          active && isPlaying
+            ? `إيقاف مؤقت ${track.titleAr}`
+            : `تشغيل ${track.titleAr}`
+        }
+      >
+        {active && isPlaying ? "Ⅱ" : "▶"}
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-brand-cream truncate">{track.titleAr}</p>
+        <p className="text-xs text-brand-cream/50 truncate">
+          {track.artistAr} · {formatDuration(track.duration)}
+        </p>
+        {track.sourceUrl && (
+          <a
+            href={track.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[11px] text-brand-gold/80 underline"
+          >
+            المصدر
+          </a>
+        )}
+      </div>
+    </Card>
   );
 }
