@@ -1,15 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { playSalawatClip, unlockAudioContext } from '@/lib/audio/spiritual-tones';
-import { showSalawatNotification, isInQuietHours } from '@/lib/services/notifications';
+import { useState, useEffect, useCallback } from "react";
+import {
+  playSalawatClip,
+  unlockAudioContext,
+} from "@/lib/audio/spiritual-tones";
+import {
+  showSalawatNotification,
+  isInQuietHours,
+} from "@/lib/services/notifications";
 
 export type SalawatInterval = 15 | 30 | 60 | 120 | 0; // 0 = disabled
 
 export interface QuietHours {
   enabled: boolean;
   from: string; // "HH:MM"
-  to: string;   // "HH:MM"
+  to: string; // "HH:MM"
 }
 
 export interface SalawatSettings {
@@ -18,29 +24,93 @@ export interface SalawatSettings {
   quietHours: QuietHours;
 }
 
-const SETTINGS_KEY = 'zikr_salawat_settings';
+const SETTINGS_KEY = "zikr_salawat_settings";
 
 const DEFAULT_SETTINGS: SalawatSettings = {
-  enabled: false,           // opt-in: user must explicitly enable
+  enabled: false, // opt-in: user must explicitly enable
   intervalMinutes: 60,
-  quietHours: { enabled: false, from: '22:00', to: '06:00' },
+  quietHours: { enabled: false, from: "22:00", to: "06:00" },
 };
 
 function loadSettings(): SalawatSettings {
-  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_SETTINGS, ...parsed, quietHours: { ...DEFAULT_SETTINGS.quietHours, ...parsed.quietHours } };
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      quietHours: { ...DEFAULT_SETTINGS.quietHours, ...parsed.quietHours },
+    };
   } catch {
     return DEFAULT_SETTINGS;
   }
 }
 
 function saveSettings(s: SalawatSettings): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
+
+type NativeSalawatFacade = {
+  scheduleLocalNotification?: (notification: {
+    id: number;
+    title: string;
+    body: string;
+    scheduleAt: string;
+    sound?: string;
+    channelId?: string;
+  }) => Promise<void>;
+  cancelLocalNotifications?: (ids: number[]) => Promise<void>;
+};
+
+const SALAWAT_NATIVE_IDS = Array.from(
+  { length: 40 },
+  (_, index) => 8000 + index
+);
+
+function isQuietAt(date: Date, quietHours: QuietHours): boolean {
+  if (!quietHours.enabled) return false;
+  const current = date.getHours() * 60 + date.getMinutes();
+  const [fromHour, fromMinute] = quietHours.from.split(":").map(Number);
+  const [toHour, toMinute] = quietHours.to.split(":").map(Number);
+  const from = fromHour * 60 + fromMinute;
+  const to = toHour * 60 + toMinute;
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return false;
+  return from <= to
+    ? current >= from && current < to
+    : current >= from || current < to;
+}
+
+function scheduleNativeSalawatReminders(settings: SalawatSettings): void {
+  if (typeof window === "undefined") return;
+  const native = (window as Window & { zikrNative?: NativeSalawatFacade })
+    .zikrNative;
+  if (!native?.scheduleLocalNotification) return;
+
+  void native.cancelLocalNotifications?.(SALAWAT_NATIVE_IDS);
+  if (!settings.enabled || settings.intervalMinutes === 0) return;
+
+  const intervalMs = settings.intervalMinutes * 60 * 1000;
+  let next = new Date(Date.now() + intervalMs);
+  let scheduledCount = 0;
+  let attempts = 0;
+  while (scheduledCount < SALAWAT_NATIVE_IDS.length && attempts < 160) {
+    if (!isQuietAt(next, settings.quietHours)) {
+      void native.scheduleLocalNotification({
+        id: SALAWAT_NATIVE_IDS[scheduledCount],
+        title: "تذكير بالصلاة على النبي",
+        body: "صل على سيدنا محمد",
+        scheduleAt: next.toISOString(),
+        sound: "salawat.wav",
+        channelId: "zikr-salawat",
+      });
+      scheduledCount += 1;
+    }
+    next = new Date(next.getTime() + intervalMs);
+    attempts += 1;
+  }
 }
 
 export interface SalawatReminderReturn {
@@ -58,17 +128,17 @@ export function useSalawatReminder(): SalawatReminderReturn {
   // server preference so the background worker uses the same configuration.
   useEffect(() => {
     setSettings(loadSettings());
-    void fetch('/api/reminders/background', { cache: 'no-store' })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => {
+    void fetch("/api/reminders/background", { cache: "no-store" })
+      .then(response => (response.ok ? response.json() : null))
+      .then(data => {
         if (!data) return;
         const next: SalawatSettings = {
           enabled: Boolean(data.salawat_enabled),
           intervalMinutes: data.salawat_interval_minutes ?? 60,
           quietHours: {
             enabled: Boolean(data.quiet_hours_start && data.quiet_hours_end),
-            from: data.quiet_hours_start?.slice(0, 5) ?? '22:00',
-            to: data.quiet_hours_end?.slice(0, 5) ?? '06:00',
+            from: data.quiet_hours_start?.slice(0, 5) ?? "22:00",
+            to: data.quiet_hours_end?.slice(0, 5) ?? "06:00",
           },
         };
         saveSettings(next);
@@ -77,23 +147,30 @@ export function useSalawatReminder(): SalawatReminderReturn {
       .catch(() => undefined);
   }, []);
 
-  // Set up interval whenever settings change
+  // Set up native reminders whenever settings change; these continue when the app is closed.
+  useEffect(() => {
+    scheduleNativeSalawatReminders(settings);
+  }, [settings]);
+
+  // Set up the foreground interval whenever settings change.
   useEffect(() => {
     if (!settings.enabled || settings.intervalMinutes === 0) return;
 
     const fire = () => {
-      if (settings.quietHours.enabled &&
-          isInQuietHours(settings.quietHours.from, settings.quietHours.to)) {
+      if (
+        settings.quietHours.enabled &&
+        isInQuietHours(settings.quietHours.from, settings.quietHours.to)
+      ) {
         return; // Respect quiet hours — skip silently
       }
       playSalawatClip();
       showSalawatNotification();
       // Also dispatch via SW for background delivery
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
-          type: 'SHOW_DHIKR_NOTIFICATION',
-          kind: 'salawat',
-          text: 'اللهم صلِّ وسلم على نبينا محمد',
+          type: "SHOW_DHIKR_NOTIFICATION",
+          kind: "salawat",
+          text: "اللهم صلِّ وسلم على نبينا محمد",
         });
       }
     };
@@ -103,16 +180,18 @@ export function useSalawatReminder(): SalawatReminderReturn {
   }, [settings]);
 
   const update = useCallback((partial: Partial<SalawatSettings>) => {
-    setSettings((prev) => {
+    setSettings(prev => {
       const next = { ...prev, ...partial };
       saveSettings(next);
-      void fetch('/api/reminders/background', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      void fetch("/api/reminders/background", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           salawat_enabled: next.enabled,
           salawat_interval_minutes: next.intervalMinutes,
-          quiet_hours_start: next.quietHours.enabled ? next.quietHours.from : null,
+          quiet_hours_start: next.quietHours.enabled
+            ? next.quietHours.from
+            : null,
           quiet_hours_end: next.quietHours.enabled ? next.quietHours.to : null,
         }),
       }).catch(() => undefined);
@@ -120,8 +199,14 @@ export function useSalawatReminder(): SalawatReminderReturn {
     });
   }, []);
 
-  const setEnabled = useCallback((v: boolean) => update({ enabled: v }), [update]);
-  const setIntervalMinutes = useCallback((v: SalawatInterval) => update({ intervalMinutes: v }), [update]);
+  const setEnabled = useCallback(
+    (v: boolean) => update({ enabled: v }),
+    [update]
+  );
+  const setIntervalMinutes = useCallback(
+    (v: SalawatInterval) => update({ intervalMinutes: v }),
+    [update]
+  );
   const setQuietHours = useCallback(
     (v: Partial<QuietHours>) =>
       update({ quietHours: { ...settings.quietHours, ...v } }),
@@ -134,5 +219,11 @@ export function useSalawatReminder(): SalawatReminderReturn {
     showSalawatNotification();
   }, []);
 
-  return { settings, setEnabled, setIntervalMinutes, setQuietHours, testReminder };
+  return {
+    settings,
+    setEnabled,
+    setIntervalMinutes,
+    setQuietHours,
+    testReminder,
+  };
 }

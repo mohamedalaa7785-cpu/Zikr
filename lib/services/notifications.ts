@@ -1,6 +1,7 @@
-import { playAzanClip } from '@/lib/audio/spiritual-tones';
+import { playAzanClip } from "@/lib/audio/spiritual-tones";
 
-export type NotificationPermission = 'granted' | 'denied' | 'default' | 'unsupported';
+export type NotificationPermission =
+  "granted" | "denied" | "default" | "unsupported";
 
 export interface NotificationPreference {
   prayerReminders: boolean;
@@ -16,6 +17,7 @@ type NativeNotificationFacade = {
     body: string;
     scheduleAt?: string;
     sound?: string;
+    channelId?: string;
   }) => Promise<void>;
 };
 
@@ -37,27 +39,38 @@ function notificationId(seed: string): number {
   return Math.max(1, hash % 2147483647);
 }
 
-async function showNativeNotification(title: string, body: string, tag: string): Promise<boolean> {
-  if (typeof window === 'undefined') return false;
+async function showNativeNotification(
+  title: string,
+  body: string,
+  tag: string
+): Promise<boolean> {
+  if (typeof window === "undefined") return false;
   const native = (window as NativeNotificationWindow).zikrNative;
   if (!native?.scheduleLocalNotification) return false;
 
+  const isPrayer = tag.startsWith("prayer-");
+  const isSalawat = tag === "salawat-reminder";
   await native.scheduleLocalNotification({
     id: notificationId(tag),
     title,
     body,
-    sound: tag.startsWith('prayer-') ? 'adhan.wav' : undefined,
+    sound: isPrayer ? "adhan.wav" : isSalawat ? "salawat.wav" : undefined,
+    channelId: isPrayer
+      ? "zikr-prayer-adhan"
+      : isSalawat
+        ? "zikr-salawat"
+        : undefined,
   });
   return true;
 }
 
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
-  if (typeof window === 'undefined') return 'unsupported';
+  if (typeof window === "undefined") return "unsupported";
 
   const native = (window as NativeNotificationWindow).zikrNative;
-  if (native) return 'granted';
+  if (native) return "granted";
 
-  if (!('Notification' in window)) return 'unsupported';
+  if (!("Notification" in window)) return "unsupported";
   return Notification.requestPermission() as Promise<NotificationPermission>;
 }
 
@@ -65,8 +78,8 @@ export async function saveNotificationPreference(
   preference: Partial<NotificationPreference>
 ): Promise<NotificationPreference> {
   const merged = { ...DEFAULT_PREFERENCE, ...preference };
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('zikr_notification_pref', JSON.stringify(merged));
+  if (typeof window !== "undefined") {
+    localStorage.setItem("zikr_notification_pref", JSON.stringify(merged));
   }
   return merged;
 }
@@ -76,13 +89,13 @@ export async function saveNotificationPreference(
  * Handles windows that cross midnight (e.g. 22:00–06:00).
  */
 export function isInQuietHours(from: string, to: string): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === "undefined") return false;
   try {
     const now = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
 
-    const [fh, fm] = from.split(':').map(Number);
-    const [th, tm] = to.split(':').map(Number);
+    const [fh, fm] = from.split(":").map(Number);
+    const [th, tm] = to.split(":").map(Number);
     const fromMin = fh * 60 + fm;
     const toMin = th * 60 + tm;
 
@@ -99,25 +112,25 @@ export function isInQuietHours(from: string, to: string): boolean {
 
 /** Show a browser/native notification for a prayer time. No-ops gracefully if not granted. */
 export function showPrayerNotification(prayerNameAr: string): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   // Play the real adhan clip in the foreground when the browser allows audio.
   // Native scheduled notifications use the same adhan sound identifier below.
   playAzanClip();
 
   const title = `حان وقت صلاة ${prayerNameAr}`;
-  const body = 'الصلاة خير من النوم — حافظ على صلاتك';
+  const body = "الصلاة خير من النوم — حافظ على صلاتك";
   const tag = `prayer-${prayerNameAr}`;
 
-  void showNativeNotification(title, body, tag).then((handled) => {
+  void showNativeNotification(title, body, tag).then(handled => {
     if (handled) return;
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
 
     try {
       new Notification(title, {
         body,
-        icon: '/icons/icon-192.png',
+        icon: "/icons/icon-192.png",
         tag,
       });
     } catch {
@@ -128,46 +141,48 @@ export function showPrayerNotification(prayerNameAr: string): void {
 
 /** Show a browser/native notification reminding the user their zakat is due. */
 export function showZakatNotification(daysLeft: number): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const body =
     daysLeft > 0
       ? `اقترب موعد إخراج زكاتك — تبقّى ${daysLeft} يوماً`
-      : 'حان موعد إخراج زكاتك — لا تنسَ أداءها';
+      : "حان موعد إخراج زكاتك — لا تنسَ أداءها";
 
-  void showNativeNotification('تذكير الزكاة', body, 'zakat-reminder').then((handled) => {
-    if (handled) return;
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
+  void showNativeNotification("تذكير الزكاة", body, "zakat-reminder").then(
+    handled => {
+      if (handled) return;
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
 
-    try {
-      new Notification('تذكير الزكاة', {
-        body,
-        icon: '/icons/icon-192.png',
-        tag: 'zakat-reminder',
-      });
-    } catch {
-      // ignore
+      try {
+        new Notification("تذكير الزكاة", {
+          body,
+          icon: "/icons/icon-192.png",
+          tag: "zakat-reminder",
+        });
+      } catch {
+        // ignore
+      }
     }
-  });
+  );
 }
 
 /** Show a browser/native notification with a rotating dhikr phrase. */
 export function showDhikrNotification(text: string): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
-  const title = 'تذكير بالذكر';
-  const tag = 'dhikr-reminder';
+  const title = "تذكير بالذكر";
+  const tag = "dhikr-reminder";
 
-  void showNativeNotification(title, text, tag).then((handled) => {
+  void showNativeNotification(title, text, tag).then(handled => {
     if (handled) return;
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
 
     try {
       new Notification(title, {
         body: text,
-        icon: '/icons/icon-192.png',
+        icon: "/icons/icon-192.png",
         tag,
       });
     } catch {
@@ -178,21 +193,21 @@ export function showDhikrNotification(text: string): void {
 
 /** Show a browser/native notification for the Salawat reminder. */
 export function showSalawatNotification(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
-  const title = 'اللهم صل على محمد';
-  const body = 'صلِّ على النبي ﷺ — اللهم صل وسلم وبارك عليه';
+  const title = "اللهم صل على محمد";
+  const body = "صلِّ على النبي ﷺ — اللهم صل وسلم وبارك عليه";
 
-  void showNativeNotification(title, body, 'salawat-reminder').then((handled) => {
+  void showNativeNotification(title, body, "salawat-reminder").then(handled => {
     if (handled) return;
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
 
     try {
       new Notification(title, {
         body,
-        icon: '/icons/icon-192.png',
-        tag: 'salawat-reminder',
+        icon: "/icons/icon-192.png",
+        tag: "salawat-reminder",
       });
     } catch {
       // ignore

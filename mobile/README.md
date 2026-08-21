@@ -23,21 +23,23 @@ com.zikr.app://login-callback
 
 ## Native capability checklist
 
-Capacitor configuration enables splash screen, status bar, keyboard, local notifications, push notification presentation, app links, universal links, deep links, camera, filesystem, share, network, preferences-backed secure-ish local settings, haptics and background-task extension points. Hardware-backed secrets and biometrics should be connected to `@capacitor-community/biometric-auth` during native dependency installation.
+Capacitor configuration enables splash screen, status bar, keyboard, local notifications, push notification presentation, app links, universal links, deep links, camera, filesystem, share, network, preferences-backed local settings, haptics and background-task extension points. The current release does not expose a biometric UI or install a biometric plugin; the old `@capacitor-community/biometric-auth` reference was removed because that package is not published under that name.
+
+Prayer notifications use the bundled `adhan.wav` asset and the `zikr-prayer-adhan` Android channel. Salawat reminders use the bundled `salawat.wav` asset and the `zikr-salawat` channel; the clip says `صل على سيدنا محمد` and is generated locally for this application. The short clips are also available under `public/audio` for foreground playback and offline PWA use.
 
 ## Dependency installation
 
-Root `package.json` intentionally keeps the web deployment lockfile stable. Before native sync, merge or install the versions listed in `mobile/capacitor-dependencies.json` in an environment that can access scoped npm packages.
+The root `package.json` now includes the Capacitor 7 runtime, platform packages, plugins, and CLI listed in `mobile/capacitor-dependencies.json`. Run `pnpm install --frozen-lockfile` before syncing native projects.
 
 ## Build sequence
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm build
-pnpm cap sync android
-pnpm cap sync ios
-npx cap open android
-npx cap open ios
+pnpm exec cap sync android
+pnpm exec cap sync ios
+pnpm exec cap open android
+pnpm exec cap open ios
 ```
 
 Provision release signing in Android Studio / Xcode; do not commit keystores, provisioning profiles, or App Store Connect API keys.

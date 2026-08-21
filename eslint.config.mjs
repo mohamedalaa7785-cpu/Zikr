@@ -7,6 +7,8 @@ const ignores = [
   "dist/**",
   "out/**",
   "coverage/**",
+  "android/**",
+  "ios/**",
   "public/sw.js",
   "supabase/migrations/**",
   "supabase/migrations_archive/**",
