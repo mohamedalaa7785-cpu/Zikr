@@ -91,7 +91,7 @@ export function playAzanTone(): void {
  * - Salawat: a short local Arabic voice clip saying "صل على سيدنا محمد".
  * Both clips are packaged locally so foreground playback also works offline.
  */
-export const AZAN_CLIP_URL = "/audio/adhan.mp3";
+export const AZAN_CLIP_URL = "/audio/adhan.wav";
 export const SALAWAT_CLIP_URL = "/audio/salawat.wav";
 
 let azanEl: HTMLAudioElement | null = null;
