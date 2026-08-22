@@ -81,3 +81,11 @@ Edge Functions النشطة التي ظهرت في المشروع هي `health`�
 [1]: https://supabase.com/docs/guides/database/database-linter Supabase Database Linter
 [2]: https://supabase.com/docs/guides/auth/password-security Supabase Password Security
 [3]: https://zikrmediaofficial.vercel.app ZIKR Production
+
+## أخطاء Vercel وRLS
+
+أظهر تجميع أخطاء Vercel خطأً واحدًا تاريخيًا في `updateProfileAction` على المسار `/profile` برسالة `permission denied for table profiles`. فحص الكود الحالي يكتب فقط `display_name` و`updated_at` بعد التحقق من المستخدم، وفحص RLS الحي يثبت وجود سياسة `profiles_authenticated_update` بشرط أن يساوي `id` قيمة `auth.uid()`. لذلك صُنّف الخطأ الظاهر في التجميع كخطأ تاريخي سابق، ولم يثبت أنه regression في deployment الحالي. لم يتم تخفيف RLS أو منح صلاحية عامة لمعالجة سجل تاريخي.
+
+## حالة الإصدار بعد التعديل الأخير
+
+تم إصلاح CSP وإضافة alias فحص الهاتف في commit `1dac1df`، ثم إنشاء PR 216. نجحت CircleCI وفحوص Vercel لمشروع `zikr`، ودُمجت التغييرات في `main` بالcommit `71a154171cf1e647f9f7fa0bd42588aadd118f8b`. بعد فترة propagation أصبح `/api/health` يطابق commit main الجديد. أُعيد تنظيف `next-env.d.ts` المتولد محليًا، وحالة المستودع نظيفة.
