@@ -30,6 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             {[
               { href: '/admin', label: 'الرئيسية' },
               { href: '/admin/content', label: 'المحتوى' },
+              { href: '/admin/knowledge', label: 'المعرفة الإسلامية' },
               { href: '/admin/sections', label: 'الأقسام' },
               { href: '/admin/users', label: 'المستخدمون' },
               { href: '/admin/videos', label: 'الفيديوهات' },

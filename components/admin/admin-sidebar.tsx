@@ -77,6 +77,16 @@ const navItems = [
         ),
       },
       {
+        href: '/admin/knowledge',
+        label: 'المعرفة الإسلامية',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4.5 h-4.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 5.25A2.25 2.25 0 0 1 6.75 3h10.5a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 17.25 21H6.75A2.25 2.25 0 0 1 4.5 18.75V5.25Z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7.5h8M8 11.25h8M8 15h5" />
+          </svg>
+        ),
+      },
+      {
         href: '/admin/prophets',
         label: 'قصص الأنبياء',
         icon: (
