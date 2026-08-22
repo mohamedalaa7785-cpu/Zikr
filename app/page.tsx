@@ -559,9 +559,9 @@ export default function HomePage() {
     ];
     return stats.map((stat, index) => ({
       ...stat,
-      value: liveValues[index] == null ? stat.value : liveValues[index]!.toLocaleString("ar-EG"),
+      value: liveValues[index] == null ? stat.value : liveValues[index]!.toLocaleString(isEnglish ? "en-US" : "ar-EG"),
     }));
-  }, [libraryStats]);
+  }, [libraryStats, isEnglish]);
 
   const timeStr = currentTime
     ? currentTime.toLocaleTimeString("en-GB", {
@@ -886,7 +886,7 @@ export default function HomePage() {
                     </p>
                     <p className="text-lg font-bold text-brand-cream tabular-nums">
                       {prayerTimes[key]
-                        ? convertTo12Hour(prayerTimes[key], true)
+                        ? convertTo12Hour(prayerTimes[key], !isEnglish)
                         : "--:-- --"}
                     </p>
                     {isActive && (
