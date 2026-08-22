@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { BookOpen, Scroll, Star } from 'lucide-react';
 import { useLanguage } from './language-provider';
 
-const FACEBOOK_PAGE_URL = 'https://www.facebook.com/ZikrMediaOfficial';
+const FACEBOOK_PAGE_URL = 'https://www.facebook.com/zikrmediaofficial1';
 
 export function Footer() {
   const { isEnglish } = useLanguage();
