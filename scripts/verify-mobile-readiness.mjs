@@ -29,7 +29,7 @@ const requiredFiles = [
 ];
 
 const failures = [];
-const warnings = [];
+const releaseCheck = process.env.MOBILE_RELEASE_CHECK === "1";
 
 for (const file of requiredFiles) {
   if (!existsSync(file)) failures.push(`Missing required mobile file: ${file}`);
@@ -152,18 +152,16 @@ for (const token of [
   if (!bridge.includes(token)) failures.push(`Native bridge missing ${token}`);
 }
 
-if (!process.env.ANDROID_APP_LINKS_SHA256) {
-  warnings.push(
-    "ANDROID_APP_LINKS_SHA256 is not set; replace the assetlinks placeholder before Play Store release."
+if (releaseCheck && !process.env.ANDROID_APP_LINKS_SHA256) {
+  failures.push(
+    "ANDROID_APP_LINKS_SHA256 is required for a Play Store release; provide the real release signing certificate SHA-256 fingerprint."
   );
 }
-if (!process.env.IOS_ASSOCIATED_DOMAIN_APP_ID) {
-  warnings.push(
-    "IOS_ASSOCIATED_DOMAIN_APP_ID is not set; replace TEAMID.com.zikr.app before App Store release."
+if (releaseCheck && !process.env.IOS_ASSOCIATED_DOMAIN_APP_ID) {
+  failures.push(
+    "IOS_ASSOCIATED_DOMAIN_APP_ID is required for an App Store release; provide the real Apple Team ID and bundle ID."
   );
 }
-
-for (const warning of warnings) console.warn(`⚠️ ${warning}`);
 
 if (failures.length) {
   for (const failure of failures) console.error(`❌ ${failure}`);

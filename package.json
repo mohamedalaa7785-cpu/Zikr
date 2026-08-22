@@ -24,6 +24,7 @@
     "mobile:android:release": "pnpm mobile:sync && cd android && ./gradlew bundleRelease",
     "mobile:ios:open": "pnpm mobile:sync && pnpm exec cap open ios",
     "mobile:check": "node scripts/verify-mobile-readiness.mjs",
+    "mobile:release-check": "MOBILE_RELEASE_CHECK=1 node scripts/verify-mobile-readiness.mjs",
     "supabase:migrations:check": "node scripts/check-supabase-migrations.mjs",
     "supabase:migrations:replay": "node scripts/validate-migrations.mjs",
     "routes:check": "node scripts/verify-platform-routes.mjs",
@@ -88,7 +89,7 @@
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": "22.13.0"
+    "node": "22.x"
   },
   "packageManager": "pnpm@9.15.0"
 }

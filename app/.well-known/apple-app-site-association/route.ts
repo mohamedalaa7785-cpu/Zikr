@@ -3,12 +3,11 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-static';
 
 export function GET() {
-  return NextResponse.json({
-    applinks: {
-      apps: [],
-      details: [
+  const appId = process.env.IOS_ASSOCIATED_DOMAIN_APP_ID?.trim();
+  const details = appId
+    ? [
         {
-          appIDs: [process.env.IOS_ASSOCIATED_DOMAIN_APP_ID ?? 'TEAMID.com.zikr.app'],
+          appIDs: [appId],
           components: [
             { '/': '/quran/*' },
             { '/': '/hadith/*' },
@@ -19,10 +18,16 @@ export function GET() {
             { '/': '/*' },
           ],
         },
-      ],
+      ]
+    : [];
+
+  return NextResponse.json({
+    applinks: {
+      apps: [],
+      details,
     },
     webcredentials: {
-      apps: [process.env.IOS_ASSOCIATED_DOMAIN_APP_ID ?? 'TEAMID.com.zikr.app'],
+      apps: appId ? [appId] : [],
     },
   });
 }
