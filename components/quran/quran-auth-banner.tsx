@@ -9,6 +9,7 @@ import type {
 } from "@supabase/supabase-js";
 import Link from "next/link";
 import { ReadingProgressCard } from "@/components/quran/reading-progress-card";
+import { useLanguage } from "@/components/layout/language-provider";
 
 /**
  * Renders client-side auth-aware UI for the Quran page header.
@@ -19,6 +20,7 @@ import { ReadingProgressCard } from "@/components/quran/reading-progress-card";
 export function QuranAuthBanner() {
   // null = not yet resolved, true/false = resolved
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { isEnglish, dir } = useLanguage();
 
   useEffect(() => {
     const supabase = createClient();
@@ -52,12 +54,12 @@ export function QuranAuthBanner() {
   }
 
   return (
-    <div className="min-h-[88px] w-full max-w-sm flex items-center">
+    <div className="min-h-[88px] w-full max-w-sm flex items-center" dir={dir}>
       <Link
         href="/auth/register"
         className="inline-flex items-center justify-center rounded-xl bg-brand-gold/10 border border-brand-gold/20 px-6 py-2 text-sm font-bold text-brand-gold hover:bg-brand-gold/20 transition-colors"
       >
-        أنشئ حساباً مجانياً لحفظ تقدمك
+        {isEnglish ? "Create a free account to save your progress" : "أنشئ حساباً مجانياً لحفظ تقدمك"}
       </Link>
     </div>
   );
