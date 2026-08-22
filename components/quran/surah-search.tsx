@@ -13,15 +13,33 @@ interface Surah {
   revelationType?: string;
 }
 
+function normalizeArabic(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
+    .replace(/[إأٱآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ـ/g, "")
+    .trim()
+    .toLowerCase();
+}
+
 export function SurahSearch({ initialSurahs }: { initialSurahs: Surah[] }) {
   const [query, setQuery] = useState("");
+  const normalizedQuery = normalizeArabic(query);
 
-  const filteredSurahs = initialSurahs.filter(
-    s =>
-      s.name.includes(query) ||
-      String(s.number) === query ||
-      s.englishName?.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredSurahs = initialSurahs.filter(s => {
+    const normalizedName = normalizeArabic(s.name);
+    const normalizedEnglishName = normalizeArabic(s.englishName ?? "");
+
+    return (
+      normalizedName.includes(normalizedQuery) ||
+      String(s.number) === query.trim() ||
+      normalizedEnglishName.includes(normalizedQuery)
+    );
+  });
 
   return (
     <div className="space-y-8">
