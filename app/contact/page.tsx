@@ -9,7 +9,7 @@ import { Mail, Video, Globe, Send, CheckCircle } from 'lucide-react';
 const contactChannels = [
   { icon: Mail, label: 'البريد الإلكتروني', value: 'zikrmediaofficial@gmail.com', href: 'mailto:zikrmediaofficial@gmail.com', color: 'text-sky-400' },
   { icon: Video, label: 'قناة يوتيوب', value: 'ZIKR | ذِكرٌ', href: 'https://www.youtube.com/@ZikrMediaOfficial', color: 'text-red-400' },
-  { icon: Globe, label: 'فيسبوك', value: 'Zikr Media Official', href: 'https://www.facebook.com/ZikrMediaOfficial', color: 'text-blue-400' },
+  { icon: Globe, label: 'فيسبوك', value: 'Zikr Media Official', href: 'https://www.facebook.com/zikrmediaofficial1', color: 'text-blue-400' },
 ];
 
 export default function ContactPage() {

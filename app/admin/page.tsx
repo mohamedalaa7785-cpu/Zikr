@@ -738,7 +738,7 @@ export default async function AdminPage() {
                 name="facebookPageUrl"
                 label="فيسبوك"
                 placeholder="https://facebook.com/..."
-                defaultValue="https://www.facebook.com/share/1GsRPxEb8J"
+                defaultValue="https://www.facebook.com/zikrmediaofficial1"
               />
               <Field
                 name="youtubeChannelUrl"
