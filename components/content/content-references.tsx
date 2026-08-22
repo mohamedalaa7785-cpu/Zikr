@@ -6,6 +6,7 @@ export type ContentReference = {
   source_type: "quran" | "hadith" | "history" | "academic" | "editorial";
   url?: string;
   locator_ar?: string;
+  locator?: string;
   note_ar?: string;
 };
 
@@ -69,10 +70,10 @@ export function ContentReferences({
             <span className="mx-2 rounded-full border border-brand-gold/20 px-2 py-0.5 text-[11px] text-brand-gold/75">
               {SOURCE_LABELS[reference.source_type]}
             </span>
-            {reference.locator_ar && (
+            {(reference.locator_ar ?? reference.locator) && (
               <span className="text-brand-cream/60">
                 {" "}
-                — {reference.locator_ar}
+                — {reference.locator_ar ?? reference.locator}
               </span>
             )}
             {reference.note_ar && (

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getAllScholars, getScholarBySlug } from "@/lib/services/scholars";
 import { siteConfig } from "@/lib/site";
+import { ContentReferences, getContentReferences } from "@/components/content/content-references";
 
 type ScholarPageProps = {
   params: Promise<{ slug: string }>;
@@ -55,6 +56,8 @@ export default async function ScholarDetailPage({ params }: ScholarPageProps) {
     notFound();
   }
 
+  const references = getContentReferences(scholar.metadata);
+
   return (
     <Container className="max-w-4xl space-y-8 py-12">
       <Button href="/scholars" variant="ghost">
@@ -87,6 +90,8 @@ export default async function ScholarDetailPage({ params }: ScholarPageProps) {
             </p>
           </div>
         )}
+
+        <ContentReferences references={references} />
 
         {(scholar.websiteUrl || scholar.youtubeUrl) && (
           <div className="flex flex-wrap justify-center gap-3 border-t border-brand-gold/20 pt-6">
