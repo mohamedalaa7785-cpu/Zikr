@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/services/admin";
 import { kidsContent } from "@/lib/data/kids-content";
 import { saveKidsContentAction } from "./actions";
+import { CloudinaryImageUploadField } from "@/components/admin/cloudinary-image-upload-field";
 
 const typeLabels: Record<string, string> = {
   story: "قصة",
@@ -164,23 +165,12 @@ export default async function AdminKidsPage() {
               ))}
             </select>
           </div>
-          <Field
+          <CloudinaryImageUploadField
             name="featured_image_url"
-            label="رابط الصورة المميزة (بديل اختياري)"
-            placeholder="https://..."
+            label="الصورة المميزة"
+            folder="kids"
+            hint="تُرفع الصورة إلى Cloudinary وتُحفظ كرابط آمن مع المحتوى. JPG أو PNG أو WEBP أو GIF — حتى 8MB"
           />
-          <label className="block space-y-1 text-sm text-brand-cream/80">
-            <span>رفع صورة مميزة</span>
-            <input
-              name="featured_image_file"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              className="w-full rounded-lg border border-brand-gold/20 bg-black/20 p-2 text-brand-cream file:ml-3 file:rounded-md file:border-0 file:bg-brand-gold/15 file:px-3 file:py-1 file:text-brand-gold"
-            />
-            <span className="block text-xs text-brand-cream/50">
-              JPG أو PNG أو WEBP أو GIF حتى 2MB. تُرفع الصورة المختارة بأمان وتكون لها الأولوية على الرابط.
-            </span>
-          </label>
           <Field
             name="video_url"
             label="رابط فيديو تعليمي"
