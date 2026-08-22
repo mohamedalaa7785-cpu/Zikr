@@ -90,14 +90,14 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
                 onClick={() => setOpen(false)}
                 className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
               >
-                الملف الشخصي
+                {isEnglish ? 'My profile' : 'الملف الشخصي'}
               </Link>
               <form action={logoutAction} className="mb-2">
                 <button
                   type="submit"
                   className="flex w-full items-center rounded-lg border border-brand-cream/15 px-4 py-3 text-sm font-semibold text-brand-cream/75 transition-all hover:border-brand-gold/30 hover:bg-brand-gold/10 hover:text-brand-gold"
                 >
-                  تسجيل الخروج
+                  {isEnglish ? 'Sign out' : 'تسجيل الخروج'}
                 </button>
               </form>
             </>
@@ -107,7 +107,7 @@ export function MobileNav({ isAuthenticated = false }: MobileNavProps) {
               onClick={() => setOpen(false)}
               className="mb-2 flex items-center rounded-lg border border-brand-gold/30 bg-brand-gold/10 px-4 py-3 text-sm font-semibold text-brand-gold hover:bg-brand-gold/20 transition-all"
             >
-              تسجيل الدخول
+              {isEnglish ? 'Sign in' : 'تسجيل الدخول'}
             </Link>
           )}
           {allLinks.map((link) => (
