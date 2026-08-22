@@ -6,6 +6,7 @@ import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/app/auth/actions';
 import { createClient } from '@/lib/supabase/client';
+import { useLanguage } from './language-provider';
 
 type AuthNavActionsProps = {
   initialUser: User | null;
@@ -14,6 +15,7 @@ type AuthNavActionsProps = {
 
 export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsProps) {
   const pathname = usePathname();
+  const { isEnglish } = useLanguage();
   const [user, setUser] = useState<User | null>(initialUser);
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
 
@@ -67,7 +69,7 @@ export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsPr
   if (!user) {
     return (
       <Button href="/auth/login" className="text-sm">
-        تسجيل الدخول
+        {isEnglish ? 'Sign in' : 'تسجيل الدخول'}
       </Button>
     );
   }
@@ -75,16 +77,16 @@ export function AuthNavActions({ initialUser, initialIsAdmin }: AuthNavActionsPr
   return (
     <>
       <Button variant="ghost" href="/profile" className="text-sm">
-        الملف الشخصي
+        {isEnglish ? 'My profile' : 'الملف الشخصي'}
       </Button>
       {isAdmin && (
         <Button variant="ghost" href="/admin" className="text-sm">
-          الأدمن
+          {isEnglish ? 'Admin' : 'الأدمن'}
         </Button>
       )}
       <form action={logoutAction}>
         <Button variant="secondary" type="submit" className="text-sm">
-          تسجيل الخروج
+          {isEnglish ? 'Sign out' : 'تسجيل الخروج'}
         </Button>
       </form>
     </>

@@ -17,26 +17,28 @@ import { useLanguage } from "@/components/layout/language-provider";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const prayerNames = [
-  { key: "Fajr", label: "الفجر", icon: "🌙" },
-  { key: "Sunrise", label: "الشروق", icon: "🌅" },
-  { key: "Dhuhr", label: "الظهر", icon: "☀️" },
-  { key: "Asr", label: "العصر", icon: "🌤" },
-  { key: "Maghrib", label: "المغرب", icon: "🌇" },
-  { key: "Isha", label: "العشاء", icon: "🌃" },
+  { key: "Fajr", label: "الفجر", labelEn: "Fajr", icon: "🌙" },
+  { key: "Sunrise", label: "الشروق", labelEn: "Sunrise", icon: "🌅" },
+  { key: "Dhuhr", label: "الظهر", labelEn: "Dhuhr", icon: "☀️" },
+  { key: "Asr", label: "العصر", labelEn: "Asr", icon: "🌤" },
+  { key: "Maghrib", label: "المغرب", labelEn: "Maghrib", icon: "🌇" },
+  { key: "Isha", label: "العشاء", labelEn: "Isha", icon: "🌃" },
 ] as const;
 
 const stats = [
-  { label: "سورة قرآنية", value: "114", sub: "سور الكتاب الكريم" },
-  { label: "آية كريمة", value: "6,236", sub: "آيات مباركة" },
-  { label: "جزءًا", value: "30", sub: "من القرآن الكريم" },
-  { label: "نبيًا ورسولًا", value: "25", sub: "ذُكروا في القرآن" },
+  { label: "سورة قرآنية", labelEn: "Quran Surahs", value: "114", sub: "سور الكتاب الكريم", subEn: "Chapters of the Holy Quran" },
+  { label: "آية كريمة", labelEn: "Verses", value: "6,236", sub: "آيات مباركة", subEn: "Blessed verses" },
+  { label: "جزءًا", labelEn: "Juz'", value: "30", sub: "من القرآن الكريم", subEn: "Parts of the Holy Quran" },
+  { label: "نبيًا ورسولًا", labelEn: "Prophets and Messengers", value: "25", sub: "ذُكروا في القرآن", subEn: "Mentioned in the Quran" },
 ];
 
 const featuredSections = [
   {
     href: "/quran",
     title: "القرآن الكريم",
+    titleEn: "The Holy Quran",
     desc: "اقرأ واستمع إلى القرآن الكريم بأصوات قراء مميزين — 114 سورة كاملة",
+    descEn: "Read and listen to the Holy Quran with the voices of renowned reciters — all 114 surahs",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -53,6 +55,7 @@ const featuredSections = [
       </svg>
     ),
     badge: "114 سورة",
+    badgeEn: "114 Surahs",
     color: "from-emerald-900/50 to-emerald-950/80",
     border: "border-emerald-700/30 hover:border-emerald-500/60",
     glow: "hover:shadow-emerald-900/30",
@@ -60,7 +63,9 @@ const featuredSections = [
   {
     href: "/hadith",
     title: "الحديث الشريف",
+    titleEn: "Prophetic Hadith",
     desc: "مجموعة شاملة من الأحاديث النبوية الصحيحة من صحيح البخاري ومسلم",
+    descEn: "A comprehensive collection of authentic Prophetic hadith from Bukhari and Muslim",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -77,6 +82,7 @@ const featuredSections = [
       </svg>
     ),
     badge: "صحيح البخاري",
+    badgeEn: "Sahih al-Bukhari",
     color: "from-amber-900/50 to-amber-950/80",
     border: "border-amber-700/30 hover:border-amber-500/60",
     glow: "hover:shadow-amber-900/30",
@@ -84,7 +90,9 @@ const featuredSections = [
   {
     href: "/adhkar",
     title: "الأذكار اليومية",
+    titleEn: "Daily Adhkar",
     desc: "أذكار الصباح والمساء وتسابيح يومية لتقوية الروح وتحصين النفس",
+    descEn: "Morning and evening remembrance and daily tasbih to strengthen the spirit",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -101,6 +109,7 @@ const featuredSections = [
       </svg>
     ),
     badge: "صباح ومساء",
+    badgeEn: "Morning & Evening",
     color: "from-violet-900/50 to-violet-950/80",
     border: "border-violet-700/30 hover:border-violet-500/60",
     glow: "hover:shadow-violet-900/30",
@@ -108,7 +117,9 @@ const featuredSections = [
   {
     href: "/dua",
     title: "الأدعية المأثورة",
+    titleEn: "Supplications",
     desc: "أدعية نبوية شريفة لمختلف المناسبات والأوقات والأحوال",
+    descEn: "Authentic Prophetic supplications for different occasions and circumstances",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -125,6 +136,7 @@ const featuredSections = [
       </svg>
     ),
     badge: "أدعية مأثورة",
+    badgeEn: "Authentic Duas",
     color: "from-teal-900/50 to-teal-950/80",
     border: "border-teal-700/30 hover:border-teal-500/60",
     glow: "hover:shadow-teal-900/30",
@@ -132,7 +144,9 @@ const featuredSections = [
   {
     href: "/prophets",
     title: "قصص الأنبياء",
+    titleEn: "Stories of the Prophets",
     desc: "سير وقصص الأنبياء والمرسلين عليهم الصلاة والسلام من آدم إلى محمد ﷺ",
+    descEn: "Biographies and stories of the Prophets and Messengers, from Adam to Muhammad ﷺ",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -149,6 +163,7 @@ const featuredSections = [
       </svg>
     ),
     badge: "25 نبيًا",
+    badgeEn: "25 Prophets",
     color: "from-sky-900/50 to-sky-950/80",
     border: "border-sky-700/30 hover:border-sky-500/60",
     glow: "hover:shadow-sky-900/30",
@@ -156,7 +171,9 @@ const featuredSections = [
   {
     href: "/spiritual-ai",
     title: "الرفيق الروحاني",
+    titleEn: "Spiritual AI Companion",
     desc: "مساعد ذكاء اصطناعي للإجابة على أسئلتك الدينية والروحانية بشكل فوري",
+    descEn: "An AI assistant for immediate guidance on spiritual and religious questions",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -173,6 +190,7 @@ const featuredSections = [
       </svg>
     ),
     badge: "AI مدعوم",
+    badgeEn: "AI-Powered",
     color: "from-green-900/50 to-green-950/80",
     border: "border-green-700/30 hover:border-green-500/60",
     glow: "hover:shadow-green-900/30",
@@ -180,21 +198,21 @@ const featuredSections = [
 ];
 
 const moreContent = [
-  { href: "/mushaf", label: "المصحف الشريف", icon: "📖" },
-  { href: "/tafsir", label: "التفسير", icon: "🔎" },
-  { href: "/offline-library", label: "المكتبة بلا إنترنت", icon: "⬇️" },
-  { href: "/companions", label: "الصحابة الكرام", icon: "👥" },
-  { href: "/scholars", label: "العلماء", icon: "📚" },
-  { href: "/kids", label: "قسم الأطفال", icon: "🌟" },
-  { href: "/memorization", label: "حفظ القرآن", icon: "📿" },
-  { href: "/radio", label: "إذاعة القرآن", icon: "📻" },
-  { href: "/tasbeeh", label: "عداد التسبيح", icon: "📿" },
-  { href: "/battles", label: "الغزوات", icon: "⚔️" },
-  { href: "/conquests", label: "الفتوحات", icon: "🏛️" },
-  { href: "/tawasheeh", label: "المداحون", icon: "🎵" },
-  { href: "/reciters", label: "القراء", icon: "🎙️" },
-  { href: "/poetry", label: "الشعر الإسلامي", icon: "✍️" },
-  { href: "/stories", label: "القصص", icon: "📖" },
+  { href: "/mushaf", label: "المصحف الشريف", labelEn: "Mushaf", icon: "📖" },
+  { href: "/tafsir", label: "التفسير", labelEn: "Tafsir", icon: "🔎" },
+  { href: "/offline-library", label: "المكتبة بلا إنترنت", labelEn: "Offline Library", icon: "⬇️" },
+  { href: "/companions", label: "الصحابة الكرام", labelEn: "Companions", icon: "👥" },
+  { href: "/scholars", label: "العلماء", labelEn: "Scholars", icon: "📚" },
+  { href: "/kids", label: "قسم الأطفال", labelEn: "Kids", icon: "🌟" },
+  { href: "/memorization", label: "حفظ القرآن", labelEn: "Quran Memorization", icon: "📿" },
+  { href: "/radio", label: "إذاعة القرآن", labelEn: "Quran Radio", icon: "📻" },
+  { href: "/tasbeeh", label: "عداد التسبيح", labelEn: "Tasbeeh Counter", icon: "📿" },
+  { href: "/battles", label: "الغزوات", labelEn: "Battles", icon: "⚔️" },
+  { href: "/conquests", label: "الفتوحات", labelEn: "Conquests", icon: "🏛️" },
+  { href: "/tawasheeh", label: "المداحون", labelEn: "Nasheed & Praise", icon: "🎵" },
+  { href: "/reciters", label: "القراء", labelEn: "Reciters", icon: "🎙️" },
+  { href: "/poetry", label: "الشعر الإسلامي", labelEn: "Islamic Poetry", icon: "✍️" },
+  { href: "/stories", label: "القصص", labelEn: "Stories", icon: "📖" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -786,22 +804,22 @@ export default function HomePage() {
         }}
       >
         <Container className="space-y-6">
-          <SectionDivider title="مواقيت الصلاة" />
+          <SectionDivider title={isEnglish ? "Prayer Times" : "مواقيت الصلاة"} />
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2
                 id="prayer-times-heading"
                 className="text-2xl font-bold text-brand-gold"
-                dir="rtl"
+                dir={dir}
               >
-                أوقات الصلاة اليوم
+                {isEnglish ? "Today's Prayer Times" : "أوقات الصلاة اليوم"}
               </h2>
-              <p className="text-sm text-brand-cream/40 mt-0.5" dir="rtl">
-                {usingLocation ? "موقعك الحالي" : prayerCity} ·{" "}
+              <p className="text-sm text-brand-cream/40 mt-0.5" dir={dir}>
+                {usingLocation ? (isEnglish ? "Your current location" : "موقعك الحالي") : prayerCity} · {" "}
                 {loadingPrayer
-                  ? "يتم التحديث دون إخفاء المواقيت"
-                  : "يتجدد تلقائيًا"}
+                  ? (isEnglish ? "Updating without hiding prayer times" : "يتم التحديث دون إخفاء المواقيت")
+                  : (isEnglish ? "Updates automatically" : "يتجدد تلقائيًا")}
               </p>
             </div>
             <form
@@ -820,30 +838,30 @@ export default function HomePage() {
                 type="text"
                 value={cityInput}
                 onChange={e => setCityInput(e.target.value)}
-                placeholder="اسم المدينة..."
+                placeholder={isEnglish ? "City name..." : "اسم المدينة..."}
                 className="min-w-0 flex-1 rounded-lg border border-brand-gold/20 bg-black/30 px-3 py-2 text-sm text-brand-cream placeholder:text-brand-cream/30 focus:border-brand-gold/50 focus:outline-none sm:w-36 sm:flex-none"
-                aria-label="اسم المدينة"
-                dir="rtl"
+                aria-label={isEnglish ? "City name" : "اسم المدينة"}
+                dir={dir}
               />
               <button
                 type="submit"
                 className="px-4 py-2 rounded-lg border border-brand-gold/30 text-brand-gold text-sm hover:border-brand-gold/60 hover:bg-brand-gold/8 transition-colors"
               >
-                تغيير
+                {isEnglish ? "Change" : "تغيير"}
               </button>
               <button
                 type="button"
                 onClick={requestPrayerByLocation}
                 className="rounded-lg border border-brand-gold/20 px-3 py-2 text-sm text-brand-cream/55 transition-colors hover:border-brand-gold/50 hover:text-brand-gold"
               >
-                موقعي
+                {isEnglish ? "My location" : "موقعي"}
               </button>
             </form>
           </div>
 
           {prayerTimes ? (
             <div className="grid grid-cols-2 gap-2 min-[360px]:grid-cols-3 sm:gap-3 md:grid-cols-6">
-              {prayerNames.map(({ key, label }) => {
+              {prayerNames.map(({ key, label, labelEn }) => {
                 const isActive = activePrayer === key;
                 const isNext = nextPrayer === key;
                 return (
@@ -862,9 +880,9 @@ export default function HomePage() {
                     )}
                     <p
                       className="text-xs text-brand-gold/60 mb-2 font-arabic"
-                      dir="rtl"
+                      dir={dir}
                     >
-                      {label}
+                      {isEnglish ? labelEn : label}
                     </p>
                     <p className="text-lg font-bold text-brand-cream tabular-nums">
                       {prayerTimes[key]
@@ -873,12 +891,12 @@ export default function HomePage() {
                     </p>
                     {isActive && (
                       <span className="mt-1.5 inline-block text-[10px] text-brand-gold font-bold tracking-widest px-2 py-0.5 rounded-full bg-brand-gold/15">
-                        الآن
+                        {isEnglish ? "Now" : "الآن"}
                       </span>
                     )}
                     {isNext && !isActive && (
                       <span className="mt-1.5 inline-block text-[10px] text-brand-gold/55 font-semibold tracking-widest">
-                        التالية
+                        {isEnglish ? "Next" : "التالية"}
                       </span>
                     )}
                   </div>
@@ -887,12 +905,12 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 min-[360px]:grid-cols-3 sm:gap-3 md:grid-cols-6">
-              {prayerNames.map(({ label }) => (
+              {prayerNames.map(({ label, labelEn }) => (
                 <div
                   key={label}
                   className="min-h-[88px] animate-pulse rounded-2xl border border-brand-gold/10 bg-black/20 p-3 text-center sm:min-h-[92px] sm:p-4"
                 >
-                  <p className="text-xs text-brand-gold/30 mb-2">{label}</p>
+                  <p className="text-xs text-brand-gold/30 mb-2" dir={dir}>{isEnglish ? labelEn : label}</p>
                   <div className="h-6 w-16 bg-brand-gold/10 rounded mx-auto" />
                 </div>
               ))}
@@ -904,19 +922,19 @@ export default function HomePage() {
               href="/prayer-times"
               className="rounded-xl border border-brand-gold/25 px-5 py-2.5 text-sm text-brand-cream/70 hover:border-brand-gold hover:text-brand-gold transition-colors"
             >
-              مواقيت الصلاة التفصيلية
+              {isEnglish ? "Detailed prayer times" : "مواقيت الصلاة التفصيلية"}
             </Link>
             <Link
               href="/qibla"
               className="rounded-xl border border-brand-gold/15 px-5 py-2.5 text-sm text-brand-cream/45 hover:border-brand-gold/30 hover:text-brand-cream/70 transition-colors"
             >
-              اتجاه القبلة
+              {isEnglish ? "Qibla direction" : "اتجاه القبلة"}
             </Link>
             <Link
               href="/adhkar"
               className="rounded-xl border border-brand-gold/15 px-5 py-2.5 text-sm text-brand-cream/45 hover:border-brand-gold/30 hover:text-brand-cream/70 transition-colors"
             >
-              أذكار الصباح والمساء
+              {isEnglish ? "Morning and evening adhkar" : "أذكار الصباح والمساء"}
             </Link>
           </div>
         </Container>
@@ -931,21 +949,21 @@ export default function HomePage() {
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 520px" }}
       >
         <Container className="space-y-6">
-          <SectionDivider title="الأقسام الرئيسية" />
+          <SectionDivider title={isEnglish ? "Featured Sections" : "الأقسام الرئيسية"} />
 
           <div className="flex items-center justify-between">
             <h2
               id="featured-heading"
               className="text-2xl font-bold text-brand-gold"
-              dir="rtl"
+              dir={dir}
             >
-              اكتشف المنصة
+              {isEnglish ? "Explore the platform" : "اكتشف المنصة"}
             </h2>
             <Link
               href="#all-sections"
               className="text-sm text-brand-gold/75 underline-offset-4 hover:text-brand-gold hover:underline transition-colors"
             >
-              عرض الكل
+              {isEnglish ? "View all" : "عرض الكل"}
             </Link>
           </div>
 
@@ -961,23 +979,23 @@ export default function HomePage() {
                     {sec.icon}
                   </div>
                   <span className="text-[10px] font-bold tracking-widest text-brand-gold/45 uppercase group-hover:text-brand-gold/70 transition-colors px-2 py-1 rounded-full border border-brand-gold/15">
-                    {sec.badge}
+                    {isEnglish ? sec.badgeEn : sec.badge}
                   </span>
                 </div>
                 <h3
                   className="text-lg font-bold text-brand-gold mb-2"
-                  dir="rtl"
+                  dir={dir}
                 >
-                  {sec.title}
+                  {isEnglish ? sec.titleEn : sec.title}
                 </h3>
                 <p
                   className="text-sm text-brand-cream/50 leading-relaxed group-hover:text-brand-cream/65 transition-colors"
-                  dir="rtl"
+                  dir={dir}
                 >
-                  {sec.desc}
+                  {isEnglish ? sec.descEn : sec.desc}
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-xs text-brand-gold/40 group-hover:text-brand-gold/70 transition-colors">
-                  <span>استكشف الآن</span>
+                  <span>{isEnglish ? "Explore now" : "استكشف الآن"}</span>
                   <svg
                     viewBox="0 0 16 16"
                     fill="currentColor"
@@ -1006,13 +1024,13 @@ export default function HomePage() {
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 520px" }}
       >
         <Container className="space-y-6">
-          <SectionDivider title="المزيد من المحتوى" />
+          <SectionDivider title={isEnglish ? "More Content" : "المزيد من المحتوى"} />
           <h2
             id="more-heading"
             className="text-2xl font-bold text-brand-gold"
-            dir="rtl"
+            dir={dir}
           >
-            المحتوى الإسلامي الشامل
+            {isEnglish ? "A complete Islamic library" : "المحتوى الإسلامي الشامل"}
           </h2>
 
           <div className="grid grid-cols-2 min-[360px]:grid-cols-4 gap-2.5 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6">
@@ -1027,9 +1045,9 @@ export default function HomePage() {
                 </span>
                 <span
                   className="text-[11px] font-medium text-brand-cream/75 group-hover:text-brand-gold transition-colors leading-tight sm:text-xs"
-                  dir="rtl"
+                  dir={dir}
                 >
-                  {item.label}
+                  {isEnglish ? item.labelEn : item.label}
                 </span>
               </Link>
             ))}
@@ -1046,19 +1064,19 @@ export default function HomePage() {
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 420px" }}
       >
         <Container className="space-y-6">
-          <SectionDivider title="أرقام وإحصائيات" />
+          <SectionDivider title={isEnglish ? "Facts & Statistics" : "أرقام وإحصائيات"} />
           <h2
             id="stats-heading"
             className="text-2xl font-bold text-brand-gold"
-            dir="rtl"
+            dir={dir}
           >
-            أرقام من القرآن الكريم
+            {isEnglish ? "Quran facts" : "أرقام من القرآن الكريم"}
           </h2>
 
           <div className="grid grid-cols-2 min-[360px]:grid-cols-4 gap-2.5 sm:gap-4">
             {displayStats.map(stat => (
               <div
-                key={stat.label}
+                key={stat.labelEn}
                 className="group relative min-h-[116px] overflow-hidden rounded-2xl border border-brand-gold/18 bg-black/25 p-3 text-center transition-colors hover:border-brand-gold/40 sm:min-h-[140px] sm:p-6"
               >
                 <div
@@ -1077,12 +1095,12 @@ export default function HomePage() {
                 </p>
                 <p
                   className="mb-1 text-[11px] font-semibold text-brand-cream/80 sm:text-sm"
-                  dir="rtl"
+                  dir={dir}
                 >
-                  {stat.label}
+                  {isEnglish ? stat.labelEn : stat.label}
                 </p>
-                <p className="text-xs text-brand-cream/35" dir="rtl">
-                  {stat.sub}
+                <p className="text-xs text-brand-cream/35" dir={dir}>
+                  {isEnglish ? stat.subEn : stat.sub}
                 </p>
               </div>
             ))}
@@ -1095,7 +1113,7 @@ export default function HomePage() {
       ══════════════════════════════════════════════════════════════════════ */}
       <section
         className="px-4 py-16"
-        aria-label="آية كريمة"
+        aria-label={isEnglish ? "Quran verse" : "آية كريمة"}
         style={{ contentVisibility: "auto", containIntrinsicSize: "0 520px" }}
       >
         <Container>
@@ -1127,7 +1145,7 @@ export default function HomePage() {
 
               <div className="space-y-4">
                 <p className="text-[10px] font-bold tracking-[0.3em] text-brand-gold/45 uppercase">
-                  آية من كتاب الله
+                  {isEnglish ? "A verse from the Book of Allah" : "آية من كتاب الله"}
                 </p>
                 <p
                   className="mx-auto max-w-3xl text-xl font-bold leading-loose text-brand-cream sm:text-2xl md:text-3xl lg:text-4xl"
@@ -1140,8 +1158,8 @@ export default function HomePage() {
                   &quot;إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ
                   أَقْوَمُ&quot;
                 </p>
-                <p className="text-sm text-brand-gold/60" dir="rtl">
-                  سورة الإسراء — الآية 9
+                <p className="text-sm text-brand-gold/60" dir={dir}>
+                  {isEnglish ? "Surah Al-Isra — Verse 9" : "سورة الإسراء — الآية 9"}
                 </p>
               </div>
 
@@ -1153,20 +1171,20 @@ export default function HomePage() {
                   href="/quran"
                   className="w-full rounded-xl bg-brand-gold px-5 py-3 text-sm font-bold text-brand-emeraldDeep shadow-lg shadow-brand-gold/20 transition-colors hover:bg-brand-goldSoft sm:w-auto sm:px-8"
                 >
-                  اقرأ القرآن الكريم
+                  {isEnglish ? "Read the Holy Quran" : "اقرأ القرآن الكريم"}
                 </Link>
                 <Link
                   href="/adhkar"
                   className="w-full rounded-xl border border-brand-gold/30 px-5 py-3 text-sm text-brand-cream/70 transition-colors hover:border-brand-gold hover:text-brand-gold sm:w-auto sm:px-8"
                 >
-                  أذكار اليوم
+                  {isEnglish ? "Today's Adhkar" : "أذكار اليوم"}
                 </Link>
                 {!user && authLoaded && (
                   <Link
                     href="/auth/register"
                     className="w-full rounded-xl border border-brand-gold/15 px-5 py-3 text-sm text-brand-cream/45 transition-colors hover:border-brand-gold/30 hover:text-brand-cream/65 sm:w-auto sm:px-8"
                   >
-                    إنشاء حساب مجاني
+                    {isEnglish ? "Create a free account" : "إنشاء حساب مجاني"}
                   </Link>
                 )}
                 {user && authLoaded && (
@@ -1174,7 +1192,7 @@ export default function HomePage() {
                     href="/profile"
                     className="w-full rounded-xl border border-brand-gold/15 px-5 py-3 text-sm text-brand-cream/45 transition-colors hover:border-brand-gold/30 hover:text-brand-cream/65 sm:w-auto sm:px-8"
                   >
-                    الملف الشخصي
+                    {isEnglish ? "My profile" : "الملف الشخصي"}
                   </Link>
                 )}
               </div>

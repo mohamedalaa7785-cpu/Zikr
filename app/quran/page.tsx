@@ -6,7 +6,7 @@ import { SurahSearch } from "@/components/quran/surah-search";
 import { Suspense } from "react";
 import { SurahSkeleton } from "@/components/quran/surah-skeleton";
 import { pageMetadata } from "@/lib/site";
-import { QuranAuthBanner } from "@/components/quran/quran-auth-banner";
+import { QuranPageHeader } from "@/components/quran/quran-page-header";
 import { ContinueReadingBanner } from "@/components/quran/continue-reading-banner";
 
 // إجبار الصفحة على الرندرة الديناميكية لمنع أخطاء الـ Build مع الـ no-store fetch
@@ -43,10 +43,7 @@ async function QuranContent() {
 
     return (
       <Container className="space-y-8 py-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <h1 className="text-4xl font-bold text-brand-gold">القرآن الكريم</h1>
-          <QuranAuthBanner />
-        </div>
+        <QuranPageHeader />
 
         {/* Reserve the optional banner slot so its async resolution cannot shift the list. */}
         <div className="min-h-[72px]">

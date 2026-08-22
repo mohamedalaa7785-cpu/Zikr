@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useLanguage } from './language-provider';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -18,6 +19,7 @@ const DISMISS_KEY = 'zikr_install_dismissed';
 export function InstallPrompt() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const { isEnglish, dir } = useLanguage();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -71,7 +73,7 @@ export function InstallPrompt() {
   return (
     <div
       role="region"
-      aria-label="تثبيت التطبيق"
+      aria-label={isEnglish ? 'Install app' : 'تثبيت التطبيق'}
       className="fixed left-1/2 z-50 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 sm:w-[calc(100%-2rem)]"
       style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
     >
@@ -90,10 +92,10 @@ export function InstallPrompt() {
           <rect x="5" y="2" width="14" height="20" rx="2" />
           <path strokeLinecap="round" d="M12 18h.01" />
         </svg>
-        <div className="min-w-0 flex-1" dir="rtl">
-          <p className="text-xs font-bold text-brand-gold sm:text-sm">ثبّت تطبيق ذِكر</p>
+        <div className="min-w-0 flex-1" dir={dir}>
+          <p className="text-xs font-bold text-brand-gold sm:text-sm">{isEnglish ? 'Install ZIKR' : 'ثبّت تطبيق ذِكر'}</p>
           <p className="text-[11px] leading-snug text-brand-cream/60 sm:text-xs">
-            أضِفه إلى شاشتك الرئيسية واستخدمه بالكامل بدون إنترنت
+            {isEnglish ? 'Add it to your home screen and use it offline.' : 'أضِفه إلى شاشتك الرئيسية واستخدمه بالكامل بدون إنترنت'}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -101,12 +103,12 @@ export function InstallPrompt() {
             onClick={handleInstall}
             className="rounded-lg bg-brand-gold px-2.5 py-1.5 text-[11px] font-bold text-brand-emeraldDeep transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold sm:px-3 sm:text-xs"
           >
-            تثبيت
+            {isEnglish ? 'Install' : 'تثبيت'}
           </button>
           <button
             onClick={handleDismiss}
             className="rounded-md p-1 text-brand-cream/50 transition-colors hover:text-brand-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
-            aria-label="إغلاق"
+            aria-label={isEnglish ? 'Close' : 'إغلاق'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

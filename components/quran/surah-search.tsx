@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { useLanguage } from "@/components/layout/language-provider";
 import { Badge } from "@/components/ui/badge";
 
 interface Surah {
@@ -28,6 +29,7 @@ function normalizeArabic(value: string) {
 
 export function SurahSearch({ initialSurahs }: { initialSurahs: Surah[] }) {
   const [query, setQuery] = useState("");
+  const { isEnglish, dir } = useLanguage();
   const normalizedQuery = normalizeArabic(query);
 
   const filteredSurahs = initialSurahs.filter(s => {
@@ -47,10 +49,10 @@ export function SurahSearch({ initialSurahs }: { initialSurahs: Surah[] }) {
       <div className="relative max-w-2xl mx-auto">
         <input
           className="w-full rounded-2xl border border-brand-gold/20 bg-black/40 p-5 pr-14 text-xl text-brand-cream placeholder:text-brand-cream/30 focus:border-brand-gold/50 focus:outline-none focus:ring-1 focus:ring-brand-gold/50 transition-all shadow-xl"
-          placeholder="ابحث عن سورة باسمها أو رقمها..."
+          placeholder={isEnglish ? "Search by surah name or number..." : "ابحث عن سورة باسمها أو رقمها..."}
           value={query}
           onChange={e => setQuery(e.target.value)}
-          dir="rtl"
+          dir={dir}
         />
         <span className="absolute right-5 top-1/2 -translate-y-1/2 text-2xl opacity-40">
           🔍
@@ -61,7 +63,7 @@ export function SurahSearch({ initialSurahs }: { initialSurahs: Surah[] }) {
       {filteredSurahs.length === 0 ? (
         <Card className="p-12 text-center border-brand-gold/10 bg-black/20">
           <p className="arabic-muted text-lg">
-            لم يتم العثور على سورة بهذا الاسم أو الرقم.
+            {isEnglish ? "No surahs match this name or number." : "لم يتم العثور على سورة بهذا الاسم أو الرقم."}
           </p>
         </Card>
       ) : (
@@ -86,12 +88,12 @@ export function SurahSearch({ initialSurahs }: { initialSurahs: Surah[] }) {
                   </div>
 
                   {/* Names */}
-                  <div className="flex-1 text-right" dir="rtl">
+                  <div className={`flex-1 ${isEnglish ? 'text-left' : 'text-right'}`} dir={dir}>
                     <h3 className="text-2xl font-bold text-brand-gold group-hover:text-brand-goldSoft transition-colors">
-                      {surah.name}
+                      {isEnglish ? (surah.englishName || `Surah ${surah.number}`) : surah.name}
                     </h3>
                     <p className="text-xs text-brand-cream/40 font-medium tracking-wider uppercase">
-                      {surah.englishName || `Surah ${surah.number}`}
+                      {isEnglish ? surah.name : (surah.englishName || `Surah ${surah.number}`)}
                     </p>
                   </div>
 
@@ -101,11 +103,11 @@ export function SurahSearch({ initialSurahs }: { initialSurahs: Surah[] }) {
                       variant="outline"
                       className="border-brand-gold/20 text-brand-gold/60 text-[10px] py-0"
                     >
-                      {surah.numberOfAyahs} آيات
+                      {surah.numberOfAyahs} {isEnglish ? 'verses' : 'آيات'}
                     </Badge>
                     {surah.revelationType && (
                       <span className="text-[10px] text-brand-cream/30">
-                        {surah.revelationType === "Meccan" ? "مكية" : "مدنية"}
+                        {isEnglish ? surah.revelationType : (surah.revelationType === "Meccan" ? "مكية" : "مدنية")}
                       </span>
                     )}
                   </div>
