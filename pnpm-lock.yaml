@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@capacitor/android':
-        specifier: 7.4.3
-        version: 7.4.3(@capacitor/core@7.4.3)
+        specifier: 7.4.5
+        version: 7.4.5(@capacitor/core@7.4.3)
       '@capacitor/app':
         specifier: 7.0.2
         version: 7.0.2(@capacitor/core@7.4.3)
@@ -249,8 +249,8 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
-  '@capacitor/android@7.4.3':
-    resolution: {integrity: sha512-VpjvnOcmYGPLgvXRhe3CGLs62Cg7sxOyp77NddCr+Y06qqgnoaj6OGeBVTc2DZlqZ6bSmh15JvFu82pkvmdgfQ==}
+  '@capacitor/android@7.4.5':
+    resolution: {integrity: sha512-G76C+PGIFkG+hxj6JLlY003txRaGZwsXBPo4b4xiZMZaD6DG++sDCoumYl/5xL40dL2b8P5tb3CKf/khWyL2Gw==}
     peerDependencies:
       '@capacitor/core': ^7.4.0
 
@@ -3044,7 +3044,7 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@capacitor/android@7.4.3(@capacitor/core@7.4.3)':
+  '@capacitor/android@7.4.5(@capacitor/core@7.4.3)':
     dependencies:
       '@capacitor/core': 7.4.3
 

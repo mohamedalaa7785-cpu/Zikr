@@ -36,7 +36,7 @@
     "launch:smoke": "node scripts/production-smoke-test.mjs"
   },
   "dependencies": {
-    "@capacitor/android": "7.4.3",
+    "@capacitor/android": "7.4.5",
     "@capacitor/app": "7.0.2",
     "@capacitor/browser": "7.0.2",
     "@capacitor/camera": "7.0.2",
