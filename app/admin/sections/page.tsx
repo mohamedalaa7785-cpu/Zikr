@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 // ─── Full site sections list ──────────────────────────────────────────────────
@@ -44,17 +44,54 @@ export default function AdminSectionsPage() {
     Object.fromEntries(ALL_SECTIONS.map((s) => [s.key, true]))
   );
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [activeGroup, setActiveGroup] = useState('الكل');
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/admin/sections', { cache: 'no-store' })
+      .then(async (response) => {
+        const payload = await response.json() as { visibility?: Record<string, boolean>; error?: string };
+        if (!response.ok) throw new Error(payload.error || 'تعذر تحميل إعدادات الأقسام');
+        if (!cancelled && payload.visibility) setEnabled((current) => ({ ...current, ...payload.visibility }));
+      })
+      .catch((loadError: unknown) => {
+        if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'تعذر تحميل إعدادات الأقسام');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const toggle = (key: string) => {
     setEnabled((prev) => ({ ...prev, [key]: !prev[key] }));
     setSaved(false);
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    setSaving(true);
+    setError('');
+    setSaved(false);
+    try {
+      const response = await fetch('/api/admin/sections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visibility: enabled }),
+      });
+      const payload = await response.json() as { visibility?: Record<string, boolean>; error?: string };
+      if (!response.ok) throw new Error(payload.error || 'تعذر حفظ إعدادات الأقسام');
+      if (payload.visibility) setEnabled((current) => ({ ...current, ...payload.visibility }));
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 3000);
+    } catch (saveError: unknown) {
+      setError(saveError instanceof Error ? saveError.message : 'تعذر حفظ إعدادات الأقسام');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const filtered = ALL_SECTIONS.filter((s) => {
@@ -82,6 +119,18 @@ export default function AdminSectionsPage() {
             تحكم في ظهور كل قسم في الموقع. الأقسام المخفية لن تظهر في القوائم والصفحة الرئيسية.
           </p>
         </section>
+
+        {error && (
+          <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200" role="alert">
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="rounded-xl border border-brand-gold/15 bg-black/20 px-4 py-3 text-sm text-brand-cream/60" role="status">
+            جاري تحميل إعدادات الأقسام المحفوظة...
+          </div>
+        )}
 
         {/* Stats bar */}
         <div className="flex items-center gap-4 flex-wrap">
@@ -222,14 +271,15 @@ export default function AdminSectionsPage() {
           </div>
 
           <button
-            onClick={handleSave}
-            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+            onClick={() => void handleSave()}
+            disabled={saving || loading}
+            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
               saved
                 ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
                 : 'bg-brand-gold text-brand-emeraldDeep hover:bg-brand-goldSoft shadow-lg shadow-brand-gold/20'
             }`}
           >
-            {saved ? 'تم الحفظ' : 'حفظ التغييرات'}
+            {saving ? 'جاري الحفظ...' : saved ? 'تم الحفظ' : 'حفظ التغييرات'}
           </button>
         </div>
 

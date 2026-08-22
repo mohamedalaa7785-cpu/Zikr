@@ -230,6 +230,16 @@ export default async function AdminPage() {
     videosCount,
     duasCount,
     socialQueueCount,
+    prophetsCount,
+    companionsCount,
+    scholarsCount,
+    conquestsCount,
+    battlesCount,
+    kidsCount,
+    tawasheehCount,
+    recitersCount,
+    quranSurahsCount,
+    hadithCount,
     publishingConfig,
   ] = await Promise.all([
     runApiHealthChecks(),
@@ -240,6 +250,16 @@ export default async function AdminPage() {
     countTable("videos"),
     countTable("duas"),
     countTable("social_publish_queue"),
+    countTable("prophets"),
+    countTable("companions"),
+    countTable("scholars"),
+    countTable("conquests"),
+    countTable("battles"),
+    countTable("kids_content"),
+    countTable("tawasheeh"),
+    countTable("quran_reciters"),
+    countTable("quran_surahs"),
+    countTable("hadiths"),
     getVideoPublishingConfig(),
   ]);
 
@@ -328,6 +348,38 @@ export default async function AdminPage() {
             note="يعمل بشكل صحيح"
             color="text-sky-300"
           />
+        </div>
+      </section>
+
+      {/* Full content inventory */}
+      <section>
+        <SectionHeading
+          title="جرد محتوى الموقع"
+          subtitle="أعداد حقيقية وروابط مباشرة للأقسام القابلة للإدارة"
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {[
+            { label: "القرآن والسور", value: quranSurahsCount, href: "/quran" },
+            { label: "الأحاديث", value: hadithCount, href: "/hadith" },
+            { label: "الأنبياء", value: prophetsCount, href: "/admin/prophets" },
+            { label: "الصحابة", value: companionsCount, href: "/companions" },
+            { label: "العلماء", value: scholarsCount, href: "/scholars" },
+            { label: "الغزوات", value: battlesCount, href: "/admin/battles" },
+            { label: "الفتوحات", value: conquestsCount, href: "/conquests" },
+            { label: "محتوى الأطفال", value: kidsCount, href: "/admin/kids" },
+            { label: "التواشيح", value: tawasheehCount, href: "/tawasheeh" },
+            { label: "القراء", value: recitersCount, href: "/reciters" },
+          ].map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="rounded-2xl border border-brand-gold/12 bg-black/20 p-4 transition-colors hover:border-brand-gold/35 hover:bg-black/30"
+            >
+              <p className="text-xs text-brand-cream/50">{item.label}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-brand-gold">{item.value.toLocaleString("ar-EG")}</p>
+              <p className="mt-1 text-[11px] text-brand-cream/35">فتح القسم ←</p>
+            </Link>
+          ))}
         </div>
       </section>
 
