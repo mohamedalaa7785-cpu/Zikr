@@ -4,6 +4,47 @@ import { ServiceError } from "@/lib/types/common";
 
 export type StoryCategory = "prophets" | "sahaba" | "documentaries" | "history";
 
+export interface StorySourceReference {
+  label: string;
+  url: string;
+  type: 'quran' | 'hadith' | 'history';
+}
+
+const PRIMARY_STORY_SOURCES: Record<string, StorySourceReference[]> = {
+  'story-of-yusuf': [
+    { label: 'سورة يوسف كاملة — القرآن الكريم (السورة 12)', url: 'https://quran.com/12', type: 'quran' },
+  ],
+  'story-of-musa': [
+    { label: 'سورة القصص — القرآن الكريم (السورة 28)', url: 'https://quran.com/28', type: 'quran' },
+    { label: 'سورة طه — القرآن الكريم (السورة 20)', url: 'https://quran.com/20', type: 'quran' },
+    { label: 'سورة الشعراء — القرآن الكريم (السورة 26)', url: 'https://quran.com/26', type: 'quran' },
+  ],
+  'story-of-ibrahim': [
+    { label: 'سورة إبراهيم — القرآن الكريم (السورة 14)', url: 'https://quran.com/14', type: 'quran' },
+    { label: 'سورة الأنعام — القرآن الكريم (السورة 6)', url: 'https://quran.com/6', type: 'quran' },
+    { label: 'سورة مريم — القرآن الكريم (السورة 19)', url: 'https://quran.com/19', type: 'quran' },
+  ],
+  'abu-bakr-siddiq': [
+    { label: 'صحيح البخاري — وفاة النبي ﷺ وموقف أبي بكر', url: 'https://sunnah.com/bukhari:1241', type: 'hadith' },
+    { label: 'صحيح البخاري — فضائل أبي بكر الصديق', url: 'https://sunnah.com/bukhari/62', type: 'hadith' },
+  ],
+  'omar-ibn-khattab': [
+    { label: 'صحيح البخاري — فضائل عمر بن الخطاب', url: 'https://sunnah.com/bukhari:3683', type: 'hadith' },
+    { label: 'صحيح مسلم — فضائل عمر', url: 'https://sunnah.com/muslim:2398', type: 'hadith' },
+  ],
+  'khalid-ibn-walid': [
+    { label: 'صحيح البخاري — فضائل خالد بن الوليد', url: 'https://sunnah.com/bukhari:3757', type: 'hadith' },
+    { label: 'صحيح البخاري — أخبار خالد في الجهاد', url: 'https://sunnah.com/bukhari:3069', type: 'hadith' },
+  ],
+  'battle-of-badr-story': [
+    { label: 'سورة الأنفال — القرآن الكريم', url: 'https://quran.com/8', type: 'quran' },
+    { label: 'صحيح البخاري — أحداث بدر', url: 'https://sunnah.com/bukhari:2915', type: 'hadith' },
+  ],
+  'andalus-civilization': [
+    { label: 'الموسوعة البريطانية — تاريخ الأندلس', url: 'https://www.britannica.com/place/Andalusia', type: 'history' },
+  ],
+};
+
 export interface Story {
   id: string;
   slug: string;
@@ -12,6 +53,7 @@ export interface Story {
   content?: string;
   category: StoryCategory;
   metadata?: Record<string, unknown>;
+  primarySources?: StorySourceReference[];
   published?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -91,6 +133,7 @@ function mapStoryRow(row: StoryRow): Story {
     content: row.content,
     category: row.category as StoryCategory,
     metadata: row.metadata,
+    primarySources: PRIMARY_STORY_SOURCES[row.slug] ?? [],
     published: row.published,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

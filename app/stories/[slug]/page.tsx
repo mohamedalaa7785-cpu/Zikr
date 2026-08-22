@@ -71,6 +71,31 @@ export default async function StoryPage({ params }: StoryPageProps) {
         <div className="prose prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
           {story.content}
         </div>
+
+        {story.primarySources && story.primarySources.length > 0 && (
+          <section aria-labelledby="story-sources" className="rounded-2xl border border-brand-gold/20 bg-black/10 p-6">
+            <h2 id="story-sources" className="mb-4 text-2xl font-semibold text-brand-gold">
+              المصادر الأصلية والمراجع
+            </h2>
+            <p className="mb-4 leading-7 text-muted-foreground">
+              هذه الروابط تساعدك على الرجوع إلى النص أو المصدر الأساسي. لم تُنشأ هذه المراجع بدل النص الأصلي، ولا تغني عن مراجعة الآيات والأحاديث في مواضعها.
+            </p>
+            <ul className="space-y-3">
+              {story.primarySources.map((source) => (
+                <li key={`${source.type}-${source.url}`}>
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-brand-gold underline underline-offset-4 hover:bg-brand-gold/10"
+                  >
+                    {source.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </div>
   );
