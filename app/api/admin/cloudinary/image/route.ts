@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-const ALLOWED_FOLDERS = new Set(['homepage', 'stories', 'articles', 'videos', 'competitions', 'branding']);
+const ALLOWED_FOLDERS = new Set(['homepage', 'stories', 'articles', 'videos', 'competitions', 'branding', 'kids']);
 
 function errorResponse(message: string, status: number) {
   return NextResponse.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } });

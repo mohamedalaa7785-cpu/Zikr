@@ -16,7 +16,7 @@ export function CloudinaryImageUploadField({
 }: {
   name: string;
   label: string;
-  folder: 'homepage' | 'stories' | 'articles' | 'videos' | 'competitions' | 'branding';
+  folder: 'homepage' | 'stories' | 'articles' | 'videos' | 'competitions' | 'branding' | 'kids';
   defaultValue?: string;
   hint?: string;
 }) {
