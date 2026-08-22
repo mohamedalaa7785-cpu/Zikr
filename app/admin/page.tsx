@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { VideoUploadField } from "@/components/admin/video-upload-field";
+import { CloudinaryImageUploadField } from "@/components/admin/cloudinary-image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { requireAdmin } from "@/lib/services/admin";
@@ -442,16 +443,8 @@ export default async function AdminPage() {
               <input type="hidden" name="key" value="homepage" />
               <Field name="title" label="العنوان الرئيسي" placeholder="ذِكرٌ" />
               <Field name="body" label="وصف الصفحة الرئيسية" textarea />
-              <Field
-                name="imageUrl"
-                label="رابط صورة الهيرو"
-                placeholder="https://..."
-              />
-              <Field
-                name="logoUrl"
-                label="رابط اللوجو"
-                placeholder="https://..."
-              />
+              <CloudinaryImageUploadField name="imageUrl" label="صورة الهيرو" folder="homepage" />
+              <CloudinaryImageUploadField name="logoUrl" label="اللوجو" folder="branding" />
               <Field
                 name="youtubeChannelUrl"
                 label="رابط قناة يوتيوب"
@@ -487,11 +480,7 @@ export default async function AdminPage() {
                 label="الوسم / الحالة"
                 placeholder="inspiring"
               />
-              <Field
-                name="coverImage"
-                label="صورة الغلاف"
-                placeholder="https://..."
-              />
+              <CloudinaryImageUploadField name="coverImage" label="صورة الغلاف" folder="stories" />
               <Field name="content" label="محتوى القصة" required textarea />
               <div className="flex items-center justify-between">
                 <Published />
@@ -514,11 +503,7 @@ export default async function AdminPage() {
                 placeholder="article-slug"
               />
               <Field name="summary" label="ملخص يصلح لفيسبوك" textarea />
-              <Field
-                name="imageUrl"
-                label="رابط الصورة"
-                placeholder="https://..."
-              />
+              <CloudinaryImageUploadField name="imageUrl" label="صورة المقال" folder="articles" />
               <Field name="author" label="الكاتب" defaultValue="ZIKR" />
               <Field
                 name="content"
@@ -589,11 +574,7 @@ export default async function AdminPage() {
                 label="رابط فيديو خارجي / ملف (بديل عن الرفع)"
                 placeholder="https://..."
               />
-              <Field
-                name="thumbnailUrl"
-                label="رابط الصورة المصغرة"
-                placeholder="https://..."
-              />
+              <CloudinaryImageUploadField name="thumbnailUrl" label="الصورة المصغرة" folder="videos" />
               <Field
                 name="script"
                 label="سكريبت الفيديو (اختياري؛ مطلوب فقط عند التوليد التلقائي، 30 حرفاً على الأقل)"
@@ -674,11 +655,7 @@ export default async function AdminPage() {
               <Field name="description" label="وصف المسابقة" textarea />
               <Field name="rules" label="الشروط وطريقة الاشتراك" textarea />
               <Field name="prize" label="الجائزة" placeholder="جائزة قيّمة" />
-              <Field
-                name="imageUrl"
-                label="صورة المسابقة"
-                placeholder="https://..."
-              />
+              <CloudinaryImageUploadField name="imageUrl" label="صورة المسابقة" folder="competitions" />
               <div className="grid grid-cols-2 gap-3">
                 <Field
                   name="startsAt"
