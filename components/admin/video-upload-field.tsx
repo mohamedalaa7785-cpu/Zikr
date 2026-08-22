@@ -65,7 +65,7 @@ export function VideoUploadField() {
       setVideoUrl(presignData.publicUrl);
       setStorageKey(typeof presignData.key === 'string' ? presignData.key : '');
       setStatus('ready');
-      setMessage('تم رفع الفيديو بنجاح وسيتم استخدامه عند الحفظ والنشر.');
+      setMessage('تم رفع الملف بنجاح وسيُستخدم تلقائيًا عند الحفظ والنشر.');
     } catch (error) {
       setStatus('error');
       setMessage(error instanceof Error ? error.message : 'تعذر رفع الفيديو.');
@@ -74,7 +74,7 @@ export function VideoUploadField() {
 
   return (
     <div className="grid gap-2 text-sm text-brand-cream/65">
-      <span>رفع فيديو إلى الموقع (اختياري)</span>
+      <span>رفع ملف فيديو إلى الموقع (اختياري)</span>
       <input
         ref={inputRef}
         type="file"
@@ -86,10 +86,10 @@ export function VideoUploadField() {
         disabled={status === 'uploading'}
         className="block w-full rounded-lg border border-brand-gold/30 bg-black/30 px-3 py-2 text-brand-cream file:mr-3 file:rounded-md file:border-0 file:bg-brand-gold file:px-3 file:py-2 file:font-semibold file:text-black"
       />
-      <input type="hidden" name="videoUrl" value={videoUrl} />
+      <input type="hidden" name="uploadedVideoUrl" value={videoUrl} />
       <input type="hidden" name="videoStorageKey" value={storageKey} />
       {fileName ? <span className="text-xs text-brand-cream/50">الملف: {fileName}</span> : null}
-      {status === 'uploading' ? <span className="text-xs text-brand-gold">جاري رفع الفيديو إلى Supabase...</span> : null}
+      {status === 'uploading' ? <span className="text-xs text-brand-gold">جاري رفع ملف الفيديو إلى التخزين الآمن...</span> : null}
       {message ? (
         <span className={`text-xs ${status === 'error' ? 'text-red-300' : 'text-emerald-300'}`} role={status === 'error' ? 'alert' : 'status'}>
           {message}
