@@ -77,14 +77,9 @@ export default async function ProfilePage({
 
   if (!user) redirect('/auth/login?next=/profile');
 
-  // Repair older accounts that authenticated successfully but never received a
-  // profiles row, without touching an existing name or avatar.
-  await supabase.from('profiles').upsert(
-    { id: user.id, email: user.email ?? null },
-    { onConflict: 'id', ignoreDuplicates: true }
-  );
-
-  const [profileRes, favoritesRes, favCountRes, progressRes, progressCountRes] = await Promise.all([
+  // Profile rows are created by the server-side auth callback/trigger. Avoid a
+  // write during a read-only page render: it adds latency and can race RLS.
+  const [profileRes, favoritesRes, progressRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('display_name, avatar_url, role, created_at')
@@ -97,26 +92,18 @@ export default async function ProfilePage({
       .order('created_at', { ascending: false })
       .limit(10),
     supabase
-      .from('favorites')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id),
-    supabase
       .from('reading_progress')
       .select('id, scope, ref, progress_json, updated_at')
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false })
       .limit(10),
-    supabase
-      .from('reading_progress')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id),
   ]);
 
   const profile = profileRes.data?.[0] ?? null;
   const favList: Favorite[] = favoritesRes.data ?? [];
   const progressList: ReadingProgress[] = progressRes.data ?? [];
-  const favCount = favCountRes.count ?? favList.length;
-  const progressCount = progressCountRes.count ?? progressList.length;
+  const favCount = favList.length;
+  const progressCount = progressList.length;
 
   const isAdmin = profile?.role === 'admin';
   const userMetadata = user.user_metadata ?? {};
@@ -207,11 +194,11 @@ export default async function ProfilePage({
             <p className="text-brand-cream/90">{formatDate(lastSignIn)}</p>
           </div>
           <div>
-            <p className="arabic-muted text-xs">عناصر المفضلة</p>
+            <p className="arabic-muted text-xs">آخر المفضلة</p>
             <p className="text-brand-cream/90 tabular-nums">{favCount.toLocaleString('ar-EG')}</p>
           </div>
           <div>
-            <p className="arabic-muted text-xs">سجلات القراءة</p>
+            <p className="arabic-muted text-xs">آخر القراءات</p>
             <p className="text-brand-cream/90 tabular-nums">{progressCount.toLocaleString('ar-EG')}</p>
           </div>
         </div>
@@ -252,7 +239,7 @@ export default async function ProfilePage({
             <h2 className="text-xl text-brand-gold">المفضلة</h2>
             {favCount > 0 && (
               <Link href="/favorites" className="text-sm text-brand-gold/70 transition-colors hover:text-brand-gold">
-                عرض الكل ({favCount.toLocaleString('ar-EG')})
+                عرض الكل
               </Link>
             )}
           </div>
@@ -295,7 +282,7 @@ export default async function ProfilePage({
             <h2 className="text-xl text-brand-gold">التقدم في القراءة</h2>
             {progressCount > 0 && (
               <span className="text-sm arabic-muted">
-                {progressCount.toLocaleString('ar-EG')} سجل
+                آخر {progressCount.toLocaleString('ar-EG')} سجلات
               </span>
             )}
           </div>
