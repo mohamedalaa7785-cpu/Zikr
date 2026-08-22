@@ -93,7 +93,7 @@ export function SurahSearch({ initialSurahs }: { initialSurahs: Surah[] }) {
                       {isEnglish ? (surah.englishName || `Surah ${surah.number}`) : surah.name}
                     </h3>
                     <p className="text-xs text-brand-cream/40 font-medium tracking-wider uppercase">
-                      {isEnglish ? surah.name : (surah.englishName || `Surah ${surah.number}`)}
+                      {isEnglish ? `Quran chapter ${surah.number}` : (surah.englishName || `Surah ${surah.number}`)}
                     </p>
                   </div>
 
