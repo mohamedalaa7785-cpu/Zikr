@@ -5,7 +5,7 @@ import { BookmarkButton } from '@/components/quran/bookmark-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { getAyah, getSurahById, getTafsir } from '@/lib/services/quran';
-import { getAyahFromDb, getSurahFromDb, getTafsirRecordFromDb } from '@/lib/services/quran-server';
+import { getAyahFromDb, getSurahMetaFromDb, getTafsirRecordFromDb } from '@/lib/services/quran-server';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Share2 } from 'lucide-react';
 
@@ -21,15 +21,15 @@ export async function generateMetadata({ params }: AyahPageProps): Promise<Metad
   const ayahId = Number.parseInt(p.ayah, 10);
 
   // Try DB first for metadata
-  let surahData = Number.isNaN(surahId) ? null : await getSurahFromDb(surahId, 'ar');
-  
+  let surahMeta = Number.isNaN(surahId) ? null : await getSurahMetaFromDb(surahId, 'ar');
+
   // Fallback to API
-  if (!surahData && !Number.isNaN(surahId)) {
-    surahData = await getSurahById(surahId, 'ar');
+  if (!surahMeta && !Number.isNaN(surahId)) {
+    surahMeta = await getSurahById(surahId, 'ar').then((result) => result?.surah ?? null);
   }
 
   return {
-    title: surahData ? `سورة ${surahData.surah.name} - الآية ${ayahId}` : `الآية ${p.ayah}`,
+    title: surahMeta ? `سورة ${surahMeta.name} - الآية ${ayahId}` : `الآية ${p.ayah}`,
     description: 'قراءة الآية والتفسير والمشاركة',
     alternates: { canonical: `/quran/${p.surah}/${p.ayah}` },
   };
@@ -43,23 +43,23 @@ export default async function AyahPage({ params }: AyahPageProps) {
   if (Number.isNaN(surahId) || Number.isNaN(ayahId)) return notFound();
 
   // DB-First Strategy with parallel execution
-  const [dbSurah, dbAyah, dbTafsirRecord] = await Promise.all([
-    getSurahFromDb(surahId, 'ar'),
+  const [dbSurahMeta, dbAyah, dbTafsirRecord] = await Promise.all([
+    getSurahMetaFromDb(surahId, 'ar'),
     getAyahFromDb(surahId, ayahId, 'ar'),
     getTafsirRecordFromDb(surahId, ayahId)
   ]);
 
   // Fallback logic
-  let surahData = dbSurah;
+  let surahMeta = dbSurahMeta;
   let ayah = dbAyah;
   let tafsir = dbTafsirRecord?.tafsir_ar ?? null;
   let tafsirSource = dbTafsirRecord?.source_url ?? null;
   let tafsirAuthor = dbTafsirRecord?.author ?? 'التفسير الميسر';
   let tafsirRetrievedAt = dbTafsirRecord?.retrieved_at ?? null;
 
-  if (!surahData) {
+  if (!surahMeta) {
     console.info(`[ayah-page] Surah DB miss for ${surahId}, falling back to API`);
-    surahData = await getSurahById(surahId, 'ar');
+    surahMeta = await getSurahById(surahId, 'ar').then((result) => result?.surah ?? null);
   }
 
   if (!ayah) {
@@ -75,16 +75,16 @@ export default async function AyahPage({ params }: AyahPageProps) {
     tafsirRetrievedAt = null;
   }
 
-  if (!surahData || !ayah) return notFound();
+  if (!surahMeta || !ayah) return notFound();
 
   return (
     <Container className='space-y-8 py-12 max-w-4xl'>
       <div className="flex justify-between items-center">
         <nav className='arabic-muted text-sm'>
           <Link href='/'>الرئيسية</Link> / <Link href='/quran'>القرآن</Link> /{' '}
-          <Link href={`/quran/${surahData.surah.number}`}>سورة {surahData.surah.name}</Link> / الآية {ayah.numberInSurah}
+          <Link href={`/quran/${surahMeta.number}`}>سورة {surahMeta.name}</Link> / الآية {ayah.numberInSurah}
         </nav>
-        <Link href={`/quran/${surahData.surah.number}`}>
+        <Link href={`/quran/${surahMeta.number}`}>
           <Button variant="ghost" size="sm">
             <ChevronLeft className="ml-2 h-4 w-4" />
             العودة للسورة
@@ -95,7 +95,7 @@ export default async function AyahPage({ params }: AyahPageProps) {
       <Card className="shadow-lg border-brand-gold/20">
         <CardHeader className="text-center bg-muted/30 border-b">
           <CardTitle className="text-2xl text-brand-gold">
-            سورة {surahData.surah.name} — الآية {ayah.numberInSurah}
+            سورة {surahMeta.name} — الآية {ayah.numberInSurah}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-10">

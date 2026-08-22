@@ -32,8 +32,23 @@ export async function getAllSurahsFromDb(locale: Locale = "ar"): Promise<Surah[]
   }
 }
 
+export async function getSurahMetaFromDb(
+  surahId: number,
+  locale: Locale = "ar"
+): Promise<Surah | null> {
+  try {
+    const dbSurahs = await supabaseServerAnonRequest<DbSurah[]>(
+      `/rest/v1/quran_surahs?id=eq.${surahId}&select=id,name_ar,name_en,name_translation,revelation_place,ayahs_count&limit=1`
+    );
+    return dbSurahs?.[0] ? mapDbSurah(dbSurahs[0], locale) : null;
+  } catch (error) {
+    console.error(`[quran-server] getSurahMetaFromDb failed for ${surahId}:`, error);
+    return null;
+  }
+}
+
 export async function getSurahFromDb(
-  surahId: number, 
+  surahId: number,
   locale: Locale = "ar"
 ): Promise<{ surah: Surah; ayahs: Ayah[] } | null> {
   try {
