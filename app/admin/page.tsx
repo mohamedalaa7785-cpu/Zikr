@@ -569,15 +569,11 @@ export default async function AdminPage() {
                 label="YouTube Video ID"
                 placeholder="مثال: dQw4w9WgXcQ"
               />
-              <Field
-                name="videoUrl"
-                label="رابط فيديو خارجي / ملف (بديل عن الرفع)"
-                placeholder="https://..."
-              />
               <CloudinaryImageUploadField name="thumbnailUrl" label="الصورة المصغرة" folder="videos" />
               <Field
                 name="script"
-                label="سكريبت الفيديو (اختياري؛ مطلوب فقط عند التوليد التلقائي، 30 حرفاً على الأقل)"
+                label="نص الفيديو (اختياري عند طلب التوليد)"
+                placeholder="اكتب النص المراجَع الذي سيُستخدم في الفيديو"
                 textarea
               />
               <Field
@@ -636,7 +632,7 @@ export default async function AdminPage() {
                   نشر/رفع يوتيوب Shorts
                 </label>
                 <p className="basis-full text-xs text-brand-cream/50">
-                  التوليد التلقائي يستخدم مقاس 9:16؛ يجب أن يكون الفيديو بين 3 و90 ثانية حتى يقبله Facebook Reels.
+                  ارفع ملف الفيديو من الحقل السابق، أو فعّل التوليد التلقائي بعد إدخال نص مراجع. لا حاجة لإدخال أي رابط فيديو يدويًا.
                 </p>
               </div>
               <Button type="submit" className="w-full">

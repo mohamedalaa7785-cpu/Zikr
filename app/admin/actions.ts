@@ -233,13 +233,13 @@ export async function saveVideoPostAction(formData: FormData) {
   const description = value(formData, "description");
   const caption = value(formData, "caption") ?? description;
   const youtubeId = value(formData, "youtubeId");
-  const videoUrl = value(formData, "videoUrl");
+  const videoUrl = value(formData, "uploadedVideoUrl");
   const videoStorageKey = value(formData, "videoStorageKey");
   const thumbnailUrl = value(formData, "thumbnailUrl");
   const selectedPlatforms = platforms(formData);
 
   if (selectedPlatforms.length > 0 && !videoUrl) {
-    throw new Error("للنشر التلقائي على Facebook أو YouTube يجب رفع ملف فيديو أو إدخال رابط فيديو مباشر.");
+    throw new Error("للنشر التلقائي على Facebook أو YouTube يجب رفع ملف فيديو من حقل الرفع.");
   }
 
   await supabaseServerAdminRequest("/rest/v1/videos?on_conflict=slug", {
